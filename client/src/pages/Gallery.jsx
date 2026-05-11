@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import API_URL from '../api/config'
 
 const categories = ['All', 'Events', 'Extra-curricular', 'Academic', 'Physical Education', 'Culture', 'Arts', 'Community']
 
@@ -13,7 +14,7 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/gallery')
+    axios.get('${API_URL}/api/gallery')
       .then(res => {
         setGalleryItems(res.data)
         setLoading(false)

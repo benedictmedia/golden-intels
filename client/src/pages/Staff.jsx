@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { X, Mail, Phone } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import API_URL from '../api/config'
 
 export default function Staff() {
   const [staff, setStaff] = useState([])
@@ -9,7 +10,7 @@ export default function Staff() {
   const [selectedStaff, setSelectedStaff] = useState(null)
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/staff')
+    axios.get('${API_URL}/api/staff')
       .then(res => { setStaff(res.data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])

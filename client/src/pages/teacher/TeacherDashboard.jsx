@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   FileText, GraduationCap, LogOut, Menu, X, Bell
@@ -40,8 +41,8 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'gradebook') {
-      axios.get('http://localhost:5000/api/results').then(res => setSubmittedResults(res.data))
-      axios.get('http://localhost:5000/api/students').then(res => setStudents(res.data))
+      axios.get('${API_URL}/api/results').then(res => setSubmittedResults(res.data))
+      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
     }
   }, [activeMenu])
 
@@ -57,7 +58,7 @@ export default function TeacherDashboard() {
         setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
         setEditingResult(null)
       } else {
-        const res = await axios.post('http://localhost:5000/api/results', {
+        const res = await axios.post('${API_URL}/api/results', {
           studentId: gradebookStudent,
           gradeLevel: gradebookClass,
           academicYear: gradebookYear,
@@ -381,7 +382,7 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'classes' || activeMenu === 'attendance') {
-      axios.get('http://localhost:5000/api/students').then(res => setStudents(res.data))
+      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
     }
   }, [activeMenu])
 

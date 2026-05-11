@@ -12,9 +12,10 @@ export default function NewsEvents() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [viewMode, setViewMode] = useState('grid')
   const [viewingItem, setViewingItem] = useState(null)
+  import API_URL from '../api/config'
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/news')
+    axios.get('${API_URL}/api/news')
       .then(res => {
         setItems(res.data)
         setLoading(false)

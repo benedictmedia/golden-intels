@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image, Newspaper, UserCircle
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'admissions') {
-      axios.get('http://localhost:5000/api/admissions').then(res => setApplications(res.data))
+      axios.get('${API_URL}/api/admissions').then(res => setApplications(res.data))
     }
   }, [activeMenu])
 
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'news') {
-      axios.get('http://localhost:5000/api/news').then(res => setNewsItems(res.data))
+      axios.get('${API_URL}/api/news').then(res => setNewsItems(res.data))
     }
   }, [activeMenu])
 
@@ -129,7 +130,7 @@ export default function AdminDashboard() {
       data.append('uploadedBy', user?.name)
       newsImages.forEach(img => data.append('images', img))
 
-      const res = await axios.post('http://localhost:5000/api/news', data, {
+      const res = await axios.post('${API_URL}/api/news', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setNewsItems([res.data, ...newsItems])
@@ -186,7 +187,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'staff') {
-      axios.get('http://localhost:5000/api/staff').then(res => setStaffList(res.data))
+      axios.get('${API_URL}/api/staff').then(res => setStaffList(res.data))
     }
   }, [activeMenu])
 
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
       const data = new FormData()
       Object.entries(staffForm).forEach(([key, value]) => data.append(key, value))
       if (staffPhoto) data.append('photo', staffPhoto)
-      const res = await axios.post('http://localhost:5000/api/staff', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post('${API_URL}/api/staff', data, { headers: { 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList])
       setShowAddStaff(false)
       setStaffForm({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
@@ -245,7 +246,7 @@ export default function AdminDashboard() {
         galleryImages.forEach(img => data.append('images', img))
       }
       await axios.delete(`/api/gallery/${editingGallery.id}`)
-      const res = await axios.post('http://localhost:5000/api/gallery', data, {
+      const res = await axios.post('${API_URL}/api/gallery', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setGalleryItems(galleryItems.map(g => g.id === editingGallery.id ? res.data : g))
@@ -260,7 +261,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'gallery') {
-      axios.get('http://localhost:5000/api/gallery').then(res => setGalleryItems(res.data))
+      axios.get('${API_URL}/api/gallery').then(res => setGalleryItems(res.data))
     }
   }, [activeMenu])
 
@@ -284,7 +285,7 @@ export default function AdminDashboard() {
       data.append('uploadedBy', user?.name)
       galleryImages.forEach(img => data.append('images', img))
 
-      const res = await axios.post('http://localhost:5000/api/gallery', data, {
+      const res = await axios.post('${API_URL}/api/gallery', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setGalleryItems([res.data, ...galleryItems])
@@ -311,14 +312,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'admission-tokens') {
-      axios.get('http://localhost:5000/api/admission-tokens').then(res => setTokens(res.data))
+      axios.get('${API_URL}/api/admission-tokens').then(res => setTokens(res.data))
     }
   }, [activeMenu])
 
   const handleGenerateToken = async () => {
     setTokenLoading(true)
     try {
-      const res = await axios.post('http://localhost:5000/api/admission-tokens')
+      const res = await axios.post('${API_URL}/api/admission-tokens')
       setNewToken(res.data)
       setTokens([res.data, ...tokens])
     } catch (err) {
@@ -360,20 +361,20 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'finance') {
-      axios.get('http://localhost:5000/api/fees/structures').then(res => {
+      axios.get('${API_URL}/api/fees/structures').then(res => {
         const structured = {}
         res.data.forEach(f => { structured[f.gradeLevel] = f.monthlyFee })
         setFeeStructures(structured)
       })
-      axios.get('http://localhost:5000/api/fees/payments').then(res => setFeePayments(res.data))
-      axios.get('http://localhost:5000/api/students').then(res => setStudents(res.data))
+      axios.get('${API_URL}/api/fees/payments').then(res => setFeePayments(res.data))
+      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
     }
   }, [activeMenu])
 
   const handleSaveFeeStructures = async () => {
     try {
       await Promise.all(Object.entries(feeStructures).map(([gradeLevel, monthlyFee]) =>
-        axios.post('http://localhost:5000/api/fees/structures', { gradeLevel, monthlyFee })
+        axios.post('${API_URL}/api/fees/structures', { gradeLevel, monthlyFee })
       ))
       setFeeSaved(true)
       setTimeout(() => setFeeSaved(false), 3000)
@@ -386,7 +387,7 @@ export default function AdminDashboard() {
       return
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/fees/payments', paymentForm)
+      const res = await axios.post('${API_URL}/api/fees/payments', paymentForm)
       setFeePayments([res.data, ...feePayments])
       setShowAddPayment(false)
       setPaymentForm({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
@@ -412,7 +413,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'performance') {
-      axios.get('http://localhost:5000/api/results').then(res => setResults(res.data))
+      axios.get('${API_URL}/api/results').then(res => setResults(res.data))
     }
   }, [activeMenu])
 
@@ -695,7 +696,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeMenu === 'learners') {
-      axios.get('http://localhost:5000/api/students').then(res => setStudents(res.data))
+      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
     }
   }, [activeMenu])
 
@@ -718,7 +719,7 @@ export default function AdminDashboard() {
       Object.entries(newStudent).forEach(([key, value]) => formData.append(key, value))
       if (photoFile) formData.append('photo', photoFile)
 
-      const res = await axios.post('http://localhost:5000/api/students', formData, {
+      const res = await axios.post('${API_URL}/api/students', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       setStudents([res.data, ...students])
@@ -750,7 +751,7 @@ export default function AdminDashboard() {
     setCreateSuccess(false)
     setCreateLoading(true)
     try {
-      await axios.post('http://localhost:5000/api/auth/register', newUser)
+      await axios.post('${API_URL}/api/auth/register', newUser)
       setCreateSuccess(true)
       setNewUser({ name: '', email: '', password: '', role: 'teacher' })
     } catch (err) {

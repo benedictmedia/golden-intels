@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send
@@ -31,13 +32,13 @@ export default function ParentDashboard() {
   const [feePayments, setFeePayments] = useState([])
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/fees/payments')
+    axios.get('${API_URL}/api/fees/payments')
       .then(res => setFeePayments(res.data))
   }, [])
   const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/results')
+    axios.get('${API_URL}/api/results')
       .then(res => {
         const approved = res.data.filter(r => r.status === 'approved')
         setApprovedResults(approved)
@@ -247,7 +248,7 @@ export default function ParentDashboard() {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/students')
+    axios.get('${API_URL}/api/students')
       .then(res => {
         setStudents(res.data)
         if (res.data.length > 0) setSelectedChild(res.data[0])

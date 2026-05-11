@@ -3,6 +3,7 @@ import { CheckCircle, Calendar, FileText, Users, Download, Lock } from 'lucide-r
 import { generateAdmissionBooklet } from '../utils/generateAdmissionBooklet'
 import axios from 'axios'
 import PageHero from '../components/layout/PageHero'
+import API_URL from '../api/config'
 
 const steps = [
   { icon: <FileText size={28} />, step: 'Step 1', title: 'Submit Application', description: 'Complete and submit the online application form with required documents' },
@@ -36,7 +37,7 @@ export default function Admissions() {
     setLoginLoading(true)
     setLoginError('')
     try {
-      const res = await axios.post('http://localhost:5000/api/admission-tokens/verify', {
+      const res = await axios.post('${API_URL}/api/admission-tokens/verify', {
         serialNumber, pin
       })
       setVerifiedSerial(res.data.serialNumber)
@@ -110,7 +111,7 @@ export default function Admissions() {
       if (ghanaBack) data.append('ghanaBack', ghanaBack)
       if (signedBooklet) data.append('signedBooklet', signedBooklet)
 
-      await axios.post('http://localhost:5000/api/admissions', data, {
+      await axios.post('${API_URL}/api/admissions', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
 
