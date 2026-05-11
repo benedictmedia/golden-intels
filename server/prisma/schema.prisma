@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("parent")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id          Int      @id @default(autoincrement())
+  studentId   String   @unique
+  firstName   String
+  lastName    String
+  dateOfBirth String
+  gender      String
+  gradeLevel  String
+  parentName  String
+  parentEmail String
+  parentPhone String
+  address     String
+  photo       String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  results     Result[]
+  feePayments FeePayment[]
+}
+
+model Result {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  student       Student  @relation(fields: [studentId], references: [id])
+  gradeLevel    String
+  academicYear  String
+  term          String
+  scores        Json
+  remarks       String?
+  status        String   @default("pending")
+  submittedBy   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AdmissionToken {
+  id           Int       @id @default(autoincrement())
+  serialNumber String    @unique
+  pin          String
+  used         Boolean   @default(false)
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model AdmissionApplication {
+  id               Int      @id @default(autoincrement())
+  serialNumber     String   @unique
+  firstName        String
+  lastName         String
+  dateOfBirth      String
+  gender           String
+  age              String?
+  monthOfBirth     String?
+  placeOfBirth     String?
+  height           String?
+  weight           String?
+  hometown         String?
+  motherTongue     String?
+  religion         String?
+  dateOfAdmission  String?
+  gradeLevel       String
+  previousSchool   String?
+  parentName       String
+  parentOccupation String?
+  parentEmail      String
+  parentPhone      String
+  secondaryContactName  String?
+  secondaryContactPhone String?
+  fatherName       String?
+  fatherAddress    String?
+  fatherNationality String?
+  fatherMaritalStatus String?
+  fatherPhone      String?
+  fatherHouseNumber String?
+  fatherReligion   String?
+  fatherOccupation String?
+  fatherPlaceOfWork String?
+  fatherEducation  String?
+  fatherEmail      String?
+  motherName       String?
+  motherAddress    String?
+  motherNationality String?
+  motherMaritalStatus String?
+  motherPhone      String?
+  motherHouseNumber String?
+  motherReligion   String?
+  motherOccupation String?
+  motherPlaceOfWork String?
+  motherEducation  String?
+  motherEmail      String?
+  livesWith        String?
+  olderChildren    String?
+  youngerChildren  String?
+  language1        String?
+  language2        String?
+  language3        String?
+  language4        String?
+  medicalConditions String?
+  allergies        String?
+  specialNeeds     String?
+  doctorName       String?
+  doctorPhone      String?
+  hospitalName     String?
+  hospitalPhone    String?
+  emergencyName    String
+  emergencyRelationship String
+  emergencyPhone   String
+  emergencyEmail   String?
+  emergencyAddress String?
+  emergencyWhatsapp String?
+  admissionDate    String?
+  photo            String?
+  nhisFront        String?
+  nhisBack         String?
+  ghanaFront       String?
+  ghanaBack        String?
+  signedBooklet    String?
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model GalleryItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  images      Json
+  category    String   @default("General")
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model NewsEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  category    String
+  type        String   @default("news")
+  images      Json?
+  videoUrl    String?
+  eventDate   String?
+  venue       String?
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model Staff {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String
+  department  String
+  subject     String?
+  bio         String?
+  photo       String?
+  email       String?
+  phone       String?
+  category    String   @default("teaching")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model FeeStructure {
+  id          Int      @id @default(autoincrement())
+  gradeLevel  String   @unique
+  monthlyFee  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FeePayment {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  student     Student  @relation(fields: [studentId], references: [id])
+  month       String
+  year        String
+  amountDue   Float
+  amountPaid  Float    @default(0)
+  balance     Float
+  status      String   @default("unpaid")
+  paidAt      DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

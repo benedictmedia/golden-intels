@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+
+@layer base {
+  body {
+    background-color: #f0f4f8;
+    color: #1a1a2e;
+  }
+
+  section {
+    position: relative;
+  }
+}
+
+@layer components {
+  .page-bg {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8edf5 50%, #f0f4f8 100%);
+  }
+
+  .section-bg-alt {
+    background: linear-gradient(135deg, #e8edf5 0%, #dde4f0 100%);
+  }
+
+  .card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(26, 60, 110, 0.15);
+  }
+}
