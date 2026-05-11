@@ -1,8 +1,9 @@
+import API_URL from '../api/config'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Search, Calendar, MapPin, X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
-import API_URL from "../api/config"
+
 
 const categories = ['All', 'Event', 'News', 'Academic', 'Sports', 'Cultural', 'Community', 'Achievement']
 
