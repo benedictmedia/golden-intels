@@ -16,7 +16,7 @@ export default function NewsEvents() {
 
 
   useEffect(() => {
-    axios.get('${API_URL}/api/news')
+    axios.get(`${API_URL}/api/news`)
       .then(res => {
         setItems(res.data)
         setLoading(false)
