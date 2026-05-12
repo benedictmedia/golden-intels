@@ -1,6 +1,7 @@
 import { BookOpen, Lightbulb, Users, Globe } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
-import aboutImg from '../assets/academics.jpg'
+import academicsImg from '../assets/academics.jpg'
+import programmesImg from '../assets/programmes.jpg'
 
 const approaches = [
   { icon: <BookOpen size={24} />, label: 'Project-Based Learning' },
@@ -14,7 +15,7 @@ export default function Academics() {
     <div>
 
       {/* Hero Banner */}
-     <PageHero badge="Academics" title="Academics" subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning." image={academicsImg}
+     <PageHero badge="Academics" title="Academics" subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning." image={academicsImg}/>
 
       {/* Our Hybrid Curriculum */}
       <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
@@ -54,7 +55,7 @@ export default function Academics() {
           {/* Right: Photo */}
           <div className="flex-1">
             <img
-              src="/src/assets/academics.jpg"
+              src={academicsImg}
               alt="Our Hybrid Curriculum"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />
@@ -309,7 +310,7 @@ export default function Academics() {
           {/* Left: Photo */}
           <div className="flex-1">
             <img
-              src="/src/assets/programmes.jpg"
+              src={programmesImg}
               alt="Programme Offerings"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />

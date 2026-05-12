@@ -1,6 +1,7 @@
 import { Heart, Eye, Target, CheckCircle } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import aboutImg from '../assets/about.jpg'
+import oxfordImg from '../assets/oxford.jpg'
 
 const values = [
   { title: 'Honesty', description: 'We uphold truth and integrity in everything we do.' },
@@ -56,7 +57,7 @@ export default function About() {
           {/* Right: Photo */}
           <div className="flex-1">
             <img
-              src="/src/assets/about.jpg"
+              src={aboutImg}
               alt="Our Story"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />
@@ -171,7 +172,7 @@ export default function About() {
           {/* Right: Photo */}
           <div className="flex-1">
             <img
-              src="/src/assets/oxford.jpg"
+              src={oxfordImg}
               alt="Oxford Accreditation"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />

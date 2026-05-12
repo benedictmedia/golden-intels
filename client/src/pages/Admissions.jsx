@@ -246,7 +246,7 @@ export default function Admissions() {
                 <p className="text-sm text-gray-500">
                   <strong className="text-[#1a3c6e]">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
                 </p>
-                <p className="text-sm text-gray-500 mt-1">📞 +233 000 000 000 &nbsp;|&nbsp; ✉️ info@goldenintels.com</p>
+                <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.com</p>
               </div>
             </div>
 

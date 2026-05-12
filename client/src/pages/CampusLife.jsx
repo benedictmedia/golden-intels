@@ -64,7 +64,7 @@ export default function CampusLife() {
     <div>
 
       {/* Hero Banner */}
-      <PageHero badge="Campus Life" title="Campus Life" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campus-lifeImg}
+      <PageHero badge="Campus Life" title="Campus Life" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campus-lifeImg}/>
       {/* Beyond Academics */}
       <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
@@ -93,7 +93,7 @@ export default function CampusLife() {
           {/* Right: Photo */}
           <div className="flex-1">
             <img
-              src="/src/assets/campus-life.jpg"
+              src={campus-lifeImg}
               alt="Campus Life at Golden-Intels"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />
