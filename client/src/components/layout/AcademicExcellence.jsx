@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BookOpen, Lightbulb, Brain, Heart } from 'lucide-react'
 import heroBg from '../../assets/school.jpg'
+import schoolImg from '../../assets/school.jpg'
 
 const highlights = [
   { icon: <BookOpen size={24} />, label: 'Rigorous Academics' },
@@ -48,7 +49,7 @@ export default function AcademicExcellence() {
        {/* Right: Photo */}
         <div className="flex-1">
           <img
-            src="/src/assets/school.jpg"
+            src={schoolImg}
             alt="Golden-Intels International School"
             className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
           />

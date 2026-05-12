@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Code, Music, Dumbbell, Scissors, FlaskConical, Palette } from 'lucide-react'
 import heroBg from '../../assets/campus.jpg'
+import campusImg from '../../assets/campus.jpg'
 
 const activities = [
   { icon: <Code size={24} />, label: 'Coding & Computer Skills' },
@@ -19,7 +20,7 @@ export default function CampusLife() {
         {/* Left: Photo */}
         <div className="flex-1">
           <img
-            src="/src/assets/campus.jpg"
+            src={campusImg}
             alt="Campus Life at Golden-Intels"
             className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
           />
