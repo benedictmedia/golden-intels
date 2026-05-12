@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import aboutImg from '../assets/campus-life.jpg'
 
 const activities = [
   {
@@ -63,8 +64,7 @@ export default function CampusLife() {
     <div>
 
       {/* Hero Banner */}
-      <PageHero badge="Campus Life" title="Campus Life" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image="/src/assets/campus-life.jpg" />
-
+      <PageHero badge="Campus Life" title="Campus Life" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campus-lifeImg}
       {/* Beyond Academics */}
       <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">

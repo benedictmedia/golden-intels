@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import heroBg from '../../assets/hero-bg.jpg'
 
 export default function Hero() {
   return (
@@ -6,7 +7,7 @@ export default function Hero() {
       {/* Background image with slow zoom animation */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110 animate-[slowZoom_15s_ease-in-out_infinite_alternate]"
-        style={{ backgroundImage: "url('/src/assets/hero-bg.jpg')" }}
+        style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-[#1a3c6e]/75"></div>

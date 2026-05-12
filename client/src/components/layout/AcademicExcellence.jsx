@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { BookOpen, Lightbulb, Brain, Heart } from 'lucide-react'
+import heroBg from '../../assets/school.jpg'
 
 const highlights = [
   { icon: <BookOpen size={24} />, label: 'Rigorous Academics' },

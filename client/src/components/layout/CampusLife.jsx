@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Code, Music, Dumbbell, Scissors, FlaskConical, Palette } from 'lucide-react'
+import heroBg from '../../assets/campus.jpg'
 
 const activities = [
   { icon: <Code size={24} />, label: 'Coding & Computer Skills' },

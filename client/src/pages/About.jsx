@@ -1,5 +1,6 @@
 import { Heart, Eye, Target, CheckCircle } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import aboutImg from '../assets/about.jpg'
 
 const values = [
   { title: 'Honesty', description: 'We uphold truth and integrity in everything we do.' },
@@ -22,12 +23,11 @@ export default function About() {
 
       {/* Hero Banner */}
       <PageHero
-        badge="About Golden-Intels"
-        title="About Golden-Intels"
-        subtitle="Shaping minds, building character, inspiring excellence since 2017."
-        image="/src/assets/about.jpg"
-      />
-
+  badge="About Golden-Intels"
+  title="About Golden-Intels"
+  subtitle="Shaping minds, building character, inspiring excellence since 2017."
+  image={aboutImg}
+/>
       {/* Our Story */}
       <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
