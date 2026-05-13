@@ -8,11 +8,6 @@ import {
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image, Newspaper, UserCircle
 } from 'lucide-react'
 
-const express = require('express')
-const cors = require('cors')
-const dotenv = require('dotenv')
-const path = require('path')
-
 dotenv.config()
 
 const app = express()
