@@ -1,30 +1,38 @@
-const asyncHandler = require('express-async-handler');
 const prisma = require('../config/prismaClient');
 
-// @desc    Create new student
-const createStudent = asyncHandler(async (req, res) => {
+// Get all students
+const getStudents = async (req, res) => {
+  try {
+    const students = await prisma.student.findMany();
+    res.json(students);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch students" });
+  }
+};
+
+// Create new student
+const createStudent = async (req, res) => {
   try {
     const { 
       firstName, lastName, studentId, dateOfBirth, gender, 
       gradeLevel, parentName, parentEmail, parentPhone, address 
     } = req.body;
 
-    // Handle photo if uploaded
     let photoUrl = null;
     if (req.file) {
-      // For now, we'll store the local path or skip Cloudinary if not configured
-      photoUrl = `/uploads/${req.file.filename}`; 
+      photoUrl = `/uploads/${req.file.filename}`;
     }
 
     const student = await prisma.student.create({
       data: {
-        firstName,
-        lastName,
+        firstName: firstName?.trim(),
+        lastName: lastName?.trim(),
         studentId: studentId || `GI-${Date.now()}`,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         gender,
         gradeLevel,
-        parentName,
+        parentName: parentName?.trim(),
         parentEmail,
         parentPhone,
         address,
@@ -40,11 +48,6 @@ const createStudent = asyncHandler(async (req, res) => {
       error: error.message 
     });
   }
-});
-
-const getStudents = asyncHandler(async (req, res) => {
-  const students = await prisma.student.findMany();
-  res.json(students);
-});
+};
 
 module.exports = { getStudents, createStudent };
