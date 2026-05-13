@@ -23,7 +23,7 @@ app.use('/api/auth', require('./routes/auth'))
 app.use('/api/students', require('./routes/students'))
 app.use('/api/results', require('./routes/results'))
 app.use('/api/admission-tokens', require('./routes/admissionTokens'))
-app.use('/api/admissions', require('./routes/admissions'))
+//app.use('/api/admissions', require('./routes/admissions'))//
 app.use('/api/gallery', require('./routes/gallery'))
 app.use('/api/news', require('./routes/newsEvents'))
 app.use('/api/staff', require('./routes/staff'))
