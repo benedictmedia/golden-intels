@@ -2,11 +2,17 @@ const express = require('express');
 const router = express.Router();
 const { getStudents, createStudent } = require('../controllers/studentController');
 const protect = require('../middleware/authMiddleware');
-// Temporarily remove upload middleware for testing
-// const { uploadStudentPhoto } = require('../middleware/cloudinaryUpload');
+const multer = require('multer');
 
+const upload = multer({ 
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+  })
+});
+
+// Routes
 router.get('/', protect, getStudents);
-router.post('/', protect, createStudent);   // Removed upload middleware for now
-// router.post('/', protect, uploadStudentPhoto.single('photo'), createStudent);
+router.post('/', protect, upload.single('photo'), createStudent);
 
 module.exports = router;
