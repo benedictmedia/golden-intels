@@ -5,17 +5,13 @@ const protect = require('../middleware/authMiddleware');
 const multer = require('multer');
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-// Important: Multer middleware must come before protect for POST
+// ✅ Correct Order: Multer FIRST, then protect
 router.get('/', protect, getStudents);
 router.post('/', upload.single('photo'), protect, createStudent);
 
