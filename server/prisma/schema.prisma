@@ -22,19 +22,21 @@ model Student {
   studentId   String   @unique
   firstName   String
   lastName    String
-  dateOfBirth String
+  dateOfBirth String?
   gender      String
   gradeLevel  String
   parentName  String
-  parentEmail String
-  parentPhone String
-  address     String
+  parentEmail String?
+  parentPhone String?
+  address     String?
   photo       String?
-  status      String   @default("active")
+  status      String?   @default("active")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   results     Result[]
   feePayments FeePayment[]
+
+  @@map("Student")
 }
 
 model Result {
