@@ -7,31 +7,3 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image, Newspaper, UserCircle
 } from 'lucide-react'
-
-dotenv.config()
-
-const app = express()
-
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://golden-intels.vercel.app',
-    'https://golden-intels-git-main-golden-intels-projects.vercel.app',
-    /\.vercel\.app$/
-  ],
-  credentials: true
-}))
-
-app.use(express.json())
-
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Golden-Intels Server is running!' })
-})
-
-const PORT = process.env.PORT || 5000
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
