@@ -1,30 +1,27 @@
-const express = require('express')
-const router = express.Router()
-const {
-  submitApplication,
-  getApplications,
-  getApplication,
-  approveApplication,
-  rejectApplication,
-  deleteApplication
-} = require('../controllers/admissionController')
-const protect = require('../middleware/authMiddleware')
-const { uploadAdmissions } = require('../middleware/cloudinaryUpload')
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const { createAdmission, getAdmissions } = require('../controllers/admissionController');
 
-const uploadFields = uploadAdmissions.fields([
+// Multer setup
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname)
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Routes
+router.post('/', upload.fields([
+  { name: 'birthCert', maxCount: 1 },
   { name: 'photo', maxCount: 1 },
-  { name: 'nhisFront', maxCount: 1 },
-  { name: 'nhisBack', maxCount: 1 },
-  { name: 'ghanaFront', maxCount: 1 },
-  { name: 'ghanaBack', maxCount: 1 },
-  { name: 'signedBooklet', maxCount: 1 },
-])
+  { name: 'transcript', maxCount: 1 }
+]), createAdmission);
 
-router.post('/', uploadFields, submitApplication)
-router.get('/', protect, getApplications)
-router.get('/:id', protect, getApplication)
-router.put('/:id/approve', protect, approveApplication)
-router.put('/:id/reject', protect, rejectApplication)
-router.delete('/:id', protect, deleteApplication)
+router.get('/', getAdmissions);
 
-module.exports = router
+module.exports = router;
