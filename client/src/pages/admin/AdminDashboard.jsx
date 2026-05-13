@@ -78,40 +78,39 @@ export default function AdminDashboard() {
 
   // Add Student
 const handleAddStudent = async (e) => {
-  e.preventDefault()
-  
+  e.preventDefault();
+
   if (!newStudent.firstName || !newStudent.lastName || !newStudent.parentName) {
-    alert("Please fill required fields (First Name, Last Name, Parent Name)")
-    return
+    alert("First Name, Last Name, and Parent Name are required!");
+    return;
   }
 
-  const formData = new FormData()
+  const formData = new FormData();
   
-  // Append all fields safely
   Object.keys(newStudent).forEach(key => {
-    if (newStudent[key] !== undefined && newStudent[key] !== '') {
-      formData.append(key, newStudent[key])
+    if (newStudent[key] && newStudent[key] !== '') {
+      formData.append(key, newStudent[key]);
     }
-  })
-  
+  });
+
   if (studentPhoto) {
-    formData.append('photo', studentPhoto)
+    formData.append('photo', studentPhoto);
   }
 
   try {
     const res = await axios.post(`${API_URL}/api/students`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 30000 // 30 seconds timeout
-    })
-    
-    setStudents([res.data, ...students])
-    resetAddStudentForm()
-    alert('✅ Student added successfully!')
+      timeout: 45000
+    });
+
+    setStudents([res.data, ...students]);
+    resetAddStudentForm();
+    alert('✅ Student added successfully!');
   } catch (err) {
-    console.error("Add Student Error:", err.response?.data || err.message)
-    alert(`❌ Server Error: ${err.response?.data?.message || err.message || 'Please check server logs'}`)
+    console.error(err.response?.data || err);
+    alert(`❌ ${err.response?.data?.message || err.message || 'Server error. Check Vercel logs.'}`);
   }
-}
+};
   // Results
   const approveResult = async (id) => {
     try {
