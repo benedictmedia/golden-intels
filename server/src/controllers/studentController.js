@@ -29,7 +29,7 @@ const createStudent = async (req, res) => {
         firstName: firstName?.trim(),
         lastName: lastName?.trim(),
         studentId: studentId || `GI-${Date.now()}`,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: dateOfBirth || null,           // Keep as string
         gender,
         gradeLevel,
         parentName: parentName?.trim(),
