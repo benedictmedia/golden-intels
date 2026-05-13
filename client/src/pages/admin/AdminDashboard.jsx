@@ -7,3 +7,9 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image, Newspaper, UserCircle
 } from 'lucide-react'
+
+const AdminDashboard = () => {
+  return <div>...</div>;
+}
+
+export default AdminDashboard;
