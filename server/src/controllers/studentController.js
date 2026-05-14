@@ -21,8 +21,11 @@ const createStudent = async (req, res) => {
   const { firstName, lastName, dateOfBirth, gender, gradeLevel, parentName, parentEmail, parentPhone, address } = req.body
   try {
     const studentId = await generateStudentId()
-    const photo = req.file ? req.file.path : null
-    console.log('Received file:', req.file)
+    let photo = null
+    if (req.file) {
+      photo = req.file.path
+      console.log('Photo saved at:', photo)
+    }
     const student = await prisma.student.create({
       data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentName, parentEmail, parentPhone, address, photo }
     })
