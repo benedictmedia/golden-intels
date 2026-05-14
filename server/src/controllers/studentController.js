@@ -26,6 +26,14 @@ const createStudent = async (req, res) => {
       return res.status(400).json({ message: "First Name, Last Name and Parent Name are required" });
     }
 
+    // Inside the try block, before prisma.create:
+let finalStudentId = studentId || `GI-${Date.now()}`;
+
+const existing = await prisma.student.findUnique({ where: { studentId: finalStudentId } });
+if (existing) {
+  finalStudentId = `GI-${Date.now()}`;
+}
+
     const student = await prisma.student.create({
       data: {
         firstName: firstName.trim(),

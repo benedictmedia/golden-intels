@@ -4,13 +4,16 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import API_URL from '../../api/config'
 import {
-  LayoutDashboard, Users, GraduationCap, DollarSign,
-  UserPlus, LogOut, Menu, X, Bell, Trash2, Edit, Moon, Sun
+  LayoutDashboard, Users, GraduationCap, DollarSign, BarChart2,
+  UserPlus, LogOut, Menu, X, Bell, Trash2, Moon, Sun
 } from 'lucide-react'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
   { icon: <Users size={20} />, label: 'Students', id: 'students' },
+  { icon: <GraduationCap size={20} />, label: 'Results', id: 'results' },
+  { icon: <DollarSign size={20} />, label: 'Fees', id: 'fees' },
+  { icon: <BarChart2 size={20} />, label: 'Reports', id: 'reports' },
 ]
 
 export default function AdminDashboard() {
@@ -49,7 +52,9 @@ export default function AdminDashboard() {
     }
   }
 
-  useEffect(() => { fetchStudents() }, [])
+  useEffect(() => {
+    fetchStudents()
+  }, [])
 
   const handleAddStudent = async (e) => {
     e.preventDefault()
@@ -73,18 +78,22 @@ export default function AdminDashboard() {
       alert('✅ Student added successfully!')
     } catch (err) {
       console.error(err)
-      alert('Failed to add student')
+      alert(err.response?.data?.message || 'Failed to add student')
     }
   }
 
   const resetForm = () => {
     setShowAddStudent(false)
-    setNewStudent({ firstName: '', lastName: '', dateOfBirth: '', gender: 'Male', gradeLevel: 'Year 1', parentName: '', parentEmail: '', parentPhone: '', address: '', studentId: '' })
+    setNewStudent({
+      firstName: '', lastName: '', dateOfBirth: '', gender: 'Male',
+      gradeLevel: 'Year 1', parentName: '', parentEmail: '', parentPhone: '',
+      address: '', studentId: ''
+    })
     setStudentPhoto(null)
   }
 
   const deleteStudent = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this student?')) return
+    if (!window.confirm('Delete this student permanently?')) return
     try {
       await axios.delete(`${API_URL}/api/students/${id}`)
       setStudents(students.filter(s => s.id !== id))
@@ -120,7 +129,7 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 ${activeMenu === item.id ? 'bg-[#d4a017] text-[#1a3c6e] font-bold' : 'hover:bg-purple-900 text-purple-200'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${activeMenu === item.id ? 'bg-[#d4a017] text-[#1a3c6e] font-bold' : 'hover:bg-purple-900 text-purple-200'}`}
             >
               {item.icon}
               {sidebarOpen && <span>{item.label}</span>}
@@ -133,7 +142,7 @@ export default function AdminDashboard() {
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             {sidebarOpen && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
           </button>
-          <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 rounded-lg">
+          <button onClick={() => { logout(); navigate('/'); }} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 rounded-lg">
             <LogOut size={20} /> {sidebarOpen && "Logout"}
           </button>
         </div>
@@ -159,6 +168,7 @@ export default function AdminDashboard() {
                 <table className="w-full">
                   <thead className="bg-[#4a235a] text-white sticky top-0">
                     <tr>
+                      <th className="px-6 py-4 text-left">Photo</th>
                       <th className="px-6 py-4 text-left">Student</th>
                       <th className="px-6 py-4 text-left">Class</th>
                       <th className="px-6 py-4 text-left">ID</th>
@@ -169,16 +179,14 @@ export default function AdminDashboard() {
                   <tbody>
                     {students.map((s, i) => (
                       <tr key={s.id} className={i % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-800'}>
-                        <td className="px-6 py-4 flex items-center gap-3">
+                        <td className="px-6 py-4">
                           {s.photo ? (
-                            <img src={s.photo} alt="" className="w-10 h-10 rounded-full object-cover" />
+                            <img src={s.photo.replace('/uploads', `${API_URL}/uploads`)} alt="" className="w-12 h-12 rounded-full object-cover border" />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-xs">No Photo</div>
+                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xs">No Photo</div>
                           )}
-                          <div>
-                            <p className="font-medium">{s.firstName} {s.lastName}</p>
-                          </div>
                         </td>
+                        <td className="px-6 py-4 font-medium">{s.firstName} {s.lastName}</td>
                         <td className="px-6 py-4">{s.gradeLevel}</td>
                         <td className="px-6 py-4">{s.studentId}</td>
                         <td className="px-6 py-4">{s.parentName}</td>
@@ -204,7 +212,9 @@ export default function AdminDashboard() {
             <div className="p-8 border-b sticky top-0 bg-inherit z-10">
               <h2 className="text-2xl font-bold">Add New Student</h2>
             </div>
+
             <form onSubmit={handleAddStudent} className="p-8 space-y-6">
+              {/* All fields included */}
               <div className="grid grid-cols-2 gap-4">
                 <input required placeholder="First Name" value={newStudent.firstName} onChange={e => setNewStudent({...newStudent, firstName: e.target.value})} className="px-4 py-3 border rounded-xl" />
                 <input required placeholder="Last Name" value={newStudent.lastName} onChange={e => setNewStudent({...newStudent, lastName: e.target.value})} className="px-4 py-3 border rounded-xl" />
@@ -224,7 +234,7 @@ export default function AdminDashboard() {
                 {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
 
-              <input required placeholder="Parent/Guardian Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
+              <input required placeholder="Parent Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input type="email" placeholder="Parent Email" value={newStudent.parentEmail} onChange={e => setNewStudent({...newStudent, parentEmail: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input type="tel" placeholder="Parent Phone" value={newStudent.parentPhone} onChange={e => setNewStudent({...newStudent, parentPhone: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input placeholder="Address" value={newStudent.address} onChange={e => setNewStudent({...newStudent, address: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
