@@ -11,8 +11,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Correct Order: Multer FIRST, then protect
 router.get('/', protect, getStudents);
-router.post('/', upload.single('photo'), protect, createStudent);
+router.post('/', upload.single('photo'), protect, createStudent);   // ✅ Fixed order
 
 module.exports = router;

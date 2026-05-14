@@ -11,6 +11,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/students', require('./routes/students'));
+app.use('/api/results', require('./routes/results'));
+app.use('/api/fees', require('./routes/fees'));
 
 // ... other routes
 
