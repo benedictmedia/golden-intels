@@ -34,12 +34,7 @@ export default function AdminDashboard() {
   })
   const [studentPhoto, setStudentPhoto] = useState(null)
 
-  useEffect(() => {
-    if (darkMode) document.documentElement.classList.add('dark')
-    else document.documentElement.classList.remove('dark')
-    localStorage.setItem('darkMode', darkMode)
-  }, [darkMode])
-
+  // Fetch students
   const fetchStudents = async () => {
     setLoading(true)
     try {
@@ -55,6 +50,13 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchStudents()
   }, [])
+
+  // Dark Mode
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add('dark')
+    else document.documentElement.classList.remove('dark')
+    localStorage.setItem('darkMode', darkMode)
+  }, [darkMode])
 
   const handleAddStudent = async (e) => {
     e.preventDefault()
@@ -93,7 +95,7 @@ export default function AdminDashboard() {
   }
 
   const deleteStudent = async (id) => {
-    if (!window.confirm('Delete this student permanently?')) return
+    if (!window.confirm('Are you sure you want to delete this student?')) return
     try {
       await axios.delete(`${API_URL}/api/students/${id}`)
       setStudents(students.filter(s => s.id !== id))
@@ -159,7 +161,10 @@ export default function AdminDashboard() {
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">All Students</h2>
-                <button onClick={() => setShowAddStudent(true)} className="bg-[#4a235a] hover:bg-purple-800 text-white px-6 py-3 rounded-xl flex items-center gap-2">
+                <button 
+                  onClick={() => setShowAddStudent(true)} 
+                  className="bg-[#4a235a] hover:bg-purple-800 text-white px-6 py-3 rounded-xl flex items-center gap-2"
+                >
                   <UserPlus size={20} /> Add New Student
                 </button>
               </div>
@@ -181,17 +186,25 @@ export default function AdminDashboard() {
                       <tr key={s.id} className={i % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-800'}>
                         <td className="px-6 py-4">
                           {s.photo ? (
-                            <img src={s.photo.replace('/uploads', `${API_URL}/uploads`)} alt="" className="w-12 h-12 rounded-full object-cover border" />
+                            <img 
+                              src={`${API_URL}${s.photo}`} 
+                              alt={`${s.firstName} ${s.lastName}`}
+                              className="w-12 h-12 rounded-full object-cover border-2 border-white shadow" 
+                              onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/48?text=No+Photo'; }}
+                            />
                           ) : (
-                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xs">No Photo</div>
+                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xs">📷</div>
                           )}
                         </td>
                         <td className="px-6 py-4 font-medium">{s.firstName} {s.lastName}</td>
                         <td className="px-6 py-4">{s.gradeLevel}</td>
-                        <td className="px-6 py-4">{s.studentId}</td>
+                        <td className="px-6 py-4 font-mono">{s.studentId}</td>
                         <td className="px-6 py-4">{s.parentName}</td>
                         <td className="px-6 py-4 text-center">
-                          <button onClick={() => deleteStudent(s.id)} className="text-red-600 hover:text-red-800 p-2">
+                          <button 
+                            onClick={() => deleteStudent(s.id)} 
+                            className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded"
+                          >
                             <Trash2 size={20} />
                           </button>
                         </td>
@@ -200,6 +213,14 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* Placeholder for other menus */}
+          {activeMenu !== 'students' && (
+            <div className="text-center py-20">
+              <h2 className="text-3xl font-bold mb-4 text-gray-400">Coming Soon</h2>
+              <p className="text-gray-500">This section is under active development.</p>
             </div>
           )}
         </div>
@@ -214,13 +235,12 @@ export default function AdminDashboard() {
             </div>
 
             <form onSubmit={handleAddStudent} className="p-8 space-y-6">
-              {/* All fields included */}
               <div className="grid grid-cols-2 gap-4">
                 <input required placeholder="First Name" value={newStudent.firstName} onChange={e => setNewStudent({...newStudent, firstName: e.target.value})} className="px-4 py-3 border rounded-xl" />
                 <input required placeholder="Last Name" value={newStudent.lastName} onChange={e => setNewStudent({...newStudent, lastName: e.target.value})} className="px-4 py-3 border rounded-xl" />
               </div>
 
-              <input placeholder="Student ID" value={newStudent.studentId} onChange={e => setNewStudent({...newStudent, studentId: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
+              <input placeholder="Student ID (optional)" value={newStudent.studentId} onChange={e => setNewStudent({...newStudent, studentId: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
 
               <div className="grid grid-cols-2 gap-4">
                 <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({...newStudent, dateOfBirth: e.target.value})} className="px-4 py-3 border rounded-xl" />
@@ -234,13 +254,13 @@ export default function AdminDashboard() {
                 {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
 
-              <input required placeholder="Parent Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
+              <input required placeholder="Parent/Guardian Name" value={newStudent.parentName} onChange={e => setNewStudent({...newStudent, parentName: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input type="email" placeholder="Parent Email" value={newStudent.parentEmail} onChange={e => setNewStudent({...newStudent, parentEmail: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input type="tel" placeholder="Parent Phone" value={newStudent.parentPhone} onChange={e => setNewStudent({...newStudent, parentPhone: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
               <input placeholder="Address" value={newStudent.address} onChange={e => setNewStudent({...newStudent, address: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
 
               <div>
-                <label className="block mb-2">Student Photo (Optional)</label>
+                <label className="block mb-2 text-sm font-medium">Student Photo (Optional)</label>
                 <input type="file" accept="image/*" onChange={e => setStudentPhoto(e.target.files[0])} />
               </div>
 
