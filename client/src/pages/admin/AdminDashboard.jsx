@@ -11,8 +11,6 @@ import {
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
   { icon: <Users size={20} />, label: 'Students', id: 'students' },
-  { icon: <GraduationCap size={20} />, label: 'Results', id: 'results' },
-  { icon: <DollarSign size={20} />, label: 'Fees', id: 'fees' },
 ]
 
 export default function AdminDashboard() {
@@ -51,9 +49,7 @@ export default function AdminDashboard() {
     }
   }
 
-  useEffect(() => {
-    fetchStudents()
-  }, [])
+  useEffect(() => { fetchStudents() }, [])
 
   const handleAddStudent = async (e) => {
     e.preventDefault()
@@ -77,27 +73,24 @@ export default function AdminDashboard() {
       alert('✅ Student added successfully!')
     } catch (err) {
       console.error(err)
-      alert('Failed to add student. Check console.')
+      alert('Failed to add student')
     }
   }
 
   const resetForm = () => {
     setShowAddStudent(false)
-    setNewStudent({
-      firstName: '', lastName: '', dateOfBirth: '', gender: 'Male',
-      gradeLevel: 'Year 1', parentName: '', parentEmail: '', parentPhone: '',
-      address: '', studentId: ''
-    })
+    setNewStudent({ firstName: '', lastName: '', dateOfBirth: '', gender: 'Male', gradeLevel: 'Year 1', parentName: '', parentEmail: '', parentPhone: '', address: '', studentId: '' })
     setStudentPhoto(null)
   }
 
   const deleteStudent = async (id) => {
-    if (!window.confirm('Delete this student?')) return
+    if (!window.confirm('Are you sure you want to delete this student?')) return
     try {
       await axios.delete(`${API_URL}/api/students/${id}`)
       setStudents(students.filter(s => s.id !== id))
-      alert('Student deleted')
+      alert('✅ Student deleted successfully')
     } catch (err) {
+      console.error(err)
       alert('Failed to delete student')
     }
   }
@@ -124,18 +117,21 @@ export default function AdminDashboard() {
 
         <nav className="flex-1 py-6">
           {menuItems.map(item => (
-            <button key={item.id} onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 ${activeMenu === item.id ? 'bg-[#d4a017] text-[#1a3c6e] font-bold' : 'hover:bg-purple-900 text-purple-200'}`}>
+            <button
+              key={item.id}
+              onClick={() => setActiveMenu(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 ${activeMenu === item.id ? 'bg-[#d4a017] text-[#1a3c6e] font-bold' : 'hover:bg-purple-900 text-purple-200'}`}
+            >
               {item.icon}
               {sidebarOpen && <span>{item.label}</span>}
             </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-purple-900">
-          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 rounded-lg mb-2">
+        <div className="p-4 border-t border-purple-900 space-y-2">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 rounded-lg">
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            {sidebarOpen && <span>{darkMode ? 'Light' : 'Dark'} Mode</span>}
+            {sidebarOpen && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
           </button>
           <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 rounded-lg">
             <LogOut size={20} /> {sidebarOpen && "Logout"}
@@ -145,23 +141,23 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className={`px-6 py-4 flex justify-between ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className={`px-6 py-4 flex justify-between items-center shadow-sm ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
           <h1 className="text-2xl font-bold capitalize">{activeMenu}</h1>
         </div>
 
         <div className={`flex-1 p-6 overflow-auto ${darkMode ? 'bg-gray-950' : 'bg-gray-100'}`}>
           {activeMenu === 'students' && (
-            <>
-              <div className="flex justify-between mb-6">
+            <div>
+              <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">All Students</h2>
-                <button onClick={() => setShowAddStudent(true)} className="bg-[#4a235a] text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-purple-800">
+                <button onClick={() => setShowAddStudent(true)} className="bg-[#4a235a] hover:bg-purple-800 text-white px-6 py-3 rounded-xl flex items-center gap-2">
                   <UserPlus size={20} /> Add New Student
                 </button>
               </div>
 
               <div className={`rounded-2xl overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
                 <table className="w-full">
-                  <thead className="bg-[#4a235a] text-white">
+                  <thead className="bg-[#4a235a] text-white sticky top-0">
                     <tr>
                       <th className="px-6 py-4 text-left">Student</th>
                       <th className="px-6 py-4 text-left">Class</th>
@@ -174,7 +170,11 @@ export default function AdminDashboard() {
                     {students.map((s, i) => (
                       <tr key={s.id} className={i % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-800'}>
                         <td className="px-6 py-4 flex items-center gap-3">
-                          {s.photo && <img src={s.photo} alt="" className="w-10 h-10 rounded-full object-cover" />}
+                          {s.photo ? (
+                            <img src={s.photo} alt="" className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-xs">No Photo</div>
+                          )}
                           <div>
                             <p className="font-medium">{s.firstName} {s.lastName}</p>
                           </div>
@@ -182,9 +182,9 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">{s.gradeLevel}</td>
                         <td className="px-6 py-4">{s.studentId}</td>
                         <td className="px-6 py-4">{s.parentName}</td>
-                        <td className="px-6 py-4 text-center flex gap-4 justify-center">
-                          <button onClick={() => deleteStudent(s.id)} className="text-red-600 hover:text-red-800">
-                            <Trash2 size={18} />
+                        <td className="px-6 py-4 text-center">
+                          <button onClick={() => deleteStudent(s.id)} className="text-red-600 hover:text-red-800 p-2">
+                            <Trash2 size={20} />
                           </button>
                         </td>
                       </tr>
@@ -192,26 +192,25 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Add Student Modal - FULL FIELDS */}
+      {/* Add Student Modal */}
       {showAddStudent && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl ${darkMode ? 'bg-gray-900 text-white' : 'bg-white'}`}>
             <div className="p-8 border-b sticky top-0 bg-inherit z-10">
               <h2 className="text-2xl font-bold">Add New Student</h2>
             </div>
-
             <form onSubmit={handleAddStudent} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <input required placeholder="First Name" value={newStudent.firstName} onChange={e => setNewStudent({...newStudent, firstName: e.target.value})} className="px-4 py-3 border rounded-xl" />
                 <input required placeholder="Last Name" value={newStudent.lastName} onChange={e => setNewStudent({...newStudent, lastName: e.target.value})} className="px-4 py-3 border rounded-xl" />
               </div>
 
-              <input placeholder="Student ID (optional)" value={newStudent.studentId} onChange={e => setNewStudent({...newStudent, studentId: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
+              <input placeholder="Student ID" value={newStudent.studentId} onChange={e => setNewStudent({...newStudent, studentId: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
 
               <div className="grid grid-cols-2 gap-4">
                 <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({...newStudent, dateOfBirth: e.target.value})} className="px-4 py-3 border rounded-xl" />
@@ -231,12 +230,12 @@ export default function AdminDashboard() {
               <input placeholder="Address" value={newStudent.address} onChange={e => setNewStudent({...newStudent, address: e.target.value})} className="w-full px-4 py-3 border rounded-xl" />
 
               <div>
-                <label className="block mb-2 text-sm font-medium">Student Photo (Optional)</label>
+                <label className="block mb-2">Student Photo (Optional)</label>
                 <input type="file" accept="image/*" onChange={e => setStudentPhoto(e.target.files[0])} />
               </div>
 
               <div className="flex gap-4 pt-6">
-                <button type="button" onClick={resetForm} className="flex-1 py-4 border rounded-xl font-medium">Cancel</button>
+                <button type="button" onClick={resetForm} className="flex-1 py-4 border rounded-xl">Cancel</button>
                 <button type="submit" className="flex-1 bg-[#4a235a] text-white py-4 rounded-xl font-bold">Add Student</button>
               </div>
             </form>

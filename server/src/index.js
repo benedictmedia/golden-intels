@@ -17,6 +17,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files (uploads)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+console.log('✅ Static uploads folder served');
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/students', require('./routes/students'));
