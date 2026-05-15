@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send
 } from 'lucide-react'
+import API_URL from '../../api/config'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
