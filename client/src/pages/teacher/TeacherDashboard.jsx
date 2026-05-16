@@ -40,11 +40,14 @@ export default function TeacherDashboard() {
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
 
   useEffect(() => {
-    if (activeMenu === 'gradebook') {
-      axios.get('${API_URL}/api/results').then(res => setSubmittedResults(res.data))
-      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
-    }
-  }, [activeMenu])
+  if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
+    const token = localStorage.getItem('token')
+    axios.get(`${API_URL}/api/students`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => setStudents(res.data))
+      .catch(err => console.error('Failed to fetch students:', err))
+  }
+}, [activeMenu])
 
   const handleGradebookSubmit = async () => {
     if (!gradebookStudent) return
@@ -381,10 +384,14 @@ export default function TeacherDashboard() {
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
 
   useEffect(() => {
-    if (activeMenu === 'classes' || activeMenu === 'attendance') {
-      axios.get('${API_URL}/api/students').then(res => setStudents(res.data))
-    }
-  }, [activeMenu])
+  if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
+    const token = localStorage.getItem('token')
+    axios.get(`${API_URL}/api/students`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => setStudents(res.data))
+      .catch(err => console.error('Failed to fetch students:', err))
+  }
+}, [activeMenu])
 
   const handleLogout = () => {
     logout()

@@ -32,9 +32,24 @@ export default function ParentDashboard() {
   const [feePayments, setFeePayments] = useState([])
 
   useEffect(() => {
-    axios.get('${API_URL}/api/fees/payments')
-      .then(res => setFeePayments(res.data))
-  }, [])
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
+
+  axios.get(`${API_URL}/api/students`, { headers })
+    .then(res => {
+      setStudents(res.data)
+      if (res.data.length > 0) setSelectedChild(res.data[0])
+    })
+
+  axios.get(`${API_URL}/api/results`, { headers })
+    .then(res => {
+      const approved = res.data.filter(r => r.status === 'approved')
+      setApprovedResults(approved)
+    })
+
+  axios.get(`${API_URL}/api/fees/payments`, { headers })
+    .then(res => setFeePayments(res.data))
+}, [])
   const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
@@ -248,12 +263,24 @@ export default function ParentDashboard() {
   }
 
   useEffect(() => {
-    axios.get('${API_URL}/api/students')
-      .then(res => {
-        setStudents(res.data)
-        if (res.data.length > 0) setSelectedChild(res.data[0])
-      })
-  }, [])
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
+
+  axios.get(`${API_URL}/api/students`, { headers })
+    .then(res => {
+      setStudents(res.data)
+      if (res.data.length > 0) setSelectedChild(res.data[0])
+    })
+
+  axios.get(`${API_URL}/api/results`, { headers })
+    .then(res => {
+      const approved = res.data.filter(r => r.status === 'approved')
+      setApprovedResults(approved)
+    })
+
+  axios.get(`${API_URL}/api/fees/payments`, { headers })
+    .then(res => setFeePayments(res.data))
+}, [])
 
   const handleLogout = () => {
     logout()
