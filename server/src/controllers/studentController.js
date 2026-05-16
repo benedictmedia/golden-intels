@@ -3,9 +3,20 @@ const prisma = new PrismaClient()
 
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
-  const count = await prisma.student.count()
-  const number = String(count + 1).padStart(4, '0')
-  return `GI-${year}-${number}`
+  let studentId
+  let isUnique = false
+  
+  while (!isUnique) {
+    const count = await prisma.student.count()
+    const random = Math.floor(Math.random() * 1000)
+    const number = String(count + 1 + random).padStart(4, '0')
+    studentId = `GI-${year}-${number}`
+    
+    const existing = await prisma.student.findUnique({ where: { studentId } })
+    if (!existing) isUnique = true
+  }
+  
+  return studentId
 }
 
 const getStudents = async (req, res) => {
