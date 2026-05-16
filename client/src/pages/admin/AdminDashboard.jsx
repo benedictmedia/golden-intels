@@ -114,6 +114,10 @@ export default function AdminDashboard() {
   const [feeClassFilter, setFeeClassFilter] = useState('All')
   const [paymentForm, setPaymentForm] = useState({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
 
+  const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('token')}`
+})
+
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
   const filteredStudents = activeClass === 'All' ? students : students.filter(s => s.gradeLevel === activeClass)
@@ -237,7 +241,7 @@ export default function AdminDashboard() {
       img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')) }
       img.src = url
     })
-    const logoData = await loadImage('/src/assets/logo.png')
+    const logoData = await loadImage(`${window.location.origin}/src/assets/logo.png`)
     doc.setFillColor(26, 60, 110); doc.rect(0, 0, pageWidth, 45, 'F')
     doc.setFillColor(212, 160, 23); doc.rect(0, 45, pageWidth, 4, 'F')
     doc.addImage(logoData, 'PNG', 12, 5, 32, 32)

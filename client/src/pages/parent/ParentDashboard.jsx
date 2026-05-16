@@ -67,7 +67,7 @@ export default function ParentDashboard() {
     const scores = result.scores
     const pageWidth = doc.internal.pageSize.getWidth()
 
-    const logoUrl = '/src/assets/logo.png'
+    const logoUrl = `${window.location.origin}/src/assets/logo.png`
     const loadImage = (url) => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'

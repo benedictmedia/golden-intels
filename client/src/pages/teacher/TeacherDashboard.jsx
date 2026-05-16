@@ -49,39 +49,53 @@ export default function TeacherDashboard() {
   }
 }, [activeMenu])
 
-  const handleGradebookSubmit = async () => {
-    if (!gradebookStudent) return
-    try {
-      if (editingResult) {
-        const res = await axios.put(`/api/results/${editingResult.id}`, {
-          scores: subjectScores,
-          remarks: teacherRemarks,
-          status: 'pending'
-        })
-        setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
-        setEditingResult(null)
-      } else {
-        const res = await axios.post('${API_URL}/api/results', {
-          studentId: gradebookStudent,
-          gradeLevel: gradebookClass,
-          academicYear: gradebookYear,
-          term: gradebookTerm,
-          scores: subjectScores,
-          remarks: teacherRemarks,
-          submittedBy: user?.name
-        })
-        setSubmittedResults([res.data, ...submittedResults])
-      }
-      setGradebookSubmitted(true)
-      setSubjectScores({})
-      setTeacherRemarks('')
-      setGradebookStudent('')
-      setActiveGradebookTab('submitted')
-      setTimeout(() => setGradebookSubmitted(false), 4000)
-    } catch (error) {
-      alert('Failed to submit results. Please try again.')
-    }
+  useEffect(() => {
+  if (activeMenu === 'gradebook') {
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    axios.get(`${API_URL}/api/results`, { headers })
+      .then(res => setSubmittedResults(res.data.filter(r => r.submittedBy === user?.name)))
+    axios.get(`${API_URL}/api/students`, { headers })
+      .then(res => setStudents(res.data))
   }
+}, [activeMenu])
+
+  const handleGradebookSubmit = async () => {
+  if (!gradebookStudent) return
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
+  try {
+    if (editingResult) {
+      const res = await axios.put(`${API_URL}/api/results/${editingResult.id}`, {
+        scores: subjectScores,
+        remarks: teacherRemarks,
+        status: 'pending'
+      }, { headers })
+      setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
+      setEditingResult(null)
+    } else {
+      const res = await axios.post(`${API_URL}/api/results`, {
+        studentId: gradebookStudent,
+        gradeLevel: gradebookClass,
+        academicYear: gradebookYear,
+        term: gradebookTerm,
+        scores: subjectScores,
+        remarks: teacherRemarks,
+        submittedBy: user?.name
+      }, { headers })
+      setSubmittedResults([res.data, ...submittedResults])
+    }
+    setGradebookSubmitted(true)
+    setSubjectScores({})
+    setTeacherRemarks('')
+    setGradebookStudent('')
+    setActiveGradebookTab('submitted')
+    setTimeout(() => setGradebookSubmitted(false), 4000)
+  } catch (error) {
+    console.error('Submit error:', error)
+    alert('Failed to submit results. Please try again.')
+  }
+}
 
   const handleEditResult = (result) => {
     setEditingResult(result)
@@ -95,14 +109,17 @@ export default function TeacherDashboard() {
   }
 
   const handleDeleteResult = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this result?')) return
-    try {
-      await axios.delete(`/api/results/${id}`)
-      setSubmittedResults(submittedResults.filter(r => r.id !== id))
-    } catch (error) {
-      alert('Failed to delete result.')
-    }
+  if (!window.confirm('Are you sure you want to delete this result?')) return
+  const token = localStorage.getItem('token')
+  try {
+    await axios.delete(`${API_URL}/api/results/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    setSubmittedResults(submittedResults.filter(r => r.id !== id))
+  } catch (error) {
+    alert('Failed to delete result.')
   }
+}
 
   const handleDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
