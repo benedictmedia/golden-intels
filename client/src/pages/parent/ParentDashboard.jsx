@@ -67,8 +67,8 @@ export default function ParentDashboard() {
     const scores = result.scores
     const pageWidth = doc.internal.pageSize.getWidth()
 
-    const logoUrl = `${window.location.origin}/src/assets/logo.png`
-    const loadImage = (url) => new Promise((resolve) => {
+    // Load logo as base64
+    const getLogoBase64 = () => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
@@ -79,15 +79,18 @@ export default function ParentDashboard() {
         ctx.drawImage(img, 0, 0)
         resolve(canvas.toDataURL('image/png'))
       }
-      img.src = url
+      img.onerror = () => resolve(null)
+      img.src = new URL('../../assets/logo.png', import.meta.url).href
     })
-    const logoData = await loadImage(logoUrl)
+    const logoData = await getLogoBase64()
 
     doc.setFillColor(26, 60, 110)
     doc.rect(0, 0, pageWidth, 45, 'F')
     doc.setFillColor(212, 160, 23)
     doc.rect(0, 45, pageWidth, 4, 'F')
-    doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    }
 
     doc.setFontSize(20)
     doc.setTextColor(255, 255, 255)
@@ -215,10 +218,12 @@ export default function ParentDashboard() {
     doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
     y += 18
 
-    doc.saveGraphicsState()
-    doc.setGState(new doc.GState({ opacity: 0.06 }))
-    doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
-    doc.restoreGraphicsState()
+    if (logoData) {
+      doc.saveGraphicsState()
+      doc.setGState(new doc.GState({ opacity: 0.06 }))
+      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+      doc.restoreGraphicsState()
+    }
 
     doc.setFillColor(240, 245, 255)
     doc.rect(10, y, pageWidth - 20, 22, 'F')

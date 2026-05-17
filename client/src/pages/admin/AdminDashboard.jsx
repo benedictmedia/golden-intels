@@ -241,10 +241,26 @@ export default function AdminDashboard() {
       img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')) }
       img.src = url
     })
-    const logoData = await loadImage(`${window.location.origin}/src/assets/logo.png`)
+    const getLogoBase64 = () => new Promise((resolve) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        resolve(canvas.toDataURL('image/png'))
+      }
+      img.onerror = () => resolve(null)
+      img.src = new URL('../../assets/logo.png', import.meta.url).href
+    })
+    const logoData = await getLogoBase64()
     doc.setFillColor(26, 60, 110); doc.rect(0, 0, pageWidth, 45, 'F')
     doc.setFillColor(212, 160, 23); doc.rect(0, 45, pageWidth, 4, 'F')
-    doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    }
     doc.setFontSize(20); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
     doc.text('Golden-Intels International School', pageWidth / 2 + 10, 18, { align: 'center' })
     doc.setFontSize(10); doc.setFont('helvetica', 'italic'); doc.setTextColor(212, 160, 23)
@@ -295,8 +311,12 @@ export default function AdminDashboard() {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(26, 60, 110)
     doc.text('Grand Total', 15, y + 7); doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
     y += 18
-    doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: 0.06 }))
-    doc.addImage(logoData, 'PNG', 55, 100, 100, 100); doc.restoreGraphicsState()
+    if (logoData) {
+      doc.saveGraphicsState()
+      doc.setGState(new doc.GState({ opacity: 0.06 }))
+      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+      doc.restoreGraphicsState()
+    }
     doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, 22, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.5); doc.rect(10, y, pageWidth - 20, 22)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 60, 110)

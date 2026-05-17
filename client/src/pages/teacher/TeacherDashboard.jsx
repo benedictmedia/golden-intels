@@ -128,9 +128,8 @@ export default function TeacherDashboard() {
     const scores = result.scores
     const pageWidth = doc.internal.pageSize.getWidth()
 
-    // Load logo
-    const logoUrl = '/src/assets/logo.png'
-    const loadImage = (url) => new Promise((resolve) => {
+    // Load logo as base64
+    const getLogoBase64 = () => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
@@ -141,9 +140,10 @@ export default function TeacherDashboard() {
         ctx.drawImage(img, 0, 0)
         resolve(canvas.toDataURL('image/png'))
       }
-      img.src = url
+      img.onerror = () => resolve(null)
+      img.src = new URL('../../assets/logo.png', import.meta.url).href
     })
-    const logoData = await loadImage(logoUrl)
+    const logoData = await getLogoBase64()
 
     // Navy header background
     doc.setFillColor(26, 60, 110)
@@ -154,7 +154,9 @@ export default function TeacherDashboard() {
     doc.rect(0, 45, pageWidth, 4, 'F')
 
     // Logo in header - larger
-    doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    if (logoData) {
+      doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+    }
 
     // School name in header
     doc.setFontSize(20)
@@ -306,10 +308,12 @@ export default function TeacherDashboard() {
     y += 18
 
     // Watermark
-    doc.saveGraphicsState()
-    doc.setGState(new doc.GState({ opacity: 0.06 }))
-    doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
-    doc.restoreGraphicsState()
+    if (logoData) {
+      doc.saveGraphicsState()
+      doc.setGState(new doc.GState({ opacity: 0.06 }))
+      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+      doc.restoreGraphicsState()
+    }
 
     // Remarks box
     doc.setFillColor(240, 245, 255)
