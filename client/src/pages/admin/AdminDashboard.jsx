@@ -236,18 +236,26 @@ export default function AdminDashboard() {
     const student = result.student
     const scores = result.scores
     const pageWidth = doc.internal.pageSize.getWidth()
-    const logoData = await new Promise((resolve) => {
+    const loadImage = (url) => new Promise((resolve) => {
+      const img = new Image(); img.crossOrigin = 'anonymous'
+      img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')) }
+      img.src = url
+    })
+    const getLogoBase64 = () => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
         const canvas = document.createElement('canvas')
-        canvas.width = img.width; canvas.height = img.height
-        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0)
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
         resolve(canvas.toDataURL('image/png'))
       }
       img.onerror = () => resolve(null)
       img.src = new URL('../../assets/logo.png', import.meta.url).href
     })
+    const logoData = await getLogoBase64()
     doc.setFillColor(26, 60, 110); doc.rect(0, 0, pageWidth, 45, 'F')
     doc.setFillColor(212, 160, 23); doc.rect(0, 45, pageWidth, 4, 'F')
     if (logoData) {
