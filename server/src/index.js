@@ -37,6 +37,7 @@ app.use('/api/gallery', require('./routes/gallery'))
 app.use('/api/news', require('./routes/newsEvents'))
 app.use('/api/staff', require('./routes/staff'))
 app.use('/api/fees', require('./routes/fees'))
+app.use('/api/attendance', require('./routes/attendance'))
 
 const PORT = process.env.PORT || 5000
 
