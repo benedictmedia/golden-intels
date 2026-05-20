@@ -6,8 +6,8 @@
 
 @layer base {
   body {
-    background-color: #fff0fb;
-    color: #1a1a2e;
+    background-color: #0ea5ff;
+    color: #0f172a;
   }
 
   section {
@@ -17,11 +17,11 @@
 
 @layer components {
   .page-bg {
-    background: linear-gradient(135deg, #fff0fb 0%, #ffd6f3 50%, #fff0fb 100%);
+    background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 50%, #7dd3fc 100%);
   }
 
   .section-bg-alt {
-    background: linear-gradient(135deg, #ffd6f3 0%, #ffc2ec 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #93c5fd 100%);
   }
 
   .card-hover {
