@@ -48,7 +48,7 @@ export default function Login() {
         )}
 
         {/* Form */}
-        <div className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-bold text-[#1a3c6e] mb-2">Email Address</label>
             <input
@@ -70,13 +70,13 @@ export default function Login() {
             />
           </div>
           <button
-            onClick={handleSubmit}
+            type="submit"
             disabled={loading}
             className="w-full bg-[#1a3c6e] hover:bg-[#2a5298] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
-        </div>
+        </form>
 
         {/* Roles info */}
         <div className="mt-8 bg-gray-50 rounded-xl p-4">

@@ -231,112 +231,229 @@ export default function AdminDashboard() {
   }
 
   const handleAdminDownloadPDF = async (result) => {
-    const { jsPDF } = await import('jspdf')
-    const doc = new jsPDF()
-    const student = result.student
-    const scores = result.scores
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const loadImage = (url) => new Promise((resolve) => {
-      const img = new Image(); img.crossOrigin = 'anonymous'
-      img.onload = () => { const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0); resolve(canvas.toDataURL('image/png')) }
-      img.src = url
-    })
-    const getLogoBase64 = () => new Promise((resolve) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width = img.width
-        canvas.height = img.height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0)
-        resolve(canvas.toDataURL('image/png'))
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      const student = result.student || {}
+      const scores = result.scores || {}
+      const pageWidth = doc.internal.pageSize.getWidth()
+
+      const getLogoBase64 = () => new Promise((resolve) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0)
+          resolve(canvas.toDataURL('image/png'))
+        }
+        img.onerror = () => resolve(null)
+        img.src = new URL('../../assets/logo.png', import.meta.url).href
+      })
+
+      const logoData = await getLogoBase64()
+
+      doc.setFillColor(26, 60, 110)
+      doc.rect(0, 0, pageWidth, 45, 'F')
+      doc.setFillColor(212, 160, 23)
+      doc.rect(0, 45, pageWidth, 4, 'F')
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
       }
-      img.onerror = () => resolve(null)
-      img.src = new URL('../../assets/logo.png', import.meta.url).href
-    })
-    const logoData = await getLogoBase64()
-    doc.setFillColor(26, 60, 110); doc.rect(0, 0, pageWidth, 45, 'F')
-    doc.setFillColor(212, 160, 23); doc.rect(0, 45, pageWidth, 4, 'F')
-    if (logoData) {
-      doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
-    }
-    doc.setFontSize(20); doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold')
-    doc.text('Golden-Intels International School', pageWidth / 2 + 10, 18, { align: 'center' })
-    doc.setFontSize(10); doc.setFont('helvetica', 'italic'); doc.setTextColor(212, 160, 23)
-    doc.text('Oxford Accredited School', pageWidth / 2 + 10, 27, { align: 'center' })
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(200, 220, 255)
-    doc.text(`Academic Year: ${result.academicYear}   |   Term: ${result.term}`, pageWidth / 2 + 10, 36, { align: 'center' })
-    doc.setFillColor(240, 245, 255); doc.rect(0, 49, pageWidth, 12, 'F')
-    doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 60, 110)
-    doc.text('STUDENT ACADEMIC REPORT', pageWidth / 2, 57, { align: 'center' })
-    doc.setFillColor(255, 255, 255); doc.rect(10, 64, pageWidth - 20, 28, 'F')
-    doc.setDrawColor(212, 160, 23); doc.setLineWidth(0.5); doc.rect(10, 64, pageWidth - 20, 28)
-    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 60, 110)
-    doc.text('Student Name:', 15, 73); doc.text('Student ID:', 15, 82); doc.text('Class:', 15, 91)
-    doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
-    doc.text(`${student.firstName} ${student.lastName}`, 50, 73)
-    doc.text(`${student.studentId}`, 50, 82); doc.text(`${result.gradeLevel}`, 50, 91)
-    doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 60, 110)
-    doc.text('Gender:', 120, 73); doc.text('Date of Birth:', 120, 82); doc.text('Status:', 120, 91)
-    doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
-    doc.text(`${student.gender}`, 150, 73); doc.text(`${student.dateOfBirth}`, 150, 82); doc.text(`${student.status}`, 150, 91)
-    let y = 100
-    doc.setFillColor(26, 60, 110); doc.rect(10, y, pageWidth - 20, 10, 'F')
-    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-    doc.text('Subject', 15, y + 7); doc.text('Class(10)', 65, y + 7); doc.text('CAT1(20)', 92, y + 7)
-    doc.text('CAT2(20)', 119, y + 7); doc.text('Exam(50)', 146, y + 7); doc.text('Total', 170, y + 7); doc.text('Grade', 186, y + 7)
-    y += 10
-    const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
-    let grandTotal = 0
-    const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 70) return 'B+'; if (t >= 60) return 'B'; if (t >= 50) return 'C'; if (t >= 40) return 'D'; return 'F' }
-    const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
-    subjectsList.forEach((subject, index) => {
-      const s = scores[subject] || {}
-      const classScore = parseFloat(s.classScore) || 0; const cat1 = parseFloat(s.cat1) || 0
-      const cat2 = parseFloat(s.cat2) || 0; const exam = parseFloat(s.exam) || 0
-      const wExam = (exam / 100) * 50; const total = classScore + cat1 + cat2 + wExam
-      grandTotal += total
-      if (index % 2 === 0) { doc.setFillColor(245, 248, 255) } else { doc.setFillColor(255, 255, 255) }
+
+      doc.setFontSize(20)
+      doc.setTextColor(255, 255, 255)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Golden-Intels International School', pageWidth / 2 + 10, 18, { align: 'center' })
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(212, 160, 23)
+      doc.text('Oxford Accredited School', pageWidth / 2 + 10, 27, { align: 'center' })
+
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(200, 220, 255)
+      doc.text(`Academic Year: ${result.academicYear}   |   Term: ${result.term}`, pageWidth / 2 + 10, 36, { align: 'center' })
+
+      doc.setFillColor(240, 245, 255)
+      doc.rect(0, 49, pageWidth, 12, 'F')
+
+      doc.setFontSize(13)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(26, 60, 110)
+      doc.text('STUDENT ACADEMIC REPORT', pageWidth / 2, 57, { align: 'center' })
+
+      doc.setFillColor(255, 255, 255)
+      doc.rect(10, 64, pageWidth - 20, 28, 'F')
+      doc.setDrawColor(212, 160, 23)
+      doc.setLineWidth(0.5)
+      doc.rect(10, 64, pageWidth - 20, 28)
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(26, 60, 110)
+      doc.text('Student Name:', 15, 73)
+      doc.text('Student ID:', 15, 82)
+      doc.text('Class:', 15, 91)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(50, 50, 50)
+      doc.text(`${student.firstName || ''} ${student.lastName || ''}`, 50, 73)
+      doc.text(`${student.studentId || ''}`, 50, 82)
+      doc.text(`${result.gradeLevel || ''}`, 50, 91)
+
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(26, 60, 110)
+      doc.text('Gender:', 120, 73)
+      doc.text('Date of Birth:', 120, 82)
+      doc.text('Status:', 120, 91)
+
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(50, 50, 50)
+      doc.text(`${student.gender || ''}`, 150, 73)
+      doc.text(`${student.dateOfBirth || ''}`, 150, 82)
+      doc.text(`${student.status || ''}`, 150, 91)
+
+      let y = 100
+      doc.setFillColor(26, 60, 110)
       doc.rect(10, y, pageWidth - 20, 10, 'F')
-      doc.setDrawColor(220, 225, 235); doc.setLineWidth(0.2); doc.rect(10, y, pageWidth - 20, 10)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 60, 110); doc.text(subject, 15, y + 7)
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
-      doc.text(classScore.toString(), 72, y + 7); doc.text(cat1.toString(), 99, y + 7)
-      doc.text(cat2.toString(), 126, y + 7); doc.text(wExam.toFixed(2), 150, y + 7); doc.text(total.toFixed(2), 170, y + 7)
-      const gradeColor = getGradeColor(total); doc.setFont('helvetica', 'bold'); doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
-      doc.text(total > 0 ? getGrade(total) : '-', 188, y + 7); y += 10
-    })
-    doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 10, 'F')
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 7); doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
-    y += 18
-    if (logoData) {
-      doc.saveGraphicsState()
-      doc.setGState(new doc.GState({ opacity: 0.06 }))
-      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
-      doc.restoreGraphicsState()
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(255, 255, 255)
+      doc.text('Subject', 15, y + 7)
+      doc.text('Class(10)', 65, y + 7)
+      doc.text('CAT1(20)', 92, y + 7)
+      doc.text('CAT2(20)', 119, y + 7)
+      doc.text('Exam(50)', 146, y + 7)
+      doc.text('Total', 170, y + 7)
+      doc.text('Grade', 186, y + 7)
+      y += 10
+
+      const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
+      let grandTotal = 0
+
+      const getGrade = (t) => {
+        if (t >= 90) return 'A+'
+        if (t >= 80) return 'A'
+        if (t >= 70) return 'B+'
+        if (t >= 60) return 'B'
+        if (t >= 50) return 'C'
+        if (t >= 40) return 'D'
+        return 'F'
+      }
+
+      const getGradeColor = (t) => {
+        if (t >= 80) return [15, 110, 86]
+        if (t >= 60) return [26, 60, 110]
+        if (t >= 50) return [212, 160, 23]
+        return [220, 50, 50]
+      }
+
+      subjectsList.forEach((subject, index) => {
+        const s = scores[subject] || {}
+        const classScore = parseFloat(s.classScore) || 0
+        const cat1 = parseFloat(s.cat1) || 0
+        const cat2 = parseFloat(s.cat2) || 0
+        const exam = parseFloat(s.exam) || 0
+        const wExam = (exam / 100) * 50
+        const total = classScore + cat1 + cat2 + wExam
+        grandTotal += total
+
+        if (index % 2 === 0) {
+          doc.setFillColor(245, 248, 255)
+        } else {
+          doc.setFillColor(255, 255, 255)
+        }
+        doc.rect(10, y, pageWidth - 20, 10, 'F')
+        doc.setDrawColor(220, 225, 235)
+        doc.setLineWidth(0.2)
+        doc.rect(10, y, pageWidth - 20, 10)
+
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        doc.setTextColor(26, 60, 110)
+        doc.text(subject, 15, y + 7)
+
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(50, 50, 50)
+        doc.text(classScore.toString(), 72, y + 7)
+        doc.text(cat1.toString(), 99, y + 7)
+        doc.text(cat2.toString(), 126, y + 7)
+        doc.text(wExam.toFixed(2), 150, y + 7)
+        doc.text(total.toFixed(2), 170, y + 7)
+
+        const gradeColor = getGradeColor(total)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
+        doc.text(total > 0 ? getGrade(total) : '-', 188, y + 7)
+        y += 10
+      })
+
+      doc.setFillColor(212, 160, 23)
+      doc.rect(10, y, pageWidth - 20, 10, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(26, 60, 110)
+      doc.text('Grand Total', 15, y + 7)
+      doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
+      y += 18
+
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+      }
+
+      doc.setFillColor(240, 245, 255)
+      doc.rect(10, y, pageWidth - 20, 22, 'F')
+      doc.setDrawColor(26, 60, 110)
+      doc.setLineWidth(0.5)
+      doc.rect(10, y, pageWidth - 20, 22)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(26, 60, 110)
+      doc.text("Class Teacher's Remarks:", 15, y + 8)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(50, 50, 50)
+      const remarksLines = doc.splitTextToSize(result.remarks || 'No remarks provided.', 170)
+      doc.text(remarksLines, 15, y + 16)
+      y += 30
+
+      doc.setDrawColor(26, 60, 110)
+      doc.setLineWidth(0.3)
+      doc.line(15, y + 10, 70, y + 10)
+      doc.line(85, y + 10, 140, y + 10)
+      doc.line(155, y + 10, 200, y + 10)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      doc.setTextColor(100, 100, 100)
+      doc.text("Class Teacher's Signature", 15, y + 15)
+      doc.text("Head Teacher's Signature", 85, y + 15)
+      doc.text("Parent's Signature", 155, y + 15)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(26, 60, 110)
+      doc.text(`Submitted by: ${result.submittedBy}`, 15, y + 25)
+      doc.text(`Date: ${new Date(result.createdAt).toLocaleDateString()}`, 140, y + 25)
+
+      doc.setFillColor(26, 60, 110)
+      doc.rect(0, 280, pageWidth, 17, 'F')
+      doc.setFillColor(212, 160, 23)
+      doc.rect(0, 278, pageWidth, 2, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(8)
+      doc.setTextColor(255, 255, 255)
+      doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, 287, { align: 'center' })
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(212, 160, 23)
+      doc.text('Oxford Accredited | Excellence in Education', pageWidth / 2, 293, { align: 'center' })
+
+      doc.save(`${student.firstName || 'student'}_${student.lastName || ''}_${result.term || ''}_${result.academicYear || ''}.pdf`)
+    } catch (error) {
+      console.error('Admin PDF download failed:', error)
+      alert('Failed to generate the PDF. Please try again.')
     }
-    doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, 22, 'F')
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.5); doc.rect(10, y, pageWidth - 20, 22)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 60, 110)
-    doc.text("Class Teacher's Remarks:", 15, y + 8)
-    doc.setFont('helvetica', 'italic'); doc.setTextColor(50, 50, 50)
-    const remarksLines = doc.splitTextToSize(result.remarks || 'No remarks provided.', 170)
-    doc.text(remarksLines, 15, y + 16); y += 30
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
-    doc.line(15, y + 10, 70, y + 10); doc.line(85, y + 10, 140, y + 10); doc.line(155, y + 10, 200, y + 10)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 100, 100)
-    doc.text("Class Teacher's Signature", 15, y + 15); doc.text("Head Teacher's Signature", 85, y + 15); doc.text("Parent's Signature", 155, y + 15)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 60, 110)
-    doc.text(`Submitted by: ${result.submittedBy}`, 15, y + 25); doc.text(`Date: ${new Date(result.createdAt).toLocaleDateString()}`, 140, y + 25)
-    doc.setFillColor(26, 60, 110); doc.rect(0, 280, pageWidth, 17, 'F')
-    doc.setFillColor(212, 160, 23); doc.rect(0, 278, pageWidth, 2, 'F')
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255)
-    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, 287, { align: 'center' })
-    doc.setFont('helvetica', 'normal'); doc.setTextColor(212, 160, 23)
-    doc.text('Oxford Accredited | Excellence in Education', pageWidth / 2, 293, { align: 'center' })
-    doc.save(`${student.firstName}_${student.lastName}_${result.term}_${result.academicYear}.pdf`)
   }
 
   const handleApproveApplication = async (id) => {
