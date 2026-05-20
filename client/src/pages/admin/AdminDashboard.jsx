@@ -132,10 +132,10 @@ export default function AdminDashboard() {
       axios.get(`${API_URL}/api/results`).then(res => setResults(res.data))
     }
     if (activeMenu === 'admissions') {
-      axios.get(`${API_URL}/api/admissions`).then(res => setApplications(res.data))
+      axios.get(`${API_URL}/api/admissions`, { headers: getAuthHeaders() }).then(res => setApplications(res.data))
     }
     if (activeMenu === 'admission-tokens') {
-      axios.get(`${API_URL}/api/admission-tokens`).then(res => setTokens(res.data))
+      axios.get(`${API_URL}/api/admission-tokens`, { headers: getAuthHeaders() }).then(res => setTokens(res.data))
     }
     if (activeMenu === 'gallery') {
       axios.get(`${API_URL}/api/gallery`).then(res => setGalleryItems(res.data))
@@ -485,24 +485,24 @@ export default function AdminDashboard() {
 
   const handleApproveApplication = async (id) => {
     try {
-      const res = await axios.put(`${API_URL}/api/admissions/${id}/approve`)
+      const res = await axios.put(`${API_URL}/api/admissions/${id}/approve`, {}, { headers: getAuthHeaders() })
       setApplications(applications.map(a => a.id === id ? res.data.application : a))
       setStudents(prev => [...prev, res.data.student])
       alert(`Application approved! Student ID: ${res.data.student.studentId} has been added to learners.`)
-    } catch (err) { alert('Failed to approve application.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to approve application.') }
   }
 
   const handleRejectApplication = async (id) => {
     try {
-      const res = await axios.put(`${API_URL}/api/admissions/${id}/reject`)
+      const res = await axios.put(`${API_URL}/api/admissions/${id}/reject`, {}, { headers: getAuthHeaders() })
       setApplications(applications.map(a => a.id === id ? res.data : a))
-    } catch (err) { alert('Failed to reject application.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to reject application.') }
   }
 
   const handleDeleteApplication = async (id) => {
     if (!window.confirm('Are you sure you want to delete this application?')) return
     try {
-      await axios.delete(`${API_URL}/api/admissions/${id}`)
+      await axios.delete(`${API_URL}/api/admissions/${id}`, { headers: getAuthHeaders() })
       setApplications(applications.filter(a => a.id !== id))
     } catch (err) { alert('Failed to delete application.') }
   }
@@ -510,7 +510,7 @@ export default function AdminDashboard() {
   const handleGenerateToken = async () => {
     setTokenLoading(true)
     try {
-      const res = await axios.post(`${API_URL}/api/admission-tokens`)
+      const res = await axios.post(`${API_URL}/api/admission-tokens`, {}, { headers: getAuthHeaders() })
       setNewToken(res.data); setTokens([res.data, ...tokens])
     } catch (err) { alert('Failed to generate token.') }
     finally { setTokenLoading(false) }
@@ -519,7 +519,7 @@ export default function AdminDashboard() {
   const handleDeleteToken = async (id) => {
     if (!window.confirm('Are you sure you want to delete this token?')) return
     try {
-      await axios.delete(`${API_URL}/api/admission-tokens/${id}`)
+      await axios.delete(`${API_URL}/api/admission-tokens/${id}`, { headers: getAuthHeaders() })
       setTokens(tokens.filter(t => t.id !== id))
     } catch (err) { alert('Failed to delete token.') }
   }

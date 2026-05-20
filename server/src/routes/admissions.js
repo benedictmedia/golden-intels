@@ -47,7 +47,15 @@ try {
   ])
 }
 
-router.post('/', uploadFields, submitApplication)
+router.post('/', (req, res, next) => {
+  uploadFields(req, res, (err) => {
+    if (err) {
+      console.error('Admission upload error:', err)
+      return res.status(500).json({ message: 'Upload error', error: err.message })
+    }
+    next()
+  })
+}, submitApplication)
 router.get('/', protect, getApplications)
 router.get('/:id', protect, getApplication)
 router.put('/:id/approve', protect, approveApplication)

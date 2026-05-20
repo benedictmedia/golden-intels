@@ -10,18 +10,60 @@ const generateStudentId = async () => {
   return `GI-${year}-${number}`
 }
 
+const getFileUrl = (req, file) => {
+  if (!file) return null
+  if (file.path?.startsWith('http')) return file.path
+  if (file.secure_url) return file.secure_url
+  if (file.url) return file.url
+  if (file.path) return `${req.protocol}://${req.get('host')}/${file.path.replace(/\\/g, '/')}`
+  return null
+}
+
+const normalizeGradeLevel = (gradeLevel) => {
+  const gradeMap = {
+    'Nursery 1': 'Nursery',
+    'Nursery 2': 'Nursery',
+    'Kindergarten 1': 'Reception',
+    'Kindergarten 2': 'Reception',
+    'Grade 1': 'Year 1',
+    'Grade 2': 'Year 2',
+    'Grade 3': 'Year 3',
+    'Grade 4': 'Year 4',
+    'Grade 5': 'Year 5',
+    'Grade 6': 'Year 6',
+  }
+  return gradeMap[gradeLevel] || gradeLevel
+}
+
 // Submit admission application
 const submitApplication = async (req, res) => {
   try {
     const data = req.body
     const files = req.files || {}
 
-    const photo = files.photo ? files.photo[0].path : null
-    const nhisFront = files.nhisFront ? files.nhisFront[0].path : null
-    const nhisBack = files.nhisBack ? files.nhisBack[0].path : null
-    const ghanaFront = files.ghanaFront ? files.ghanaFront[0].path : null
-    const ghanaBack = files.ghanaBack ? files.ghanaBack[0].path : null
-    const signedBooklet = files.signedBooklet ? files.signedBooklet[0].path : null
+    if (!data.serialNumber) {
+      return res.status(400).json({ message: 'Admission token serial number is required.' })
+    }
+
+    const token = await prisma.admissionToken.findUnique({
+      where: { serialNumber: data.serialNumber }
+    })
+
+    if (!token) {
+      return res.status(404).json({ message: 'Invalid admission token.' })
+    }
+
+    if (token.used) {
+      return res.status(400).json({ message: 'This admission token has already been used.' })
+    }
+
+    const photo = getFileUrl(req, files.photo?.[0])
+    const nhisFront = getFileUrl(req, files.nhisFront?.[0])
+    const nhisBack = getFileUrl(req, files.nhisBack?.[0])
+    const ghanaFront = getFileUrl(req, files.ghanaFront?.[0])
+    const ghanaBack = getFileUrl(req, files.ghanaBack?.[0])
+    const signedBooklet = getFileUrl(req, files.signedBooklet?.[0])
+    const gradeLevel = normalizeGradeLevel(data.gradeLevel)
 
     const application = await prisma.admissionApplication.create({
       data: {
@@ -39,7 +81,7 @@ const submitApplication = async (req, res) => {
         motherTongue: data.motherTongue,
         religion: data.religion,
         dateOfAdmission: data.dateOfAdmission,
-        gradeLevel: data.gradeLevel,
+        gradeLevel,
         previousSchool: data.previousSchool,
         parentName: data.parentName,
         parentOccupation: data.parentOccupation,
@@ -108,6 +150,7 @@ const submitApplication = async (req, res) => {
 
     res.status(201).json(application)
   } catch (error) {
+    console.error('Admission submit error:', error)
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
@@ -149,6 +192,10 @@ const approveApplication = async (req, res) => {
       return res.status(404).json({ message: 'Application not found' })
     }
 
+    if (application.status !== 'pending') {
+      return res.status(400).json({ message: `This application has already been ${application.status}.` })
+    }
+
     // Generate student ID
     const studentId = await generateStudentId()
 
@@ -160,7 +207,7 @@ const approveApplication = async (req, res) => {
         lastName: application.lastName,
         dateOfBirth: application.dateOfBirth,
         gender: application.gender,
-        gradeLevel: application.gradeLevel,
+        gradeLevel: normalizeGradeLevel(application.gradeLevel),
         parentName: application.parentName,
         parentEmail: application.parentEmail,
         parentPhone: application.parentPhone,
@@ -178,6 +225,7 @@ const approveApplication = async (req, res) => {
 
     res.json({ application: updated, student })
   } catch (error) {
+    console.error('Approve application error:', error)
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }

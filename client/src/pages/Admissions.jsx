@@ -28,6 +28,7 @@ export default function Admissions() {
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [verifiedSerial, setVerifiedSerial] = useState('')
+  const [submitLoading, setSubmitLoading] = useState(false)
 
   const handleTokenLogin = async () => {
     if (!serialNumber || !pin) {
@@ -37,7 +38,7 @@ export default function Admissions() {
     setLoginLoading(true)
     setLoginError('')
     try {
-      const res = await axios.post('${API_URL}/api/admission-tokens/verify', {
+      const res = await axios.post(`${API_URL}/api/admission-tokens/verify`, {
         serialNumber, pin
       })
       setVerifiedSerial(res.data.serialNumber)
@@ -100,6 +101,7 @@ export default function Admissions() {
       alert('Please upload the signed booklet and check the consent box.')
       return
     }
+    setSubmitLoading(true)
     try {
       const data = new FormData()
       data.append('serialNumber', verifiedSerial)
@@ -111,14 +113,14 @@ export default function Admissions() {
       if (ghanaBack) data.append('ghanaBack', ghanaBack)
       if (signedBooklet) data.append('signedBooklet', signedBooklet)
 
-      await axios.post('${API_URL}/api/admissions', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+      await axios.post(`${API_URL}/api/admissions`, data)
 
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      alert('Failed to submit application. Please try again.')
+      alert(error.response?.data?.message || 'Failed to submit application. Please try again.')
+    } finally {
+      setSubmitLoading(false)
     }
   }
 
@@ -413,7 +415,7 @@ export default function Admissions() {
                 <label className={labelClass}>Grade Level Applying For <span className="text-red-500">*</span></label>
                 <select name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} className={inputClass}>
                   <option value="">Select grade level</option>
-                  {['Nursery 1','Nursery 2','Kindergarten 1','Kindergarten 2','Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12','Grade 13'].map(g => (
+                  {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
@@ -764,10 +766,10 @@ export default function Admissions() {
           <div className="text-center">
             <button
               onClick={handleSubmit}
-              disabled={!consentGiven || !signedBooklet}
+              disabled={!consentGiven || !signedBooklet || submitLoading}
               className="bg-[#1a3c6e] hover:bg-[#2a5298] text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Application
+              {submitLoading ? 'Submitting Application...' : 'Submit Application'}
             </button>
             {(!consentGiven || !signedBooklet) && (
               <p className="text-sm text-red-400 mt-3">
