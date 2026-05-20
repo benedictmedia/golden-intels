@@ -474,7 +474,7 @@ export default function AdminDashboard() {
       doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, 287, { align: 'center' })
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(212, 160, 23)
-      doc.text('Oxford Accredited | Excellence in Education', pageWidth / 2, 293, { align: 'center' })
+      doc.text('Oxford Accredited | We Nurture for Nature', pageWidth / 2, 293, { align: 'center' })
 
       doc.save(`${student.firstName || 'student'}_${student.lastName || ''}_${result.term || ''}_${result.academicYear || ''}.pdf`)
     } catch (error) {

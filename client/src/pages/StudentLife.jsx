@@ -1,12 +1,19 @@
 import { useState } from 'react'
 import { Search, X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import clubDebateImg from '../assets/club-debate.jpg'
+import clubScienceImg from '../assets/club-science.jpg'
+import clubCodingImg from '../assets/club-coding.jpg'
+import clubMusicImg from '../assets/club-music.jpg'
+import clubSportsImg from '../assets/club-sports.jpg'
+import clubDramaImg from '../assets/club-drama.jpg'
+import clubEnvironmentImg from '../assets/club-environment.jpg'
 
 const clubs = [
   {
     name: 'Debators Club',
     category: 'Academic',
-    image: '/src/assets/club-debate.jpg',
+    image: clubDebateImg,
     color: 'bg-[#1a3c6e]',
     textColor: 'text-blue-200',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -18,7 +25,7 @@ const clubs = [
   {
     name: 'Science and Maths Club',
     category: 'Academic',
-    image: '/src/assets/club-science.jpg',
+    image: clubScienceImg,
     color: 'bg-[#0f6e56]',
     textColor: 'text-green-200',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -30,7 +37,7 @@ const clubs = [
   {
     name: 'Coding and STEM Club',
     category: 'Technology',
-    image: '/src/assets/club-coding.jpg',
+    image: clubCodingImg,
     color: 'bg-[#185fa5]',
     textColor: 'text-blue-100',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -42,7 +49,7 @@ const clubs = [
   {
     name: 'Music and Orchestra Club',
     category: 'Arts',
-    image: '/src/assets/club-music.jpg',
+    image: clubMusicImg,
     color: 'bg-[#4a235a]',
     textColor: 'text-purple-200',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -54,7 +61,7 @@ const clubs = [
   {
     name: 'Sports Club',
     category: 'Sports',
-    image: '/src/assets/club-sports.jpg',
+    image: clubSportsImg,
     color: 'bg-[#0f6e56]',
     textColor: 'text-green-200',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -66,7 +73,7 @@ const clubs = [
   {
     name: 'Drama Club',
     category: 'Arts',
-    image: '/src/assets/club-drama.jpg',
+    image: clubDramaImg,
     color: 'bg-[#993556]',
     textColor: 'text-pink-200',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',
@@ -78,7 +85,7 @@ const clubs = [
   {
     name: 'Environmental and Health Club',
     category: 'Community',
-    image: '/src/assets/club-environment.jpg',
+    image: clubEnvironmentImg,
     color: 'bg-[#3B6D11]',
     textColor: 'text-green-100',
     tagColor: 'bg-[#d4a017] text-[#1a3c6e]',

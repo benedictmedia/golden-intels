@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Search, X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
+import eyfsImg from '../assets/eyfs.jpg'
+import primaryImg from '../assets/primary.jpg'
+import ipcImg from '../assets/ipc.jpg'
 
 const programs = [
   {
     category: 'Early Years',
     title: 'Early Years Foundation Stage',
-    image: '/src/assets/eyfs.jpg',
+    image: eyfsImg,
     targetAudience: 'Children aged 3-5 years (Nursery & Reception)',
     overview: 'Our Early Years Foundation Stage program provides a nurturing and stimulating environment for our youngest learners, fostering their development across all key areas. We focus on play-based learning to build a strong foundation for future academic success.',
     shortOutcome: 'Children will develop strong communication skills, physical...',
@@ -16,7 +19,7 @@ const programs = [
   {
     category: 'Primary',
     title: 'Lower and Upper Primary Years Programme',
-    image: '/src/assets/primary.jpg',
+    image: primaryImg,
     targetAudience: 'Children aged 5-11 years (Years 1-6)',
     overview: 'The Primary Years Programme at Golden-Intels International School is designed to develop inquiring, knowledgeable, and caring young people who are motivated to succeed. We offer a holistic, inquiry-based approach to learning that encourages critical thinking and global awareness.',
     shortOutcome: 'Students will become independent learners, develop strong academic skills in core subjects...',
@@ -26,7 +29,7 @@ const programs = [
   {
     category: 'International',
     title: 'International Primary Curriculum',
-    image: '/src/assets/ipc.jpg',
+    image: ipcImg,
     targetAudience: 'Ages 5-11 (Years 1-6)',
     overview: 'The IPC is a comprehensive, thematic, creative curriculum for 5-11 year olds, with a clear process of learning and specific learning goals for every subject.',
     shortOutcome: 'Students will gain deep subject knowledge, develop critical thinking and research skills...',

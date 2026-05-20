@@ -2,11 +2,15 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import campusLifeImg from '../assets/campus-life.jpg'
+import academicActivitiesImg from '../assets/academic-activities.jpg'
+import artsActivitiesImg from '../assets/arts-activities.jpg'
+import sportsActivitiesImg from '../assets/sports-activities.jpg'
+import communityActivitiesImg from '../assets/community-activities.jpg'
 
 const activities = [
   {
     category: 'Academic',
-    image: '/src/assets/academic-activities.jpg',
+    image: academicActivitiesImg,
     color: 'bg-[#1a3c6e]',
     textColor: 'text-blue-200',
     shortDescription: 'Igniting curiosity and innovation through academic clubs and technology programs.',
@@ -20,7 +24,7 @@ const activities = [
   },
   {
     category: 'Arts',
-    image: '/src/assets/arts-activities.jpg',
+    image: artsActivitiesImg,
     color: 'bg-[#4a235a]',
     textColor: 'text-purple-200',
     shortDescription: 'Nurturing creativity and cultural appreciation through music, drama, and cuisine.',
@@ -33,7 +37,7 @@ const activities = [
   },
   {
     category: 'Sports',
-    image: '/src/assets/sports-activities.jpg',
+    image: sportsActivitiesImg,
     color: 'bg-[#0f6e56]',
     textColor: 'text-green-200',
     shortDescription: 'Building healthy bodies, teamwork, and resilience through sport and physical activity.',
@@ -45,7 +49,7 @@ const activities = [
   },
   {
     category: 'Community Service',
-    image: '/src/assets/community-activities.jpg',
+    image: communityActivitiesImg,
     color: 'bg-[#d4a017]',
     textColor: 'text-[#1a3c6e]/80',
     shortDescription: 'Developing responsible citizens through environmental and sustainability initiatives.',
@@ -93,7 +97,7 @@ export default function CampusLife() {
           {/* Right: Photo */}
           <div className="flex-1">
             <img
-              src={campus-lifeImg}
+              src={campusLifeImg}
               alt="Campus Life at Golden-Intels"
               className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
             />
