@@ -68,7 +68,7 @@ export default function NewsEvents() {
       <PageHero badge="News & Events" title="News & Events" subtitle="Stay updated with the latest happenings at Golden-Intels International School." />
       {/* Upcoming Events Banner */}
       {upcomingEvents.length > 0 && (
-        <section className="bg-cyan-500 py-4">
+        <section className="bg-blue-500 py-4">
           <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto">
             <span className="text-cyan-700 font-bold text-sm shrink-0">📅 Upcoming:</span>
             {upcomingEvents.map(event => (
@@ -84,7 +84,7 @@ export default function NewsEvents() {
       )}
 
       {/* Search and Filter */}
-      <section className="bg-cyan-50 py-8">
+      <section className="bg-blue-50 py-8">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Search Bar */}
@@ -108,8 +108,8 @@ export default function NewsEvents() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === cat
-                      ? 'bg-cyan-600 text-white'
-                      : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'
                   }`}
                 >
                   {cat}
@@ -119,13 +119,13 @@ export default function NewsEvents() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'grid' ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}
               >
                 Grid
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'list' ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}
               >
                 List
               </button>
@@ -137,7 +137,7 @@ export default function NewsEvents() {
       </section>
 
       {/* News Grid / List */}
-      <section className="py-16 bg-cyan-50">
+      <section className="py-16 bg-blue-50">
         <div className="max-w-7xl mx-auto px-4">
           {loading ? (
             <div className="text-center text-gray-400 py-20">Loading...</div>
@@ -170,7 +170,7 @@ export default function NewsEvents() {
                       <span className="text-white text-5xl">▶</span>
                     </div>
                   ) : (
-                    <div className="w-full h-52 bg-cyan-600 flex items-center justify-center">
+                    <div className="w-full h-52 bg-blue-600 flex items-center justify-center">
                       <span className="text-cyan-600 text-5xl font-bold font-serif">GI</span>
                     </div>
                   )}
@@ -179,7 +179,7 @@ export default function NewsEvents() {
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        item.type === 'event' ? 'bg-cyan-500 text-cyan-700' : 'bg-cyan-600 text-white'
+                        item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'
                       }`}>
                         {item.type === 'event' ? '📅 Event' : '📰 News'}
                       </span>
@@ -218,14 +218,14 @@ export default function NewsEvents() {
                   {item.images && item.images.length > 0 ? (
                     <img src={`${item.images[0]}`} alt={item.title} className="w-32 h-24 object-cover rounded-xl shrink-0" />
                   ) : (
-                    <div className="w-32 h-24 bg-cyan-600 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-32 h-24 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
                       <span className="text-cyan-600 font-bold text-xl">GI</span>
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        item.type === 'event' ? 'bg-cyan-500 text-cyan-700' : 'bg-cyan-600 text-white'
+                        item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'
                       }`}>
                         {item.type === 'event' ? '📅 Event' : '📰 News'}
                       </span>
@@ -262,10 +262,10 @@ export default function NewsEvents() {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
             {/* Modal Header */}
-            <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full mr-2 ${
-                  viewingItem.type === 'event' ? 'bg-cyan-500 text-cyan-700' : 'bg-white/20 text-white'
+                  viewingItem.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-white/20 text-white'
                 }`}>
                   {viewingItem.type === 'event' ? '📅 Event' : '📰 News'}
                 </span>
@@ -348,7 +348,7 @@ export default function NewsEvents() {
 
               <button
                 onClick={() => setViewingItem(null)}
-                className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors mt-6"
+                className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors mt-6"
               >
                 Close
               </button>

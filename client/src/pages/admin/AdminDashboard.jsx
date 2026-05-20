@@ -22,10 +22,10 @@ const menuItems = [
 ]
 
 const stats = [
-  { label: 'Total Learners', value: '0', color: 'bg-cyan-600', textColor: 'text-cyan-100' },
+  { label: 'Total Learners', value: '0', color: 'bg-blue-600', textColor: 'text-cyan-100' },
   { label: 'Admissions', value: '0', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
   { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-  { label: 'Staff Members', value: '0', color: 'bg-cyan-500', textColor: 'text-cyan-700/80' },
+  { label: 'Staff Members', value: '0', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
 ]
 
 const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
@@ -682,13 +682,13 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-cyan-100 overflow-hidden">
+    <div className="flex h-screen bg-blue-100 overflow-hidden">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-cyan-600 text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`}>
-        <div className="flex items-center justify-between p-4 border-b border-cyan-300">
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`}>
+        <div className="flex items-center justify-between p-4 border-b border-blue-300">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
               <div><p className="text-xs font-bold">Golden-Intels</p><p className="text-xs text-cyan-100">Admin Portal</p></div>
             </div>
           )}
@@ -699,13 +699,13 @@ export default function AdminDashboard() {
         <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map(item => (
             <button key={item.id} onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${activeMenu === item.id ? 'bg-cyan-500 text-cyan-700 font-bold' : 'hover:bg-cyan-700 text-cyan-100'}`}>
+              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${activeMenu === item.id ? 'bg-blue-500 text-cyan-700 font-bold' : 'hover:bg-blue-700 text-cyan-100'}`}>
               {item.icon}{sidebarOpen && <span className="text-sm">{item.label}</span>}
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-cyan-300">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-cyan-700 text-cyan-100 transition-colors rounded-lg">
+        <div className="p-4 border-t border-blue-300">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-700 text-cyan-100 transition-colors rounded-lg">
             <LogOut size={20} />{sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
         </div>
@@ -722,9 +722,9 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             <button className="relative text-gray-500 hover:text-cyan-700">
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
             </button>
-            <div className="w-9 h-9 bg-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm">{user?.name?.charAt(0)}</div>
+            <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">{user?.name?.charAt(0)}</div>
           </div>
         </div>
 
@@ -759,9 +759,9 @@ export default function AdminDashboard() {
               <div className="flex flex-wrap gap-3 mb-6">
                 {['All', 'pending', 'approved', 'rejected'].map(status => (
                   <button key={status} onClick={() => setAdmissionFilter(status)}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${admissionFilter === status ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'}`}>
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${admissionFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {status}
-                    <span className="ml-2 bg-cyan-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
                       {status === 'All' ? applications.length : applications.filter(a => a.status === status).length}
                     </span>
                   </button>
@@ -775,7 +775,7 @@ export default function AdminDashboard() {
                     <div key={app.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-start justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-200 border-2 border-cyan-600">
+                          <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                             {app.photo ? <img src={app.photo} alt={app.firstName} className="w-full h-full object-cover" /> :
                               <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-xl">{app.firstName?.charAt(0)}</div>}
                           </div>
@@ -787,12 +787,12 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${app.status === 'approved' ? 'bg-green-100 text-green-700' : app.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-cyan-100 text-cyan-700'}`}>{app.status}</span>
-                          <button onClick={() => setViewingApplication(app)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"><Eye size={14} /> View</button>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${app.status === 'approved' ? 'bg-green-100 text-green-700' : app.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{app.status}</span>
+                          <button onClick={() => setViewingApplication(app)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"><Eye size={14} /> View</button>
                           {app.status === 'pending' && (
                             <>
                               <button onClick={() => handleApproveApplication(app.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>
-                              <button onClick={() => handleRejectApplication(app.id)} className="bg-cyan-500 hover:bg-cyan-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Reject</button>
+                              <button onClick={() => handleRejectApplication(app.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Reject</button>
                             </>
                           )}
                           <button onClick={() => handleDeleteApplication(app.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
@@ -806,20 +806,20 @@ export default function AdminDashboard() {
               {viewingApplication && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Admission Application</h2>
                       <button onClick={() => setViewingApplication(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-6 mb-6">
-                        <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-200 border-4 border-cyan-600">
+                        <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-200 border-4 border-blue-600">
                           {viewingApplication.photo ? <img src={viewingApplication.photo} alt={viewingApplication.firstName} className="w-full h-full object-cover" /> :
                             <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{viewingApplication.firstName?.charAt(0)}</div>}
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold text-cyan-700">{viewingApplication.firstName} {viewingApplication.lastName}</h3>
                           <p className="text-gray-500">{viewingApplication.gradeLevel} | {viewingApplication.gender}</p>
-                          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${viewingApplication.status === 'approved' ? 'bg-green-100 text-green-700' : viewingApplication.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-cyan-100 text-cyan-700'}`}>{viewingApplication.status}</span>
+                          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${viewingApplication.status === 'approved' ? 'bg-green-100 text-green-700' : viewingApplication.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{viewingApplication.status}</span>
                         </div>
                       </div>
                       {[
@@ -828,10 +828,10 @@ export default function AdminDashboard() {
                         { title: 'Emergency Contact', fields: [['Name', viewingApplication.emergencyName], ['Relationship', viewingApplication.emergencyRelationship], ['Phone', viewingApplication.emergencyPhone]] },
                       ].map((section, si) => (
                         <div key={si} className="mb-6">
-                          <h4 className="font-bold text-white bg-cyan-600 px-4 py-2 rounded-lg mb-3">{section.title}</h4>
+                          <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">{section.title}</h4>
                           <div className="grid grid-cols-2 gap-2">
                             {section.fields.map(([label, value], fi) => (
-                              <div key={fi} className="bg-cyan-50 rounded-lg px-3 py-2">
+                              <div key={fi} className="bg-blue-50 rounded-lg px-3 py-2">
                                 <p className="text-xs font-bold text-cyan-700">{label}</p>
                                 <p className="text-sm text-gray-600">{value || '—'}</p>
                               </div>
@@ -840,10 +840,10 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                       <div className="mb-6">
-                        <h4 className="font-bold text-white bg-cyan-600 px-4 py-2 rounded-lg mb-3">Uploaded Documents</h4>
+                        <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">Uploaded Documents</h4>
                         <div className="grid grid-cols-2 gap-4">
                           {[['NHIS Card - Front', viewingApplication.nhisFront], ['NHIS Card - Back', viewingApplication.nhisBack], ['Ghana Card - Front', viewingApplication.ghanaFront], ['Ghana Card - Back', viewingApplication.ghanaBack]].map((doc, di) => (
-                            <div key={di} className="bg-cyan-50 rounded-lg p-3">
+                            <div key={di} className="bg-blue-50 rounded-lg p-3">
                               <p className="text-xs font-bold text-cyan-700 mb-2">{doc[0]}</p>
                               {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
                             </div>
@@ -852,7 +852,7 @@ export default function AdminDashboard() {
                         {viewingApplication.signedBooklet && (
                           <div className="mt-4 bg-blue-50 rounded-lg p-4">
                             <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
-                            <button onClick={() => window.open(viewingApplication.signedBooklet, '_blank')} className="inline-block bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download Signed Booklet</button>
+                            <button onClick={() => window.open(viewingApplication.signedBooklet, '_blank')} className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download Signed Booklet</button>
                           </div>
                         )}
                       </div>
@@ -860,10 +860,10 @@ export default function AdminDashboard() {
                         {viewingApplication.status === 'pending' && (
                           <>
                             <button onClick={() => { handleApproveApplication(viewingApplication.id); setViewingApplication(null) }} className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-colors">Approve & Add to Learners</button>
-                            <button onClick={() => { handleRejectApplication(viewingApplication.id); setViewingApplication(null) }} className="flex-1 bg-cyan-500 hover:bg-cyan-700 text-white font-bold py-3 rounded-xl transition-colors">Reject Application</button>
+                            <button onClick={() => { handleRejectApplication(viewingApplication.id); setViewingApplication(null) }} className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors">Reject Application</button>
                           </>
                         )}
-                        <button onClick={() => setViewingApplication(null)} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Close</button>
+                        <button onClick={() => setViewingApplication(null)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Close</button>
                       </div>
                     </div>
                   </div>
@@ -881,7 +881,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex gap-3 mb-6">
                 {['fee-structure', 'payments'].map(tab => (
-                  <button key={tab} onClick={() => setFinanceTab(tab)} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors capitalize ${financeTab === tab ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600'}`}>
+                  <button key={tab} onClick={() => setFinanceTab(tab)} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors capitalize ${financeTab === tab ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}>
                     {tab === 'fee-structure' ? 'Fee Structure' : 'Fee Payments'}
                   </button>
                 ))}
@@ -892,7 +892,7 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold text-cyan-700 mb-4">Set Monthly Fees by Class</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6'].map(grade => (
-                        <div key={grade} className="bg-cyan-50 rounded-xl p-4">
+                        <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-cyan-700 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500 text-sm font-bold">GH₵</span>
@@ -901,13 +901,13 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                     </div>
-                    <button onClick={handleSaveFeeStructures} className="mt-6 bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Fee Structure</button>
+                    <button onClick={handleSaveFeeStructures} className="mt-6 bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Fee Structure</button>
                     {feeSaved && <span className="ml-4 text-green-600 text-sm font-bold">✓ Saved successfully!</span>}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="bg-cyan-600 text-white rounded-2xl p-6 shadow-md"><p className="text-cyan-100 text-sm mb-1">Total Students</p><p className="text-3xl font-bold">{students.length}</p></div>
+                    <div className="bg-blue-600 text-white rounded-2xl p-6 shadow-md"><p className="text-cyan-100 text-sm mb-1">Total Students</p><p className="text-3xl font-bold">{students.length}</p></div>
                     <div className="bg-[#0f6e56] text-white rounded-2xl p-6 shadow-md"><p className="text-green-200 text-sm mb-1">Total Collected</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p></div>
-                    <div className="bg-cyan-500 text-cyan-700 rounded-2xl p-6 shadow-md"><p className="text-cyan-700/70 text-sm mb-1">Total Outstanding</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p></div>
+                    <div className="bg-blue-500 text-cyan-700 rounded-2xl p-6 shadow-md"><p className="text-cyan-700/70 text-sm mb-1">Total Outstanding</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p></div>
                   </div>
                 </div>
               )}
@@ -915,16 +915,16 @@ export default function AdminDashboard() {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold text-cyan-700">Fee Payments</h3>
-                    <button onClick={() => setShowAddPayment(true)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
+                    <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
                     {['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6'].map(cls => (
-                      <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'}`}>{cls}</button>
+                      <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-cyan-600 text-white">
+                      <thead className="bg-blue-600 text-white">
                         <tr>
                           <th className="px-6 py-4 text-left">Student</th>
                           <th className="px-6 py-4 text-left">Class</th>
@@ -941,7 +941,7 @@ export default function AdminDashboard() {
                           <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-400">No payments recorded yet.</td></tr>
                         ) : (
                           filteredFeePayments.map((payment, index) => (
-                            <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
+                            <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                               <td className="px-6 py-4 font-medium text-cyan-700">{payment.student?.firstName} {payment.student?.lastName}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.student?.gradeLevel}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.month} {payment.year}</td>
@@ -949,11 +949,11 @@ export default function AdminDashboard() {
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountPaid.toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.balance.toFixed(2)}</td>
                               <td className="px-6 py-4">
-                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${payment.status === 'paid' ? 'bg-green-100 text-green-700' : payment.status === 'partial' ? 'bg-cyan-100 text-cyan-700' : 'bg-red-100 text-red-700'}`}>{payment.status}</span>
+                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${payment.status === 'paid' ? 'bg-green-100 text-green-700' : payment.status === 'partial' ? 'bg-blue-100 text-cyan-700' : 'bg-red-100 text-red-700'}`}>{payment.status}</span>
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex gap-2">
-                                  <button onClick={() => { setEditingPayment(payment); setPaymentForm({ amountPaid: payment.amountPaid, notes: payment.notes || '' }) }} className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
+                                  <button onClick={() => { setEditingPayment(payment); setPaymentForm({ amountPaid: payment.amountPaid, notes: payment.notes || '' }) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
                                   <button onClick={() => handleDeletePayment(payment.id)} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg"><Trash2 size={14} /></button>
                                 </div>
                               </td>
@@ -968,7 +968,7 @@ export default function AdminDashboard() {
               {showAddPayment && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Record Fee Payment</h2>
                       <button onClick={() => setShowAddPayment(false)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
@@ -1008,8 +1008,8 @@ export default function AdminDashboard() {
                         <input type="text" value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} placeholder="e.g. Paid via mobile money" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
-                        <button onClick={handleAddPayment} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Record Payment</button>
-                        <button onClick={() => setShowAddPayment(false)} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={handleAddPayment} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Record Payment</button>
+                        <button onClick={() => setShowAddPayment(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1018,12 +1018,12 @@ export default function AdminDashboard() {
               {editingPayment && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Update Payment</h2>
                       <button onClick={() => setEditingPayment(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
                     <div className="p-6 space-y-4">
-                      <div className="bg-cyan-50 rounded-xl p-4">
+                      <div className="bg-blue-50 rounded-xl p-4">
                         <p className="text-sm font-bold text-cyan-700">{editingPayment.student?.firstName} {editingPayment.student?.lastName}</p>
                         <p className="text-xs text-gray-500">{editingPayment.month} {editingPayment.year} | Due: GH₵ {editingPayment.amountDue.toFixed(2)}</p>
                       </div>
@@ -1036,8 +1036,8 @@ export default function AdminDashboard() {
                         <input type="text" value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
-                        <button onClick={handleUpdatePayment} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Update Payment</button>
-                        <button onClick={() => setEditingPayment(null)} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={handleUpdatePayment} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Update Payment</button>
+                        <button onClick={() => setEditingPayment(null)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1055,9 +1055,9 @@ export default function AdminDashboard() {
               </div>
               <div className="flex flex-wrap gap-3 mb-6">
                 {['All', 'pending', 'approved', 'rejected'].map(status => (
-                  <button key={status} onClick={() => setResultFilter(status)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${resultFilter === status ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'}`}>
+                  <button key={status} onClick={() => setResultFilter(status)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${resultFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {status}
-                    <span className="ml-2 bg-cyan-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{status === 'All' ? results.length : results.filter(r => r.status === status).length}</span>
+                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{status === 'All' ? results.length : results.filter(r => r.status === status).length}</span>
                   </button>
                 ))}
               </div>
@@ -1069,7 +1069,7 @@ export default function AdminDashboard() {
                     <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-start justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-cyan-600">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                             {result.student?.photo ? <img src={result.student.photo} alt={result.student.firstName} className="w-full h-full object-cover" /> :
                               <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold">{result.student?.firstName?.charAt(0)}</div>}
                           </div>
@@ -1081,10 +1081,10 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-cyan-100 text-cyan-700'}`}>{result.status}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{result.status}</span>
                           {result.status !== 'approved' && <button onClick={() => handleApproveResult(result.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>}
-                          <button onClick={() => handleAdminEditResult(result)} className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors">Edit</button>
-                          <button onClick={() => handleAdminDownloadPDF(result)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download PDF</button>
+                          <button onClick={() => handleAdminEditResult(result)} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => handleAdminDownloadPDF(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download PDF</button>
                           <button onClick={() => handleAdminDeleteResult(result.id)} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Delete</button>
                         </div>
                       </div>
@@ -1095,7 +1095,7 @@ export default function AdminDashboard() {
               {adminEditResult && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Edit Result</h2>
                       <button onClick={() => setAdminEditResult(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
@@ -1104,7 +1104,7 @@ export default function AdminDashboard() {
                       {['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS'].map(subject => {
                         const s = adminEditScores[subject] || {}
                         return (
-                          <div key={subject} className="bg-cyan-50 rounded-xl p-4">
+                          <div key={subject} className="bg-blue-50 rounded-xl p-4">
                             <h4 className="font-bold text-cyan-700 mb-3 text-sm">{subject}</h4>
                             <div className="grid grid-cols-2 gap-3">
                               {[{ key: 'classScore', label: 'Class(10)' }, { key: 'cat1', label: 'CAT1(20)' }, { key: 'cat2', label: 'CAT2(20)' }, { key: 'exam', label: 'Exam(100)' }].map(field => (
@@ -1122,8 +1122,8 @@ export default function AdminDashboard() {
                         <textarea value={adminEditRemarks} onChange={e => setAdminEditRemarks(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
-                        <button onClick={handleAdminSaveEdit} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
-                        <button onClick={() => setAdminEditResult(null)} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={handleAdminSaveEdit} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
+                        <button onClick={() => setAdminEditResult(null)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1137,13 +1137,13 @@ export default function AdminDashboard() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold font-serif text-cyan-700">Learners</h2>
-                <button onClick={() => setShowAddStudent(true)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
+                <button onClick={() => setShowAddStudent(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
               </div>
               {showAddStudent && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
                   <h3 className="text-xl font-bold text-cyan-700 mb-6">Add New Learner</h3>
                   <div className="flex items-center gap-6 mb-6">
-                    <div className="w-24 h-24 rounded-full bg-cyan-100 overflow-hidden border-4 border-cyan-600 flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden border-4 border-blue-600 flex items-center justify-center">
                       {photoPreview ? <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-gray-400 text-xs text-center px-2">No Photo</span>}
                     </div>
                     <div>
@@ -1176,16 +1176,16 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-4 mt-6">
-                    <button onClick={handleAddStudent} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Learner</button>
-                    <button onClick={() => { setShowAddStudent(false); setPhotoFile(null); setPhotoPreview(null) }} className="bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={handleAddStudent} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Learner</button>
+                    <button onClick={() => { setShowAddStudent(false); setPhotoFile(null); setPhotoPreview(null) }} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                   </div>
                 </div>
               )}
               <div className="flex flex-wrap gap-3 mb-6">
                 {classes.map(cls => (
-                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'}`}>
+                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {cls}
-                    <span className="ml-2 bg-cyan-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => s.gradeLevel === cls).length}</span>
+                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => s.gradeLevel === cls).length}</span>
                   </button>
                 ))}
               </div>
@@ -1194,7 +1194,7 @@ export default function AdminDashboard() {
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-cyan-600 text-white">
+                  <thead className="bg-blue-600 text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Photo</th>
                       <th className="px-6 py-4 text-left">Student ID</th>
@@ -1210,21 +1210,21 @@ export default function AdminDashboard() {
                       <tr><td colSpan="7" className="px-6 py-8 text-center text-gray-400">No learners in this class yet.</td></tr>
                     ) : (
                       filteredStudents.map((student, index) => (
-                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
+                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-cyan-600">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                               {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" /> :
                                 <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-sm">{student.firstName?.charAt(0)}</div>}
                             </div>
                           </td>
-                          <td className="px-6 py-4"><span className="bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
+                          <td className="px-6 py-4"><span className="bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
                           <td className="px-6 py-4 font-medium text-cyan-700">{student.firstName} {student.lastName}</td>
-                          <td className="px-6 py-4"><span className="bg-cyan-600 text-white text-xs font-bold px-3 py-1 rounded-full">{student.gradeLevel}</span></td>
+                          <td className="px-6 py-4"><span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">{student.gradeLevel}</span></td>
                           <td className="px-6 py-4 text-gray-600">{student.gender}</td>
                           <td className="px-6 py-4"><span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span></td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setSelectedStudent(student)} className="bg-cyan-600 hover:bg-cyan-400 text-white p-2 rounded-lg transition-colors"><Eye size={16} /></button>
+                              <button onClick={() => setSelectedStudent(student)} className="bg-blue-600 hover:bg-blue-400 text-white p-2 rounded-lg transition-colors"><Eye size={16} /></button>
                               <button onClick={() => handleDeleteStudent(student.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                             </div>
                           </td>
@@ -1259,7 +1259,7 @@ export default function AdminDashboard() {
                     <option value="admin">Admin</option>
                   </select>
                 </div>
-                <button onClick={handleCreateAccount} disabled={createLoading} className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{createLoading ? 'Creating...' : 'Create Account'}</button>
+                <button onClick={handleCreateAccount} disabled={createLoading} className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{createLoading ? 'Creating...' : 'Create Account'}</button>
               </div>
             </div>
           )}
@@ -1272,7 +1272,7 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Admission Tokens</h2>
                   <p className="text-gray-500 text-sm">Generate serial numbers and PINs for parents who have paid the admission fee.</p>
                 </div>
-                <button onClick={handleGenerateToken} disabled={tokenLoading} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors disabled:opacity-50">{tokenLoading ? 'Generating...' : '+ Generate Token'}</button>
+                <button onClick={handleGenerateToken} disabled={tokenLoading} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors disabled:opacity-50">{tokenLoading ? 'Generating...' : '+ Generate Token'}</button>
               </div>
               {newToken && (
                 <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
@@ -1299,7 +1299,7 @@ export default function AdminDashboard() {
               )}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-cyan-600 text-white">
+                  <thead className="bg-blue-600 text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Serial Number</th>
                       <th className="px-6 py-4 text-left">Status</th>
@@ -1313,7 +1313,7 @@ export default function AdminDashboard() {
                       <tr><td colSpan="5" className="px-6 py-8 text-center text-gray-400">No tokens generated yet.</td></tr>
                     ) : (
                       tokens.map((token, index) => (
-                        <tr key={token.id} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
+                        <tr key={token.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4 font-bold text-cyan-700">{token.serialNumber}</td>
                           <td className="px-6 py-4"><span className={`text-xs font-bold px-3 py-1 rounded-full ${token.used ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{token.used ? 'Used' : 'Available'}</span></td>
                           <td className="px-6 py-4 text-gray-600">{new Date(token.createdAt).toLocaleDateString()}</td>
@@ -1336,7 +1336,7 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Gallery</h2>
                   <p className="text-gray-500 text-sm">Upload and manage school photos and events.</p>
                 </div>
-                <button onClick={() => setShowAddGallery(true)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Gallery Item</button>
+                <button onClick={() => setShowAddGallery(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Gallery Item</button>
               </div>
               {showAddGallery && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
@@ -1364,7 +1364,7 @@ export default function AdminDashboard() {
                           {galleryPreviews.map((preview, index) => (
                             <div key={index} className="relative">
                               <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-xl" />
-                              <span className="absolute top-1 right-1 bg-cyan-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{index + 1}</span>
+                              <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{index + 1}</span>
                             </div>
                           ))}
                         </div>
@@ -1372,8 +1372,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <button onClick={handleAddGalleryItem} disabled={galleryLoading} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">{galleryLoading ? 'Uploading...' : 'Upload Gallery Item'}</button>
-                    <button onClick={() => { setShowAddGallery(false); setGalleryPreviews([]); setGalleryImages([]) }} className="bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={handleAddGalleryItem} disabled={galleryLoading} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">{galleryLoading ? 'Uploading...' : 'Upload Gallery Item'}</button>
+                    <button onClick={() => { setShowAddGallery(false); setGalleryPreviews([]); setGalleryImages([]) }} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                   </div>
                 </div>
               )}
@@ -1386,7 +1386,7 @@ export default function AdminDashboard() {
                       <div className="relative cursor-pointer" onClick={() => { setViewingGallery(item); setActiveGalleryImage(0) }}>
                         <img src={item.images[0]} alt={item.title} className="w-full h-48 object-cover" />
                         {item.images.length > 1 && <span className="absolute top-2 right-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-full">+{item.images.length - 1} more</span>}
-                        <span className="absolute top-2 left-2 bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{item.category}</span>
+                        <span className="absolute top-2 left-2 bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{item.category}</span>
                       </div>
                       <div className="p-4">
                         <h3 className="font-bold text-cyan-700 mb-1">{item.title}</h3>
@@ -1394,7 +1394,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</p>
                           <div className="flex gap-2">
-                            <button onClick={(e) => { e.stopPropagation(); setEditingGallery(item); setGalleryForm({ title: item.title, description: item.description || '', category: item.category }) }} className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 p-1.5 rounded-lg transition-colors text-xs font-bold px-3">Edit</button>
+                            <button onClick={(e) => { e.stopPropagation(); setEditingGallery(item); setGalleryForm({ title: item.title, description: item.description || '', category: item.category }) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 p-1.5 rounded-lg transition-colors text-xs font-bold px-3">Edit</button>
                             <button onClick={(e) => { e.stopPropagation(); handleDeleteGalleryItem(item.id) }} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                           </div>
                         </div>
@@ -1406,7 +1406,7 @@ export default function AdminDashboard() {
               {editingGallery && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Edit Gallery Item</h2>
                       <button onClick={() => setEditingGallery(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
@@ -1429,8 +1429,8 @@ export default function AdminDashboard() {
                         )}
                       </div>
                       <div className="flex gap-3">
-                        <button onClick={handleEditGalleryItem} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
-                        <button onClick={() => { setEditingGallery(null); setGalleryPreviews([]); setGalleryImages([]) }} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={handleEditGalleryItem} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
+                        <button onClick={() => { setEditingGallery(null); setGalleryPreviews([]); setGalleryImages([]) }} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1472,20 +1472,20 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">News & Events</h2>
                   <p className="text-gray-500 text-sm">Manage school news and upcoming events.</p>
                 </div>
-                <button onClick={() => setShowAddNews(true)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add News / Event</button>
+                <button onClick={() => setShowAddNews(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add News / Event</button>
               </div>
               <div className="flex gap-3 mb-6">
                 {['All', 'news', 'event'].map(f => (
-                  <button key={f} onClick={() => setNewsFilter(f)} className={`px-5 py-2 rounded-full text-sm font-bold transition-colors capitalize ${newsFilter === f ? 'bg-cyan-600 text-white' : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'}`}>
+                  <button key={f} onClick={() => setNewsFilter(f)} className={`px-5 py-2 rounded-full text-sm font-bold transition-colors capitalize ${newsFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {f === 'All' ? 'All' : f === 'news' ? 'News' : 'Events'}
-                    <span className="ml-2 bg-cyan-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{f === 'All' ? newsItems.length : newsItems.filter(n => n.type === f).length}</span>
+                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{f === 'All' ? newsItems.length : newsItems.filter(n => n.type === f).length}</span>
                   </button>
                 ))}
               </div>
               {(showAddNews || editingNews) && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">{editingNews ? 'Edit Item' : 'Add News / Event'}</h2>
                       <button onClick={() => { setShowAddNews(false); setEditingNews(null); setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' }); setNewsImages([]); setNewsPreviews([]) }} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
@@ -1520,8 +1520,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={editingNews ? handleEditNews : handleAddNews} disabled={newsLoading} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">{newsLoading ? 'Saving...' : editingNews ? 'Save Changes' : 'Publish'}</button>
-                        <button onClick={() => { setShowAddNews(false); setEditingNews(null); setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' }); setNewsImages([]); setNewsPreviews([]) }} className="bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={editingNews ? handleEditNews : handleAddNews} disabled={newsLoading} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">{newsLoading ? 'Saving...' : editingNews ? 'Save Changes' : 'Publish'}</button>
+                        <button onClick={() => { setShowAddNews(false); setEditingNews(null); setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' }); setNewsImages([]); setNewsPreviews([]) }} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1536,7 +1536,7 @@ export default function AdminDashboard() {
                       {item.images && item.images.length > 0 && <img src={item.images[0]} alt={item.title} className="w-full h-44 object-cover" />}
                       <div className="p-5">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.type === 'event' ? 'bg-cyan-500 text-cyan-700' : 'bg-cyan-600 text-white'}`}>{item.type === 'event' ? 'Event' : 'News'}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'}`}>{item.type === 'event' ? 'Event' : 'News'}</span>
                           <span className="text-xs text-gray-400">{item.category}</span>
                         </div>
                         <h3 className="font-bold text-cyan-700 mb-2 line-clamp-2">{item.title}</h3>
@@ -1550,7 +1550,7 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</p>
                           <div className="flex gap-2">
-                            <button onClick={() => { setEditingNews(item); setNewsForm({ title: item.title, content: item.content, category: item.category, type: item.type, videoUrl: item.videoUrl || '', eventDate: item.eventDate || '', venue: item.venue || '' }); setNewsPreviews([]); setNewsImages([]) }} className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">Edit</button>
+                            <button onClick={() => { setEditingNews(item); setNewsForm({ title: item.title, content: item.content, category: item.category, type: item.type, videoUrl: item.videoUrl || '', eventDate: item.eventDate || '', venue: item.venue || '' }); setNewsPreviews([]); setNewsImages([]) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">Edit</button>
                             <button onClick={() => handleDeleteNews(item.id)} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                           </div>
                         </div>
@@ -1570,18 +1570,18 @@ export default function AdminDashboard() {
                   <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Our Staff</h2>
                   <p className="text-gray-500 text-sm">Manage school staff members.</p>
                 </div>
-                <button onClick={() => setShowAddStaff(true)} className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
+                <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
               </div>
               {(showAddStaff || editingStaff) && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                    <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">{editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}</h2>
                       <button onClick={() => { setShowAddStaff(false); setEditingStaff(null); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-6 mb-6">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-cyan-600">
+                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
                           {staffPhotoPreview ? <img src={staffPhotoPreview} alt="Preview" className="w-full h-full object-cover" /> :
                             editingStaff?.photo ? <img src={editingStaff.photo} alt="Current" className="w-full h-full object-cover" /> :
                             <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{staffForm.name?.charAt(0) || '?'}</div>}
@@ -1612,8 +1612,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={editingStaff ? handleEditStaff : handleAddStaff} disabled={staffLoading} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{staffLoading ? 'Saving...' : editingStaff ? 'Save Changes' : 'Add Staff Member'}</button>
-                        <button onClick={() => { setShowAddStaff(false); setEditingStaff(null); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={editingStaff ? handleEditStaff : handleAddStaff} disabled={staffLoading} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{staffLoading ? 'Saving...' : editingStaff ? 'Save Changes' : 'Add Staff Member'}</button>
+                        <button onClick={() => { setShowAddStaff(false); setEditingStaff(null); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -1627,8 +1627,8 @@ export default function AdminDashboard() {
                     <div key={member.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
                       <div className="relative">
                         {member.photo ? <img src={member.photo} alt={member.name} className="w-full h-48 object-cover" /> :
-                          <div className="w-full h-48 bg-cyan-600 flex items-center justify-center"><span className="text-cyan-600 text-4xl font-bold">{member.name?.charAt(0)}</span></div>}
-                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-cyan-500 text-cyan-700' : member.category === 'teaching' ? 'bg-cyan-600 text-white' : 'bg-[#0f6e56] text-white'}`}>
+                          <div className="w-full h-48 bg-blue-600 flex items-center justify-center"><span className="text-cyan-600 text-4xl font-bold">{member.name?.charAt(0)}</span></div>}
+                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-cyan-700' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#0f6e56] text-white'}`}>
                           {member.category === 'leadership' ? 'Leadership' : member.category === 'teaching' ? 'Teaching' : 'Support'}
                         </span>
                       </div>
@@ -1638,7 +1638,7 @@ export default function AdminDashboard() {
                         {member.subject && <p className="text-xs text-cyan-600 font-bold mb-2">{member.subject}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>
@@ -1656,19 +1656,19 @@ export default function AdminDashboard() {
       {selectedStudent && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
               <h2 className="text-xl font-bold font-serif">Learner Profile</h2>
               <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="hover:text-cyan-600 transition-colors"><X size={24} /></button>
             </div>
             <div className="p-6">
               <div className="flex items-center gap-6 mb-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-cyan-600">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
                   {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" /> :
                     <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-cyan-700">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
-                  <span className="inline-block bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
+                  <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
                   <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
                 </div>
               </div>
@@ -1676,15 +1676,15 @@ export default function AdminDashboard() {
                 <div>
                   <div className="space-y-3 mb-6">
                     {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
-                      <div key={index} className="flex items-start gap-4 bg-cyan-50 rounded-xl px-4 py-3">
+                      <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
                         <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
                         <span className="text-sm text-gray-600">{item[1] || '—'}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-3">
-                    <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
-                    <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
+                    <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
+                    <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
                   </div>
                 </div>
               ) : (
@@ -1726,8 +1726,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <button onClick={handleEditStudent} className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
-                    <button onClick={() => setEditMode(false)} className="flex-1 bg-cyan-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={handleEditStudent} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
+                    <button onClick={() => setEditMode(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
                   </div>
                 </div>
               )}

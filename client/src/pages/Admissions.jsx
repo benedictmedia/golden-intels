@@ -130,7 +130,7 @@ export default function Admissions() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-cyan-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-12 shadow-xl max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-green-600" />
@@ -144,7 +144,7 @@ export default function Admissions() {
           </div>
           <button
             onClick={() => setSubmitted(false)}
-            className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors"
+            className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors"
           >
             Submit Another Application
           </button>
@@ -160,13 +160,13 @@ export default function Admissions() {
         <PageHero badge="Admissions" title="Admissions" subtitle="Begin your journey to excellence. Join our community of learners." />
 
         {/* Payment Info + Login */}
-        <section className="py-20 bg-cyan-50">
+        <section className="py-20 bg-blue-50">
           <div className="max-w-4xl mx-auto px-4">
 
             {/* Payment Instructions */}
-            <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md mb-8">
+            <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <Lock size={20} className="text-cyan-700" />
                 </div>
                 <h2 className="text-2xl font-bold font-serif">Access the Admission Form</h2>
@@ -195,7 +195,7 @@ export default function Admissions() {
                   </div>
                 </div>
               </div>
-              <div className="bg-cyan-500/20 rounded-xl p-4">
+              <div className="bg-blue-500/20 rounded-xl p-4">
                 <p className="text-cyan-600 text-sm font-bold mb-1">After Payment:</p>
                 <p className="text-cyan-100 text-sm">
                   After making payment, contact the school office with your payment receipt. You will be issued a unique <strong className="text-white">Serial Number</strong> and <strong className="text-white">PIN</strong> to access the admission form.
@@ -238,13 +238,13 @@ export default function Admissions() {
                 <button
                   onClick={handleTokenLogin}
                   disabled={loginLoading}
-                  className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                  className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {loginLoading ? 'Verifying...' : 'Access Admission Form'}
                 </button>
               </div>
 
-              <div className="mt-6 bg-cyan-50 rounded-xl p-4">
+              <div className="mt-6 bg-blue-50 rounded-xl p-4">
                 <p className="text-sm text-gray-500">
                   <strong className="text-cyan-700">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
                 </p>
@@ -262,8 +262,8 @@ export default function Admissions() {
     <div>
 
       {/* Hero Banner */}
-      <section className="bg-cyan-600 text-white py-20 text-center">
-        <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+      <section className="bg-blue-600 text-white py-20 text-center">
+        <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
           Admissions
         </span>
         <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4">Admissions</h1>
@@ -273,17 +273,17 @@ export default function Admissions() {
       </section>
 
       {/* Admission Process */}
-      <section className="py-20 bg-cyan-50">
+      <section className="py-20 bg-blue-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">Admission Process</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Our straightforward admission process ensures a smooth experience for families.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <div key={index} className="bg-cyan-600 text-white rounded-2xl p-8 text-center shadow-md">
-                <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-700">
+              <div key={index} className="bg-blue-600 text-white rounded-2xl p-8 text-center shadow-md">
+                <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-700">
                   {step.icon}
                 </div>
                 <span className="text-cyan-600 text-sm font-bold">{step.step}</span>
@@ -300,7 +300,7 @@ export default function Admissions() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Requirements */}
-          <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
             <h3 className="text-2xl font-bold font-serif mb-6">Admission Requirements</h3>
             <h4 className="text-cyan-600 font-bold mb-4">Required Documents</h4>
             <ul className="space-y-3">
@@ -336,11 +336,11 @@ export default function Admissions() {
       </section>
 
       {/* Admission Form */}
-      <section className="py-20 bg-cyan-50">
+      <section className="py-20 bg-blue-50">
         <div className="max-w-4xl mx-auto px-4">
 
           <div className="text-center mb-10">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">Admission Form</h2>
             <p className="text-gray-600">Complete all sections below to begin your admission process.</p>
           </div>
@@ -430,7 +430,7 @@ export default function Admissions() {
                 <label className={labelClass}>Passport-Sized Picture</label>
                 <p className="text-xs text-gray-400 mb-2">Recommended: JPG or PNG format, 4x6 cm (passport size)</p>
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-xl bg-cyan-100 overflow-hidden border-2 border-cyan-600 flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-xl bg-blue-100 overflow-hidden border-2 border-blue-600 flex items-center justify-center">
                     {photoPreview ? (
                       <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
@@ -691,7 +691,7 @@ export default function Admissions() {
             {/* Step 1 - Download */}
             <div className="bg-blue-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
                 <div className="flex-1">
                   <h4 className="font-bold text-cyan-700 mb-1">Download Admission Booklet</h4>
                   <p className="text-sm text-gray-600 mb-3">
@@ -699,7 +699,7 @@ export default function Admissions() {
                   </p>
                   <button
                     onClick={() => generateAdmissionBooklet(formData, photo, nhisFront, nhisBack, ghanaFront, ghanaBack)}
-                    className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                   >
                     <Download size={16} />
                     Download Admission Booklet (.docx)
@@ -709,9 +709,9 @@ export default function Admissions() {
             </div>
 
             {/* Step 2 - Sign */}
-            <div className="bg-cyan-50 rounded-xl p-5 mb-4">
+            <div className="bg-blue-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-cyan-700 font-bold text-sm shrink-0">2</div>
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-cyan-700 font-bold text-sm shrink-0">2</div>
                 <div>
                   <h4 className="font-bold text-cyan-700 mb-1">Read, Sign and Save</h4>
                   <p className="text-sm text-gray-600">
@@ -747,7 +747,7 @@ export default function Admissions() {
             </div>
 
             {/* Consent Checkbox */}
-            <div className="bg-cyan-600 rounded-xl p-5">
+            <div className="bg-blue-600 rounded-xl p-5">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -767,7 +767,7 @@ export default function Admissions() {
             <button
               onClick={handleSubmit}
               disabled={!consentGiven || !signedBooklet || submitLoading}
-              className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitLoading ? 'Submitting Application...' : 'Submit Application'}
             </button>

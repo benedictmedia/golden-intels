@@ -54,7 +54,7 @@ export default function Curriculum() {
       <PageHero badge="Curriculum" title="Our Curriculum" subtitle="Explore our comprehensive academic programs designed to nurture excellence and foster lifelong learning." />
 
       {/* Search Bar */}
-      <section className="bg-cyan-50 py-10">
+      <section className="bg-blue-50 py-10">
         <div className="max-w-2xl mx-auto px-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -90,7 +90,7 @@ export default function Curriculum() {
 
                   {/* Content */}
                   <div className="p-8">
-                    <span className="inline-block bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
                       {program.category}
                     </span>
                     <h3 className="text-xl font-bold text-cyan-700 mb-3">{program.title}</h3>
@@ -108,7 +108,7 @@ export default function Curriculum() {
 
                     <button
                       onClick={() => setSelected(program)}
-                      className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                      className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                     >
                       Learn More
                     </button>
@@ -135,7 +135,7 @@ export default function Curriculum() {
               />
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-cyan-100 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors"
               >
                 <X size={20} className="text-cyan-700" />
               </button>
@@ -143,7 +143,7 @@ export default function Curriculum() {
 
             {/* Modal Content */}
             <div className="p-8">
-              <span className="inline-block bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selected.category}
               </span>
               <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-4">{selected.title}</h2>
@@ -169,7 +169,7 @@ export default function Curriculum() {
 
               <button
                 onClick={() => setSelected(null)}
-                className="mt-8 w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors"
+                className="mt-8 w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -180,12 +180,12 @@ export default function Curriculum() {
       )}
 
     {/* Why Choose Our Curriculum */}
-     <section className="py-20 bg-gradient-to-br from-cyan-50 to-cyan-100">
+     <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Advantage
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
@@ -199,8 +199,8 @@ export default function Curriculum() {
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-            <div className="bg-cyan-600 text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-blue-600 text-white rounded-2xl p-8 text-center shadow-md">
+              <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-cyan-700 font-bold text-xl">C</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Comprehensive</h4>
@@ -210,7 +210,7 @@ export default function Curriculum() {
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-cyan-700 font-bold text-xl">G</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Goal-Oriented</h4>
@@ -220,7 +220,7 @@ export default function Curriculum() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-cyan-700 font-bold text-xl">E</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Excellence-Focused</h4>
@@ -229,8 +229,8 @@ export default function Curriculum() {
               </p>
             </div>
 
-            <div className="bg-cyan-500 text-cyan-700 rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="bg-blue-500 text-cyan-700 rounded-2xl p-8 text-center shadow-md">
+              <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-cyan-600 font-bold text-xl">S</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Student-Centered</h4>

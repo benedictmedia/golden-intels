@@ -14,7 +14,7 @@ const activities = [
 
 export default function CampusLife() {
   return (
-    <section className="py-20 bg-cyan-100">
+    <section className="py-20 bg-blue-100">
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
         {/* Left: Photo */}
@@ -28,7 +28,7 @@ export default function CampusLife() {
 
         {/* Right: Text */}
         <div className="flex-1">
-          <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+          <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
             Campus Life
           </span>
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
@@ -50,7 +50,7 @@ export default function CampusLife() {
 
           <Link
             to="/campus-life"
-            className="inline-block bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
+            className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
           >
             Discover Campus Life
           </Link>

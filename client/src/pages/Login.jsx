@@ -28,13 +28,13 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-cyan-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-10">
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center font-bold text-cyan-700 text-xl">G</div>
+          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 text-xl">G</div>
           </div>
           <h1 className="text-2xl font-bold font-serif text-cyan-700">Portal Login</h1>
           <p className="text-gray-500 text-sm mt-1">Golden-Intels International School</p>
@@ -72,14 +72,14 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         {/* Roles info */}
-        <div className="mt-8 bg-cyan-50 rounded-xl p-4">
+        <div className="mt-8 bg-blue-50 rounded-xl p-4">
           <p className="text-xs font-bold text-cyan-700 mb-2">Portal Access:</p>
           <div className="space-y-1">
             <p className="text-xs text-gray-500">👤 Admin — Full school management</p>

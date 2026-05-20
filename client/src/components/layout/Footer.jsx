@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-cyan-600 text-white">
+    <footer className="bg-blue-600 text-white">
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -11,7 +11,7 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center font-bold text-cyan-900 text-lg">G</div>
+            <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center font-bold text-cyan-900 text-lg">G</div>
             <div>
               <p className="font-bold text-sm">Golden-Intels</p>
               <p className="text-xs text-cyan-100">International School</p>
@@ -21,16 +21,16 @@ export default function Footer() {
             An Oxford-accredited institution dedicated to developing confident, creative, and globally minded learners since 2017.
           </p>
           <div className="flex gap-3">
-            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-blue-700 hover:bg-blue-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               f
             </a>
-            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-blue-700 hover:bg-blue-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               X
             </a>
-            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-blue-700 hover:bg-blue-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               in
             </a>
-            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-blue-700 hover:bg-blue-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               yt
             </a>
           </div>
@@ -100,7 +100,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-cyan-300 py-6 text-center text-sm text-cyan-100">
+      <div className="border-t border-blue-300 py-6 text-center text-sm text-cyan-100">
         <p>© {new Date().getFullYear()} Golden-Intels International School. All rights reserved.</p>
       </div>
 

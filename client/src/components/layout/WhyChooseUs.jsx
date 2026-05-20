@@ -35,12 +35,12 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-gradient-to-br from-cyan-200 via-cyan-100 to-cyan-50">
+    <section className="py-20 bg-gradient-to-br from-blue-200 via-blue-100 to-blue-50">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+          <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
             Why Choose Us
           </span>
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">

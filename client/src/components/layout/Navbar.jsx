@@ -20,12 +20,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-cyan-600 text-white shadow-lg">
+    <nav className="bg-blue-600 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center font-bold text-cyan-900 text-lg">G</div>
+          <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center font-bold text-cyan-900 text-lg">G</div>
           <div className="leading-tight">
             <p className="font-bold text-sm">Golden-Intels</p>
             <p className="text-xs text-cyan-100">International School</p>
@@ -44,7 +44,7 @@ export default function Navbar() {
         </ul>
 
         {/* Portal button */}
-        <Link to="/login" className="hidden lg:block bg-cyan-200 hover:bg-cyan-300 text-cyan-900 font-bold text-sm px-4 py-2 rounded-lg transition-colors">
+        <Link to="/login" className="hidden lg:block bg-blue-200 hover:bg-blue-300 text-cyan-900 font-bold text-sm px-4 py-2 rounded-lg transition-colors">
           Portal Login
         </Link>
 
@@ -56,7 +56,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden bg-cyan-600 border-t border-cyan-300 px-4 pb-4">
+        <div className="lg:hidden bg-blue-600 border-t border-blue-300 px-4 pb-4">
           <ul className="flex flex-col gap-3 mt-3 text-sm">
             {navLinks.map(link => (
               <li key={link.name}>
@@ -66,7 +66,7 @@ export default function Navbar() {
               </li>
             ))}
             <li>
-              <Link to="/login" className="block bg-cyan-200 text-cyan-900 font-bold text-center py-2 rounded-lg mt-2">
+              <Link to="/login" className="block bg-blue-200 text-cyan-900 font-bold text-center py-2 rounded-lg mt-2">
                 Portal Login
               </Link>
             </li>

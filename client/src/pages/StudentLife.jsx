@@ -14,9 +14,9 @@ const clubs = [
     name: 'Debators Club',
     category: 'Academic',
     image: clubDebateImg,
-    color: 'bg-cyan-600',
+    color: 'bg-blue-600',
     textColor: 'text-cyan-100',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Building confident communicators and critical thinkers through the art of debate.',
     fullDescription: 'The Debators Club at Golden-Intels is a dynamic platform where students develop the art of persuasive communication, critical thinking, and logical reasoning. Members engage in structured debates on a wide range of topics — from current affairs to philosophical questions — sharpening their ability to construct well-reasoned arguments and respond confidently under pressure. The club prepares students for public speaking competitions, inter-school debate tournaments, and builds the confidence needed to express ideas clearly and respectfully in any setting.',
     meets: 'Every Tuesday after school',
@@ -28,7 +28,7 @@ const clubs = [
     image: clubScienceImg,
     color: 'bg-[#0f6e56]',
     textColor: 'text-green-200',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Exploring the wonders of science and mathematics through hands-on experiments.',
     fullDescription: 'The Science and Maths Club is a haven for curious minds who love to explore, experiment, and discover. Students engage in exciting lab experiments, mathematical puzzles, science quizzes, and problem-solving challenges that go beyond the regular curriculum. The club encourages students to think like scientists and mathematicians — asking questions, forming hypotheses, testing ideas, and drawing conclusions. Members regularly participate in science fairs and mathematics competitions, representing Golden-Intels with pride and enthusiasm.',
     meets: 'Every Wednesday after school',
@@ -40,7 +40,7 @@ const clubs = [
     image: clubCodingImg,
     color: 'bg-[#185fa5]',
     textColor: 'text-blue-100',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Empowering future innovators through coding, robotics, and technology.',
     fullDescription: 'The Coding and STEM Club is where future innovators, engineers, and tech leaders are born. Students learn programming languages, build robots, design apps, and explore the exciting intersection of Science, Technology, Engineering, and Mathematics. Through project-based learning and creative challenges, members develop computational thinking, problem-solving skills, and a passion for innovation. The club also introduces students to emerging technologies like artificial intelligence and automation, preparing them for the careers of tomorrow.',
     meets: 'Every Thursday after school',
@@ -52,7 +52,7 @@ const clubs = [
     image: clubMusicImg,
     color: 'bg-[#4a235a]',
     textColor: 'text-purple-200',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Celebrating musical talent through choir, orchestra, and performance.',
     fullDescription: 'The Music and Orchestra Club nurtures the musical talents of students across all year groups. Whether a student is a complete beginner or an experienced musician, the club provides a welcoming and inspiring environment to learn, practice, and perform. Members participate in the school choir, learn to play various instruments, and come together as an orchestra to perform at school events, concerts, and community gatherings. The club instills discipline, teamwork, and a deep appreciation for music and the performing arts.',
     meets: 'Every Monday and Friday after school',
@@ -64,7 +64,7 @@ const clubs = [
     image: clubSportsImg,
     color: 'bg-[#0f6e56]',
     textColor: 'text-green-200',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Building healthy bodies, teamwork, and resilience through sport.',
     fullDescription: 'The Sports Club at Golden-Intels promotes physical fitness, teamwork, and a healthy lifestyle for all students. Members participate in a variety of sporting activities including football, athletics, and physical fitness training. The club teaches students the values of sportsmanship, perseverance, and teamwork while helping them build physical strength, coordination, and confidence. Students have the opportunity to represent the school in inter-school sporting competitions and develop a lifelong love for physical activity and healthy living.',
     meets: 'Every Tuesday and Thursday',
@@ -76,7 +76,7 @@ const clubs = [
     image: clubDramaImg,
     color: 'bg-[#993556]',
     textColor: 'text-cyan-200',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Bringing stories to life through theatre, performance, and creative expression.',
     fullDescription: 'The Drama Club is a creative space where students discover the joy of storytelling, performance, and theatrical arts. Members explore scriptwriting, acting techniques, stage direction, costume design, and set building, gaining a comprehensive understanding of what it takes to produce a theatrical performance. The club stages termly productions and performances that showcase the incredible talent of our students. Drama builds confidence, emotional intelligence, empathy, and public speaking skills — all of which are invaluable life skills that extend well beyond the stage.',
     meets: 'Every Wednesday and Friday after school',
@@ -88,7 +88,7 @@ const clubs = [
     image: clubEnvironmentImg,
     color: 'bg-[#3B6D11]',
     textColor: 'text-green-100',
-    tagColor: 'bg-cyan-500 text-cyan-700',
+    tagColor: 'bg-blue-500 text-cyan-700',
     shortDescription: 'Championing sustainability, health, and environmental responsibility.',
     fullDescription: 'The Environmental and Health Club empowers students to become responsible stewards of the environment and advocates for healthy living. Members engage in sustainability projects, environmental clean-up campaigns, tree planting, recycling initiatives, and health awareness programs. The club organizes the school\'s annual Environmental Day and leads campaigns that raise awareness about climate change, personal hygiene, nutrition, and mental wellness. Students develop a deep sense of responsibility towards their community, their environment, and their own wellbeing.',
     meets: 'Every Friday after school',
@@ -119,7 +119,7 @@ export default function StudentLife() {
       <PageHero badge="Student Life" title="Student Life" subtitle="Discover the vibrant extracurricular activities and experiences that shape our students' journey." />
 
       {/* Search and Filter */}
-      <section className="bg-cyan-50 py-10">
+      <section className="bg-blue-50 py-10">
         <div className="max-w-4xl mx-auto px-4">
 
           {/* Search Bar */}
@@ -142,8 +142,8 @@ export default function StudentLife() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
                   activeCategory === cat
-                    ? 'bg-cyan-600 text-white'
-                    : 'bg-white text-cyan-700 border border-cyan-600 hover:bg-cyan-600 hover:text-white'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'
                 }`}
               >
                 {cat}
@@ -155,7 +155,7 @@ export default function StudentLife() {
       </section>
 
       {/* Clubs Grid */}
-      <section className="py-16 bg-gradient-to-br from-cyan-50 to-cyan-100">
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4">
           {filtered.length === 0 ? (
             <div className="text-center text-gray-400 text-lg py-20">
@@ -188,7 +188,7 @@ export default function StudentLife() {
                     </div>
                     <button
                       onClick={() => setSelected(club)}
-                      className="w-full bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors"
+                      className="w-full bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors"
                     >
                       Learn More
                     </button>
@@ -215,7 +215,7 @@ export default function StudentLife() {
               />
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-cyan-100 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors"
               >
                 <X size={20} className="text-cyan-700" />
               </button>
@@ -223,13 +223,13 @@ export default function StudentLife() {
 
             {/* Modal Content */}
             <div className="p-8">
-              <span className="inline-block bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selected.category}
               </span>
               <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-4">{selected.name}</h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">{selected.fullDescription}</p>
 
-              <div className="bg-cyan-50 rounded-xl p-4 mb-8 space-y-2">
+              <div className="bg-blue-50 rounded-xl p-4 mb-8 space-y-2">
                 <p className="text-gray-700">
                   <span className="font-bold text-cyan-700">Meets: </span>{selected.meets}
                 </p>
@@ -240,7 +240,7 @@ export default function StudentLife() {
 
               <button
                 onClick={() => setSelected(null)}
-                className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors"
+                className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -256,7 +256,7 @@ export default function StudentLife() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Why Get Involved
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
@@ -270,8 +270,8 @@ export default function StudentLife() {
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
 
-            <div className="bg-cyan-600 text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-blue-600 text-white rounded-2xl p-8 shadow-md">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-cyan-700 font-bold text-lg">🤝</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Build Friendships</h4>
@@ -281,7 +281,7 @@ export default function StudentLife() {
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-cyan-700 font-bold text-lg">⭐</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Develop Skills</h4>
@@ -291,7 +291,7 @@ export default function StudentLife() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-cyan-700 font-bold text-lg">🎉</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Create Memories</h4>
@@ -300,8 +300,8 @@ export default function StudentLife() {
               </p>
             </div>
 
-            <div className="bg-cyan-500 text-cyan-700 rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-blue-500 text-cyan-700 rounded-2xl p-8 shadow-md">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
                 <span className="text-white font-bold text-lg">🏅</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Leadership Growth</h4>
@@ -311,7 +311,7 @@ export default function StudentLife() {
             </div>
 
             <div className="bg-[#185fa5] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-cyan-700 font-bold text-lg">🔍</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Explore Interests</h4>
@@ -321,7 +321,7 @@ export default function StudentLife() {
             </div>
 
             <div className="bg-[#993556] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-cyan-500 rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-cyan-700 font-bold text-lg">💚</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Balance & Wellness</h4>
@@ -333,7 +333,7 @@ export default function StudentLife() {
           </div>
 
           {/* Call To Action */}
-          <div className="bg-cyan-600 rounded-2xl p-12 text-center shadow-md">
+          <div className="bg-blue-600 rounded-2xl p-12 text-center shadow-md">
             <h3 className="text-2xl md:text-3xl font-bold font-serif text-white mb-4">
               Ready to Get Involved?
             </h3>
@@ -342,7 +342,7 @@ export default function StudentLife() {
             </p>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold px-10 py-3 rounded-lg text-lg transition-colors"
+              className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-10 py-3 rounded-lg text-lg transition-colors"
             >
               Explore All Activities
             </button>

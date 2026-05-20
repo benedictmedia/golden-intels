@@ -6,7 +6,7 @@ import CallToAction from '../components/layout/CallToAction'
 
 export default function Home() {
   return (
-    <div className="bg-gradient-to-b from-cyan-200 via-cyan-50 to-cyan-100">
+    <div className="bg-gradient-to-b from-blue-200 via-blue-50 to-blue-100">
       <Hero />
       <WhyChooseUs />
       <AcademicExcellence />

@@ -30,12 +30,12 @@ export default function About() {
   image={aboutImg}
 />
       {/* Our Story */}
-      <section className="py-20 bg-gradient-to-br from-cyan-50 to-cyan-100">
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Story
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
@@ -71,7 +71,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Mission */}
-          <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
             <div className="text-cyan-600 mb-4">
               <Target size={40} />
             </div>
@@ -82,7 +82,7 @@ export default function About() {
           </div>
 
           {/* Vision */}
-          <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
             <div className="text-cyan-600 mb-4">
               <Eye size={40} />
             </div>
@@ -96,10 +96,10 @@ export default function About() {
       </section>
 
       {/* Core Values */}
-     <section className="py-20 bg-gradient-to-br from-cyan-50 to-cyan-100">
+     <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               What We Stand For
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700">
@@ -108,7 +108,7 @@ export default function About() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div key={index} className="bg-cyan-600 text-white rounded-2xl p-8 text-center shadow-md">
+              <div key={index} className="bg-blue-600 text-white rounded-2xl p-8 text-center shadow-md">
                 <div className="text-cyan-600 flex justify-center mb-4">
                   <Heart size={36} />
                 </div>
@@ -124,7 +124,7 @@ export default function About() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Where We Are Headed
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700">
@@ -133,7 +133,7 @@ export default function About() {
           </div>
           <div className="space-y-4">
             {goals.map((goal, index) => (
-              <div key={index} className="flex items-start gap-4 bg-cyan-600 text-white rounded-xl p-6 shadow-md">
+              <div key={index} className="flex items-start gap-4 bg-blue-600 text-white rounded-xl p-6 shadow-md">
                 <div className="text-cyan-600 mt-1">
                   <CheckCircle size={24} />
                 </div>
@@ -145,12 +145,12 @@ export default function About() {
       </section>
 
     {/* Oxford Accreditation */}
-      <section className="py-20 bg-gradient-to-br from-cyan-50 to-cyan-100">
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Accreditation
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">

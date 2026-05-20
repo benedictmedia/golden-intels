@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 export default function CallToAction() {
   return (
-    <section className="py-20 bg-cyan-500">
+    <section className="py-20 bg-blue-500">
       <div className="max-w-4xl mx-auto px-4 text-center">
 
         {/* Badge */}
-        <span className="inline-block bg-cyan-200 text-slate-950 text-sm font-bold px-4 py-1 rounded-full mb-6">
+        <span className="inline-block bg-blue-200 text-slate-950 text-sm font-bold px-4 py-1 rounded-full mb-6">
           Admissions Open
         </span>
 
@@ -24,13 +24,13 @@ export default function CallToAction() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/admissions"
-            className="bg-cyan-200 hover:bg-cyan-300 text-slate-950 font-bold px-8 py-3 rounded-lg text-lg transition-colors"
+            className="bg-blue-200 hover:bg-blue-300 text-slate-950 font-bold px-8 py-3 rounded-lg text-lg transition-colors"
           >
             Start Application
           </Link>
           <Link
             to="/contact"
-            className="border-2 border-white hover:border-cyan-200 hover:text-cyan-200 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
+            className="border-2 border-white hover:border-blue-200 hover:text-cyan-200 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
           >
             Schedule a Visit
           </Link>
