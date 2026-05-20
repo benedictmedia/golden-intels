@@ -14,12 +14,27 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    axios.get('${API_URL}/api/gallery')
-      .then(res => {
-        setGalleryItems(res.data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    let mounted = true
+    const loadGallery = () => {
+      axios.get(`${API_URL}/api/gallery`)
+        .then(res => {
+          if (!mounted) return
+          setGalleryItems(res.data)
+          setViewingItem(current => current ? res.data.find(item => item.id === current.id) || null : current)
+        })
+        .catch(err => console.error('Failed to load gallery:', err))
+        .finally(() => mounted && setLoading(false))
+    }
+
+    loadGallery()
+    const interval = setInterval(loadGallery, 15000)
+    window.addEventListener('focus', loadGallery)
+
+    return () => {
+      mounted = false
+      clearInterval(interval)
+      window.removeEventListener('focus', loadGallery)
+    }
   }, [])
 
   const filtered = activeCategory === 'All'

@@ -10,9 +10,27 @@ export default function Staff() {
   const [selectedStaff, setSelectedStaff] = useState(null)
 
   useEffect(() => {
-    axios.get('${API_URL}/api/staff')
-      .then(res => { setStaff(res.data); setLoading(false) })
-      .catch(() => setLoading(false))
+    let mounted = true
+    const loadStaff = () => {
+      axios.get(`${API_URL}/api/staff`)
+        .then(res => {
+          if (!mounted) return
+          setStaff(res.data)
+          setSelectedStaff(current => current ? res.data.find(member => member.id === current.id) || null : current)
+        })
+        .catch(err => console.error('Failed to load staff:', err))
+        .finally(() => mounted && setLoading(false))
+    }
+
+    loadStaff()
+    const interval = setInterval(loadStaff, 15000)
+    window.addEventListener('focus', loadStaff)
+
+    return () => {
+      mounted = false
+      clearInterval(interval)
+      window.removeEventListener('focus', loadStaff)
+    }
   }, [])
 
   const leadership = staff.filter(s => s.category === 'leadership')

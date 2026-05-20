@@ -17,12 +17,27 @@ export default function NewsEvents() {
 
 
   useEffect(() => {
-    axios.get(`${API_URL}/api/news`)
-      .then(res => {
-        setItems(res.data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    let mounted = true
+    const loadNews = () => {
+      axios.get(`${API_URL}/api/news`)
+        .then(res => {
+          if (!mounted) return
+          setItems(res.data)
+          setViewingItem(current => current ? res.data.find(item => item.id === current.id) || null : current)
+        })
+        .catch(err => console.error('Failed to load news and events:', err))
+        .finally(() => mounted && setLoading(false))
+    }
+
+    loadNews()
+    const interval = setInterval(loadNews, 15000)
+    window.addEventListener('focus', loadNews)
+
+    return () => {
+      mounted = false
+      clearInterval(interval)
+      window.removeEventListener('focus', loadNews)
+    }
   }, [])
 
   const filtered = items.filter(item => {

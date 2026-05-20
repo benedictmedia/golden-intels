@@ -401,6 +401,30 @@ export default function AdminDashboard() {
       doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
       y += 18
 
+      let attendanceSummary = null
+      try {
+        const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: getAuthHeaders() })
+        attendanceSummary = attendanceRes.data
+      } catch (error) {
+        console.error('Attendance summary unavailable:', error)
+      }
+
+      if (attendanceSummary) {
+        doc.setFillColor(245, 248, 255)
+        doc.rect(10, y, pageWidth - 20, 18, 'F')
+        doc.setDrawColor(212, 160, 23)
+        doc.setLineWidth(0.4)
+        doc.rect(10, y, pageWidth - 20, 18)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        doc.setTextColor(26, 60, 110)
+        doc.text('Attendance Summary', 15, y + 7)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(50, 50, 50)
+        doc.text(`Days: ${attendanceSummary.total}   Present: ${attendanceSummary.present}   Absent: ${attendanceSummary.absent}   Late: ${attendanceSummary.late}   Attendance: ${attendanceSummary.percentage}%`, 15, y + 14)
+        y += 26
+      }
+
       if (logoData) {
         doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
       }
@@ -509,7 +533,7 @@ export default function AdminDashboard() {
       data.append('title', galleryForm.title); data.append('description', galleryForm.description)
       data.append('category', galleryForm.category); data.append('uploadedBy', user?.name)
       galleryImages.forEach(img => data.append('images', img))
-      const res = await axios.post(`${API_URL}/api/gallery`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post(`${API_URL}/api/gallery`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setGalleryItems([res.data, ...galleryItems]); setShowAddGallery(false)
       setGalleryForm({ title: '', description: '', category: 'Events' }); setGalleryImages([]); setGalleryPreviews([])
     } catch (err) { alert('Failed to upload gallery item.') }
@@ -519,7 +543,7 @@ export default function AdminDashboard() {
   const handleDeleteGalleryItem = async (id) => {
     if (!window.confirm('Are you sure you want to delete this gallery item?')) return
     try {
-      await axios.delete(`${API_URL}/api/gallery/${id}`)
+      await axios.delete(`${API_URL}/api/gallery/${id}`, { headers: getAuthHeaders() })
       setGalleryItems(galleryItems.filter(g => g.id !== id))
     } catch (err) { alert('Failed to delete gallery item.') }
   }
@@ -530,8 +554,7 @@ export default function AdminDashboard() {
       data.append('title', galleryForm.title); data.append('description', galleryForm.description)
       data.append('category', galleryForm.category); data.append('uploadedBy', user?.name)
       if (galleryImages.length > 0) galleryImages.forEach(img => data.append('images', img))
-      await axios.delete(`${API_URL}/api/gallery/${editingGallery.id}`)
-      const res = await axios.post(`${API_URL}/api/gallery`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.put(`${API_URL}/api/gallery/${editingGallery.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setGalleryItems(galleryItems.map(g => g.id === editingGallery.id ? res.data : g))
       setEditingGallery(null); setGalleryForm({ title: '', description: '', category: 'Events' }); setGalleryImages([]); setGalleryPreviews([])
     } catch (err) { alert('Failed to update gallery item.') }
@@ -547,7 +570,7 @@ export default function AdminDashboard() {
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       data.append('uploadedBy', user?.name)
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.post(`${API_URL}/api/news`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post(`${API_URL}/api/news`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setNewsItems([res.data, ...newsItems]); setShowAddNews(false)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
@@ -560,7 +583,7 @@ export default function AdminDashboard() {
       const data = new FormData()
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setNewsItems(newsItems.map(n => n.id === editingNews.id ? res.data : n))
       setEditingNews(null)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
@@ -571,7 +594,7 @@ export default function AdminDashboard() {
   const handleDeleteNews = async (id) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return
     try {
-      await axios.delete(`${API_URL}/api/news/${id}`)
+      await axios.delete(`${API_URL}/api/news/${id}`, { headers: getAuthHeaders() })
       setNewsItems(newsItems.filter(n => n.id !== id))
     } catch (err) { alert('Failed to delete news item.') }
   }
@@ -585,7 +608,7 @@ export default function AdminDashboard() {
       const data = new FormData()
       Object.entries(staffForm).forEach(([key, value]) => data.append(key, value))
       if (staffPhoto) data.append('photo', staffPhoto)
-      const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList]); setShowAddStaff(false)
       setStaffForm({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
@@ -598,7 +621,7 @@ export default function AdminDashboard() {
       const data = new FormData()
       Object.entries(staffForm).forEach(([key, value]) => data.append(key, value))
       if (staffPhoto) data.append('photo', staffPhoto)
-      const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList(staffList.map(s => s.id === editingStaff.id ? res.data : s))
       setEditingStaff(null)
       setStaffForm({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
@@ -609,7 +632,7 @@ export default function AdminDashboard() {
   const handleDeleteStaff = async (id) => {
     if (!window.confirm('Are you sure you want to remove this staff member?')) return
     try {
-      await axios.delete(`${API_URL}/api/staff/${id}`)
+      await axios.delete(`${API_URL}/api/staff/${id}`, { headers: getAuthHeaders() })
       setStaffList(staffList.filter(s => s.id !== id))
     } catch (err) { alert('Failed to delete staff member.') }
   }
