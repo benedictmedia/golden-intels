@@ -30,15 +30,15 @@ export default function About() {
   image={aboutImg}
 />
       {/* Our Story */}
-      <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Story
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-6">
               How It All Began
             </h2>
             <div className="text-gray-600 text-lg leading-relaxed space-y-5">
@@ -71,23 +71,23 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Mission */}
-          <div className="bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
-            <div className="text-[#ff00c8] mb-4">
+          <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+            <div className="text-sky-600 mb-4">
               <Target size={40} />
             </div>
             <h3 className="text-2xl font-bold font-serif mb-4">Our Mission</h3>
-            <p className="text-pink-100 text-lg leading-relaxed">
+            <p className="text-sky-100 text-lg leading-relaxed">
               To deliver a high-quality international education that nurtures curiosity, critical thinking, and academic excellence, empowering learners to become confident, ethical, and globally minded individuals prepared for lifelong learning.
             </p>
           </div>
 
           {/* Vision */}
-          <div className="bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
-            <div className="text-[#ff00c8] mb-4">
+          <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+            <div className="text-sky-600 mb-4">
               <Eye size={40} />
             </div>
             <h3 className="text-2xl font-bold font-serif mb-4">Our Vision</h3>
-            <p className="text-pink-100 text-lg leading-relaxed">
+            <p className="text-sky-100 text-lg leading-relaxed">
               To nurture confident, responsible individuals who aspire to achieve their full potential.
             </p>
           </div>
@@ -96,24 +96,24 @@ export default function About() {
       </section>
 
       {/* Core Values */}
-     <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+     <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               What We Stand For
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9]">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700">
               Our Core Values
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div key={index} className="bg-[#e600a9] text-white rounded-2xl p-8 text-center shadow-md">
-                <div className="text-[#ff00c8] flex justify-center mb-4">
+              <div key={index} className="bg-sky-600 text-white rounded-2xl p-8 text-center shadow-md">
+                <div className="text-sky-600 flex justify-center mb-4">
                   <Heart size={36} />
                 </div>
                 <h4 className="text-xl font-bold mb-2">{value.title}</h4>
-                <p className="text-pink-100 text-sm leading-relaxed">{value.description}</p>
+                <p className="text-sky-100 text-sm leading-relaxed">{value.description}</p>
               </div>
             ))}
           </div>
@@ -124,20 +124,20 @@ export default function About() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Where We Are Headed
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9]">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700">
               Our Goals
             </h2>
           </div>
           <div className="space-y-4">
             {goals.map((goal, index) => (
-              <div key={index} className="flex items-start gap-4 bg-[#e600a9] text-white rounded-xl p-6 shadow-md">
-                <div className="text-[#ff00c8] mt-1">
+              <div key={index} className="flex items-start gap-4 bg-sky-600 text-white rounded-xl p-6 shadow-md">
+                <div className="text-sky-600 mt-1">
                   <CheckCircle size={24} />
                 </div>
-                <p className="text-pink-100 text-lg">{goal}</p>
+                <p className="text-sky-100 text-lg">{goal}</p>
               </div>
             ))}
           </div>
@@ -145,15 +145,15 @@ export default function About() {
       </section>
 
     {/* Oxford Accreditation */}
-      <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Accreditation
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-6">
               Oxford Accreditation
             </h2>
             <div className="text-gray-600 text-lg leading-relaxed space-y-5">

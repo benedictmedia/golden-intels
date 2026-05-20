@@ -18,15 +18,15 @@ export default function Academics() {
      <PageHero badge="Academics" title="Academics" subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning." image={academicsImg}/>
 
       {/* Our Hybrid Curriculum */}
-      <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Approach
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-6">
               Our Hybrid Curriculum
             </h2>
             <div className="text-gray-600 text-lg leading-relaxed space-y-5">
@@ -44,8 +44,8 @@ export default function Academics() {
             {/* Approaches */}
             <div className="grid grid-cols-2 gap-4 mt-8">
               {approaches.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 text-[#e600a9] font-medium">
-                  <div className="text-[#ff00c8]">{item.icon}</div>
+                <div key={index} className="flex items-center gap-3 text-sky-700 font-medium">
+                  <div className="text-sky-600">{item.icon}</div>
                   <span>{item.label}</span>
                 </div>
               ))}
@@ -70,10 +70,10 @@ export default function Academics() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Curriculum Structure
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">
               Grade Levels & Curriculum Structure
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -85,20 +85,20 @@ export default function Academics() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
             {/* OIC Card */}
-            <div className="bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+              <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
                 International
               </span>
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Oxford International Curriculum (OIC)
               </h3>
-              <p className="text-pink-100 mb-6">
+              <p className="text-sky-100 mb-6">
                 Our OIC subjects develop global competencies and critical thinking skills:
               </p>
               <ul className="space-y-3">
                 {['Science', 'Mathematics', 'English', 'Computing', 'Geography', 'Global Skills Projects', 'Wellbeing', 'Sustainability'].map((subject, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#ff00c8]"></div>
+                    <div className="w-2 h-2 rounded-full bg-sky-500"></div>
                     <span className="text-blue-100">{subject}</span>
                   </li>
                 ))}
@@ -107,7 +107,7 @@ export default function Academics() {
 
             {/* GES Card */}
             <div className="bg-[#4a235a] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+              <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Local
               </span>
               <h3 className="text-2xl font-bold font-serif mb-3">
@@ -119,7 +119,7 @@ export default function Academics() {
               <ul className="space-y-3">
                 {['Creative Arts', 'History', 'Ghanaian Language (Ewe)', 'French', 'Religious and Moral Education (RME)'].map((subject, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#ff00c8]"></div>
+                    <div className="w-2 h-2 rounded-full bg-sky-500"></div>
                     <span className="text-purple-100">{subject}</span>
                   </li>
                 ))}
@@ -131,15 +131,15 @@ export default function Academics() {
       </section>
 
    {/* A Growing School */}
-      <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Growth & Development
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">
               A Growing School
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -151,11 +151,11 @@ export default function Academics() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
 
             {/* Expanding Every Year */}
-            <div className="bg-[#ff00c8] text-[#e600a9] rounded-2xl p-10 shadow-md">
+            <div className="bg-sky-500 text-sky-700 rounded-2xl p-10 shadow-md">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Expanding Every Year
               </h3>
-              <p className="text-[#e600a9]/80 text-lg leading-relaxed">
+              <p className="text-sky-700/80 text-lg leading-relaxed">
                 Golden-Intels is actively growing and expanding its facilities and programs. We are committed to excellence.
               </p>
             </div>
@@ -176,11 +176,11 @@ export default function Academics() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
             {/* Modern Learning Facilities */}
-            <div className="bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
+            <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Modern Learning Facilities
               </h3>
-              <p className="text-pink-100 mb-6 text-lg">
+              <p className="text-sky-100 mb-6 text-lg">
                 Our school is equipped with innovative learning spaces:
               </p>
               <ul className="space-y-3">
@@ -191,7 +191,7 @@ export default function Academics() {
                   'Playgrounds, to enhance motto skills',
                 ].map((facility, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-[#ff00c8]"></div>
+                    <div className="w-2 h-2 rounded-full bg-sky-500"></div>
                     <span className="text-blue-100">{facility}</span>
                   </li>
                 ))}
@@ -199,11 +199,11 @@ export default function Academics() {
             </div>
 
             {/* Current Offerings */}
-            <div className="bg-[#ff00c8] text-[#e600a9] rounded-2xl p-10 shadow-md">
+            <div className="bg-sky-500 text-sky-700 rounded-2xl p-10 shadow-md">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Current Offerings
               </h3>
-              <p className="text-[#e600a9]/80 text-lg leading-relaxed">
+              <p className="text-sky-700/80 text-lg leading-relaxed">
                 Currently serving students from Early Years through Reception to Primary with our hybrid OIC and GES curriculum, with plans to expand progressively to Lower and Upper Secondary education.
               </p>
             </div>
@@ -218,10 +218,10 @@ export default function Academics() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Pathways
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">
               Educational Pathways
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -234,7 +234,7 @@ export default function Academics() {
 
             {/* Ghana Education Pathway */}
             <div className="bg-[#0f6e56] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+              <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Local
               </span>
               <h3 className="text-2xl font-bold font-serif mb-6">
@@ -242,12 +242,12 @@ export default function Academics() {
               </h3>
               <div className="space-y-5">
                 <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-[#ff66dc] mb-1">BECE</h4>
+                  <h4 className="font-bold text-sky-300 mb-1">BECE</h4>
                   <p className="text-green-100 text-sm">Basic Education Certificate Examination</p>
                   <p className="text-green-200 text-sm mt-1">Taken at the end of Junior High School (Grade 9)</p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-[#ff66dc] mb-1">SHS</h4>
+                  <h4 className="font-bold text-sky-300 mb-1">SHS</h4>
                   <p className="text-green-100 text-sm">Senior High School</p>
                   <p className="text-green-200 text-sm mt-1">Three-year program following BECE qualification</p>
                 </div>
@@ -259,7 +259,7 @@ export default function Academics() {
 
             {/* International Pathway */}
             <div className="bg-[#4a235a] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+              <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
                 International
               </span>
               <h3 className="text-2xl font-bold font-serif mb-6">
@@ -267,11 +267,11 @@ export default function Academics() {
               </h3>
               <div className="space-y-5">
                 <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-[#ff66dc] mb-1">International GCSE</h4>
+                  <h4 className="font-bold text-sky-300 mb-1">International GCSE</h4>
                   <p className="text-purple-100 text-sm">Comprehensive qualification at Grade 10-11</p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-[#ff66dc] mb-1">A-Level & OxfordAQA</h4>
+                  <h4 className="font-bold text-sky-300 mb-1">A-Level & OxfordAQA</h4>
                   <p className="text-purple-100 text-sm">Advanced qualifications through Grade 12-13</p>
                 </div>
                 <p className="text-purple-200 text-sm leading-relaxed">
@@ -281,19 +281,19 @@ export default function Academics() {
             </div>
 
             {/* Flexible Progression */}
-            <div className="bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+              <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Flexible
               </span>
               <h3 className="text-2xl font-bold font-serif mb-6">
                 Flexible Progression
               </h3>
               <div className="space-y-5">
-                <p className="text-pink-100 text-lg leading-relaxed">
+                <p className="text-sky-100 text-lg leading-relaxed">
                   Our hybrid curriculum allows students to transition between pathways based on their academic goals and aspirations.
                 </p>
                 <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-[#ff66dc] mb-1">Grade 1 - Grade 9</h4>
+                  <h4 className="font-bold text-sky-300 mb-1">Grade 1 - Grade 9</h4>
                   <p className="text-blue-100 text-sm">Students develop skills and knowledge to pursue either pathway successfully.</p>
                 </div>
               </div>
@@ -304,7 +304,7 @@ export default function Academics() {
       </section>
 
    {/* Programme Offerings */}
-      <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
+      <section className="py-20 bg-gradient-to-br from-sky-50 to-sky-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Photo */}
@@ -317,24 +317,24 @@ export default function Academics() {
           </div>
 
           {/* Right: Text Card */}
-          <div className="flex-1 bg-[#e600a9] text-white rounded-2xl p-10 shadow-md">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+          <div className="flex-1 bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               What We Offer
             </span>
             <h3 className="text-2xl font-bold font-serif mb-6">
               Programme Offerings
             </h3>
-            <p className="text-pink-100 text-lg leading-relaxed mb-6">
+            <p className="text-sky-100 text-lg leading-relaxed mb-6">
               Golden-Intels offers Oxford International Curriculum (OIC) and Ghana Education Service (GES) programmes. Our focus is on providing quality education through our hybrid curriculum that combines international best practices with local educational standards, ensuring students receive a well-rounded education that prepares them for success in Ghana and on the global stage.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/10 rounded-xl p-4 text-center">
-                <div className="text-[#ff66dc] font-bold text-lg mb-1">OIC</div>
-                <div className="text-pink-100 text-sm">Oxford International Curriculum</div>
+                <div className="text-sky-300 font-bold text-lg mb-1">OIC</div>
+                <div className="text-sky-100 text-sm">Oxford International Curriculum</div>
               </div>
               <div className="bg-white/10 rounded-xl p-4 text-center">
-                <div className="text-[#ff66dc] font-bold text-lg mb-1">GES</div>
-                <div className="text-pink-100 text-sm">Ghana Education Service</div>
+                <div className="text-sky-300 font-bold text-lg mb-1">GES</div>
+                <div className="text-sky-100 text-sm">Ghana Education Service</div>
               </div>
             </div>
           </div>
@@ -348,10 +348,10 @@ export default function Academics() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               How We Teach
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">
               Our Learning Approach
             </h2>
           </div>
@@ -359,16 +359,16 @@ export default function Academics() {
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            <div className="bg-[#e600a9] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">1</div>
+            <div className="bg-sky-600 text-white rounded-2xl p-8 shadow-md">
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">1</div>
               <h4 className="text-xl font-bold mb-3">Inquiry-Based Learning</h4>
-              <p className="text-pink-100 leading-relaxed">
+              <p className="text-sky-100 leading-relaxed">
                 Students explore concepts through questions and investigations, developing critical thinking and problem-solving skills.
               </p>
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">2</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">2</div>
               <h4 className="text-xl font-bold mb-3">Collaborative Project-Based Learning</h4>
               <p className="text-purple-200 leading-relaxed">
                 Team-based activities foster communication, leadership, and cooperation while building real-world skills.
@@ -376,7 +376,7 @@ export default function Academics() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">3</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">3</div>
               <h4 className="text-xl font-bold mb-3">Technology Integration</h4>
               <p className="text-green-200 leading-relaxed">
                 Modern tools and digital resources enhance learning experiences and prepare students for the digital age.
@@ -384,23 +384,23 @@ export default function Academics() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">4</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">4</div>
               <h4 className="text-xl font-bold mb-3">Personalized Support</h4>
               <p className="text-green-200 leading-relaxed">
                 Individual attention and tailored instruction ensure every student receives the support they need to excel.
               </p>
             </div>
 
-            <div className="bg-[#e600a9] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">5</div>
+            <div className="bg-sky-600 text-white rounded-2xl p-8 shadow-md">
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">5</div>
               <h4 className="text-xl font-bold mb-3">Global Perspectives</h4>
-              <p className="text-pink-100 leading-relaxed">
+              <p className="text-sky-100 leading-relaxed">
                 International curriculum and diverse viewpoints prepare students for success in a connected world.
               </p>
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">6</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">6</div>
               <h4 className="text-xl font-bold mb-3">Play-Based Learning</h4>
               <p className="text-purple-200 leading-relaxed">
                 Learners at the Early Years are exposed to concepts through playful activities.
@@ -408,7 +408,7 @@ export default function Academics() {
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">7</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">7</div>
               <h4 className="text-xl font-bold mb-3">Place-Based Learning</h4>
               <p className="text-purple-200 leading-relaxed">
                 Learners are exposed to knowledge through drawing their attention to their immediate environment.
@@ -416,7 +416,7 @@ export default function Academics() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9] mb-4">8</div>
+              <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700 mb-4">8</div>
               <h4 className="text-xl font-bold mb-3">Assessment for Learning</h4>
               <p className="text-green-200 leading-relaxed">
                 Continuous feedback and varied assessment methods guide student progress and inform instruction.
@@ -424,8 +424,8 @@ export default function Academics() {
             </div>
 
             {/* Empty card to balance the grid */}
-            <div className="bg-[#e600a9] text-white rounded-2xl p-8 shadow-md flex items-center justify-center">
-              <p className="text-pink-100 text-center text-lg font-serif italic">
+            <div className="bg-sky-600 text-white rounded-2xl p-8 shadow-md flex items-center justify-center">
+              <p className="text-sky-100 text-center text-lg font-serif italic">
                 "Education is not the filling of a pail, but the lighting of a fire."
               </p>
             </div>
