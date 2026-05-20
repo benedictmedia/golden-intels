@@ -426,7 +426,10 @@ export default function AdminDashboard() {
       }
 
       if (logoData) {
+        doc.saveGraphicsState()
+        doc.setGState(new doc.GState({ opacity: 0.06 }))
         doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+        doc.restoreGraphicsState()
       }
 
       doc.setFillColor(240, 245, 255)
@@ -570,11 +573,14 @@ export default function AdminDashboard() {
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       data.append('uploadedBy', user?.name)
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.post(`${API_URL}/api/news`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post(`${API_URL}/api/news`, data, { headers: getAuthHeaders() })
       setNewsItems([res.data, ...newsItems]); setShowAddNews(false)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
-    } catch (err) { alert('Failed to add news item.') }
+    } catch (err) {
+      console.error('Failed to add news item:', err)
+      alert(err.response?.data?.message || 'Failed to add news item.')
+    }
     finally { setNewsLoading(false) }
   }
 
@@ -583,12 +589,15 @@ export default function AdminDashboard() {
       const data = new FormData()
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, { headers: getAuthHeaders() })
       setNewsItems(newsItems.map(n => n.id === editingNews.id ? res.data : n))
       setEditingNews(null)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
-    } catch (err) { alert('Failed to update news item.') }
+    } catch (err) {
+      console.error('Failed to update news item:', err)
+      alert(err.response?.data?.message || 'Failed to update news item.')
+    }
   }
 
   const handleDeleteNews = async (id) => {

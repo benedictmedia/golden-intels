@@ -21,23 +21,24 @@ const createNewsEvent = async (req, res) => {
   try {
     const { title, content, category, type, videoUrl, eventDate, venue, uploadedBy } = req.body
     const files = req.files || []
-    const images = files.map(file => file.path)
+    const images = files.map(file => file.path || file.secure_url || file.url || '').filter(Boolean)
 
     const item = await prisma.newsEvent.create({
       data: {
-        title,
-        content,
-        category,
-        type,
+        title: title || 'Untitled',
+        content: content || '',
+        category: category || 'General',
+        type: type || 'news',
         images,
         videoUrl: videoUrl || null,
         eventDate: eventDate || null,
         venue: venue || null,
-        uploadedBy,
+        uploadedBy: uploadedBy || req.user?.name || 'Admin',
       }
     })
     res.status(201).json(item)
   } catch (error) {
+    console.error('News create error:', error)
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
@@ -50,19 +51,22 @@ const updateNewsEvent = async (req, res) => {
     const files = req.files || []
 
     const existing = await prisma.newsEvent.findUnique({ where: { id: parseInt(id) } })
+    if (!existing) {
+      return res.status(404).json({ message: 'News or event item not found' })
+    }
     let images = existing.images || []
 
     if (files.length > 0) {
-      images = files.map(file => file.path)
+      images = files.map(file => file.path || file.secure_url || file.url || '').filter(Boolean)
     }
 
     const item = await prisma.newsEvent.update({
       where: { id: parseInt(id) },
       data: {
-        title,
-        content,
-        category,
-        type,
+        title: title || existing.title,
+        content: content || existing.content,
+        category: category || existing.category,
+        type: type || existing.type,
         images,
         videoUrl: videoUrl || null,
         eventDate: eventDate || null,
@@ -71,6 +75,7 @@ const updateNewsEvent = async (req, res) => {
     })
     res.json(item)
   } catch (error) {
+    console.error('News update error:', error)
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
