@@ -5,10 +5,10 @@ export default {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#1a3c6e",
-          light: "#2a5298",
-          gold: "#d4a017",
-          goldLight: "#f0c040",
+          DEFAULT: "#e600a9",
+          light: "#ff33c7",
+          gold: "#ff00c8",
+          goldLight: "#ff66dc",
         },
       },
       fontFamily: {

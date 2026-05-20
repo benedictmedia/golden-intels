@@ -552,21 +552,21 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-[#ffe0f7] overflow-hidden">
 
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-[#0f6e56] text-white transition-all duration-300 flex flex-col`}>
         <div className="flex items-center justify-between p-4 border-b border-green-800">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#d4a017] rounded-full flex items-center justify-center font-bold text-[#1a3c6e]">G</div>
+              <div className="w-8 h-8 bg-[#ff00c8] rounded-full flex items-center justify-center font-bold text-[#e600a9]">G</div>
               <div>
                 <p className="text-xs font-bold">Golden-Intels</p>
-                <p className="text-xs text-yellow-300">Teacher Portal</p>
+                <p className="text-xs text-pink-100">Teacher Portal</p>
               </div>
             </div>
           )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:text-[#d4a017]">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:text-[#ff00c8]">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -577,7 +577,7 @@ export default function TeacherDashboard() {
               key={item.id}
               onClick={() => setActiveMenu(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
-                activeMenu === item.id ? 'bg-[#d4a017] text-[#1a3c6e] font-bold' : 'hover:bg-green-800 text-green-200'
+                activeMenu === item.id ? 'bg-[#ff00c8] text-[#e600a9] font-bold' : 'hover:bg-green-800 text-green-200'
               }`}
             >
               {item.icon}
@@ -606,7 +606,7 @@ export default function TeacherDashboard() {
           <div className="flex items-center gap-4">
             <button className="relative text-gray-500 hover:text-[#0f6e56]">
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#d4a017] rounded-full text-xs text-[#1a3c6e] font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#ff00c8] rounded-full text-xs text-[#e600a9] font-bold flex items-center justify-center">0</span>
             </button>
             <div className="w-9 h-9 bg-[#0f6e56] rounded-full flex items-center justify-center text-white font-bold text-sm">
               {user?.name?.charAt(0)}
@@ -623,9 +623,9 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Students', value: students.length, color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-                  { label: 'Assignments', value: assignments.length, color: 'bg-[#1a3c6e]', textColor: 'text-blue-200' },
+                  { label: 'Assignments', value: assignments.length, color: 'bg-[#e600a9]', textColor: 'text-pink-100' },
                   { label: 'Lessons', value: lessons.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Classes', value: '1', color: 'bg-[#d4a017]', textColor: 'text-[#1a3c6e]/80' },
+                  { label: 'Classes', value: '1', color: 'bg-[#ff00c8]', textColor: 'text-[#e600a9]/80' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -654,7 +654,7 @@ export default function TeacherDashboard() {
                     }`}
                   >
                     {cls}
-                    <span className="ml-2 bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="ml-2 bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-2 py-0.5 rounded-full">
                       {students.filter(s => s.gradeLevel === cls).length}
                     </span>
                   </button>
@@ -678,7 +678,7 @@ export default function TeacherDashboard() {
                       </tr>
                     ) : (
                       filteredStudents.map((student, index) => (
-                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#fff0fb]'}>
                           <td className="px-6 py-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-[#0f6e56]">
                               {student.photo ? (
@@ -691,7 +691,7 @@ export default function TeacherDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span>
+                            <span className="bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span>
                           </td>
                           <td className="px-6 py-4 font-medium text-[#0f6e56]">{student.firstName} {student.lastName}</td>
                           <td className="px-6 py-4 text-gray-600">{student.gender}</td>
@@ -730,8 +730,8 @@ export default function TeacherDashboard() {
                 {[
                   ['Present', attendanceStats.present, 'bg-[#0f6e56]', 'text-green-100'],
                   ['Absent', attendanceStats.absent, 'bg-red-500', 'text-red-100'],
-                  ['Late', attendanceStats.late, 'bg-[#d4a017]', 'text-[#1a3c6e]/80'],
-                  ['Marked', `${attendanceCompletion}%`, 'bg-[#1a3c6e]', 'text-blue-100'],
+                  ['Late', attendanceStats.late, 'bg-[#ff00c8]', 'text-[#e600a9]/80'],
+                  ['Marked', `${attendanceCompletion}%`, 'bg-[#e600a9]', 'text-blue-100'],
                 ].map(([label, value, color, textColor]) => (
                   <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                     <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
@@ -783,17 +783,17 @@ export default function TeacherDashboard() {
                       </tr>
                     ) : (
                       filteredStudents.map((student, index) => (
-                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#fff0fb]'}>
                           <td className="px-6 py-4">
                             <p className="font-bold text-[#0f6e56]">{student.firstName} {student.lastName}</p>
                             <p className="text-xs text-gray-400">{student.studentId}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="inline-flex bg-gray-100 rounded-xl p-1">
+                            <div className="inline-flex bg-[#ffe0f7] rounded-xl p-1">
                               {[
                                 ['present', 'Present', 'bg-[#0f6e56] text-white'],
                                 ['absent', 'Absent', 'bg-red-500 text-white'],
-                                ['late', 'Late', 'bg-[#d4a017] text-[#1a3c6e]'],
+                                ['late', 'Late', 'bg-[#ff00c8] text-[#e600a9]'],
                               ].map(([status, label, activeClassName]) => (
                                 <button
                                   key={status}
@@ -852,7 +852,7 @@ export default function TeacherDashboard() {
                   }`}
                 >
                   Submitted Results
-                  <span className="ml-2 bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="ml-2 bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-2 py-0.5 rounded-full">
                     {submittedResults.length}
                   </span>
                 </button>
@@ -884,19 +884,19 @@ export default function TeacherDashboard() {
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                                 result.status === 'approved' ? 'bg-green-100 text-green-700' :
                                 result.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
+                                'bg-pink-100 text-[#8a0065]'
                               }`}>
                                 {result.status}
                               </span>
                               <button
                                 onClick={() => handleEditResult(result)}
-                                className="bg-[#d4a017] hover:bg-[#f0c040] text-[#1a3c6e] font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                                className="bg-[#ff00c8] hover:bg-[#ff66dc] text-[#e600a9] font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDownloadPDF(result)}
-                                className="bg-[#1a3c6e] hover:bg-[#2a5298] text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                                className="bg-[#e600a9] hover:bg-[#ff33c7] text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                               >
                                 Download PDF
                               </button>
@@ -992,7 +992,7 @@ export default function TeacherDashboard() {
                       return 'F'
                     }
                     return (
-                      <div key={subject} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                      <div key={subject} className="bg-[#fff0fb] rounded-2xl p-6 border border-gray-100">
                         <h5 className="text-md font-bold text-[#0f6e56] mb-4">{subject}</h5>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div>
@@ -1040,7 +1040,7 @@ export default function TeacherDashboard() {
                           <div className="bg-[#0f6e56] text-white rounded-xl px-4 py-2 text-sm font-bold">
                             Total: {subjectTotal.toFixed(2)}/100
                           </div>
-                          <div className="bg-[#d4a017] text-[#1a3c6e] rounded-xl px-4 py-2 text-sm font-bold">
+                          <div className="bg-[#ff00c8] text-[#e600a9] rounded-xl px-4 py-2 text-sm font-bold">
                             Grade: {subjectTotal > 0 ? getGrade(subjectTotal) : '-'}
                           </div>
                         </div>
@@ -1063,7 +1063,7 @@ export default function TeacherDashboard() {
                 </div>
 
                 {/* Summary */}
-                <div className="bg-gray-50 rounded-2xl p-6 mb-6 flex flex-wrap gap-6">
+                <div className="bg-[#fff0fb] rounded-2xl p-6 mb-6 flex flex-wrap gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Total Score (All Subjects)</p>
                     <p className="text-2xl font-bold text-[#0f6e56]">{totalAllSubjects.toFixed(2)}/900</p>
@@ -1134,7 +1134,7 @@ export default function TeacherDashboard() {
                   </div>
                   <div className="flex gap-4 mt-6">
                     <button onClick={handleAddAssignment} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Assignment</button>
-                    <button onClick={() => setShowAddAssignment(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={() => setShowAddAssignment(false)} className="bg-[#ffe0f7] hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                   </div>
                 </div>
               )}
@@ -1147,7 +1147,7 @@ export default function TeacherDashboard() {
                 ) : (
                   assignments.map(assignment => (
                     <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <span className="inline-block bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full mb-3">{assignment.gradeLevel}</span>
+                      <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full mb-3">{assignment.gradeLevel}</span>
                       <h3 className="text-lg font-bold text-[#0f6e56] mb-1">{assignment.title}</h3>
                       <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
                       <p className="text-sm text-gray-600 mb-3">{assignment.description}</p>
@@ -1197,7 +1197,7 @@ export default function TeacherDashboard() {
                   </div>
                   <div className="flex gap-4 mt-6">
                     <button onClick={handleAddLesson} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Lesson</button>
-                    <button onClick={() => setShowAddLesson(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                    <button onClick={() => setShowAddLesson(false)} className="bg-[#ffe0f7] hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                   </div>
                 </div>
               )}
@@ -1210,7 +1210,7 @@ export default function TeacherDashboard() {
                 ) : (
                   lessons.map(lesson => (
                     <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <span className="inline-block bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full mb-3">{lesson.gradeLevel}</span>
+                      <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full mb-3">{lesson.gradeLevel}</span>
                       <h3 className="text-lg font-bold text-[#0f6e56] mb-1">{lesson.title}</h3>
                       <p className="text-sm text-gray-500 mb-3">{lesson.subject}</p>
                       <p className="text-sm text-gray-600 leading-relaxed">{lesson.content}</p>

@@ -54,7 +54,7 @@ export default function Curriculum() {
       <PageHero badge="Curriculum" title="Our Curriculum" subtitle="Explore our comprehensive academic programs designed to nurture excellence and foster lifelong learning." />
 
       {/* Search Bar */}
-      <section className="bg-gray-50 py-10">
+      <section className="bg-[#fff0fb] py-10">
         <div className="max-w-2xl mx-auto px-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -63,7 +63,7 @@ export default function Curriculum() {
               placeholder="Search programs..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1a3c6e] text-gray-700 text-lg"
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#e600a9] text-gray-700 text-lg"
             />
           </div>
         </div>
@@ -90,25 +90,25 @@ export default function Curriculum() {
 
                   {/* Content */}
                   <div className="p-8">
-                    <span className="inline-block bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full mb-4">
                       {program.category}
                     </span>
-                    <h3 className="text-xl font-bold text-[#1a3c6e] mb-3">{program.title}</h3>
+                    <h3 className="text-xl font-bold text-[#e600a9] mb-3">{program.title}</h3>
                     <p className="text-gray-600 leading-relaxed mb-2">{program.overview}</p>
 
                     <div className="mt-4 mb-2">
-                      <span className="text-sm font-bold text-[#1a3c6e]">Target Audience: </span>
+                      <span className="text-sm font-bold text-[#e600a9]">Target Audience: </span>
                       <span className="text-sm text-gray-600">{program.targetAudience}</span>
                     </div>
 
                     <div className="mt-2 mb-4">
-                      <span className="text-sm font-bold text-[#1a3c6e]">Learning Outcomes: </span>
+                      <span className="text-sm font-bold text-[#e600a9]">Learning Outcomes: </span>
                       <span className="text-sm text-gray-600">{program.shortOutcome}</span>
                     </div>
 
                     <button
                       onClick={() => setSelected(program)}
-                      className="bg-[#1a3c6e] hover:bg-[#2a5298] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                      className="bg-[#e600a9] hover:bg-[#ff33c7] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                     >
                       Learn More
                     </button>
@@ -135,41 +135,41 @@ export default function Curriculum() {
               />
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#ffe0f7] transition-colors"
               >
-                <X size={20} className="text-[#1a3c6e]" />
+                <X size={20} className="text-[#e600a9]" />
               </button>
             </div>
 
             {/* Modal Content */}
             <div className="p-8">
-              <span className="inline-block bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selected.category}
               </span>
-              <h2 className="text-2xl font-bold font-serif text-[#1a3c6e] mb-4">{selected.title}</h2>
+              <h2 className="text-2xl font-bold font-serif text-[#e600a9] mb-4">{selected.title}</h2>
 
               <div className="space-y-5 text-gray-600">
                 <div>
-                  <h4 className="font-bold text-[#1a3c6e] mb-1">Overview</h4>
+                  <h4 className="font-bold text-[#e600a9] mb-1">Overview</h4>
                   <p className="leading-relaxed">{selected.overview}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#1a3c6e] mb-1">Target Audience</h4>
+                  <h4 className="font-bold text-[#e600a9] mb-1">Target Audience</h4>
                   <p>{selected.targetAudience}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#1a3c6e] mb-1">Learning Outcomes</h4>
+                  <h4 className="font-bold text-[#e600a9] mb-1">Learning Outcomes</h4>
                   <p className="leading-relaxed">{selected.fullOutcome}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#1a3c6e] mb-1">Curriculum Overview</h4>
+                  <h4 className="font-bold text-[#e600a9] mb-1">Curriculum Overview</h4>
                   <p className="leading-relaxed">{selected.curriculumOverview}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelected(null)}
-                className="mt-8 w-full bg-[#1a3c6e] hover:bg-[#2a5298] text-white font-bold py-3 rounded-xl transition-colors"
+                className="mt-8 w-full bg-[#e600a9] hover:bg-[#ff33c7] text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -180,15 +180,15 @@ export default function Curriculum() {
       )}
 
     {/* Why Choose Our Curriculum */}
-     <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
+     <section className="py-20 bg-gradient-to-br from-[#fff0fb] to-[#ffd6f3]">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#d4a017] text-[#1a3c6e] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#ff00c8] text-[#e600a9] text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Advantage
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#1a3c6e] mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#e600a9] mb-4">
               Why Choose Our Curriculum?
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -199,19 +199,19 @@ export default function Curriculum() {
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-            <div className="bg-[#1a3c6e] text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-[#d4a017] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[#1a3c6e] font-bold text-xl">C</span>
+            <div className="bg-[#e600a9] text-white rounded-2xl p-8 text-center shadow-md">
+              <div className="w-14 h-14 bg-[#ff00c8] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-[#e600a9] font-bold text-xl">C</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Comprehensive</h4>
-              <p className="text-blue-200 leading-relaxed">
+              <p className="text-pink-100 leading-relaxed">
                 Well-rounded curriculum covering all essential subjects and skills.
               </p>
             </div>
 
             <div className="bg-[#4a235a] text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-[#d4a017] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[#1a3c6e] font-bold text-xl">G</span>
+              <div className="w-14 h-14 bg-[#ff00c8] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-[#e600a9] font-bold text-xl">G</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Goal-Oriented</h4>
               <p className="text-purple-200 leading-relaxed">
@@ -220,8 +220,8 @@ export default function Curriculum() {
             </div>
 
             <div className="bg-[#0f6e56] text-white rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-[#d4a017] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[#1a3c6e] font-bold text-xl">E</span>
+              <div className="w-14 h-14 bg-[#ff00c8] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-[#e600a9] font-bold text-xl">E</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Excellence-Focused</h4>
               <p className="text-green-200 leading-relaxed">
@@ -229,12 +229,12 @@ export default function Curriculum() {
               </p>
             </div>
 
-            <div className="bg-[#d4a017] text-[#1a3c6e] rounded-2xl p-8 text-center shadow-md">
-              <div className="w-14 h-14 bg-[#1a3c6e] rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[#d4a017] font-bold text-xl">S</span>
+            <div className="bg-[#ff00c8] text-[#e600a9] rounded-2xl p-8 text-center shadow-md">
+              <div className="w-14 h-14 bg-[#e600a9] rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-[#ff00c8] font-bold text-xl">S</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Student-Centered</h4>
-              <p className="text-[#1a3c6e]/80 leading-relaxed">
+              <p className="text-[#e600a9]/80 leading-relaxed">
                 Personalized learning experiences tailored to individual needs.
               </p>
             </div>

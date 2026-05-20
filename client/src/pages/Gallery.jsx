@@ -48,7 +48,7 @@ export default function Gallery() {
       <PageHero badge="Gallery" title="School Gallery" subtitle="Explore memorable moments from our school events and gatherings." />
 
       {/* Filter Bar */}
-      <section className="bg-gray-50 py-8">
+      <section className="bg-[#fff0fb] py-8">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-gray-500 text-sm font-bold mb-4">Filter by:</p>
           <div className="flex flex-wrap gap-3">
@@ -58,8 +58,8 @@ export default function Gallery() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
                   activeCategory === cat
-                    ? 'bg-[#1a3c6e] text-white'
-                    : 'bg-white text-[#1a3c6e] border border-[#1a3c6e] hover:bg-[#1a3c6e] hover:text-white'
+                    ? 'bg-[#e600a9] text-white'
+                    : 'bg-white text-[#e600a9] border border-[#e600a9] hover:bg-[#e600a9] hover:text-white'
                 }`}
               >
                 {cat}
@@ -70,7 +70,7 @@ export default function Gallery() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-[#fff0fb]">
         <div className="max-w-7xl mx-auto px-4">
           {loading ? (
             <div className="text-center text-gray-400 py-20">Loading gallery...</div>
@@ -98,14 +98,14 @@ export default function Gallery() {
                         +{item.images.length - 1} more
                       </span>
                     )}
-                    <span className="absolute top-3 left-3 bg-[#d4a017] text-[#1a3c6e] text-xs font-bold px-3 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-[#ff00c8] text-[#e600a9] text-xs font-bold px-3 py-1 rounded-full">
                       {item.category}
                     </span>
                   </div>
 
                   {/* Info */}
                   <div className="p-5">
-                    <h3 className="font-bold text-[#1a3c6e] text-lg mb-1">{item.title}</h3>
+                    <h3 className="font-bold text-[#e600a9] text-lg mb-1">{item.title}</h3>
                     {item.description && (
                       <p className="text-sm text-gray-500 mb-3">{item.description}</p>
                     )}
@@ -132,7 +132,7 @@ export default function Gallery() {
                 <h3 className="text-white font-bold text-xl">{viewingItem.title}</h3>
                 <p className="text-gray-400 text-sm">{viewingItem.category} | {new Date(viewingItem.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
               </div>
-              <button onClick={() => setViewingItem(null)} className="text-white hover:text-[#d4a017] transition-colors">
+              <button onClick={() => setViewingItem(null)} className="text-white hover:text-[#ff00c8] transition-colors">
                 <X size={28} />
               </button>
             </div>
@@ -175,7 +175,7 @@ export default function Gallery() {
                     alt={`Photo ${index + 1}`}
                     onClick={() => setActiveImage(index)}
                     className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${
-                      activeImage === index ? 'ring-2 ring-[#d4a017] opacity-100' : 'opacity-50 hover:opacity-100'
+                      activeImage === index ? 'ring-2 ring-[#ff00c8] opacity-100' : 'opacity-50 hover:opacity-100'
                     }`}
                   />
                 ))}

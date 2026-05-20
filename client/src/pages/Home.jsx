@@ -6,7 +6,7 @@ import CallToAction from '../components/layout/CallToAction'
 
 export default function Home() {
   return (
-    <div className="bg-gradient-to-b from-[#fff25c] via-[#e7f4ff] to-[#fff8b8]">
+    <div className="bg-gradient-to-b from-[#ffb3ec] via-[#fff0fb] to-[#ffe0f7]">
       <Hero />
       <WhyChooseUs />
       <AcademicExcellence />
