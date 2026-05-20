@@ -25,6 +25,15 @@ export default function TeacherDashboard() {
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('Year 1')
   const [attendance, setAttendance] = useState({})
+  const [attendanceDate, setAttendanceDate] = useState(() => {
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+    return now.toISOString().slice(0, 10)
+  })
+  const [attendanceRecords, setAttendanceRecords] = useState([])
+  const [attendanceLoading, setAttendanceLoading] = useState(false)
+  const [attendanceSaving, setAttendanceSaving] = useState(false)
+  const [attendanceError, setAttendanceError] = useState('')
   const [attendanceSaved, setAttendanceSaved] = useState(false)
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
@@ -48,6 +57,31 @@ export default function TeacherDashboard() {
       .catch(err => console.error('Failed to fetch students:', err))
   }
 }, [activeMenu])
+
+  useEffect(() => {
+    if (activeMenu !== 'attendance') return
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setAttendanceLoading(true)
+    setAttendanceError('')
+    axios.get(`${API_URL}/api/attendance`, {
+      headers,
+      params: { date: attendanceDate, gradeLevel: activeClass }
+    })
+      .then(res => {
+        setAttendanceRecords(res.data)
+        const nextAttendance = {}
+        res.data.forEach(record => {
+          nextAttendance[record.studentId] = record.status
+        })
+        setAttendance(nextAttendance)
+      })
+      .catch(err => {
+        console.error('Failed to fetch attendance:', err)
+        setAttendanceError('Unable to load attendance for this date.')
+      })
+      .finally(() => setAttendanceLoading(false))
+  }, [activeMenu, activeClass, attendanceDate])
 
   useEffect(() => {
   if (activeMenu === 'gradebook') {
@@ -307,6 +341,32 @@ export default function TeacherDashboard() {
 
     y += 18
 
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    let attendanceSummary = null
+    try {
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers })
+      attendanceSummary = attendanceRes.data
+    } catch (error) {
+      console.error('Attendance summary unavailable:', error)
+    }
+
+    if (attendanceSummary) {
+      doc.setFillColor(245, 248, 255)
+      doc.rect(10, y, pageWidth - 20, 18, 'F')
+      doc.setDrawColor(212, 160, 23)
+      doc.setLineWidth(0.4)
+      doc.rect(10, y, pageWidth - 20, 18)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(26, 60, 110)
+      doc.text('Attendance Summary', 15, y + 7)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(50, 50, 50)
+      doc.text(`Days: ${attendanceSummary.total}   Present: ${attendanceSummary.present}   Absent: ${attendanceSummary.absent}   Late: ${attendanceSummary.late}   Attendance: ${attendanceSummary.percentage}%`, 15, y + 14)
+      y += 26
+    }
+
     // Watermark
     if (logoData) {
       doc.saveGraphicsState()
@@ -420,14 +480,52 @@ export default function TeacherDashboard() {
   }
 
   const filteredStudents = students.filter(s => s.gradeLevel === activeClass)
+  const attendanceStats = filteredStudents.reduce((stats, student) => {
+    const status = attendance[student.id] || 'present'
+    return { ...stats, [status]: (stats[status] || 0) + 1 }
+  }, { present: 0, absent: 0, late: 0 })
+  const attendanceCompletion = filteredStudents.length
+    ? Math.round((Object.keys(attendance).filter(id => filteredStudents.some(s => s.id.toString() === id.toString())).length / filteredStudents.length) * 100)
+    : 0
 
   const handleAttendance = (studentId, status) => {
     setAttendance({ ...attendance, [studentId]: status })
   }
 
-  const saveAttendance = () => {
-    setAttendanceSaved(true)
-    setTimeout(() => setAttendanceSaved(false), 3000)
+  const saveAttendance = async () => {
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    const classStudents = students.filter(s => s.gradeLevel === activeClass)
+    setAttendanceSaving(true)
+    setAttendanceError('')
+    try {
+      await axios.post(`${API_URL}/api/attendance`, {
+        date: attendanceDate,
+        gradeLevel: activeClass,
+        recordedBy: user?.name || 'Teacher',
+        records: classStudents.map(student => ({
+          studentId: student.id,
+          status: attendance[student.id] || 'present'
+        }))
+      }, { headers })
+      const res = await axios.get(`${API_URL}/api/attendance`, {
+        headers,
+        params: { date: attendanceDate, gradeLevel: activeClass }
+      })
+      setAttendanceRecords(res.data)
+      const nextAttendance = {}
+      res.data.forEach(record => {
+        nextAttendance[record.studentId] = record.status
+      })
+      setAttendance(nextAttendance)
+      setAttendanceSaved(true)
+      setTimeout(() => setAttendanceSaved(false), 3000)
+    } catch (error) {
+      console.error('Save attendance error:', error)
+      setAttendanceError('Failed to save attendance. Please try again.')
+    } finally {
+      setAttendanceSaving(false)
+    }
   }
 
   const handleGrade = (studentId, value) => {
@@ -612,10 +710,36 @@ export default function TeacherDashboard() {
           {/* Attendance */}
           {activeMenu === 'attendance' && (
             <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#0f6e56]">Attendance</h2>
-                <span className="text-sm text-gray-500">{new Date().toDateString()}</span>
+              <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-[#0f6e56] mb-1">Attendance Register</h2>
+                  <p className="text-gray-500 text-sm">Record daily class attendance by date. Saved records update parent dashboards immediately.</p>
+                </div>
+                <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
+                  <label className="block text-xs font-bold text-[#0f6e56] mb-1">Attendance Date</label>
+                  <input
+                    type="date"
+                    value={attendanceDate}
+                    onChange={e => setAttendanceDate(e.target.value)}
+                    className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
+                  />
+                </div>
               </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[
+                  ['Present', attendanceStats.present, 'bg-[#0f6e56]', 'text-green-100'],
+                  ['Absent', attendanceStats.absent, 'bg-red-500', 'text-red-100'],
+                  ['Late', attendanceStats.late, 'bg-[#d4a017]', 'text-[#1a3c6e]/80'],
+                  ['Marked', `${attendanceCompletion}%`, 'bg-[#1a3c6e]', 'text-blue-100'],
+                ].map(([label, value, color, textColor]) => (
+                  <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
+                    <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
+                    <p className="text-3xl font-bold mt-1">{value}</p>
+                  </div>
+                ))}
+              </div>
+
               <div className="flex flex-wrap gap-3 mb-6">
                 {classes.map(cls => (
                   <button
@@ -631,7 +755,12 @@ export default function TeacherDashboard() {
               </div>
               {attendanceSaved && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
-                  Attendance saved successfully!
+                  Attendance saved for {activeClass} on {new Date(attendanceDate).toLocaleDateString()}.
+                </div>
+              )}
+              {attendanceError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                  {attendanceError}
                 </div>
               )}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
@@ -639,39 +768,61 @@ export default function TeacherDashboard() {
                   <thead className="bg-[#0f6e56] text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Student</th>
-                      <th className="px-6 py-4 text-left">Present</th>
-                      <th className="px-6 py-4 text-left">Absent</th>
-                      <th className="px-6 py-4 text-left">Late</th>
+                      <th className="px-6 py-4 text-left">Status</th>
+                      <th className="px-6 py-4 text-left">Recorded</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredStudents.length === 0 ? (
+                    {attendanceLoading ? (
                       <tr>
-                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No students in this class.</td>
+                        <td colSpan="3" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
+                      </tr>
+                    ) : filteredStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan="3" className="px-6 py-8 text-center text-gray-400">No students in this class.</td>
                       </tr>
                     ) : (
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-6 py-4 font-medium text-[#0f6e56]">{student.firstName} {student.lastName}</td>
-                          {['present', 'absent', 'late'].map(status => (
-                            <td key={status} className="px-6 py-4">
-                              <input
-                                type="radio"
-                                name={`attendance-${student.id}`}
-                                checked={attendance[student.id] === status}
-                                onChange={() => handleAttendance(student.id, status)}
-                                className="w-4 h-4 accent-[#0f6e56]"
-                              />
-                            </td>
-                          ))}
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-[#0f6e56]">{student.firstName} {student.lastName}</p>
+                            <p className="text-xs text-gray-400">{student.studentId}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="inline-flex bg-gray-100 rounded-xl p-1">
+                              {[
+                                ['present', 'Present', 'bg-[#0f6e56] text-white'],
+                                ['absent', 'Absent', 'bg-red-500 text-white'],
+                                ['late', 'Late', 'bg-[#d4a017] text-[#1a3c6e]'],
+                              ].map(([status, label, activeClassName]) => (
+                                <button
+                                  key={status}
+                                  type="button"
+                                  onClick={() => handleAttendance(student.id, status)}
+                                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                    (attendance[student.id] || 'present') === status ? activeClassName : 'text-gray-500 hover:text-[#0f6e56]'
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-gray-500">
+                            {attendanceRecords.some(record => record.studentId === student.id) ? 'Saved' : 'Pending'}
+                          </td>
                         </tr>
                       ))
                     )}
                   </tbody>
                 </table>
               </div>
-              <button onClick={saveAttendance} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors">
-                Save Attendance
+              <button
+                onClick={saveAttendance}
+                disabled={attendanceSaving || filteredStudents.length === 0}
+                className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {attendanceSaving ? 'Saving Attendance...' : 'Save Attendance'}
               </button>
             </div>
           )}

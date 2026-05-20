@@ -30,6 +30,9 @@ export default function ParentDashboard() {
   const [messageSent, setMessageSent] = useState(false)
   const [approvedResults, setApprovedResults] = useState([])
   const [feePayments, setFeePayments] = useState([])
+  const [attendanceRecords, setAttendanceRecords] = useState([])
+  const [attendanceLoading, setAttendanceLoading] = useState(false)
+  const [attendanceError, setAttendanceError] = useState('')
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -53,12 +56,19 @@ export default function ParentDashboard() {
   const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
-    axios.get('${API_URL}/api/results')
-      .then(res => {
-        const approved = res.data.filter(r => r.status === 'approved')
-        setApprovedResults(approved)
+    if (activeMenu !== 'attendance' || !selectedChild?.id) return
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setAttendanceLoading(true)
+    setAttendanceError('')
+    axios.get(`${API_URL}/api/attendance/student/${selectedChild.id}`, { headers })
+      .then(res => setAttendanceRecords(res.data))
+      .catch(err => {
+        console.error('Failed to fetch attendance:', err)
+        setAttendanceError('Unable to load attendance records.')
       })
-  }, [])
+      .finally(() => setAttendanceLoading(false))
+  }, [activeMenu, selectedChild])
 
   const handleParentDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
@@ -218,6 +228,32 @@ export default function ParentDashboard() {
     doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
     y += 18
 
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    let attendanceSummaryForReport = null
+    try {
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers })
+      attendanceSummaryForReport = attendanceRes.data
+    } catch (error) {
+      console.error('Attendance summary unavailable:', error)
+    }
+
+    if (attendanceSummaryForReport) {
+      doc.setFillColor(245, 248, 255)
+      doc.rect(10, y, pageWidth - 20, 18, 'F')
+      doc.setDrawColor(212, 160, 23)
+      doc.setLineWidth(0.4)
+      doc.rect(10, y, pageWidth - 20, 18)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(9)
+      doc.setTextColor(26, 60, 110)
+      doc.text('Attendance Summary', 15, y + 7)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(50, 50, 50)
+      doc.text(`Days: ${attendanceSummaryForReport.total}   Present: ${attendanceSummaryForReport.present}   Absent: ${attendanceSummaryForReport.absent}   Late: ${attendanceSummaryForReport.late}   Attendance: ${attendanceSummaryForReport.percentage}%`, 15, y + 14)
+      y += 26
+    }
+
     if (logoData) {
       doc.saveGraphicsState()
       doc.setGState(new doc.GState({ opacity: 0.06 }))
@@ -312,13 +348,14 @@ export default function ParentDashboard() {
     { term: 'Term 3 - 2024', amount: 'GH₵ 0', status: 'Pending', due: '2024-09-15' },
   ]
 
-  const attendance = [
-    { date: '2024-01-08', status: 'Present' },
-    { date: '2024-01-09', status: 'Present' },
-    { date: '2024-01-10', status: 'Absent' },
-    { date: '2024-01-11', status: 'Present' },
-    { date: '2024-01-12', status: 'Late' },
-  ]
+  const attendanceSummary = attendanceRecords.reduce((summary, record) => ({
+    ...summary,
+    [record.status]: (summary[record.status] || 0) + 1
+  }), { present: 0, absent: 0, late: 0 })
+  const attendancePercentage = attendanceRecords.length
+    ? Math.round((attendanceSummary.present / attendanceRecords.length) * 100)
+    : 0
+  const formatAttendanceStatus = (status) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
 
   const grades = [
     { subject: 'Mathematics', score: 85, grade: 'A' },
@@ -475,28 +512,77 @@ export default function ParentDashboard() {
           {/* Attendance */}
           {activeMenu === 'attendance' && (
             <div>
-              <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-6">Attendance Record</h2>
+              <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Attendance Record</h2>
+                  <p className="text-gray-500 text-sm">Daily attendance updates recorded by teachers.</p>
+                </div>
+                {students.length > 0 && (
+                  <select
+                    value={selectedChild?.id || ''}
+                    onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                  >
+                    {students.map(student => (
+                      <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[
+                  ['Attendance', `${attendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
+                  ['Present', attendanceSummary.present, 'bg-[#0f6e56]', 'text-green-100'],
+                  ['Absent', attendanceSummary.absent, 'bg-red-500', 'text-red-100'],
+                  ['Late', attendanceSummary.late, 'bg-[#d4a017]', 'text-[#1a3c6e]/80'],
+                ].map(([label, value, color, textColor]) => (
+                  <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
+                    <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
+                    <p className="text-3xl font-bold mt-1">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {attendanceError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                  {attendanceError}
+                </div>
+              )}
+
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-[#4a235a] text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Date</th>
                       <th className="px-6 py-4 text-left">Status</th>
+                      <th className="px-6 py-4 text-left">Class</th>
+                      <th className="px-6 py-4 text-left">Recorded By</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {attendance.map((record, index) => (
+                    {attendanceLoading ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
+                      </tr>
+                    ) : attendanceRecords.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No attendance records available yet.</td>
+                      </tr>
+                    ) : attendanceRecords.map((record, index) => (
                       <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="px-6 py-4 text-gray-600">{record.date}</td>
+                        <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
                         <td className="px-6 py-4">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                            record.status === 'Present' ? 'bg-green-100 text-green-700' :
-                            record.status === 'Absent' ? 'bg-red-100 text-red-700' :
+                            record.status === 'present' ? 'bg-green-100 text-green-700' :
+                            record.status === 'absent' ? 'bg-red-100 text-red-700' :
                             'bg-yellow-100 text-yellow-700'
                           }`}>
-                            {record.status}
+                            {formatAttendanceStatus(record.status)}
                           </span>
                         </td>
+                        <td className="px-6 py-4 text-gray-600">{record.gradeLevel}</td>
+                        <td className="px-6 py-4 text-gray-500">{record.recordedBy}</td>
                       </tr>
                     ))}
                   </tbody>

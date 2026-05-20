@@ -4,8 +4,8 @@ const { getAttendance, getStudentAttendance, saveAttendance, getAttendanceSummar
 const protect = require('../middleware/authMiddleware')
 
 router.get('/', protect, getAttendance)
-router.get('/student/:studentId', getStudentAttendance)
-router.get('/summary/:studentId', getStudentAttendance)
+router.get('/student/:studentId', protect, getStudentAttendance)
+router.get('/summary/:studentId', protect, getAttendanceSummary)
 router.post('/', protect, saveAttendance)
 
 module.exports = router
