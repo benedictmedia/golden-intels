@@ -35,7 +35,7 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-gradient-to-br from-[#f0f4f8] to-[#e8edf5]">
+    <section className="py-20 bg-gradient-to-br from-[#fff25c] via-[#fff8b8] to-[#e7f4ff]">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}

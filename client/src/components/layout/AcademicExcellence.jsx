@@ -12,7 +12,7 @@ const highlights = [
 
 export default function AcademicExcellence() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-[#e7f4ff]">
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
         {/* Left: Text */}

@@ -14,7 +14,7 @@ const activities = [
 
 export default function CampusLife() {
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-[#fff8b8]">
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
         {/* Left: Photo */}
