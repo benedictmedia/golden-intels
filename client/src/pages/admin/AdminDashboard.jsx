@@ -5,7 +5,7 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image, Newspaper, UserCircle
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle
 } from 'lucide-react'
 
 const menuItems = [
@@ -16,7 +16,7 @@ const menuItems = [
   { icon: <Users size={20} />, label: 'Learners', id: 'learners' },
   { icon: <UserPlus size={20} />, label: 'Create Account', id: 'create-account' },
   { icon: <Key size={20} />, label: 'Admission Tokens', id: 'admission-tokens' },
-  { icon: <Image size={20} />, label: 'Gallery', id: 'gallery' },
+  { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery' },
   { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
 ]
