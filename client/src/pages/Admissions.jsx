@@ -124,27 +124,27 @@ export default function Admissions() {
     }
   }
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-600 text-gray-700 text-sm"
-  const labelClass = "block text-sm font-bold text-sky-700 mb-2"
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm"
+  const labelClass = "block text-sm font-bold text-cyan-700 mb-2"
   const sectionClass = "bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6"
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-sky-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-cyan-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-12 shadow-xl max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-green-600" />
           </div>
-          <h2 className="text-3xl font-bold font-serif text-sky-700 mb-4">Application Submitted!</h2>
+          <h2 className="text-3xl font-bold font-serif text-cyan-700 mb-4">Application Submitted!</h2>
           <p className="text-gray-600 mb-2">Thank you for applying to Golden-Intels International School.</p>
           <p className="text-gray-600 mb-6">We will review your application and contact you within <strong>1 week</strong> to schedule an assessment.</p>
           <div className="bg-blue-50 rounded-xl p-4 mb-8">
-            <p className="text-sm text-sky-700 font-bold">What happens next?</p>
+            <p className="text-sm text-cyan-700 font-bold">What happens next?</p>
             <p className="text-sm text-gray-600 mt-1">Our admissions team will reach out to you via email or phone to schedule your child's assessment and campus visit.</p>
           </div>
           <button
             onClick={() => setSubmitted(false)}
-            className="bg-sky-600 hover:bg-sky-400 text-white font-bold px-8 py-3 rounded-xl transition-colors"
+            className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-8 py-3 rounded-xl transition-colors"
           >
             Submit Another Application
           </button>
@@ -160,44 +160,44 @@ export default function Admissions() {
         <PageHero badge="Admissions" title="Admissions" subtitle="Begin your journey to excellence. Join our community of learners." />
 
         {/* Payment Info + Login */}
-        <section className="py-20 bg-sky-50">
+        <section className="py-20 bg-cyan-50">
           <div className="max-w-4xl mx-auto px-4">
 
             {/* Payment Instructions */}
-            <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md mb-8">
+            <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center">
-                  <Lock size={20} className="text-sky-700" />
+                <div className="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center">
+                  <Lock size={20} className="text-cyan-700" />
                 </div>
                 <h2 className="text-2xl font-bold font-serif">Access the Admission Form</h2>
               </div>
-              <p className="text-sky-100 text-lg mb-6">
+              <p className="text-cyan-100 text-lg mb-6">
                 To access our admission form, you are required to pay a non-refundable admission form fee. This fee does not include tuition or feeding.
               </p>
               <div className="bg-white/10 rounded-xl p-6 mb-6">
-                <h3 className="text-sky-600 font-bold text-lg mb-4">Payment Details</h3>
+                <h3 className="text-cyan-600 font-bold text-lg mb-4">Payment Details</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sky-100">Amount:</span>
+                    <span className="text-cyan-100">Amount:</span>
                     <span className="text-white font-bold text-xl">GHS 430.00</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sky-100">Account Number:</span>
+                    <span className="text-cyan-100">Account Number:</span>
                     <span className="text-white font-bold">0594330816</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sky-100">Account Name:</span>
+                    <span className="text-cyan-100">Account Name:</span>
                     <span className="text-white font-bold">Goldenintels Educare</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sky-100">Payment Method:</span>
+                    <span className="text-cyan-100">Payment Method:</span>
                     <span className="text-white font-bold">Mobile Money / Bank Transfer</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-sky-500/20 rounded-xl p-4">
-                <p className="text-sky-600 text-sm font-bold mb-1">After Payment:</p>
-                <p className="text-sky-100 text-sm">
+              <div className="bg-cyan-500/20 rounded-xl p-4">
+                <p className="text-cyan-600 text-sm font-bold mb-1">After Payment:</p>
+                <p className="text-cyan-100 text-sm">
                   After making payment, contact the school office with your payment receipt. You will be issued a unique <strong className="text-white">Serial Number</strong> and <strong className="text-white">PIN</strong> to access the admission form.
                 </p>
               </div>
@@ -205,7 +205,7 @@ export default function Admissions() {
 
             {/* Login Form */}
             <div className="bg-white rounded-2xl p-10 shadow-sm border border-gray-100">
-              <h3 className="text-2xl font-bold font-serif text-sky-700 mb-2">Already Have a Serial Number?</h3>
+              <h3 className="text-2xl font-bold font-serif text-cyan-700 mb-2">Already Have a Serial Number?</h3>
               <p className="text-gray-500 mb-6">Enter your serial number and PIN to access the admission form.</p>
 
               {loginError && (
@@ -216,37 +216,37 @@ export default function Admissions() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-sky-700 mb-2">Serial Number</label>
+                  <label className="block text-sm font-bold text-cyan-700 mb-2">Serial Number</label>
                   <input
                     type="text"
                     value={serialNumber}
                     onChange={e => setSerialNumber(e.target.value)}
                     placeholder="e.g. GI-2026-12345"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-600 text-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-sky-700 mb-2">PIN</label>
+                  <label className="block text-sm font-bold text-cyan-700 mb-2">PIN</label>
                   <input
                     type="password"
                     value={pin}
                     onChange={e => setPin(e.target.value)}
                     placeholder="Enter your 4-digit PIN"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sky-600 text-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
                   />
                 </div>
                 <button
                   onClick={handleTokenLogin}
                   disabled={loginLoading}
-                  className="w-full bg-sky-600 hover:bg-sky-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                  className="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {loginLoading ? 'Verifying...' : 'Access Admission Form'}
                 </button>
               </div>
 
-              <div className="mt-6 bg-sky-50 rounded-xl p-4">
+              <div className="mt-6 bg-cyan-50 rounded-xl p-4">
                 <p className="text-sm text-gray-500">
-                  <strong className="text-sky-700">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
+                  <strong className="text-cyan-700">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
                 </p>
                 <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.com</p>
               </div>
@@ -262,33 +262,33 @@ export default function Admissions() {
     <div>
 
       {/* Hero Banner */}
-      <section className="bg-sky-600 text-white py-20 text-center">
-        <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+      <section className="bg-cyan-600 text-white py-20 text-center">
+        <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
           Admissions
         </span>
         <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4">Admissions</h1>
-        <p className="text-sky-100 text-lg max-w-2xl mx-auto">
+        <p className="text-cyan-100 text-lg max-w-2xl mx-auto">
           Begin your journey to excellence. Join our community of learners.
         </p>
       </section>
 
       {/* Admission Process */}
-      <section className="py-20 bg-sky-50">
+      <section className="py-20 bg-cyan-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">Admission Process</h2>
+            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">Admission Process</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Our straightforward admission process ensures a smooth experience for families.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <div key={index} className="bg-sky-600 text-white rounded-2xl p-8 text-center shadow-md">
-                <div className="w-14 h-14 bg-sky-500 rounded-full flex items-center justify-center mx-auto mb-4 text-sky-700">
+              <div key={index} className="bg-cyan-600 text-white rounded-2xl p-8 text-center shadow-md">
+                <div className="w-14 h-14 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-700">
                   {step.icon}
                 </div>
-                <span className="text-sky-600 text-sm font-bold">{step.step}</span>
+                <span className="text-cyan-600 text-sm font-bold">{step.step}</span>
                 <h4 className="text-xl font-bold mt-1 mb-3">{step.title}</h4>
-                <p className="text-sky-100 text-sm leading-relaxed">{step.description}</p>
+                <p className="text-cyan-100 text-sm leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
@@ -300,14 +300,14 @@ export default function Admissions() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Requirements */}
-          <div className="bg-sky-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-cyan-600 text-white rounded-2xl p-10 shadow-md">
             <h3 className="text-2xl font-bold font-serif mb-6">Admission Requirements</h3>
-            <h4 className="text-sky-600 font-bold mb-4">Required Documents</h4>
+            <h4 className="text-cyan-600 font-bold mb-4">Required Documents</h4>
             <ul className="space-y-3">
               {requirements.map((req, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <CheckCircle size={18} className="text-sky-600 mt-0.5 shrink-0" />
-                  <span className="text-sky-100 text-sm">{req}</span>
+                  <CheckCircle size={18} className="text-cyan-600 mt-0.5 shrink-0" />
+                  <span className="text-cyan-100 text-sm">{req}</span>
                 </li>
               ))}
             </ul>
@@ -318,15 +318,15 @@ export default function Admissions() {
             <h3 className="text-2xl font-bold font-serif mb-6">Important Dates</h3>
             <div className="space-y-6">
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-sky-600 font-bold mb-1">Application Deadline</h4>
+                <h4 className="text-cyan-600 font-bold mb-1">Application Deadline</h4>
                 <p className="text-purple-200 text-sm">Rolling admissions — Applications accepted first and second term</p>
               </div>
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-sky-600 font-bold mb-1">Assessment Period</h4>
+                <h4 className="text-cyan-600 font-bold mb-1">Assessment Period</h4>
                 <p className="text-purple-200 text-sm">Scheduled within 1 week of application submission</p>
               </div>
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-sky-600 font-bold mb-1">Enrollment Confirmation</h4>
+                <h4 className="text-cyan-600 font-bold mb-1">Enrollment Confirmation</h4>
                 <p className="text-purple-200 text-sm">Within 1 week of assessment completion</p>
               </div>
             </div>
@@ -336,18 +336,18 @@ export default function Admissions() {
       </section>
 
       {/* Admission Form */}
-      <section className="py-20 bg-sky-50">
+      <section className="py-20 bg-cyan-50">
         <div className="max-w-4xl mx-auto px-4">
 
           <div className="text-center mb-10">
-            <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">Admission Form</h2>
+            <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">Admission Form</h2>
             <p className="text-gray-600">Complete all sections below to begin your admission process.</p>
           </div>
 
           {/* Learner's Data */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Learner's Data</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Learner's Data</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={labelClass}>First Name <span className="text-red-500">*</span></label>
@@ -430,7 +430,7 @@ export default function Admissions() {
                 <label className={labelClass}>Passport-Sized Picture</label>
                 <p className="text-xs text-gray-400 mb-2">Recommended: JPG or PNG format, 4x6 cm (passport size)</p>
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-xl bg-sky-100 overflow-hidden border-2 border-sky-600 flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-xl bg-cyan-100 overflow-hidden border-2 border-cyan-600 flex items-center justify-center">
                     {photoPreview ? (
                       <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
@@ -445,7 +445,7 @@ export default function Admissions() {
 
           {/* Family Data */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Family Data</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Family Data</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={labelClass}>Parent/Guardian Name <span className="text-red-500">*</span></label>
@@ -476,7 +476,7 @@ export default function Admissions() {
 
           {/* Father Info */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Father Info</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Father Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {[
                 { label: 'Name', name: 'fatherName' },
@@ -510,7 +510,7 @@ export default function Admissions() {
 
           {/* Mother Info */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Mother Info</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Mother Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {[
                 { label: 'Name', name: 'motherName' },
@@ -544,7 +544,7 @@ export default function Admissions() {
 
           {/* Significant Data */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Significant Data</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Significant Data</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={labelClass}>Youngster Lives With</label>
@@ -613,7 +613,7 @@ export default function Admissions() {
 
           {/* Emergency Contact */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Emergency Contact</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Emergency Contact</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={labelClass}>Contact Name <span className="text-red-500">*</span></label>
@@ -648,7 +648,7 @@ export default function Admissions() {
 
           {/* Document Uploads */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-6 pb-2 border-b border-gray-100">Child's National Health Insurance Scheme (NHIS) Card</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-6 pb-2 border-b border-gray-100">Child's National Health Insurance Scheme (NHIS) Card</h3>
             <p className="text-sm text-gray-500 mb-4">Please upload clear images of both the front and back of the NHIS card</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -663,7 +663,7 @@ export default function Admissions() {
               </div>
             </div>
 
-            <h3 className="text-xl font-bold font-serif text-sky-700 mt-8 mb-4 pb-2 border-b border-gray-100">Guardian's Ghana Card (National ID)</h3>
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mt-8 mb-4 pb-2 border-b border-gray-100">Guardian's Ghana Card (National ID)</h3>
             <p className="text-sm text-gray-500 mb-4">Please upload clear images of both the front and back of the Ghana card</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
@@ -681,7 +681,7 @@ export default function Admissions() {
 
          {/* Admission Booklet Section */}
           <div className={sectionClass}>
-            <h3 className="text-xl font-bold font-serif text-sky-700 mb-2 pb-2 border-b border-gray-100">
+            <h3 className="text-xl font-bold font-serif text-cyan-700 mb-2 pb-2 border-b border-gray-100">
               Admission Booklet & Consent
             </h3>
             <p className="text-gray-500 text-sm mb-6">
@@ -691,15 +691,15 @@ export default function Admissions() {
             {/* Step 1 - Download */}
             <div className="bg-blue-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
+                <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-sky-700 mb-1">Download Admission Booklet</h4>
+                  <h4 className="font-bold text-cyan-700 mb-1">Download Admission Booklet</h4>
                   <p className="text-sm text-gray-600 mb-3">
                     Click to download our admission document. It contains the school policies, rules and regulations, and a preview of your filled form.
                   </p>
                   <button
                     onClick={() => generateAdmissionBooklet(formData, photo, nhisFront, nhisBack, ghanaFront, ghanaBack)}
-                    className="flex items-center gap-2 bg-sky-600 hover:bg-sky-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                   >
                     <Download size={16} />
                     Download Admission Booklet (.docx)
@@ -709,11 +709,11 @@ export default function Admissions() {
             </div>
 
             {/* Step 2 - Sign */}
-            <div className="bg-sky-50 rounded-xl p-5 mb-4">
+            <div className="bg-cyan-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center text-sky-700 font-bold text-sm shrink-0">2</div>
+                <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-cyan-700 font-bold text-sm shrink-0">2</div>
                 <div>
-                  <h4 className="font-bold text-sky-700 mb-1">Read, Sign and Save</h4>
+                  <h4 className="font-bold text-cyan-700 mb-1">Read, Sign and Save</h4>
                   <p className="text-sm text-gray-600">
                     Carefully read all the school policies. Sign the consent section by taking a clear picture of your signature and resizing it into the signature field in the document. Save the signed document.
                   </p>
@@ -726,7 +726,7 @@ export default function Admissions() {
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 bg-[#0f6e56] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">3</div>
                 <div className="flex-1">
-                  <h4 className="font-bold text-sky-700 mb-1">Upload Signed Booklet</h4>
+                  <h4 className="font-bold text-cyan-700 mb-1">Upload Signed Booklet</h4>
                   <p className="text-sm text-gray-600 mb-3">
                     Upload the signed copy of your admission booklet below before submitting.
                   </p>
@@ -747,13 +747,13 @@ export default function Admissions() {
             </div>
 
             {/* Consent Checkbox */}
-            <div className="bg-sky-600 rounded-xl p-5">
+            <div className="bg-cyan-600 rounded-xl p-5">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={consentGiven}
                   onChange={e => setConsentGiven(e.target.checked)}
-                  className="w-5 h-5 mt-0.5 accent-sky-600 shrink-0"
+                  className="w-5 h-5 mt-0.5 accent-cyan-600 shrink-0"
                 />
                 <span className="text-white text-sm leading-relaxed">
                   I have read and understand the School Rules and Regulations, and I agree to uphold these standards and ensure my child complies with all school policies.
@@ -767,7 +767,7 @@ export default function Admissions() {
             <button
               onClick={handleSubmit}
               disabled={!consentGiven || !signedBooklet || submitLoading}
-              className="bg-sky-600 hover:bg-sky-400 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-cyan-600 hover:bg-cyan-400 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitLoading ? 'Submitting Application...' : 'Submit Application'}
             </button>

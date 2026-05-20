@@ -373,21 +373,21 @@ export default function ParentDashboard() {
   ]
 
   return (
-    <div className="flex h-screen bg-sky-100 overflow-hidden">
+    <div className="flex h-screen bg-cyan-100 overflow-hidden">
 
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-[#4a235a] text-white transition-all duration-300 flex flex-col`}>
         <div className="flex items-center justify-between p-4 border-b border-purple-900">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold text-sky-700">G</div>
+              <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
               <div>
                 <p className="text-xs font-bold">Golden-Intels</p>
-                <p className="text-xs text-sky-100">Parent Portal</p>
+                <p className="text-xs text-cyan-100">Parent Portal</p>
               </div>
             </div>
           )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:text-sky-600">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:text-cyan-600">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -398,7 +398,7 @@ export default function ParentDashboard() {
               key={item.id}
               onClick={() => setActiveMenu(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
-                activeMenu === item.id ? 'bg-sky-500 text-sky-700 font-bold' : 'hover:bg-purple-900 text-purple-200'
+                activeMenu === item.id ? 'bg-cyan-500 text-cyan-700 font-bold' : 'hover:bg-purple-900 text-purple-200'
               }`}
             >
               {item.icon}
@@ -427,7 +427,7 @@ export default function ParentDashboard() {
           <div className="flex items-center gap-4">
             <button className="relative text-gray-500 hover:text-[#4a235a]">
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-sky-500 rounded-full text-xs text-sky-700 font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
             </button>
             <div className="w-9 h-9 bg-[#4a235a] rounded-full flex items-center justify-center text-white font-bold text-sm">
               {user?.name?.charAt(0)}
@@ -444,9 +444,9 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Children', value: students.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Assignments', value: assignments.length, color: 'bg-sky-600', textColor: 'text-sky-100' },
+                  { label: 'Assignments', value: assignments.length, color: 'bg-cyan-600', textColor: 'text-cyan-100' },
                   { label: 'Avg Grade', value: 'A', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-                  { label: 'Messages', value: messages.length, color: 'bg-sky-500', textColor: 'text-sky-700/80' },
+                  { label: 'Messages', value: messages.length, color: 'bg-cyan-500', textColor: 'text-cyan-700/80' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -485,7 +485,7 @@ export default function ParentDashboard() {
                         </div>
                         <div>
                           <h3 className="font-bold text-[#4a235a]">{student.firstName} {student.lastName}</h3>
-                          <span className="inline-block bg-sky-500 text-sky-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{student.studentId}</span>
+                          <span className="inline-block bg-cyan-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{student.studentId}</span>
                         </div>
                       </div>
                       <div className="space-y-2 text-sm">
@@ -535,7 +535,7 @@ export default function ParentDashboard() {
                   ['Attendance', `${attendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
                   ['Present', attendanceSummary.present, 'bg-[#0f6e56]', 'text-green-100'],
                   ['Absent', attendanceSummary.absent, 'bg-red-500', 'text-red-100'],
-                  ['Late', attendanceSummary.late, 'bg-sky-500', 'text-sky-700/80'],
+                  ['Late', attendanceSummary.late, 'bg-cyan-500', 'text-cyan-700/80'],
                 ].map(([label, value, color, textColor]) => (
                   <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                     <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
@@ -570,13 +570,13 @@ export default function ParentDashboard() {
                         <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No attendance records available yet.</td>
                       </tr>
                     ) : attendanceRecords.map((record, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-sky-50'}>
+                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
                         <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
                         <td className="px-6 py-4">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                             record.status === 'present' ? 'bg-green-100 text-green-700' :
                             record.status === 'absent' ? 'bg-red-100 text-red-700' :
-                            'bg-sky-100 text-sky-700'
+                            'bg-cyan-100 text-cyan-700'
                           }`}>
                             {formatAttendanceStatus(record.status)}
                           </span>
@@ -640,7 +640,7 @@ export default function ParentDashboard() {
                                 return 'F'
                               }
                               return (
-                                <div key={subject} className="bg-sky-50 rounded-lg p-2 text-center">
+                                <div key={subject} className="bg-cyan-50 rounded-lg p-2 text-center">
                                   <p className="text-xs font-bold text-[#4a235a]">{subject}</p>
                                   <p className="text-sm font-bold text-gray-700">{total.toFixed(1)}</p>
                                   <p className="text-xs text-purple-600 font-bold">{getGrade(total)}</p>
@@ -660,7 +660,7 @@ export default function ParentDashboard() {
                           </button>
                           <button
                             onClick={() => handleParentDownloadPDF(result)}
-                            className="bg-sky-500 hover:bg-sky-300 text-sky-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                            className="bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
                           >
                             Download PDF
                           </button>
@@ -682,7 +682,7 @@ export default function ParentDashboard() {
                 {assignments.map((assignment, index) => (
                   <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                     <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 ${
-                      assignment.status === 'Submitted' ? 'bg-green-100 text-green-700' : 'bg-sky-100 text-sky-700'
+                      assignment.status === 'Submitted' ? 'bg-green-100 text-green-700' : 'bg-cyan-100 text-cyan-700'
                     }`}>
                       {assignment.status}
                     </span>
@@ -740,7 +740,7 @@ export default function ParentDashboard() {
                     </thead>
                     <tbody>
                       {feePayments.map((payment, index) => (
-                        <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-sky-50'}>
+                        <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
                           <td className="px-6 py-4 font-medium text-[#4a235a]">{payment.student?.firstName} {payment.student?.lastName}</td>
                           <td className="px-6 py-4 text-gray-600">{payment.month}</td>
                           <td className="px-6 py-4 text-gray-600">{payment.year}</td>
@@ -750,7 +750,7 @@ export default function ParentDashboard() {
                           <td className="px-6 py-4">
                             <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                               payment.status === 'paid' ? 'bg-green-100 text-green-700' :
-                              payment.status === 'partial' ? 'bg-sky-100 text-sky-700' :
+                              payment.status === 'partial' ? 'bg-cyan-100 text-cyan-700' :
                               'bg-red-100 text-red-700'
                             }`}>
                               {payment.status}
@@ -827,12 +827,12 @@ export default function ParentDashboard() {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
             {/* Header */}
-            <div className="bg-sky-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-cyan-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-bold font-serif">Student Academic Report</h2>
-                <p className="text-sky-100 text-sm">{viewingResult.academicYear} | {viewingResult.term}</p>
+                <p className="text-cyan-100 text-sm">{viewingResult.academicYear} | {viewingResult.term}</p>
               </div>
-              <button onClick={() => setViewingResult(null)} className="hover:text-sky-600 transition-colors">
+              <button onClick={() => setViewingResult(null)} className="hover:text-cyan-600 transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -840,32 +840,32 @@ export default function ParentDashboard() {
             <div className="p-6">
 
               {/* Gold bar */}
-              <div className="h-1 bg-sky-500 rounded-full mb-6"></div>
+              <div className="h-1 bg-cyan-500 rounded-full mb-6"></div>
 
               {/* Student Info */}
               <div className="bg-blue-50 rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-gray-500">Student Name</p>
-                  <p className="font-bold text-sky-700">{viewingResult.student?.firstName} {viewingResult.student?.lastName}</p>
+                  <p className="font-bold text-cyan-700">{viewingResult.student?.firstName} {viewingResult.student?.lastName}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Student ID</p>
-                  <p className="font-bold text-sky-700">{viewingResult.student?.studentId}</p>
+                  <p className="font-bold text-cyan-700">{viewingResult.student?.studentId}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Class</p>
-                  <p className="font-bold text-sky-700">{viewingResult.gradeLevel}</p>
+                  <p className="font-bold text-cyan-700">{viewingResult.gradeLevel}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Gender</p>
-                  <p className="font-bold text-sky-700">{viewingResult.student?.gender}</p>
+                  <p className="font-bold text-cyan-700">{viewingResult.student?.gender}</p>
                 </div>
               </div>
 
               {/* Subjects Table */}
               <div className="rounded-xl overflow-hidden border border-gray-100 mb-6">
                 <table className="w-full text-sm">
-                  <thead className="bg-sky-600 text-white">
+                  <thead className="bg-cyan-600 text-white">
                     <tr>
                       <th className="px-4 py-3 text-left">Subject</th>
                       <th className="px-4 py-3 text-center">Class(10)</th>
@@ -901,8 +901,8 @@ export default function ParentDashboard() {
                         return 'text-red-600'
                       }
                       return (
-                        <tr key={subject} className={index % 2 === 0 ? 'bg-white' : 'bg-sky-50'}>
-                          <td className="px-4 py-3 font-bold text-sky-700">{subject}</td>
+                        <tr key={subject} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-50'}>
+                          <td className="px-4 py-3 font-bold text-cyan-700">{subject}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{classScore}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{cat1}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{cat2}</td>
@@ -913,9 +913,9 @@ export default function ParentDashboard() {
                       )
                     })}
                     {/* Grand Total Row */}
-                    <tr className="bg-sky-500">
-                      <td colSpan="5" className="px-4 py-3 font-bold text-sky-700">Grand Total</td>
-                      <td className="px-4 py-3 text-center font-bold text-sky-700">
+                    <tr className="bg-cyan-500">
+                      <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
+                      <td className="px-4 py-3 text-center font-bold text-cyan-700">
                         {['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS'].reduce((acc, subject) => {
                           const s = viewingResult.scores[subject] || {}
                           const classScore = parseFloat(s.classScore) || 0
@@ -934,7 +934,7 @@ export default function ParentDashboard() {
 
               {/* Remarks */}
               <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <p className="text-sm font-bold text-sky-700 mb-1">Class Teacher's Remarks</p>
+                <p className="text-sm font-bold text-cyan-700 mb-1">Class Teacher's Remarks</p>
                 <p className="text-sm text-gray-600 italic">{viewingResult.remarks || 'No remarks provided.'}</p>
               </div>
 
@@ -942,13 +942,13 @@ export default function ParentDashboard() {
               <div className="flex gap-3">
                 <button
                   onClick={() => handleParentDownloadPDF(viewingResult)}
-                  className="flex-1 bg-sky-500 hover:bg-sky-300 text-sky-700 font-bold py-3 rounded-xl transition-colors"
+                  className="flex-1 bg-cyan-500 hover:bg-cyan-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors"
                 >
                   Download PDF
                 </button>
                 <button
                   onClick={() => setViewingResult(null)}
-                  className="flex-1 bg-sky-600 hover:bg-sky-400 text-white font-bold py-3 rounded-xl transition-colors"
+                  className="flex-1 bg-cyan-600 hover:bg-cyan-400 text-white font-bold py-3 rounded-xl transition-colors"
                 >
                   Close
                 </button>

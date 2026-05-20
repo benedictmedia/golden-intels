@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-sky-600 text-white">
+    <footer className="bg-cyan-600 text-white">
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -11,26 +11,26 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-sky-200 rounded-full flex items-center justify-center font-bold text-sky-900 text-lg">G</div>
+            <div className="w-10 h-10 bg-cyan-200 rounded-full flex items-center justify-center font-bold text-cyan-900 text-lg">G</div>
             <div>
               <p className="font-bold text-sm">Golden-Intels</p>
-              <p className="text-xs text-sky-100">International School</p>
+              <p className="text-xs text-cyan-100">International School</p>
             </div>
           </div>
-          <p className="text-sky-100 text-sm leading-relaxed mb-4">
+          <p className="text-cyan-100 text-sm leading-relaxed mb-4">
             An Oxford-accredited institution dedicated to developing confident, creative, and globally minded learners since 2017.
           </p>
           <div className="flex gap-3">
-            <a href="#" className="w-8 h-8 bg-sky-700 hover:bg-sky-500 hover:text-sky-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               f
             </a>
-            <a href="#" className="w-8 h-8 bg-sky-700 hover:bg-sky-500 hover:text-sky-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               X
             </a>
-            <a href="#" className="w-8 h-8 bg-sky-700 hover:bg-sky-500 hover:text-sky-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               in
             </a>
-            <a href="#" className="w-8 h-8 bg-sky-700 hover:bg-sky-500 hover:text-sky-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
+            <a href="#" className="w-8 h-8 bg-cyan-700 hover:bg-cyan-500 hover:text-cyan-900 rounded-full flex items-center justify-center transition-colors text-xs font-bold">
               yt
             </a>
           </div>
@@ -38,7 +38,7 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div>
-          <h4 className="font-bold text-sky-200 mb-4">Quick Links</h4>
+          <h4 className="font-bold text-cyan-200 mb-4">Quick Links</h4>
           <ul className="space-y-2 text-sm">
             {[
               { label: 'Home', path: '/' },
@@ -50,7 +50,7 @@ export default function Footer() {
               { label: 'Admissions', path: '/admissions' },
             ].map(link => (
               <li key={link.label}>
-                <Link to={link.path} className="text-sky-100 hover:text-sky-200 transition-colors">
+                <Link to={link.path} className="text-cyan-100 hover:text-cyan-200 transition-colors">
                   {link.label}
                 </Link>
               </li>
@@ -60,7 +60,7 @@ export default function Footer() {
 
         {/* More Links */}
         <div>
-          <h4 className="font-bold text-sky-200 mb-4">More</h4>
+          <h4 className="font-bold text-cyan-200 mb-4">More</h4>
           <ul className="space-y-2 text-sm">
             {[
               { label: 'Our Staff', path: '/staff' },
@@ -70,7 +70,7 @@ export default function Footer() {
               { label: 'Portal Login', path: '/login' },
             ].map(link => (
               <li key={link.label}>
-                <Link to={link.path} className="text-sky-100 hover:text-sky-200 transition-colors">
+                <Link to={link.path} className="text-cyan-100 hover:text-cyan-200 transition-colors">
                   {link.label}
                 </Link>
               </li>
@@ -80,19 +80,19 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h4 className="font-bold text-sky-200 mb-4">Contact Us</h4>
+          <h4 className="font-bold text-cyan-200 mb-4">Contact Us</h4>
           <ul className="space-y-4 text-sm">
             <li className="flex items-start gap-3">
-              <MapPin size={16} className="text-sky-200 mt-0.5 shrink-0" />
-              <span className="text-sky-100">Golden-Intels International School, Ghana</span>
+              <MapPin size={16} className="text-cyan-200 mt-0.5 shrink-0" />
+              <span className="text-cyan-100">Golden-Intels International School, Ghana</span>
             </li>
             <li className="flex items-center gap-3">
-              <Phone size={16} className="text-sky-200 shrink-0" />
-              <span className="text-sky-100">+233 000 000 000</span>
+              <Phone size={16} className="text-cyan-200 shrink-0" />
+              <span className="text-cyan-100">+233 000 000 000</span>
             </li>
             <li className="flex items-center gap-3">
-              <Mail size={16} className="text-sky-200 shrink-0" />
-              <span className="text-sky-100">info@goldenintels.com</span>
+              <Mail size={16} className="text-cyan-200 shrink-0" />
+              <span className="text-cyan-100">info@goldenintels.com</span>
             </li>
           </ul>
         </div>
@@ -100,7 +100,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-sky-300 py-6 text-center text-sm text-sky-100">
+      <div className="border-t border-cyan-300 py-6 text-center text-sm text-cyan-100">
         <p>© {new Date().getFullYear()} Golden-Intels International School. All rights reserved.</p>
       </div>
 

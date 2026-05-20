@@ -35,15 +35,15 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-gradient-to-br from-sky-200 via-sky-100 to-sky-50">
+    <section className="py-20 bg-gradient-to-br from-cyan-200 via-cyan-100 to-cyan-50">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <span className="inline-block bg-sky-500 text-sky-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+          <span className="inline-block bg-cyan-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
             Why Choose Us
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-sky-700 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
             Why Choose Golden-Intels
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -55,10 +55,10 @@ export default function WhyChooseUs() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {reasons.map((reason, index) => (
             <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              <div className="text-sky-600 mb-4">
+              <div className="text-cyan-600 mb-4">
                 {reason.icon}
               </div>
-              <h3 className="text-xl font-bold text-sky-700 mb-2">{reason.title}</h3>
+              <h3 className="text-xl font-bold text-cyan-700 mb-2">{reason.title}</h3>
               <p className="text-gray-600">{reason.description}</p>
             </div>
           ))}
