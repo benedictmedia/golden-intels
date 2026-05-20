@@ -118,7 +118,7 @@ export default function Admissions() {
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to submit application. Please try again.')
+      alert(error.response?.data?.message || error.response?.data?.error || 'Failed to submit application. Please try again.')
     } finally {
       setSubmitLoading(false)
     }

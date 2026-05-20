@@ -8,17 +8,45 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-const createStorage = (folder) => new CloudinaryStorage({
+const createStorage = (folder, options = {}) => new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    return {
+    const params = {
       folder: `goldenintels/${folder}`,
       resource_type: 'auto',
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'docx'],
+    }
+
+    if (options.transform !== false) {
+      params.transformation = [
+          { quality: 'auto:low', fetch_format: 'auto' },
+          { width: 1920, height: 1080, crop: 'limit' }
+        ]
+    }
+
+    return params
+  },
+})
+
+const createAdmissionsStorage = () => new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const isDocument = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword'
+    ].includes(file.mimetype)
+
+    return {
+      folder: 'goldenintels/admissions',
+      resource_type: isDocument ? 'raw' : 'image',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'],
+      ...(isDocument ? {} : {
       transformation: [
         { quality: 'auto:low', fetch_format: 'auto' },
         { width: 1920, height: 1080, crop: 'limit' }
       ],
+      }),
     }
   },
 })
@@ -27,6 +55,6 @@ const uploadStudentPhoto = multer({ storage: createStorage('students'), limits: 
 const uploadGallery = multer({ storage: createStorage('gallery'), limits: { fileSize: 10 * 1024 * 1024 } })
 const uploadNews = multer({ storage: createStorage('news'), limits: { fileSize: 10 * 1024 * 1024 } })
 const uploadStaff = multer({ storage: createStorage('staff'), limits: { fileSize: 10 * 1024 * 1024 } })
-const uploadAdmissions = multer({ storage: createStorage('admissions'), limits: { fileSize: 10 * 1024 * 1024 } })
+const uploadAdmissions = multer({ storage: createAdmissionsStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
 
 module.exports = { cloudinary, uploadStudentPhoto, uploadGallery, uploadNews, uploadStaff, uploadAdmissions }
