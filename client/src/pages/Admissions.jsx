@@ -159,46 +159,31 @@ export default function Admissions() {
         {/* Hero Banner */}
         <PageHero badge="Admissions" title="Admissions" subtitle="Begin your journey to excellence. Join our community of learners." />
 
-        {/* Payment Info + Login */}
+        {/* Admission Access + Login */}
         <section className="py-20 bg-blue-50">
           <div className="max-w-4xl mx-auto px-4">
 
-            {/* Payment Instructions */}
+            {/* Access Instructions */}
             <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md mb-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <Lock size={20} className="text-cyan-700" />
                 </div>
-                <h2 className="text-2xl font-bold font-serif">Access the Admission Form</h2>
+                <h2 className="text-2xl font-bold font-serif">Admission Access</h2>
               </div>
               <p className="text-cyan-100 text-lg mb-6">
-                To access our admission form, you are required to pay a non-refundable admission form fee. This fee does not include tuition or feeding.
+                To begin admissions, please visit the school or call the school office. Admission conversations are arranged in person or by phone with our school leaders.
               </p>
               <div className="bg-white/10 rounded-xl p-6 mb-6">
-                <h3 className="text-cyan-600 font-bold text-lg mb-4">Payment Details</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-cyan-100">Amount:</span>
-                    <span className="text-white font-bold text-xl">GHS 430.00</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-cyan-100">Account Number:</span>
-                    <span className="text-white font-bold">0594330816</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-cyan-100">Account Name:</span>
-                    <span className="text-white font-bold">Goldenintels Educare</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-cyan-100">Payment Method:</span>
-                    <span className="text-white font-bold">Mobile Money / Bank Transfer</span>
-                  </div>
-                </div>
+                <h3 className="text-cyan-600 font-bold text-lg mb-4">How to get your access credentials</h3>
+                <p className="text-cyan-100 text-sm leading-relaxed">
+                  Once your admission discussion is completed with the school office, you will receive a unique <strong className="text-white">Serial Number</strong> and <strong className="text-white">PIN</strong> to access the online admission form.
+                </p>
               </div>
               <div className="bg-blue-500/20 rounded-xl p-4">
-                <p className="text-cyan-600 text-sm font-bold mb-1">After Payment:</p>
+                <p className="text-cyan-600 text-sm font-bold mb-1">Need help?</p>
                 <p className="text-cyan-100 text-sm">
-                  After making payment, contact the school office with your payment receipt. You will be issued a unique <strong className="text-white">Serial Number</strong> and <strong className="text-white">PIN</strong> to access the admission form.
+                  Contact the school office for assistance with admission access and credential issuance.
                 </p>
               </div>
             </div>
