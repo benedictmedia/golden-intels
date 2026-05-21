@@ -8,7 +8,6 @@ import About from './pages/About'
 import Academics from './pages/Academics'
 import Curriculum from './pages/Curriculum'
 import CampusLife from './pages/CampusLife'
-import StudentLife from './pages/StudentLife'
 import Admissions from './pages/Admissions'
 import Gallery from './pages/Gallery'
 import NewsEvents from './pages/NewsEvents'
@@ -30,7 +29,6 @@ function AnimatedRoutes() {
           <Route path="/academics" element={<PageTransition><Navbar /><Academics /><Footer /></PageTransition>} />
           <Route path="/curriculum" element={<PageTransition><Navbar /><Curriculum /><Footer /></PageTransition>} />
           <Route path="/campus-life" element={<PageTransition><Navbar /><CampusLife /><Footer /></PageTransition>} />
-          <Route path="/student-life" element={<PageTransition><Navbar /><StudentLife /><Footer /></PageTransition>} />
           <Route path="/admissions" element={<PageTransition><Navbar /><Admissions /><Footer /></PageTransition>} />
           <Route path="/gallery" element={<PageTransition><Navbar /><Gallery /><Footer /></PageTransition>} />
           <Route path="/news" element={<PageTransition><Navbar /><NewsEvents /><Footer /></PageTransition>} />

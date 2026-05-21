@@ -46,7 +46,6 @@ export default function Footer() {
               { label: 'Academics', path: '/academics' },
               { label: 'Curriculum', path: '/curriculum' },
               { label: 'Campus Life', path: '/campus-life' },
-              { label: 'Student Life', path: '/student-life' },
               { label: 'Admissions', path: '/admissions' },
             ].map(link => (
               <li key={link.label}>

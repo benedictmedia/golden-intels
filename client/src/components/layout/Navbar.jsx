@@ -8,7 +8,6 @@ const navLinks = [
   { name: 'Academics', path: '/academics' },
   { name: 'Curriculum', path: '/curriculum' },
   { name: 'Campus Life', path: '/campus-life' },
-  { name: 'Student Life', path: '/student-life' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'Admissions', path: '/admissions' },
   { name: 'Our Staff', path: '/staff' },

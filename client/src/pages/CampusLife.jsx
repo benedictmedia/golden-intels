@@ -1,11 +1,18 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import campusLifeImg from '../assets/campus-life.jpg'
 import academicActivitiesImg from '../assets/academic-activities.jpg'
 import artsActivitiesImg from '../assets/arts-activities.jpg'
 import sportsActivitiesImg from '../assets/sports-activities.jpg'
 import communityActivitiesImg from '../assets/community-activities.jpg'
+import clubDebateImg from '../assets/club-debate.jpg'
+import clubScienceImg from '../assets/club-science.jpg'
+import clubCodingImg from '../assets/club-coding.jpg'
+import clubMusicImg from '../assets/club-music.jpg'
+import clubSportsImg from '../assets/club-sports.jpg'
+import clubDramaImg from '../assets/club-drama.jpg'
+import clubEnvironmentImg from '../assets/club-environment.jpg'
 
 const activities = [
   {
@@ -61,14 +68,106 @@ const activities = [
   },
 ]
 
+const clubs = [
+  {
+    name: 'Debators Club',
+    category: 'Academic',
+    image: clubDebateImg,
+    color: 'bg-blue-600',
+    textColor: 'text-cyan-100',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Building confident communicators and critical thinkers through the art of debate.',
+    fullDescription: 'The Debators Club at Golden-Intels is a dynamic platform where students develop the art of persuasive communication, critical thinking, and logical reasoning. Members engage in structured debates on a wide range of topics — from current affairs to philosophical questions — sharpening their ability to construct well-reasoned arguments and respond confidently under pressure. The club prepares students for public speaking competitions, inter-school debate tournaments, and builds the confidence needed to express ideas clearly and respectfully in any setting.',
+    meets: 'Every Tuesday after school',
+    openTo: 'All year groups',
+  },
+  {
+    name: 'Science and Maths Club',
+    category: 'Academic',
+    image: clubScienceImg,
+    color: 'bg-[#0f6e56]',
+    textColor: 'text-green-200',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Exploring the wonders of science and mathematics through hands-on experiments.',
+    fullDescription: 'The Science and Maths Club is a haven for curious minds who love to explore, experiment, and discover. Students engage in exciting lab experiments, mathematical puzzles, science quizzes, and problem-solving challenges that go beyond the regular curriculum. The club encourages students to think like scientists and mathematicians — asking questions, forming hypotheses, testing ideas, and drawing conclusions. Members regularly participate in science fairs and mathematics competitions, representing Golden-Intels with pride and enthusiasm.',
+    meets: 'Every Wednesday after school',
+    openTo: 'Years 3 and above',
+  },
+  {
+    name: 'Coding and STEM Club',
+    category: 'Technology',
+    image: clubCodingImg,
+    color: 'bg-[#185fa5]',
+    textColor: 'text-blue-100',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Empowering future innovators through coding, robotics, and technology.',
+    fullDescription: 'The Coding and STEM Club is where future innovators, engineers, and tech leaders are born. Students learn programming languages, build robots, design apps, and explore the exciting intersection of Science, Technology, Engineering, and Mathematics. Through project-based learning and creative challenges, members develop computational thinking, problem-solving skills, and a passion for innovation. The club also introduces students to emerging technologies like artificial intelligence and automation, preparing them for the careers of tomorrow.',
+    meets: 'Every Thursday after school',
+    openTo: 'All year groups',
+  },
+  {
+    name: 'Music and Orchestra Club',
+    category: 'Arts',
+    image: clubMusicImg,
+    color: 'bg-[#4a235a]',
+    textColor: 'text-purple-200',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Celebrating musical talent through choir, orchestra, and performance.',
+    fullDescription: 'The Music and Orchestra Club nurtures the musical talents of students across all year groups. Whether a student is a complete beginner or an experienced musician, the club provides a welcoming and inspiring environment to learn, practice, and perform. Members participate in the school choir, learn to play various instruments, and come together as an orchestra to perform at school events, concerts, and community gatherings. The club instills discipline, teamwork, and a deep appreciation for music and the performing arts.',
+    meets: 'Every Monday and Friday after school',
+    openTo: 'All year groups',
+  },
+  {
+    name: 'Sports Club',
+    category: 'Sports',
+    image: clubSportsImg,
+    color: 'bg-[#0f6e56]',
+    textColor: 'text-green-200',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Building healthy bodies, teamwork, and resilience through sport.',
+    fullDescription: 'The Sports Club at Golden-Intels promotes physical fitness, teamwork, and a healthy lifestyle for all students. Members participate in a variety of sporting activities including football, athletics, and physical fitness training. The club teaches students the values of sportsmanship, perseverance, and teamwork while helping them build physical strength, coordination, and confidence. Students have the opportunity to represent the school in inter-school sporting competitions and develop a lifelong love for physical activity and healthy living.',
+    meets: 'Every Tuesday and Thursday',
+    openTo: 'All year groups',
+  },
+  {
+    name: 'Drama Club',
+    category: 'Arts',
+    image: clubDramaImg,
+    color: 'bg-[#993556]',
+    textColor: 'text-cyan-200',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Bringing stories to life through theatre, performance, and creative expression.',
+    fullDescription: 'The Drama Club is a creative space where students discover the joy of storytelling, performance, and theatrical arts. Members explore scriptwriting, acting techniques, stage direction, costume design, and set building, gaining a comprehensive understanding of what it takes to produce a theatrical performance. The club stages termly productions and performances that showcase the incredible talent of our students. Drama builds confidence, emotional intelligence, empathy, and public speaking skills — all of which are invaluable life skills that extend well beyond the stage.',
+    meets: 'Every Wednesday and Friday after school',
+    openTo: 'All year groups',
+  },
+  {
+    name: 'Environmental and Health Club',
+    category: 'Community',
+    image: clubEnvironmentImg,
+    color: 'bg-[#3B6D11]',
+    textColor: 'text-green-100',
+    tagColor: 'bg-blue-500 text-cyan-700',
+    shortDescription: 'Championing sustainability, health, and environmental responsibility.',
+    fullDescription: 'The Environmental and Health Club empowers students to become responsible stewards of the environment and advocates for healthy living. Members engage in sustainability projects, environmental clean-up campaigns, tree planting, recycling initiatives, and health awareness programs. The club organizes the school\'s annual Environmental Day and leads campaigns that raise awareness about climate change, personal hygiene, nutrition, and mental wellness. Students develop a deep sense of responsibility towards their community, their environment, and their own wellbeing.',
+    meets: 'Every Friday after school',
+    openTo: 'All year groups',
+  },
+]
+
+const categories = ['All', 'Academic', 'Technology', 'Arts', 'Sports', 'Community']
+
 export default function CampusLife() {
   const [selected, setSelected] = useState(null)
+  const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState('All')
+  const [selectedClub, setSelectedClub] = useState(null)
 
   return (
     <div>
 
       {/* Hero Banner */}
-      <PageHero badge="Campus Life" title="Campus Life" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campusLifeImg}/>
+      <PageHero badge="Activities & Clubs" title="Our Activities & Clubs" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campusLifeImg}/>
       {/* Beyond Academics */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
@@ -165,6 +264,70 @@ export default function CampusLife() {
         </div>
       </section>
 
+      {/* Clubs / Student Life (migrated) */}
+      <section className="bg-blue-50 py-10">
+        <div className="max-w-4xl mx-auto px-4">
+
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search activities and clubs..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-lg"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-3 justify-center mb-8">
+            {['All', 'Academic', 'Technology', 'Arts', 'Sports', 'Community'].map(cat => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
+                  activeCategory === cat
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Clubs Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {clubs.filter(club => {
+              const matchesSearch =
+                club.name.toLowerCase().includes(search.toLowerCase()) ||
+                club.shortDescription.toLowerCase().includes(search.toLowerCase())
+              const matchesCategory = activeCategory === 'All' || club.category === activeCategory
+              return matchesSearch && matchesCategory
+            }).map((club, index) => (
+              <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <img src={club.image} alt={club.name} className="w-full h-48 object-cover" />
+                <div className={`${club.color} p-6`}>
+                  <span className={`inline-block ${club.tagColor} text-xs font-bold px-3 py-1 rounded-full mb-3`}>
+                    {club.category}
+                  </span>
+                  <h3 className="text-xl font-bold text-white mb-2">{club.name}</h3>
+                  <p className={`${club.textColor} text-sm leading-relaxed mb-4`}>{club.shortDescription}</p>
+                  <div className={`${club.textColor} text-xs mb-4 space-y-1`}>
+                    <p><span className="text-cyan-600 font-bold">Meets:</span> {club.meets}</p>
+                    <p><span className="text-cyan-600 font-bold">Open to:</span> {club.openTo}</p>
+                  </div>
+                  <button onClick={() => setSelectedClub(club)} className="w-full bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">
+                    Learn More
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -209,6 +372,37 @@ export default function CampusLife() {
               >
                 Close
               </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Club Modal (for migrated Student Life clubs) */}
+      {selectedClub && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+
+            {/* Modal Image */}
+            <div className="relative">
+              <img src={selectedClub.image} alt={selectedClub.name} className="w-full h-56 object-cover rounded-t-2xl" />
+              <button onClick={() => setSelectedClub(null)} className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors">
+                <X size={20} className="text-cyan-700" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-4">{selectedClub.category}</span>
+              <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-4">{selectedClub.name}</h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">{selectedClub.fullDescription}</p>
+
+              <div className="bg-blue-50 rounded-xl p-4 mb-8 space-y-2">
+                <p className="text-gray-700"><span className="font-bold text-cyan-700">Meets: </span>{selectedClub.meets}</p>
+                <p className="text-gray-700"><span className="font-bold text-cyan-700">Open to: </span>{selectedClub.openTo}</p>
+              </div>
+
+              <button onClick={() => setSelectedClub(null)} className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
             </div>
 
           </div>
