@@ -13,6 +13,7 @@ import Admissions from './pages/Admissions'
 import Gallery from './pages/Gallery'
 import NewsEvents from './pages/NewsEvents'
 import Staff from './pages/Staff'
+import Contact from './pages/Contact'
 import Login from './pages/Login'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
@@ -21,7 +22,7 @@ import ParentDashboard from './pages/parent/ParentDashboard'
 function AnimatedRoutes() {
   const location = useLocation()
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-blue-400 to-blue-300 text-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-fuchsia-50 to-violet-100 text-slate-900">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />
@@ -34,6 +35,7 @@ function AnimatedRoutes() {
           <Route path="/gallery" element={<PageTransition><Navbar /><Gallery /><Footer /></PageTransition>} />
           <Route path="/news" element={<PageTransition><Navbar /><NewsEvents /><Footer /></PageTransition>} />
           <Route path="/staff" element={<PageTransition><Navbar /><Staff /><Footer /></PageTransition>} />
+          <Route path="/contact" element={<PageTransition><Navbar /><Contact /><Footer /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
