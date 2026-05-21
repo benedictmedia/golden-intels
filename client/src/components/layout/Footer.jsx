@@ -45,7 +45,7 @@ export default function Footer() {
               { label: 'About Us', path: '/about' },
               { label: 'Academics', path: '/academics' },
               { label: 'Curriculum', path: '/curriculum' },
-              { label: 'Campus Life', path: '/campus-life' },
+              { label: 'Our Activities & Clubs', path: '/campus-life' },
               { label: 'Admissions', path: '/admissions' },
             ].map(link => (
               <li key={link.label}>

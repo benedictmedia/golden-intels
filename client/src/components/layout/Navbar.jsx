@@ -7,7 +7,7 @@ const navLinks = [
   { name: 'About Us', path: '/about' },
   { name: 'Academics', path: '/academics' },
   { name: 'Curriculum', path: '/curriculum' },
-  { name: 'Campus Life', path: '/campus-life' },
+  { name: 'Our Activities & Clubs', path: '/campus-life' },
   { name: 'Gallery', path: '/gallery' },
   { name: 'Admissions', path: '/admissions' },
   { name: 'Our Staff', path: '/staff' },

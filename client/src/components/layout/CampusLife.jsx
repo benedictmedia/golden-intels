@@ -21,7 +21,7 @@ export default function CampusLife() {
         <div className="flex-1">
           <img
             src={campusImg}
-            alt="Campus Life at Golden-Intels"
+            alt="Our Activities & Clubs at Golden-Intels"
             className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
           />
         </div>
@@ -29,13 +29,13 @@ export default function CampusLife() {
         {/* Right: Text */}
         <div className="flex-1">
           <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
-            Campus Life
+            Activities & Clubs
           </span>
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
-            Vibrant Campus Life
+            Discover Our Activities & Clubs
           </h2>
           <p className="text-gray-600 text-lg leading-relaxed mb-8">
-            Beyond academics, our students thrive in a rich environment of coding, Computer Skills, STEM, arts and music, baking, sewing and braiding, Physical education and sports, and many more. We believe in developing well-rounded individuals prepared for all aspects of life.
+            Beyond academics, our students thrive in a rich environment of coding, computer skills, STEM, arts and music, baking, sewing and braiding, physical education and sports, and many more. We believe in developing well-rounded individuals prepared for all aspects of life.
           </p>
 
           {/* Activities */}
@@ -52,7 +52,7 @@ export default function CampusLife() {
             to="/campus-life"
             className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
           >
-            Discover Campus Life
+            Discover Our Activities & Clubs
           </Link>
         </div>
 
