@@ -776,7 +776,7 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
-                            {app.photo ? <img src={app.photo} alt={app.firstName} className="w-full h-full object-cover" /> :
+                            {app.photo ? <img src={app.photo} alt={app.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                               <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-xl">{app.firstName?.charAt(0)}</div>}
                           </div>
                           <div>
@@ -813,7 +813,7 @@ export default function AdminDashboard() {
                     <div className="p-6">
                       <div className="flex items-center gap-6 mb-6">
                         <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-200 border-4 border-blue-600">
-                          {viewingApplication.photo ? <img src={viewingApplication.photo} alt={viewingApplication.firstName} className="w-full h-full object-cover" /> :
+                          {viewingApplication.photo ? <img src={viewingApplication.photo} alt={viewingApplication.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                             <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{viewingApplication.firstName?.charAt(0)}</div>}
                         </div>
                         <div>
@@ -845,7 +845,7 @@ export default function AdminDashboard() {
                           {[['NHIS Card - Front', viewingApplication.nhisFront], ['NHIS Card - Back', viewingApplication.nhisBack], ['Ghana Card - Front', viewingApplication.ghanaFront], ['Ghana Card - Back', viewingApplication.ghanaBack]].map((doc, di) => (
                             <div key={di} className="bg-blue-50 rounded-lg p-3">
                               <p className="text-xs font-bold text-cyan-700 mb-2">{doc[0]}</p>
-                              {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
+                              {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" loading="lazy" decoding="async" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
                             </div>
                           ))}
                         </div>
@@ -1070,7 +1070,7 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
-                            {result.student?.photo ? <img src={result.student.photo} alt={result.student.firstName} className="w-full h-full object-cover" /> :
+                            {result.student?.photo ? <img src={result.student.photo} alt={result.student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                               <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold">{result.student?.firstName?.charAt(0)}</div>}
                           </div>
                           <div>
@@ -1144,7 +1144,7 @@ export default function AdminDashboard() {
                   <h3 className="text-xl font-bold text-cyan-700 mb-6">Add New Learner</h3>
                   <div className="flex items-center gap-6 mb-6">
                     <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden border-4 border-blue-600 flex items-center justify-center">
-                      {photoPreview ? <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" /> : <span className="text-gray-400 text-xs text-center px-2">No Photo</span>}
+                      {photoPreview ? <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <span className="text-gray-400 text-xs text-center px-2">No Photo</span>}
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Passport Photo</label>
@@ -1213,7 +1213,7 @@ export default function AdminDashboard() {
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
-                              {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" /> :
+                              {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                                 <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-sm">{student.firstName?.charAt(0)}</div>}
                             </div>
                           </td>
@@ -1363,7 +1363,7 @@ export default function AdminDashboard() {
                         <div className="grid grid-cols-4 gap-3 mt-3">
                           {galleryPreviews.map((preview, index) => (
                             <div key={index} className="relative">
-                              <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-xl" />
+                              <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-xl" loading="lazy" decoding="async" />
                               <span className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{index + 1}</span>
                             </div>
                           ))}
@@ -1384,7 +1384,7 @@ export default function AdminDashboard() {
                   {galleryItems.map(item => (
                     <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                       <div className="relative cursor-pointer" onClick={() => { setViewingGallery(item); setActiveGalleryImage(0) }}>
-                        <img src={item.images[0]} alt={item.title} className="w-full h-48 object-cover" />
+                        <img src={item.images[0]} alt={item.title} className="w-full h-48 object-cover" loading="lazy" decoding="async" />
                         {item.images.length > 1 && <span className="absolute top-2 right-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-full">+{item.images.length - 1} more</span>}
                         <span className="absolute top-2 left-2 bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{item.category}</span>
                       </div>
@@ -1423,9 +1423,9 @@ export default function AdminDashboard() {
                         <label className="block text-sm font-bold text-cyan-700 mb-2">Replace Images (optional)</label>
                         <input type="file" accept="image/*" multiple onChange={handleGalleryImageChange} className="text-sm text-gray-600" />
                         {galleryPreviews.length > 0 ? (
-                          <div className="grid grid-cols-4 gap-2 mt-3">{galleryPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" />)}</div>
+                          <div className="grid grid-cols-4 gap-2 mt-3">{galleryPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" loading="lazy" decoding="async" />)}</div>
                         ) : (
-                          <div className="grid grid-cols-4 gap-2 mt-3">{editingGallery.images.map((img, index) => <img key={index} src={img} alt={`Current ${index + 1}`} className="w-full h-16 object-cover rounded-lg opacity-60" />)}</div>
+                          <div className="grid grid-cols-4 gap-2 mt-3">{editingGallery.images.map((img, index) => <img key={index} src={img} alt={`Current ${index + 1}`} className="w-full h-16 object-cover rounded-lg opacity-60" loading="lazy" decoding="async" />)}</div>
                         )}
                       </div>
                       <div className="flex gap-3">
@@ -1444,7 +1444,7 @@ export default function AdminDashboard() {
                       <button onClick={() => setViewingGallery(null)} className="text-white hover:text-cyan-600 transition-colors"><X size={28} /></button>
                     </div>
                     <div className="relative mb-4">
-                      <img src={viewingGallery.images[activeGalleryImage]} alt={viewingGallery.title} className="w-full max-h-[60vh] object-contain rounded-xl" />
+                      <img src={viewingGallery.images[activeGalleryImage]} alt={viewingGallery.title} className="w-full max-h-[60vh] object-contain rounded-xl" loading="lazy" decoding="async" />
                       {viewingGallery.images.length > 1 && (
                         <>
                           <button onClick={() => setActiveGalleryImage(prev => prev === 0 ? viewingGallery.images.length - 1 : prev - 1)} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors">‹</button>
@@ -1455,7 +1455,17 @@ export default function AdminDashboard() {
                     </div>
                     {viewingGallery.images.length > 1 && (
                       <div className="flex gap-2 overflow-x-auto pb-2">
-                        {viewingGallery.images.map((img, index) => <img key={index} src={img} alt={`${index + 1}`} onClick={() => setActiveGalleryImage(index)} className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${activeGalleryImage === index ? 'ring-2 ring-cyan-500' : 'opacity-60 hover:opacity-100'}`} />)}
+                        {viewingGallery.images.map((img, index) => (
+                          <img
+                            key={index}
+                            src={img}
+                            alt={`${index + 1}`}
+                            onClick={() => setActiveGalleryImage(index)}
+                            className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${activeGalleryImage === index ? 'ring-2 ring-cyan-500' : 'opacity-60 hover:opacity-100'}`}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
@@ -1516,7 +1526,7 @@ export default function AdminDashboard() {
                         <div>
                           <label className="block text-sm font-bold text-cyan-700 mb-2">Images (up to 5)</label>
                           <input type="file" accept="image/*" multiple onChange={handleNewsImageChange} className="text-sm text-gray-600" />
-                          {newsPreviews.length > 0 && <div className="grid grid-cols-4 gap-2 mt-3">{newsPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" />)}</div>}
+                          {newsPreviews.length > 0 && <div className="grid grid-cols-4 gap-2 mt-3">{newsPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" loading="lazy" decoding="async" />)}</div>}
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
@@ -1533,7 +1543,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredNews.map(item => (
                     <div key={item.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                      {item.images && item.images.length > 0 && <img src={item.images[0]} alt={item.title} className="w-full h-44 object-cover" />}
+                      {item.images && item.images.length > 0 && <img src={item.images[0]} alt={item.title} className="w-full h-44 object-cover" loading="lazy" decoding="async" />}
                       <div className="p-5">
                         <div className="flex items-center gap-2 mb-2">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'}`}>{item.type === 'event' ? 'Event' : 'News'}</span>
@@ -1582,8 +1592,8 @@ export default function AdminDashboard() {
                     <div className="p-6">
                       <div className="flex items-center gap-6 mb-6">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
-                          {staffPhotoPreview ? <img src={staffPhotoPreview} alt="Preview" className="w-full h-full object-cover" /> :
-                            editingStaff?.photo ? <img src={editingStaff.photo} alt="Current" className="w-full h-full object-cover" /> :
+                          {staffPhotoPreview ? <img src={staffPhotoPreview} alt="Preview" className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
+                            editingStaff?.photo ? <img src={editingStaff.photo} alt="Current" className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                             <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{staffForm.name?.charAt(0) || '?'}</div>}
                         </div>
                         <div>
@@ -1626,7 +1636,7 @@ export default function AdminDashboard() {
                   {staffList.map(member => (
                     <div key={member.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
                       <div className="relative">
-                        {member.photo ? <img src={member.photo} alt={member.name} className="w-full h-48 object-cover" /> :
+                        {member.photo ? <img src={member.photo} alt={member.name} className="w-full h-48 object-cover" loading="lazy" decoding="async" /> :
                           <div className="w-full h-48 bg-blue-600 flex items-center justify-center"><span className="text-cyan-600 text-4xl font-bold">{member.name?.charAt(0)}</span></div>}
                         <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-cyan-700' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#0f6e56] text-white'}`}>
                           {member.category === 'leadership' ? 'Leadership' : member.category === 'teaching' ? 'Teaching' : 'Support'}
@@ -1663,7 +1673,7 @@ export default function AdminDashboard() {
             <div className="p-6">
               <div className="flex items-center gap-6 mb-6">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
-                  {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" /> :
+                  {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                     <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
                 </div>
                 <div>

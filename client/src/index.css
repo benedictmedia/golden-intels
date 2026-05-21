@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    background-color: #0ea5ff;
+    background-color: #f3f4f6;
     color: #0f172a;
   }
 
@@ -17,11 +17,11 @@
 
 @layer components {
   .page-bg {
-    background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 50%, #7dd3fc 100%);
+    background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 50%, #f3f4f6 100%);
   }
 
   .section-bg-alt {
-    background: linear-gradient(135deg, #38bdf8 0%, #93c5fd 100%);
+    background: linear-gradient(135deg, #f8f6eb 0%, #ede9d2 100%);
   }
 
   .card-hover {
@@ -30,6 +30,6 @@
 
   .card-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(230, 0, 169, 0.18);
+    box-shadow: 0 20px 40px rgba(212, 160, 23, 0.2);
   }
 }

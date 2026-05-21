@@ -51,8 +51,7 @@ export default function AcademicExcellence() {
           <img
             src={schoolImg}
             alt="Golden-Intels International School"
-            className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-          />
+            className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
         </div>
       </div>
     </section>

@@ -3,7 +3,7 @@ import { Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-200">
+    <footer className="bg-blue-900 text-slate-200">
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -11,7 +11,7 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center font-bold text-emerald-900 text-lg">G</div>
+            <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center font-bold text-blue-900 text-lg">G</div>
             <div>
               <p className="font-bold text-sm text-white">Golden-Intels</p>
               <p className="text-xs text-slate-400">International School</p>

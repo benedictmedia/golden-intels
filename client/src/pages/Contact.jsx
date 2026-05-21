@@ -25,7 +25,7 @@ export default function Contact() {
     <main className="bg-gradient-to-br from-cyan-50 via-fuchsia-50 to-violet-100 text-slate-900">
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200">
+          <p className="inline-flex rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-blue-900 ring-1 ring-cyan-200">
             Reach out to Golden-Intels
           </p>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
@@ -58,13 +58,13 @@ export default function Contact() {
 
             <div className="rounded-[2rem] bg-white/90 p-8 shadow-xl ring-1 ring-slate-200">
               <div className="flex items-start gap-4">
-                <div className="rounded-3xl bg-emerald-600 p-4 text-white shadow-md">
+                <div className="rounded-3xl bg-cyan-600 p-4 text-white shadow-md">
                   <MessageSquare size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">WhatsApp</h2>
                   <p className="mt-3 text-slate-600">Reach school staff on WhatsApp for fast, informal support.</p>
-                  <p className="mt-4 text-slate-700"><a href="https://wa.me/233240000000" className="text-emerald-700 hover:text-emerald-800">+233 24 000 0000</a></p>
+                  <p className="mt-4 text-slate-700"><a href="https://wa.me/233240000000" className="text-cyan-700 hover:text-cyan-800">+233 24 000 0000</a></p>
                 </div>
               </div>
             </div>

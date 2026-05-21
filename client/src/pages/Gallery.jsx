@@ -91,8 +91,7 @@ export default function Gallery() {
                     <img
                       src={`${item.images[0]}`}
                       alt={item.title}
-                      className="w-full h-56 object-cover"
-                    />
+                      className="w-full h-56 object-cover" loading="lazy" decoding="async" />
                     {item.images.length > 1 && (
                       <span className="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-full">
                         +{item.images.length - 1} more
@@ -142,8 +141,7 @@ export default function Gallery() {
               <img
                 src={`${viewingItem.images[activeImage]}`}
                 alt={viewingItem.title}
-                className="w-full max-h-[65vh] object-contain rounded-xl"
-              />
+                className="w-full max-h-[65vh] object-contain rounded-xl" loading="lazy" decoding="async" />
               {viewingItem.images.length > 1 && (
                 <>
                   <button
@@ -177,6 +175,8 @@ export default function Gallery() {
                     className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${
                       activeImage === index ? 'ring-2 ring-cyan-500 opacity-100' : 'opacity-50 hover:opacity-100'
                     }`}
+                    loading="lazy"
+                    decoding="async"
                   />
                 ))}
               </div>

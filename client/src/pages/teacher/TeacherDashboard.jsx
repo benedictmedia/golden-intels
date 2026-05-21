@@ -682,7 +682,7 @@ export default function TeacherDashboard() {
                           <td className="px-6 py-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-[#0f6e56]">
                               {student.photo ? (
-                                <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" />
+                                <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-[#0f6e56] font-bold text-sm">
                                   {student.firstName?.charAt(0)}

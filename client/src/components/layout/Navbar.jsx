@@ -24,7 +24,7 @@ export default function Navbar() {
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center font-bold text-emerald-900 text-lg">G</div>
+          <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center font-bold text-blue-900 text-lg">G</div>
           <div className="leading-tight">
             <p className="font-bold text-sm text-slate-900">Golden-Intels</p>
             <p className="text-xs text-slate-500">International School</p>
@@ -35,7 +35,7 @@ export default function Navbar() {
         <ul className="hidden lg:flex items-center gap-5 text-sm font-medium">
           {navLinks.map(link => (
             <li key={link.name}>
-              <Link to={link.path} className="text-slate-700 hover:text-fuchsia-600 transition-colors">
+              <Link to={link.path} className="text-slate-700 hover:text-cyan-700 transition-colors">
                 {link.name}
               </Link>
             </li>
@@ -43,7 +43,7 @@ export default function Navbar() {
         </ul>
 
         {/* Portal button */}
-        <Link to="/login" className="hidden lg:block bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm shadow-fuchsia-200/40">
+        <Link to="/login" className="hidden lg:block bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm shadow-cyan-200/40">
           Portal Login
         </Link>
 
@@ -59,13 +59,13 @@ export default function Navbar() {
           <ul className="flex flex-col gap-3 mt-3 text-sm">
             {navLinks.map(link => (
               <li key={link.name}>
-                <Link to={link.path} onClick={() => setMenuOpen(false)} className="text-slate-700 hover:text-fuchsia-600 transition-colors block">
+                <Link to={link.path} onClick={() => setMenuOpen(false)} className="text-slate-700 hover:text-cyan-700 transition-colors block">
                   {link.name}
                 </Link>
               </li>
             ))}
             <li>
-              <Link to="/login" className="block bg-fuchsia-600 text-white font-bold text-center py-2 rounded-lg mt-2 hover:bg-fuchsia-700 transition-colors">
+              <Link to="/login" className="block bg-cyan-600 text-white font-bold text-center py-2 rounded-lg mt-2 hover:bg-cyan-700 transition-colors">
                 Portal Login
               </Link>
             </li>

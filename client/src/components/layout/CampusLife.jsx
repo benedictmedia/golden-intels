@@ -22,8 +22,7 @@ export default function CampusLife() {
           <img
             src={campusImg}
             alt="Our Activities & Clubs at Golden-Intels"
-            className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-          />
+            className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
         </div>
 
         {/* Right: Text */}

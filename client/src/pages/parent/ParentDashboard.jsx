@@ -476,7 +476,7 @@ export default function ParentDashboard() {
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 border-4 border-[#4a235a]">
                           {student.photo ? (
-                            <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" />
+                            <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[#4a235a] font-bold text-xl">
                               {student.firstName?.charAt(0)}

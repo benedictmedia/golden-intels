@@ -157,8 +157,7 @@ export default function NewsEvents() {
                       <img
                         src={`${item.images[0]}`}
                         alt={item.title}
-                        className="w-full h-52 object-cover"
-                      />
+                        className="w-full h-52 object-cover" loading="lazy" decoding="async" />
                       {item.images.length > 1 && (
                         <span className="absolute top-3 right-3 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-full">
                           +{item.images.length - 1}
@@ -216,7 +215,7 @@ export default function NewsEvents() {
                   onClick={() => setViewingItem(item)}
                 >
                   {item.images && item.images.length > 0 ? (
-                    <img src={`${item.images[0]}`} alt={item.title} className="w-32 h-24 object-cover rounded-xl shrink-0" />
+                    <img src={`${item.images[0]}`} alt={item.title} className="w-32 h-24 object-cover rounded-xl shrink-0" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-32 h-24 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
                       <span className="text-cyan-600 font-bold text-xl">GI</span>
@@ -284,8 +283,7 @@ export default function NewsEvents() {
                   <img
                     src={`${viewingItem.images[0]}`}
                     alt={viewingItem.title}
-                    className="w-full h-64 object-cover rounded-xl mb-3"
-                  />
+                    className="w-full h-64 object-cover rounded-xl mb-3" loading="lazy" decoding="async" />
                   {viewingItem.images.length > 1 && (
                     <div className="flex gap-2 overflow-x-auto">
                       {viewingItem.images.slice(1).map((img, index) => (
@@ -293,8 +291,7 @@ export default function NewsEvents() {
                           key={index}
                           src={`${img}`}
                           alt={`Photo ${index + 2}`}
-                          className="w-20 h-16 object-cover rounded-lg shrink-0"
-                        />
+                          className="w-20 h-16 object-cover rounded-lg shrink-0" loading="lazy" decoding="async" />
                       ))}
                     </div>
                   )}

@@ -198,8 +198,7 @@ export default function CampusLife() {
             <img
               src={campusLifeImg}
               alt="Campus Life at Golden-Intels"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-            />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
           </div>
 
         </div>
@@ -231,8 +230,7 @@ export default function CampusLife() {
                 <img
                   src={activity.image}
                   alt={activity.category}
-                  className="w-full h-48 object-cover"
-                />
+                  className="w-full h-48 object-cover" loading="lazy" decoding="async" />
 
                 {/* Content */}
                 <div className={`${activity.color} p-6 h-full`}>
@@ -307,7 +305,7 @@ export default function CampusLife() {
               return matchesSearch && matchesCategory
             }).map((club, index) => (
               <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <img src={club.image} alt={club.name} className="w-full h-48 object-cover" />
+                <img src={club.image} alt={club.name} className="w-full h-48 object-cover" loading="lazy" decoding="async" />
                 <div className={`${club.color} p-6`}>
                   <span className={`inline-block ${club.tagColor} text-xs font-bold px-3 py-1 rounded-full mb-3`}>
                     {club.category}
@@ -338,8 +336,7 @@ export default function CampusLife() {
               <img
                 src={selected.image}
                 alt={selected.category}
-                className="w-full h-56 object-cover rounded-t-2xl"
-              />
+                className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button
                 onClick={() => setSelected(null)}
                 className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors"
@@ -385,7 +382,7 @@ export default function CampusLife() {
 
             {/* Modal Image */}
             <div className="relative">
-              <img src={selectedClub.image} alt={selectedClub.name} className="w-full h-56 object-cover rounded-t-2xl" />
+              <img src={selectedClub.image} alt={selectedClub.name} className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button onClick={() => setSelectedClub(null)} className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors">
                 <X size={20} className="text-cyan-700" />
               </button>

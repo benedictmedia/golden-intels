@@ -432,7 +432,7 @@ export default function Admissions() {
                 <div className="flex items-center gap-6">
                   <div className="w-24 h-24 rounded-xl bg-blue-100 overflow-hidden border-2 border-blue-600 flex items-center justify-center">
                     {photoPreview ? (
-                      <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     ) : (
                       <span className="text-gray-400 text-xs text-center px-2">No Photo</span>
                     )}

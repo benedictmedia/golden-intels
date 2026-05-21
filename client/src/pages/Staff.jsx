@@ -44,7 +44,7 @@ export default function Staff() {
     >
       <div className="relative">
         {member.photo ? (
-          <img src={`${member.photo}`} alt={member.name} className="w-full h-56 object-cover" />
+          <img src={`${member.photo}`} alt={member.name} className="w-full h-56 object-cover" loading="lazy" decoding="async" />
         ) : (
           <div className="w-full h-56 bg-blue-600 flex items-center justify-center">
             <span className="text-cyan-600 text-5xl font-bold">{member.name?.charAt(0)}</span>
@@ -135,7 +135,7 @@ export default function Staff() {
               <div className="flex items-center gap-6 mb-6">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600 shrink-0">
                   {selectedStaff.photo ? (
-                    <img src={`${selectedStaff.photo}`} alt={selectedStaff.name} className="w-full h-full object-cover" />
+                    <img src={`${selectedStaff.photo}`} alt={selectedStaff.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">
                       {selectedStaff.name?.charAt(0)}

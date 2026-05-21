@@ -59,8 +59,7 @@ export default function About() {
             <img
               src={aboutImg}
               alt="Our Story"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-            />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
           </div>
 
         </div>
@@ -174,8 +173,7 @@ export default function About() {
             <img
               src={oxfordImg}
               alt="Oxford Accreditation"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-            />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
           </div>
 
         </div>

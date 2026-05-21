@@ -85,8 +85,7 @@ export default function Curriculum() {
                   <img
                     src={program.image}
                     alt={program.title}
-                    className="w-full h-48 object-cover"
-                  />
+                    className="w-full h-48 object-cover" loading="lazy" decoding="async" />
 
                   {/* Content */}
                   <div className="p-8">
@@ -131,8 +130,7 @@ export default function Curriculum() {
               <img
                 src={selected.image}
                 alt={selected.title}
-                className="w-full h-56 object-cover rounded-t-2xl"
-              />
+                className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button
                 onClick={() => setSelected(null)}
                 className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-blue-100 transition-colors"

@@ -21,7 +21,7 @@ import ParentDashboard from './pages/parent/ParentDashboard'
 function AnimatedRoutes() {
   const location = useLocation()
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-fuchsia-50 to-violet-100 text-slate-900">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />

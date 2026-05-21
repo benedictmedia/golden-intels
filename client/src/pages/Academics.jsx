@@ -57,8 +57,7 @@ export default function Academics() {
             <img
               src={academicsImg}
               alt="Our Hybrid Curriculum"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-            />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
           </div>
 
         </div>
@@ -312,8 +311,7 @@ export default function Academics() {
             <img
               src={programmesImg}
               alt="Programme Offerings"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
-            />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
           </div>
 
           {/* Right: Text Card */}
