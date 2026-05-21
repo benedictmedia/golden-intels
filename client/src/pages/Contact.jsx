@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, MessageCircle, Phone, MapPin, Whatsapp } from 'lucide-react'
+import { Mail, MessageCircle, MessageSquare, Phone, MapPin } from 'lucide-react'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -59,7 +59,7 @@ export default function Contact() {
             <div className="rounded-[2rem] bg-white/90 p-8 shadow-xl ring-1 ring-slate-200">
               <div className="flex items-start gap-4">
                 <div className="rounded-3xl bg-emerald-600 p-4 text-white shadow-md">
-                  <Whatsapp size={24} />
+                  <MessageSquare size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">WhatsApp</h2>
