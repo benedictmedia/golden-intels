@@ -17,6 +17,7 @@ import Login from './pages/Login'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
 import ParentDashboard from './pages/parent/ParentDashboard'
+import LearnerDashboard from './pages/learner/LearnerDashboard'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -38,6 +39,7 @@ function AnimatedRoutes() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/parent" element={<ParentDashboard />} />
+          <Route path="/learner" element={<LearnerDashboard />} />
         </Routes>
       </AnimatePresence>
     </div>

@@ -19,6 +19,7 @@ export default function Login() {
       if (user.role === 'admin') navigate('/admin')
       else if (user.role === 'teacher') navigate('/teacher')
       else if (user.role === 'parent') navigate('/parent')
+      else if (user.role === 'learner') navigate('/learner')
       else navigate('/')
     } catch (err) {
       setError('Invalid email or password. Please try again.')
@@ -84,10 +85,10 @@ export default function Login() {
           <div className="space-y-1">
             <p className="text-xs text-gray-500">👤 Admin — Full school management</p>
             <p className="text-xs text-gray-500">📚 Teacher — Classes and gradebook</p>
-            <p className="text-xs text-gray-500">👨‍👩‍👧 Parent — Child progress and fees</p>
+            <p className="text-xs text-gray-500">👨‍👩‍👧 Parent — Child progress and school updates</p>
+            <p className="text-xs text-gray-500">👩‍🎓 Learner — Learning resources, assignments and quizzes</p>
           </div>
         </div>
-
       </div>
     </div>
   )
