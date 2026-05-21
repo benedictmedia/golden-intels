@@ -1241,7 +1241,7 @@ export default function AdminDashboard() {
           {activeMenu === 'create-account' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-2xl">
               <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-2">Create Account</h2>
-              <p className="text-gray-500 mb-8">Create accounts for teachers and parents.</p>
+              <p className="text-gray-500 mb-8">Create accounts for teachers, parents, and learners to access their respective portals.</p>
               {createSuccess && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">Account created successfully!</div>}
               {createError && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{createError}</div>}
               <div className="space-y-5">
@@ -1256,6 +1256,7 @@ export default function AdminDashboard() {
                   <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
+                    <option value="learner">Learner</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
