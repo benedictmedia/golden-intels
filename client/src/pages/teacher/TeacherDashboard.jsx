@@ -464,7 +464,7 @@ export default function TeacherDashboard() {
   const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
   const [quizzes, setQuizzes] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
-  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
@@ -588,7 +588,7 @@ export default function TeacherDashboard() {
     setLmsItemView(null)
     setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Year 1' })
     setNewLesson({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   }
 
   const handleViewLmsItem = (item, type) => {
@@ -661,7 +661,7 @@ export default function TeacherDashboard() {
         dueDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : item.dueDate || '',
         dueTime: parsedDate ? parsedDate.toISOString().slice(11, 16) : (item.dueTime || ''),
         durationMinutes: item.durationMinutes,
-        questions: item.questions,
+        questions: item.questions?.map(q => ({ type: q.type || 'multiple-choice', prompt: q.prompt, options: q.options || ['', '', '', ''], answer: q.answer })) || [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }],
         published: item.published
       })
       setShowAddQuiz(true)
@@ -745,7 +745,7 @@ export default function TeacherDashboard() {
   const addQuizQuestion = () => {
     setNewQuiz(prev => ({
       ...prev,
-      questions: [...prev.questions, { prompt: '', options: ['', '', '', ''], answer: '' }]
+      questions: [...prev.questions, { prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }]
     }))
   }
 
@@ -1634,25 +1634,42 @@ export default function TeacherDashboard() {
                       <div className="space-y-6">
                         {newQuiz.questions.map((question, index) => (
                           <div key={index} className="bg-blue-50 rounded-2xl p-5 border border-gray-200">
-                            <div className="flex items-center justify-between gap-4 mb-4">
+                            <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
                               <h4 className="font-bold text-[#0f6e56]">Question {index + 1}</h4>
+                              <div className="flex items-center gap-3">
+                                <label className="text-sm font-semibold text-[#0f6e56]">Type</label>
+                                <select value={question.type || 'multiple-choice'} onChange={e => handleQuizQuestionChange(index, 'type', e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                                  <option value="multiple-choice">Multiple choice</option>
+                                  <option value="fill-in">Fill in the blank</option>
+                                </select>
+                              </div>
                               <button type="button" onClick={() => removeQuizQuestion(index)} className="text-red-600 text-sm">Remove</button>
                             </div>
                             <label className="block text-sm font-bold text-[#0f6e56] mb-2">Prompt</label>
                             <input type="text" value={question.prompt} onChange={e => handleQuizQuestionChange(index, 'prompt', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 mb-4" />
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              {question.options.map((option, optionIndex) => (
-                                <div key={optionIndex}>
-                                  <label className="block text-sm font-bold text-[#0f6e56] mb-2">Option {optionIndex + 1}</label>
-                                  <input type="text" value={option} onChange={e => handleQuizOptionChange(index, optionIndex, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                            {question.type === 'multiple-choice' ? (
+                              <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                  {question.options.map((option, optionIndex) => (
+                                    <div key={optionIndex}>
+                                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Option {optionIndex + 1}</label>
+                                      <input type="text" value={option} onChange={e => handleQuizOptionChange(index, optionIndex, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                            <label className="block text-sm font-bold text-[#0f6e56] mb-2">Correct Answer</label>
-                            <select value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                              <option value="">Select correct option</option>
-                              {question.options.map((option, optionIndex) => <option key={optionIndex} value={option}>{option || `Option ${optionIndex + 1}`}</option>)}
-                            </select>
+                                <label className="block text-sm font-bold text-[#0f6e56] mb-2">Correct Answer</label>
+                                <select value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                                  <option value="">Select correct option</option>
+                                  {question.options.map((option, optionIndex) => <option key={optionIndex} value={option}>{option || `Option ${optionIndex + 1}`}</option>)}
+                                </select>
+                              </>
+                            ) : (
+                              <>
+                                <label className="block text-sm font-bold text-[#0f6e56] mb-2">Correct Answer</label>
+                                <input type="text" value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                                <p className="text-xs text-gray-500 mt-2">Learners will type the answer directly.</p>
+                              </>
+                            )}
                           </div>
                         ))}
                       </div>

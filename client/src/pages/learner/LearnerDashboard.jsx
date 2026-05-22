@@ -49,6 +49,47 @@ export default function LearnerDashboard() {
     return navigator.userAgent || navigator.platform || 'Unknown device'
   }
 
+  const handleDownloadLearnerPdf = async (record) => {
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF()
+      doc.setFontSize(16)
+      doc.text('Learner Submission Report', 14, 20)
+      doc.setFontSize(11)
+      doc.text(`Name: ${record.learnerName || 'Learner'}`, 14, 30)
+      doc.text(`Email: ${record.learnerEmail || 'No email'}`, 14, 36)
+      doc.text(`Device: ${record.device || 'Unknown device'}`, 14, 42)
+      doc.text(`Submitted: ${formatDateTime(record.submittedAt)}`, 14, 48)
+      doc.text(`Time used: ${record.timeUsedSeconds != null ? `${Math.round(record.timeUsedSeconds)} sec` : 'N/A'}`, 14, 54)
+      doc.text(`Resource: ${record.type} - ${record.title || 'N/A'}`, 14, 60)
+      if (record.score != null) {
+        doc.text(`Score: ${record.score} / ${record.totalQuestions ?? record.questions?.length ?? 'N/A'}`, 14, 66)
+      }
+      doc.text('Question Review:', 14, 76)
+      let y = 84
+      ;(record.questions || []).forEach((question, index) => {
+        if (y > 260) {
+          doc.addPage()
+          y = 20
+        }
+        const selected = question.selected || 'No answer'
+        const correct = question.answer || 'N/A'
+        const match = question.answer != null && selected.trim().toLowerCase() === correct.trim().toLowerCase()
+        const symbol = match ? '✔' : '✖'
+        doc.setFontSize(12)
+        doc.text(`Q${index + 1}. ${question.prompt}`, 14, y)
+        y += 6
+        doc.text(`${symbol} Your answer: ${selected}`, 18, y)
+        y += 6
+        doc.text(`Correct answer: ${correct}`, 18, y)
+        y += 8
+      })
+      doc.save(`${record.learnerName || 'Learner'}-${record.type}-submission.pdf`)
+    } catch (error) {
+      console.error('Failed to generate learner PDF:', error)
+    }
+  }
+
   const formatDateTime = (value) => {
     if (!value) return '-'
     const date = new Date(value)
@@ -314,13 +355,27 @@ export default function LearnerDashboard() {
                       </div>
                       <p className="text-gray-600 mb-4">{assignment.description}</p>
                       {submission ? (
-                        <div className="bg-green-50 border border-green-200 text-green-700 rounded-2xl p-4">
-                          <p className="font-bold">Submitted</p>
-                          <p className="text-sm">{submission.answer}</p>
-                          <p className="text-xs text-gray-500 mt-2">{new Date(submission.submittedAt).toLocaleString()}</p>
+                        <div className="space-y-4">
+                          <div className="bg-green-50 border border-green-200 text-green-700 rounded-2xl p-4">
+                            <p className="font-bold">Submitted</p>
+                            <p className="text-sm">{submission.answer}</p>
+                            <p className="text-xs text-gray-500 mt-2">{new Date(submission.submittedAt).toLocaleString()}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDownloadLearnerPdf({
+                              ...submission,
+                              type: 'assignment',
+                              title: assignment.title,
+                              questions: [{ prompt: assignment.description || assignment.title, selected: submission.answer, answer: 'Student response' }]
+                            })}
+                            className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-3 rounded-xl"
+                          >
+                            Download Answer PDF
+                          </button>
                         </div>
                       ) : (
-                        <div className="space-y-4">
+                                        <div className="space-y-4">
+                          <label className="block text-sm font-bold text-[#0f6e56]">Fill in your answer</label>
                           <textarea
                             placeholder="Write your assignment answer here..."
                             value={assignmentAnswers[assignment.id] || ''}
@@ -382,26 +437,43 @@ export default function LearnerDashboard() {
                             <p className="text-sm">Score: {submission.score} / {quiz.questions.length}</p>
                             <p className="text-xs text-gray-500 mt-2">{new Date(submission.submittedAt).toLocaleString()}</p>
                           </div>
-                          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                            <h4 className="text-lg font-bold text-[#0f6e56] mb-4">Review your answers</h4>
-                            <div className="space-y-4">
-                              {quiz.questions.map((question, idx) => {
-                                const selected = submission.answers?.[idx] || 'No answer'
-                                const isCorrect = selected === question.answer
-                                return (
-                                  <div key={idx} className={`rounded-2xl p-4 border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                                    <div className="flex items-start justify-between gap-4">
-                                      <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
-                                      <span className={`text-xs font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
-                                        {isCorrect ? 'Correct' : 'Incorrect'}
-                                      </span>
+                          <div className="space-y-4">
+                            <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                              <h4 className="text-lg font-bold text-[#0f6e56] mb-4">Review your answers</h4>
+                              <div className="space-y-4">
+                                {quiz.questions.map((question, idx) => {
+                                  const selected = submission.answers?.[idx] || 'No answer'
+                                  const isCorrect = String(selected).trim().toLowerCase() === String(question.answer).trim().toLowerCase()
+                                  return (
+                                    <div key={idx} className={`rounded-2xl p-4 border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                                      <div className="flex items-start justify-between gap-4">
+                                        <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
+                                        <span className={`text-xs font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                          {isCorrect ? '✔ Correct' : '✖ Incorrect'}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-gray-700 mt-2">Your answer: {selected}</p>
+                                      <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
                                     </div>
-                                    <p className="text-sm text-gray-700 mt-2">Your answer: {selected}</p>
-                                    <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
-                                  </div>
-                                )
-                              })}
+                                  )
+                                })}
+                              </div>
                             </div>
+                            <button
+                              onClick={() => handleDownloadLearnerPdf({
+                                ...submission,
+                                type: 'quiz',
+                                title: quiz.title,
+                                questions: quiz.questions.map((question, idx) => ({
+                                  prompt: question.prompt,
+                                  selected: submission.answers?.[idx] || 'No answer',
+                                  answer: question.answer
+                                }))
+                              })}
+                              className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-3 rounded-xl"
+                            >
+                              Download Quiz PDF
+                            </button>
                           </div>
                         </div>
                       ) : !activeQuizId || activeQuizId !== quiz.id ? (
@@ -417,26 +489,43 @@ export default function LearnerDashboard() {
                         <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4">This quiz is now closed.</div>
                       ) : (
                         <div className="space-y-6">
-                          {quiz.questions.map((question, idx) => (
-                            <div key={idx} className="bg-blue-50 rounded-2xl p-4">
-                              <p className="font-bold text-[#0f6e56] mb-2">Q{idx + 1}. {question.prompt}</p>
-                              <div className="space-y-2">
-                                {question.options.map((option, optionIndex) => (
-                                  <label key={optionIndex} className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                      type="radio"
-                                      name={`quiz-${quiz.id}-q-${idx}`}
-                                      value={option}
-                                      checked={quizAnswers[quiz.id]?.[idx] === option}
-                                      onChange={() => handleQuizAnswer(quiz.id, idx, option)}
-                                      className="h-4 w-4 text-[#0f6e56]"
-                                    />
-                                    <span className="text-gray-700">{option}</span>
-                                  </label>
-                                ))}
+                          {quiz.questions.map((question, idx) => {
+                            const selectedAnswer = quizAnswers[quiz.id]?.[idx] || ''
+                            const isFillIn = question.type === 'fill-in'
+                            return (
+                              <div key={idx} className="bg-blue-50 rounded-2xl p-4">
+                                <div className="flex items-center justify-between gap-4 mb-2">
+                                  <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
+                                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">{isFillIn ? 'Fill in' : 'Multiple choice'}</span>
+                                </div>
+                                {isFillIn ? (
+                                  <input
+                                    type="text"
+                                    value={selectedAnswer}
+                                    placeholder="Type your answer here"
+                                    onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)}
+                                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
+                                  />
+                                ) : (
+                                  <div className="space-y-2">
+                                    {question.options.map((option, optionIndex) => (
+                                      <label key={optionIndex} className="flex items-center gap-3 cursor-pointer rounded-2xl border border-gray-200 p-3 hover:bg-white bg-white">
+                                        <input
+                                          type="radio"
+                                          name={`quiz-${quiz.id}-q-${idx}`}
+                                          value={option}
+                                          checked={selectedAnswer === option}
+                                          onChange={() => handleQuizAnswer(quiz.id, idx, option)}
+                                          className="h-4 w-4 text-[#0f6e56]"
+                                        />
+                                        <span className="text-gray-700">{option}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                           <button
                             onClick={() => handleSubmitQuiz(quiz)}
                             className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-3 rounded-xl"
