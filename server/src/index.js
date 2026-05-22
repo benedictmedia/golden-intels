@@ -3,9 +3,21 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const path = require('path')
 const bcrypt = require('bcryptjs')
+const { execSync } = require('child_process')
 const { PrismaClient } = require('@prisma/client')
 
 dotenv.config()
+
+try {
+  console.log('⏳ Applying Prisma migrations on startup...')
+  execSync('npx prisma migrate deploy --schema=prisma/schema.prisma', {
+    stdio: 'inherit',
+    cwd: path.join(__dirname, '..')
+  })
+  console.log('✅ Prisma migrations deployed successfully')
+} catch (error) {
+  console.error('Failed to deploy Prisma migrations:', error)
+}
 
 const prisma = new PrismaClient()
 const app = express()
