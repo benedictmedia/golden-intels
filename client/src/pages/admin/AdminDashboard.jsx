@@ -1522,20 +1522,21 @@ export default function AdminDashboard() {
                                   <p className="mt-3 text-xs text-orange-600">No staff assignment found for this teacher.</p>
                                 )}
                               </div>
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
-                              {u.active === false ? (
-                                <>
-                                  <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
-                                  <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
-                                </>
-                              ) : (
-                                <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
-                              )}
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                                {u.active === false ? (
+                                  <>
+                                    <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
+                                    <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
+                                  </>
+                                ) : (
+                                  <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
