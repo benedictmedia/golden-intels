@@ -30,6 +30,7 @@ const stats = [
 ]
 
 const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -103,7 +104,7 @@ export default function AdminDashboard() {
   const [staffLoading, setStaffLoading] = useState(false)
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
-  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
+  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
 
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
@@ -686,14 +687,22 @@ export default function AdminDashboard() {
 
   const handleAddStaff = async () => {
     if (!staffForm.name || !staffForm.role) { alert('Please fill in name and role.'); return }
+    const isTeacher = staffForm.role.toLowerCase() === 'teacher'
+    if (isTeacher && (!staffForm.classes.length || !staffForm.subjects.length)) {
+      alert('Teachers must be assigned at least one class and one subject.')
+      return
+    }
     setStaffLoading(true)
     try {
       const data = new FormData()
-      Object.entries(staffForm).forEach(([key, value]) => data.append(key, value))
+      Object.entries(staffForm).forEach(([key, value]) => {
+        if (Array.isArray(value)) data.append(key, JSON.stringify(value))
+        else data.append(key, value)
+      })
       if (staffPhoto) data.append('photo', staffPhoto)
       const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList]); setShowAddStaff(false)
-      setStaffForm({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert('Failed to add staff member.') }
     finally { setStaffLoading(false) }
@@ -701,13 +710,21 @@ export default function AdminDashboard() {
 
   const handleEditStaff = async () => {
     try {
+      const isTeacher = staffForm.role.toLowerCase() === 'teacher'
+      if (isTeacher && (!staffForm.classes.length || !staffForm.subjects.length)) {
+        alert('Teachers must be assigned at least one class and one subject.')
+        return
+      }
       const data = new FormData()
-      Object.entries(staffForm).forEach(([key, value]) => data.append(key, value))
+      Object.entries(staffForm).forEach(([key, value]) => {
+        if (Array.isArray(value)) data.append(key, JSON.stringify(value))
+        else data.append(key, value)
+      })
       if (staffPhoto) data.append('photo', staffPhoto)
       const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList(staffList.map(s => s.id === editingStaff.id ? res.data : s))
       setEditingStaff(null)
-      setStaffForm({ name: '', role: '', department: '', subject: '', bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert('Failed to update staff member.') }
   }
@@ -1829,12 +1846,57 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {[['Full Name *','name','text'],['Role *','role','text'],['Department','department','text'],['Subject','subject','text'],['Email','email','email'],['Phone','phone','text']].map(([label, key, type]) => (
+                        {[['Full Name *','name','text'],['Role *','role','text'],['Department','department','text'],['Email','email','email'],['Phone','phone','text']].map(([label, key, type]) => (
                           <div key={key}>
                             <label className="block text-sm font-bold text-cyan-700 mb-2">{label}</label>
                             <input type={type} value={staffForm[key]} onChange={e => setStaffForm({ ...staffForm, [key]: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                           </div>
                         ))}
+                        <div className="md:col-span-2 rounded-3xl border border-cyan-200 bg-cyan-50 p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h3 className="text-lg font-bold text-cyan-700">Teacher Assignment</h3>
+                              <p className="text-sm text-gray-500">These assignments only apply when the staff role is set to <span className="font-semibold">Teacher</span>.</p>
+                            </div>
+                            {staffForm.role.toLowerCase() === 'teacher' && (
+                              <span className="text-xs font-bold uppercase tracking-wide text-red-600">Required for teachers</span>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div>
+                              <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Classes</label>
+                              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
+                                {classes.slice(1).map(cls => (
+                                  <label key={cls} className="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" checked={staffForm.classes.includes(cls)} onChange={() => {
+                                      const next = staffForm.classes.includes(cls)
+                                        ? staffForm.classes.filter(c => c !== cls)
+                                        : [...staffForm.classes, cls]
+                                      setStaffForm({ ...staffForm, classes: next })
+                                    }} className="rounded text-cyan-600" />
+                                    {cls}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Subjects</label>
+                              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
+                                {subjectsList.map(subj => (
+                                  <label key={subj} className="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" checked={staffForm.subjects.includes(subj)} onChange={() => {
+                                      const next = staffForm.subjects.includes(subj)
+                                        ? staffForm.subjects.filter(s => s !== subj)
+                                        : [...staffForm.subjects, subj]
+                                      setStaffForm({ ...staffForm, subjects: next })
+                                    }} className="rounded text-cyan-600" />
+                                    {subj}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         <div>
                           <label className="block text-sm font-bold text-cyan-700 mb-2">Category</label>
                           <select value={staffForm.category} onChange={e => setStaffForm({ ...staffForm, category: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
@@ -1872,10 +1934,11 @@ export default function AdminDashboard() {
                       <div className="p-5">
                         <h3 className="font-bold text-cyan-700 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
-                        {member.subject && <p className="text-xs text-cyan-600 font-bold mb-2">{member.subject}</p>}
+                        {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Classes: {member.classes.join(', ')}</p>}
+                        {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>

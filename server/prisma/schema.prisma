@@ -175,8 +175,8 @@ model Staff {
   name       String
   role       String
   department String
-  subject    String?
-  bio        String?
+  subject    String?  subjects    String[] @default([])
+  classes     String[] @default([])  bio        String?
   photo      String?
   email      String?
   phone      String?
