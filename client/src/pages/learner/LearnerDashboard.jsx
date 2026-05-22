@@ -281,10 +281,33 @@ export default function LearnerDashboard() {
                       </div>
                       <p className="text-gray-600 mb-4">Due {quiz.dueDate ? new Date(quiz.dueDate).toLocaleDateString() : 'No deadline'}. Duration: {quiz.durationMinutes} mins.</p>
                       {submission ? (
-                        <div className="bg-green-50 border border-green-200 text-green-700 rounded-2xl p-4">
-                          <p className="font-bold">Quiz submitted</p>
-                          <p className="text-sm">Score: {submission.score} / {quiz.questions.length}</p>
-                          <p className="text-xs text-gray-500 mt-2">{new Date(submission.submittedAt).toLocaleString()}</p>
+                        <div className="space-y-4">
+                          <div className="bg-green-50 border border-green-200 text-green-700 rounded-2xl p-4">
+                            <p className="font-bold">Quiz submitted</p>
+                            <p className="text-sm">Score: {submission.score} / {quiz.questions.length}</p>
+                            <p className="text-xs text-gray-500 mt-2">{new Date(submission.submittedAt).toLocaleString()}</p>
+                          </div>
+                          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                            <h4 className="text-lg font-bold text-[#0f6e56] mb-4">Review your answers</h4>
+                            <div className="space-y-4">
+                              {quiz.questions.map((question, idx) => {
+                                const selected = submission.answers?.[idx] || 'No answer'
+                                const isCorrect = selected === question.answer
+                                return (
+                                  <div key={idx} className={`rounded-2xl p-4 border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                                    <div className="flex items-start justify-between gap-4">
+                                      <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
+                                      <span className={`text-xs font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                        {isCorrect ? 'Correct' : 'Incorrect'}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-gray-700 mt-2">Your answer: {selected}</p>
+                                    <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
                         </div>
                       ) : expired ? (
                         <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4">This quiz is now closed.</div>

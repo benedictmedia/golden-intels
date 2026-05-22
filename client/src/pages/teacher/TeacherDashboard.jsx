@@ -465,6 +465,8 @@ export default function TeacherDashboard() {
   const [showAddQuiz, setShowAddQuiz] = useState(false)
   const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
+  const [lmsItemView, setLmsItemView] = useState(null)
+  const [editingLmsItem, setEditingLmsItem] = useState(null)
 
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
 
@@ -555,24 +557,89 @@ export default function TeacherDashboard() {
     setTimeout(() => setGradesSaved(false), 3000)
   }
 
+  const resetLmsForm = () => {
+    setEditingLmsItem(null)
+    setLmsItemView(null)
+    setNewAssignment({ title: '', subject: '', dueDate: '', description: '', gradeLevel: 'Year 1' })
+    setNewLesson({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
+    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+  }
+
+  const handleViewLmsItem = (item, type) => {
+    setLmsItemView({ item, type })
+  }
+
+  const handleEditLmsItem = (item, type) => {
+    setEditingLmsItem({ item, type })
+    setLmsItemView({ item, type })
+    if (type === 'assignment') {
+      setNewAssignment({ title: item.title, subject: item.subject, dueDate: item.dueDate, description: item.description, gradeLevel: item.gradeLevel })
+      setShowAddAssignment(true)
+      setShowAddLesson(false)
+      setShowAddQuiz(false)
+    }
+    if (type === 'lesson') {
+      setNewLesson({ title: item.title, subject: item.subject, gradeLevel: item.gradeLevel, content: item.content })
+      setShowAddLesson(true)
+      setShowAddAssignment(false)
+      setShowAddQuiz(false)
+    }
+    if (type === 'quiz') {
+      setNewQuiz({ title: item.title, subject: item.subject, gradeLevel: item.gradeLevel, dueDate: item.dueDate, durationMinutes: item.durationMinutes, questions: item.questions, published: item.published })
+      setShowAddQuiz(true)
+      setShowAddAssignment(false)
+      setShowAddLesson(false)
+    }
+  }
+
+  const handleDeleteLmsItem = (itemId, type) => {
+    if (!window.confirm('Delete this item? This cannot be undone.')) return
+    if (type === 'lesson') {
+      setLessons(prev => prev.filter(item => item.id !== itemId))
+    }
+    if (type === 'assignment') {
+      setAssignments(prev => prev.filter(item => item.id !== itemId))
+    }
+    if (type === 'quiz') {
+      setQuizzes(prev => prev.filter(item => item.id !== itemId))
+    }
+    if (lmsItemView?.item?.id === itemId) setLmsItemView(null)
+    if (editingLmsItem?.item?.id === itemId) resetLmsForm()
+  }
+
   const handleAddAssignment = () => {
     if (!newAssignment.title) return
-    setAssignments([{ id: Date.now(), published: false, ...newAssignment }, ...assignments])
-    setNewAssignment({ title: '', subject: '', dueDate: '', description: '', gradeLevel: 'Year 1' })
+    if (editingLmsItem?.type === 'assignment') {
+      setAssignments(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newAssignment, published: editingLmsItem.item.published } : item))
+      setEditingLmsItem(null)
+    } else {
+      setAssignments([{ id: Date.now(), published: false, ...newAssignment }, ...assignments])
+    }
+    resetLmsForm()
     setShowAddAssignment(false)
   }
 
   const handleAddLesson = () => {
     if (!newLesson.title) return
-    setLessons([{ id: Date.now(), published: false, ...newLesson }, ...lessons])
-    setNewLesson({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
+    if (editingLmsItem?.type === 'lesson') {
+      setLessons(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newLesson, published: editingLmsItem.item.published } : item))
+      setEditingLmsItem(null)
+    } else {
+      setLessons([{ id: Date.now(), published: false, ...newLesson }, ...lessons])
+    }
+    resetLmsForm()
     setShowAddLesson(false)
   }
 
   const handleAddQuiz = () => {
     if (!newQuiz.title || newQuiz.questions.length === 0) return
-    setQuizzes([{ id: Date.now(), published: false, ...newQuiz }, ...quizzes])
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+    if (editingLmsItem?.type === 'quiz') {
+      setQuizzes(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newQuiz, published: editingLmsItem.item.published } : item))
+      setEditingLmsItem(null)
+    } else {
+      setQuizzes([{ id: Date.now(), published: false, ...newQuiz }, ...quizzes])
+    }
+    resetLmsForm()
     setShowAddQuiz(false)
   }
 
@@ -1259,6 +1326,51 @@ export default function TeacherDashboard() {
                 </div>
               </div>
 
+              {lmsItemView && (
+                <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Preview {lmsItemView.type}</p>
+                      <h3 className="text-xl font-bold text-[#0f6e56] mb-2">{lmsItemView.item.title}</h3>
+                      <p className="text-sm text-gray-500">{lmsItemView.item.subject} · {lmsItemView.item.gradeLevel}</p>
+                    </div>
+                    <button onClick={() => setLmsItemView(null)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full">Close</button>
+                  </div>
+                  {lmsItemView.type === 'lesson' && (
+                    <div className="space-y-3">
+                      <p className="text-gray-600">{lmsItemView.item.content}</p>
+                      <p className="text-xs text-gray-400">Status: {lmsItemView.item.published ? 'Published' : 'Draft'}</p>
+                    </div>
+                  )}
+                  {lmsItemView.type === 'assignment' && (
+                    <div className="space-y-3">
+                      <p className="text-gray-600">{lmsItemView.item.description}</p>
+                      <p className="text-sm text-gray-500">Due: {lmsItemView.item.dueDate}</p>
+                      <p className="text-xs text-gray-400">Status: {lmsItemView.item.published ? 'Published' : 'Draft'}</p>
+                    </div>
+                  )}
+                  {lmsItemView.type === 'quiz' && (
+                    <div className="space-y-3">
+                      <p className="text-gray-600">Due: {lmsItemView.item.dueDate} · Duration: {lmsItemView.item.durationMinutes} mins</p>
+                      <div className="space-y-4">
+                        {lmsItemView.item.questions.map((question, index) => (
+                          <div key={index} className="bg-slate-50 rounded-2xl p-4">
+                            <p className="font-bold text-[#0f6e56] mb-2">Q{index + 1}. {question.prompt}</p>
+                            <div className="grid gap-2">
+                              {question.options.map((option, optionIndex) => (
+                                <div key={optionIndex} className="text-sm text-gray-700">{option}</div>
+                              ))}
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2">Answer: {question.answer || 'N/A'}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-400">Status: {lmsItemView.item.published ? 'Published' : 'Draft'}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {lmsView === 'resources' && (
                 <div>
                   <div className="flex flex-wrap gap-3 mb-6">
@@ -1267,7 +1379,7 @@ export default function TeacherDashboard() {
 
                   {showAddLesson && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">Create Lesson</h3>
+                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">{editingLmsItem?.type === 'lesson' ? 'Edit Lesson' : 'Create Lesson'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Lesson Title</label>
@@ -1310,6 +1422,11 @@ export default function TeacherDashboard() {
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{lesson.title}</h3>
                           <p className="text-sm text-gray-500 mb-3">{lesson.subject}</p>
                           <p className="text-sm text-gray-600 leading-relaxed">{lesson.content}</p>
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            <button onClick={() => handleViewLmsItem(lesson, 'lesson')} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(lesson, 'lesson')} className="bg-white border border-[#0f6e56] text-[#0f6e56] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleDeleteLmsItem(lesson.id, 'lesson')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
+                          </div>
                         </div>
                       ))
                     )}
@@ -1325,7 +1442,7 @@ export default function TeacherDashboard() {
 
                   {showAddAssignment && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">Create Assignment</h3>
+                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">{editingLmsItem?.type === 'assignment' ? 'Edit Assignment' : 'Create Assignment'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Title</label>
@@ -1376,6 +1493,11 @@ export default function TeacherDashboard() {
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
                             {assignment.published ? 'Learners can now access this assignment.' : 'Draft: publish to send it to learners.'}
                           </div>
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            <button onClick={() => handleViewLmsItem(assignment, 'assignment')} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(assignment, 'assignment')} className="bg-white border border-[#0f6e56] text-[#0f6e56] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleDeleteLmsItem(assignment.id, 'assignment')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
+                          </div>
                         </div>
                       ))
                     )}
@@ -1391,7 +1513,7 @@ export default function TeacherDashboard() {
 
                   {showAddQuiz && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">Create Quiz</h3>
+                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">{editingLmsItem?.type === 'quiz' ? 'Edit Quiz' : 'Create Quiz'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Quiz Title</label>
@@ -1466,6 +1588,11 @@ export default function TeacherDashboard() {
                           <p className="text-sm text-gray-600 mb-3">Due {quiz.dueDate} · {quiz.durationMinutes} minutes</p>
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
                             {quiz.published ? 'Learners can now see and take this quiz.' : 'Draft: publish to send it to learners.'}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            <button onClick={() => handleViewLmsItem(quiz, 'quiz')} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(quiz, 'quiz')} className="bg-white border border-[#0f6e56] text-[#0f6e56] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleDeleteLmsItem(quiz.id, 'quiz')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
                           </div>
                         </div>
                       ))
