@@ -39,7 +39,12 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Create account state
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'teacher' })
+  const initialNewUserState = {
+    name: '', email: '', password: '', role: 'teacher',
+    classes: [], subjects: [], teacherSubject: '', teacherDepartment: 'Teaching',
+    learnerFirstName: '', learnerLastName: '', learnerDateOfBirth: '', learnerGender: '', learnerGradeLevel: '', learnerParentEmail: '', learnerParentName: '', learnerParentPhone: ''
+  }
+  const [newUser, setNewUser] = useState(initialNewUserState)
   const [createLoading, setCreateLoading] = useState(false)
   const [createSuccess, setCreateSuccess] = useState(false)
   const [createError, setCreateError] = useState('')
@@ -142,7 +147,7 @@ export default function AdminDashboard() {
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
 
   useEffect(() => {
-    if (activeMenu === 'learners') {
+    if (activeMenu === 'learners' || activeMenu === 'create-account') {
       axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
       axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params: { role: 'parent' } }).then(res => setParentAccounts(res.data.users || []))
     }
@@ -192,12 +197,14 @@ export default function AdminDashboard() {
       const formData = new FormData()
       Object.entries(newStudent).forEach(([key, value]) => formData.append(key, value))
       if (photoFile) formData.append('photo', photoFile)
-      const res = await axios.post(`${API_URL}/api/students`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const res = await axios.post(`${API_URL}/api/students`, formData, { headers: getAuthHeaders() })
       setStudents([res.data, ...students])
       setShowAddStudent(false)
       setPhotoFile(null); setPhotoPreview(null)
       setNewStudent({ firstName: '', lastName: '', dateOfBirth: '', gender: '', gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '' })
-    } catch (err) { alert('Failed to add learner. Please fill all fields.') }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
+    }
   }
 
   const handleDeleteStudent = async (id) => {
@@ -218,14 +225,53 @@ export default function AdminDashboard() {
     } catch (err) { alert('Failed to update learner details.') }
   }
 
+  const toggleSelection = (field, value) => {
+    setNewUser(prev => {
+      const list = prev[field] || []
+      return {
+        ...prev,
+        [field]: list.includes(value) ? list.filter(item => item !== value) : [...list, value]
+      }
+    })
+  }
+
   const handleCreateAccount = async () => {
     setCreateError(''); setCreateSuccess(false); setCreateLoading(true)
     try {
-      await axios.post(`${API_URL}/api/auth/register`, newUser)
+      const userName = newUser.name || `${newUser.learnerFirstName} ${newUser.learnerLastName}`.trim() || newUser.email
+      const payload = {
+        name: userName,
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role
+      }
+
+      if (newUser.role === 'teacher') {
+        payload.department = newUser.teacherDepartment
+        payload.subjects = newUser.subjects
+        payload.classes = newUser.classes
+        if (newUser.teacherSubject) payload.subject = newUser.teacherSubject
+      }
+
+      if (newUser.role === 'learner') {
+        payload.firstName = newUser.learnerFirstName || newUser.name.split(' ')[0] || ''
+        payload.lastName = newUser.learnerLastName || newUser.name.split(' ').slice(1).join(' ') || ''
+        payload.dateOfBirth = newUser.learnerDateOfBirth
+        payload.gender = newUser.learnerGender
+        payload.gradeLevel = newUser.learnerGradeLevel
+        payload.parentEmail = newUser.learnerParentEmail
+        payload.parentName = newUser.learnerParentName
+        payload.parentPhone = newUser.learnerParentPhone
+      }
+
+      await axios.post(`${API_URL}/api/auth/register`, payload)
       setCreateSuccess(true)
-      setNewUser({ name: '', email: '', password: '', role: 'teacher' })
-    } catch (err) { setCreateError(err.response?.data?.message || 'Failed to create account.') }
-    finally { setCreateLoading(false) }
+      setNewUser(initialNewUserState)
+    } catch (err) {
+      setCreateError(err.response?.data?.message || 'Failed to create account.')
+    } finally {
+      setCreateLoading(false)
+    }
   }
 
   // Accounts actions
@@ -1395,13 +1441,104 @@ export default function AdminDashboard() {
                 ))}
                 <div>
                   <label className="block text-sm font-bold text-cyan-700 mb-2">Role</label>
-                  <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                  <select value={newUser.role} onChange={e => setNewUser({ ...initialNewUserState, role: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
                     <option value="learner">Learner</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
+
+                {newUser.role === 'teacher' && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Assign Classes</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {classes.filter(c => c !== 'All').map(className => (
+                          <button key={className} type="button" onClick={() => toggleSelection('classes', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classes.includes(className) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                            {className}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
+                      <select value={newUser.teacherSubject} onChange={e => setNewUser({ ...newUser, teacherSubject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                        <option value="">Select primary subject</option>
+                        {subjectsList.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Additional Subjects</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {subjectsList.map(subject => (
+                          <button key={subject} type="button" onClick={() => toggleSelection('subjects', subject)} className={`text-left px-3 py-2 rounded-xl border ${newUser.subjects.includes(subject) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                            {subject}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {newUser.role === 'learner' && (
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Learner First Name</label>
+                        <input type="text" value={newUser.learnerFirstName} onChange={e => setNewUser({ ...newUser, learnerFirstName: e.target.value })} placeholder="Enter first name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Last Name</label>
+                        <input type="text" value={newUser.learnerLastName} onChange={e => setNewUser({ ...newUser, learnerLastName: e.target.value })} placeholder="Enter last name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
+                        <input type="date" value={newUser.learnerDateOfBirth} onChange={e => setNewUser({ ...newUser, learnerDateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
+                        <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                          <option value="">Select grade</option>
+                          {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Gender</label>
+                        <select value={newUser.learnerGender} onChange={e => setNewUser({ ...newUser, learnerGender: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                          <option value="">Select gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Existing Parent Account</label>
+                      <select value={newUser.learnerParentEmail} onChange={e => {
+                        const email = e.target.value
+                        const parent = parentAccounts.find(p => p.email === email)
+                        setNewUser(prev => ({ ...prev, learnerParentEmail: email, learnerParentName: parent ? parent.name : prev.learnerParentName }))
+                      }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                        <option value="">Select existing parent or leave blank</option>
+                        {parentAccounts.map(parent => (
+                          <option key={parent.id} value={parent.email}>{parent.name} — {parent.email}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Name</label>
+                        <input type="text" value={newUser.learnerParentName} onChange={e => setNewUser({ ...newUser, learnerParentName: e.target.value })} placeholder="Enter parent name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Phone</label>
+                        <input type="text" value={newUser.learnerParentPhone} onChange={e => setNewUser({ ...newUser, learnerParentPhone: e.target.value })} placeholder="Enter parent phone" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">If provided, learner details will be used to create a linked student profile for the learner portal.</p>
+                  </div>
+                )}
+
                 <button onClick={handleCreateAccount} disabled={createLoading} className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{createLoading ? 'Creating...' : 'Create Account'}</button>
               </div>
             </div>

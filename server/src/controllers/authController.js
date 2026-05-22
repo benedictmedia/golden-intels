@@ -7,18 +7,125 @@ const generateToken = (id, role, email) => {
   return jwt.sign({ id, role, email }, process.env.JWT_SECRET, { expiresIn: '7d' })
 }
 
+const parseArrayField = (value) => {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [parsed].filter(Boolean)
+    } catch {
+      return value.split(',').map(v => v.trim()).filter(Boolean)
+    }
+  }
+  return []
+}
+
+const generateStudentId = async (tx) => {
+  const year = new Date().getFullYear()
+  let studentId
+  let isUnique = false
+
+  while (!isUnique) {
+    const count = await tx.student.count()
+    const random = Math.floor(Math.random() * 1000)
+    const number = String(count + 1 + random).padStart(4, '0')
+    studentId = `GI-${year}-${number}`
+    const existing = await tx.student.findUnique({ where: { studentId } })
+    if (!existing) isUnique = true
+  }
+
+  return studentId
+}
+
 // Register
 const register = async (req, res) => {
-  const { name, email, password, role } = req.body
+  const {
+    name,
+    email,
+    password,
+    role,
+    department,
+    subject: teacherSubject,
+    classes,
+    subjects,
+    firstName,
+    lastName,
+    dateOfBirth,
+    gender,
+    gradeLevel,
+    parentEmail,
+    parentName,
+    parentPhone,
+    address
+  } = req.body
+
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } })
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' })
     }
+
     const hashedPassword = await bcrypt.hash(password, 10)
-    const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role: role || 'parent' }
+
+    const user = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: { name, email, password: hashedPassword, role: role || 'parent' }
+      })
+
+      if (createdUser.role === 'teacher') {
+        const parsedClasses = parseArrayField(classes)
+        const parsedSubjects = parseArrayField(subjects)
+        if (parsedClasses.length > 0 || parsedSubjects.length > 0 || teacherSubject) {
+          await tx.staff.create({
+            data: {
+              name,
+              role: 'teacher',
+              department: department || 'Teaching',
+              subject: teacherSubject || parsedSubjects[0] || null,
+              subjects: parsedSubjects,
+              classes: parsedClasses,
+              email,
+              phone: null,
+              category: 'teaching'
+            }
+          })
+        }
+      }
+
+      if (createdUser.role === 'learner') {
+        const studentFirstName = firstName || name.split(' ')[0] || ''
+        const studentLastName = lastName || name.split(' ').slice(1).join(' ') || ''
+        const parsedParentEmail = parentEmail || null
+        if (studentFirstName && studentLastName && gender && gradeLevel) {
+          let parentId = null
+          if (parsedParentEmail) {
+            const parentUser = await tx.user.findUnique({ where: { email: parsedParentEmail } })
+            if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
+          }
+
+          const studentId = await generateStudentId(tx)
+          await tx.student.create({
+            data: {
+              studentId,
+              firstName: studentFirstName,
+              lastName: studentLastName,
+              dateOfBirth,
+              gender,
+              gradeLevel,
+              parentId,
+              parentName: parentName || `${studentFirstName} ${studentLastName}`,
+              parentEmail: parsedParentEmail,
+              parentPhone: parentPhone || null,
+              address: address || null
+            }
+          })
+        }
+      }
+
+      return createdUser
     })
+
     const token = generateToken(user.id, user.role, user.email)
     res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } })
   } catch (error) {
