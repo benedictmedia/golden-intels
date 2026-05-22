@@ -433,6 +433,7 @@ export default function TeacherDashboard() {
   }
 
   const subjects = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
+  const teacherSubjectOptions = user?.subjects?.length ? user.subjects : subjects
 
   const handleSubjectScore = (subject, field, value) => {
     setSubjectScores(prev => ({
@@ -471,6 +472,7 @@ export default function TeacherDashboard() {
   const [submissionRecords, setSubmissionRecords] = useState([])
 
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+  const teacherClassOptions = user?.classes?.length ? user.classes : classes
 
   useEffect(() => {
     const saved = window.localStorage.getItem('goldenIntelsLms')
@@ -485,6 +487,12 @@ export default function TeacherDashboard() {
       setSubmissionRecords(JSON.parse(savedSubmissions))
     }
   }, [])
+
+  useEffect(() => {
+    if (user?.classes?.length && !user.classes.includes(activeClass)) {
+      setActiveClass(user.classes[0])
+    }
+  }, [user?.classes, activeClass])
 
   useEffect(() => {
     window.localStorage.setItem('goldenIntelsLms', JSON.stringify({ assignments, lessons, quizzes }))
@@ -862,7 +870,7 @@ export default function TeacherDashboard() {
             <div>
               <h2 className="text-2xl font-bold font-serif text-[#0f6e56] mb-6">My Classes</h2>
               <div className="flex flex-wrap gap-3 mb-6">
-                {classes.map(cls => (
+                {teacherClassOptions.map(cls => (
                   <button
                     key={cls}
                     onClick={() => setActiveClass(cls)}
@@ -958,7 +966,7 @@ export default function TeacherDashboard() {
               </div>
 
               <div className="flex flex-wrap gap-3 mb-6">
-                {classes.map(cls => (
+                {teacherClassOptions.map(cls => (
                   <button
                     key={cls}
                     onClick={() => setActiveClass(cls)}
@@ -1146,7 +1154,7 @@ export default function TeacherDashboard() {
                       onChange={e => { setGradebookClass(e.target.value); setGradebookStudent('') }}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                     >
-                      {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                      {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                     </select>
                   </div>
                   <div>
@@ -1332,12 +1340,19 @@ export default function TeacherDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
-                      <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                      {teacherSubjectOptions.length > 0 ? (
+                        <select value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                          <option value="">Choose subject</option>
+                          {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                        </select>
+                      ) : (
+                        <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
                       <select value={newAssignment.gradeLevel} onChange={e => setNewAssignment({ ...newAssignment, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                        {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                        {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                       </select>
                     </div>
                     <div>
@@ -1472,12 +1487,19 @@ export default function TeacherDashboard() {
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
+                          {teacherSubjectOptions.length > 0 ? (
+                          <select value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                            <option value="">Choose subject</option>
+                            {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                          </select>
+                        ) : (
                           <input type="text" value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                        )}
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
                           <select value={newLesson.gradeLevel} onChange={e => setNewLesson({ ...newLesson, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                            {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                            {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div className="md:col-span-2">
@@ -1540,7 +1562,7 @@ export default function TeacherDashboard() {
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
                           <select value={newAssignment.gradeLevel} onChange={e => setNewAssignment({ ...newAssignment, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                            {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                            {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div>
@@ -1610,12 +1632,19 @@ export default function TeacherDashboard() {
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
-                          <input type="text" value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                          {teacherSubjectOptions.length > 0 ? (
+                            <select value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                              <option value="">Choose subject</option>
+                              {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                            </select>
+                          ) : (
+                            <input type="text" value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
                           <select value={newQuiz.gradeLevel} onChange={e => setNewQuiz({ ...newQuiz, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                            {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                            {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div>

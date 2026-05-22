@@ -38,6 +38,28 @@ const generateStudentId = async (tx) => {
   return studentId
 }
 
+const buildUserResponse = async (user) => {
+  const responseUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    active: user.active
+  }
+
+  if (user.role === 'teacher') {
+    const staff = await prisma.staff.findUnique({ where: { email: user.email } })
+    if (staff) {
+      responseUser.classes = staff.classes || []
+      responseUser.subjects = staff.subjects || []
+      responseUser.department = staff.department
+      responseUser.staffSubject = staff.subject || null
+    }
+  }
+
+  return responseUser
+}
+
 // Register
 const register = async (req, res) => {
   const {
@@ -127,7 +149,8 @@ const register = async (req, res) => {
     })
 
     const token = generateToken(user.id, user.role, user.email)
-    res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } })
+    const responseUser = await buildUserResponse(user)
+    res.status(201).json({ token, user: responseUser })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -148,7 +171,8 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' })
     }
     const token = generateToken(user.id, user.role, user.email)
-    res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } })
+    const responseUser = await buildUserResponse(user)
+    res.json({ token, user: responseUser })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -158,7 +182,8 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.user.id } })
-    res.json({ id: user.id, name: user.name, email: user.email, role: user.role })
+    const responseUser = await buildUserResponse(user)
+    res.json(responseUser)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

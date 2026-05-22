@@ -33,6 +33,19 @@ const getStudents = async (req, res) => {
       })
       return res.json(students)
     }
+
+    if (req.user && req.user.role === 'teacher') {
+      const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
+      const where = {}
+      if (staff?.classes?.length) {
+        where.gradeLevel = { in: staff.classes }
+      } else if (staff?.department) {
+        where.gradeLevel = staff.department
+      }
+      const students = await prisma.student.findMany({ where, orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
+      return res.json(students)
+    }
+
     const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
     res.json(students)
   } catch (error) {

@@ -58,6 +58,16 @@ const getStudentAttendance = async (req, res) => {
 const saveAttendance = async (req, res) => {
   const { records, date, gradeLevel, recordedBy } = req.body
   try {
+    if (req.user && req.user.role === 'teacher') {
+      const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
+      if (staff?.classes?.length && !staff.classes.includes(gradeLevel)) {
+        return res.status(403).json({ message: 'Forbidden: You may only record attendance for your assigned classes.' })
+      }
+      if (!staff?.classes?.length && staff?.department && staff.department !== gradeLevel) {
+        return res.status(403).json({ message: 'Forbidden: You may only record attendance for your assigned class.' })
+      }
+    }
+
     // Delete existing records for this date and class
     await prisma.attendanceRecord.deleteMany({
       where: { date, gradeLevel }

@@ -32,6 +32,19 @@ const getResults = async (req, res) => {
   }
 }
 
+const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => {
+  if (!req.user || req.user.role !== 'teacher') return true
+  const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
+  if (!staff) return true
+  if ((!staff.classes || staff.classes.length === 0) && !staff.department) return true
+
+  const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+  if (!student) return false
+  const allowedClass = staff.classes?.includes(student.gradeLevel) || staff.department === student.gradeLevel
+  const allowedGradeLevel = gradeLevel == null || staff.classes?.includes(gradeLevel) || staff.department === gradeLevel
+  return allowedClass && allowedGradeLevel
+}
+
 // Get results by student
 const getResultsByStudent = async (req, res) => {
   const { studentId } = req.params
@@ -58,6 +71,11 @@ const getResultsByStudent = async (req, res) => {
 const createResult = async (req, res) => {
   const { studentId, gradeLevel, academicYear, term, scores, remarks, submittedBy } = req.body
   try {
+    if (req.user && req.user.role === 'teacher') {
+      const allowed = await isTeacherAllowedForStudent(req, studentId, gradeLevel)
+      if (!allowed) return res.status(403).json({ message: 'Forbidden: You may only submit results for your assigned classes.' })
+    }
+
     const result = await prisma.result.create({
       data: {
         studentId: parseInt(studentId),
@@ -82,6 +100,14 @@ const updateResult = async (req, res) => {
   const { id } = req.params
   const { scores, remarks, status } = req.body
   try {
+    const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
+    if (req.user && req.user.role === 'teacher') {
+      const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
+      if (!allowed && existing.submittedBy !== req.user.name) {
+        return res.status(403).json({ message: 'Forbidden: You may only update results for your assigned classes.' })
+      }
+    }
+
     const result = await prisma.result.update({
       where: { id: parseInt(id) },
       data: { scores, remarks, status },
@@ -97,6 +123,13 @@ const updateResult = async (req, res) => {
 const deleteResult = async (req, res) => {
   const { id } = req.params
   try {
+    const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
+    if (req.user && req.user.role === 'teacher') {
+      const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
+      if (!allowed && existing.submittedBy !== req.user.name) {
+        return res.status(403).json({ message: 'Forbidden: You may only delete results for your assigned classes.' })
+      }
+    }
     await prisma.result.delete({ where: { id: parseInt(id) } })
     res.json({ message: 'Result deleted successfully' })
   } catch (error) {

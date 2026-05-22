@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import API_URL from '../../api/config'
 
 export default function LearnerDashboard() {
   const { user, logout } = useAuth()
@@ -9,6 +11,7 @@ export default function LearnerDashboard() {
   const [assignments, setAssignments] = useState([])
   const [lessons, setLessons] = useState([])
   const [quizzes, setQuizzes] = useState([])
+  const [studentProfile, setStudentProfile] = useState(null)
   const [submissions, setSubmissions] = useState({ assignments: {}, quizzes: {} })
   const [quizAnswers, setQuizAnswers] = useState({})
   const [assignmentAnswers, setAssignmentAnswers] = useState({})
@@ -27,6 +30,17 @@ export default function LearnerDashboard() {
     }
     const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissions')
     if (savedSubmissions) setSubmissions(JSON.parse(savedSubmissions))
+
+    const fetchStudentProfile = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/students/me`)
+        setStudentProfile(res.data)
+      } catch (error) {
+        console.error('Failed to load learner profile:', error?.response?.data || error.message)
+      }
+    }
+
+    fetchStudentProfile()
   }, [])
 
   useEffect(() => {
@@ -99,6 +113,32 @@ export default function LearnerDashboard() {
   const publishedAssignments = assignments.filter(item => item.published)
   const publishedLessons = lessons.filter(item => item.published)
   const publishedQuizzes = quizzes.filter(item => item.published)
+
+  const getLearnerGradeLevel = () => {
+    if (studentProfile?.gradeLevel) return studentProfile.gradeLevel
+    if (user?.gradeLevel) return user.gradeLevel
+    const allGrades = [...publishedAssignments, ...publishedLessons, ...publishedQuizzes]
+      .map(item => item.gradeLevel)
+      .filter(Boolean)
+
+    if (allGrades.length === 0) return null
+    const counts = allGrades.reduce((acc, grade) => {
+      acc[grade] = (acc[grade] || 0) + 1
+      return acc
+    }, {})
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
+  }
+
+  const learnerGradeLevel = getLearnerGradeLevel()
+  const learnerLessons = publishedLessons.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
+  const learnerAssignments = publishedAssignments.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
+  const learnerQuizzes = publishedQuizzes.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
+
+  const completedAssignmentCount = Object.keys(submissions.assignments || {}).length
+  const completedQuizCount = Object.keys(submissions.quizzes || {}).length
+  const totalLearnerItems = learnerLessons.length + learnerAssignments.length + learnerQuizzes.length
+  const completionRate = totalLearnerItems ? Math.round(((completedAssignmentCount + completedQuizCount) / totalLearnerItems) * 100) : 0
+  const latestQuizScore = learnerQuizzes.length === 0 ? '-' : submissions.quizzes?.[learnerQuizzes[0].id]?.score ?? '-'
 
   const handleStartQuiz = (quizId) => {
     setActiveQuizId(quizId)
@@ -212,9 +252,9 @@ export default function LearnerDashboard() {
     navigate('/')
   }
 
-  const activeAssignmentCount = publishedAssignments.length
-  const activeQuizCount = publishedQuizzes.length
-  const activeLessonCount = publishedLessons.length
+  const activeAssignmentCount = learnerAssignments.length
+  const activeQuizCount = learnerQuizzes.length
+  const activeLessonCount = learnerLessons.length
 
   return (
     <div className="flex h-screen bg-blue-100 overflow-hidden">
@@ -268,40 +308,84 @@ export default function LearnerDashboard() {
         </div>
 
         {activeTab === 'dashboard' && (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <div className="xl:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+              <div className="flex flex-col gap-6">
+                <div>
+                  <p className="text-xs uppercase text-gray-500">Learner Profile</p>
+                  <h3 className="text-3xl font-bold text-[#0f6e56] mt-2">{studentProfile ? `${studentProfile.firstName} ${studentProfile.lastName}` : user?.name || 'Learner'}</h3>
+                  <p className="text-sm text-gray-500 mt-2">{learnerGradeLevel ? `${learnerGradeLevel} class` : 'Class information not available'}</p>
+                  {studentProfile?.studentId && (
+                    <p className="text-sm text-gray-500 mt-1">ID: {studentProfile.studentId}</p>
+                  )}
+                  {studentProfile?.parentName && (
+                    <p className="text-sm text-gray-500 mt-1">Parent: {studentProfile.parentName}</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 rounded-3xl p-4 text-center">
+                    <p className="text-xs uppercase text-gray-500">Lessons</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{learnerLessons.length}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-3xl p-4 text-center">
+                    <p className="text-xs uppercase text-gray-500">Assignments</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{learnerAssignments.length}</p>
+                  </div>
+                  <div className="bg-blue-50 rounded-3xl p-4 text-center">
+                    <p className="text-xs uppercase text-gray-500">Quizzes</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{learnerQuizzes.length}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white rounded-3xl p-4 border border-gray-100 text-center">
+                    <p className="text-xs uppercase text-gray-500">Completed</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{completedAssignmentCount + completedQuizCount}</p>
+                  </div>
+                  <div className="bg-white rounded-3xl p-4 border border-gray-100 text-center">
+                    <p className="text-xs uppercase text-gray-500">Completion</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{completionRate}%</p>
+                  </div>
+                  <div className="bg-white rounded-3xl p-4 border border-gray-100 text-center">
+                    <p className="text-xs uppercase text-gray-500">Latest quiz</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{latestQuizScore}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold text-[#0f6e56] mb-4">Latest Lesson</h3>
-              {publishedLessons.length === 0 ? (
+              {learnerLessons.length === 0 ? (
                 <p className="text-gray-500">No lessons published yet.</p>
               ) : (
                 <div>
-                  <h4 className="text-lg font-bold text-[#0f6e56]">{publishedLessons[0].title}</h4>
-                  <p className="text-sm text-gray-500 mb-4">{publishedLessons[0].subject} · {publishedLessons[0].gradeLevel}</p>
-                  <p className="text-gray-600 leading-relaxed">{publishedLessons[0].content}</p>
+                  <h4 className="text-lg font-bold text-[#0f6e56]">{learnerLessons[0].title}</h4>
+                  <p className="text-sm text-gray-500 mb-4">{learnerLessons[0].subject} · {learnerLessons[0].gradeLevel}</p>
+                  <p className="text-gray-600 leading-relaxed">{learnerLessons[0].content}</p>
                 </div>
               )}
             </div>
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold text-[#0f6e56] mb-4">Progress</h3>
               <div className="space-y-4">
-                <p className="text-sm text-gray-500">Assignments completed: {Object.keys(submissions.assignments || {}).length}</p>
-                <p className="text-sm text-gray-500">Quizzes completed: {Object.keys(submissions.quizzes || {}).length}</p>
-                <p className="text-sm text-gray-500">Latest quiz score: {publishedQuizzes.length === 0 ? '-' : submissions.quizzes?.[publishedQuizzes[0].id]?.score ?? '-'}</p>
+                <p className="text-sm text-gray-500">Assignments completed: {completedAssignmentCount}</p>
+                <p className="text-sm text-gray-500">Quizzes completed: {completedQuizCount}</p>
+                <p className="text-sm text-gray-500">Latest quiz score: {latestQuizScore}</p>
               </div>
             </div>
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
               <h3 className="text-xl font-bold text-[#0f6e56] mb-4">Next Deadline</h3>
-              {publishedAssignments.length === 0 && publishedQuizzes.length === 0 ? (
+              {learnerAssignments.length === 0 && learnerQuizzes.length === 0 ? (
                 <p className="text-gray-500">No upcoming items yet.</p>
               ) : (
                 <div className="space-y-3">
-                  {publishedAssignments.slice(0, 1).map(item => (
+                  {learnerAssignments.slice(0, 1).map(item => (
                     <div key={item.id}>
                       <p className="text-sm font-bold text-[#0f6e56]">Assignment: {item.title}</p>
                       <p className="text-xs text-gray-500">Due {formatDateTime(item.dueDate)}</p>
                     </div>
                   ))}
-                  {publishedQuizzes.slice(0, 1).map(item => (
+                  {learnerQuizzes.slice(0, 1).map(item => (
                     <div key={item.id}>
                       <p className="text-sm font-bold text-[#0f6e56]">Quiz: {item.title}</p>
                       <p className="text-xs text-gray-500">Due {formatDateTime(item.dueDate)}</p>
@@ -317,10 +401,10 @@ export default function LearnerDashboard() {
           <div>
             <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Learning Resources</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {publishedLessons.length === 0 ? (
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No published lessons available.</div>
+              {learnerLessons.length === 0 ? (
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No published lessons available for your class.</div>
               ) : (
-                publishedLessons.map(lesson => (
+                learnerLessons.map(lesson => (
                   <div key={lesson.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                     <span className="inline-block bg-blue-100 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-3">{lesson.gradeLevel}</span>
                     <h4 className="text-xl font-bold text-[#0f6e56] mb-2">{lesson.title}</h4>
@@ -337,10 +421,10 @@ export default function LearnerDashboard() {
           <div>
             <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Assignments</h3>
             <div className="grid grid-cols-1 gap-6">
-              {publishedAssignments.length === 0 ? (
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active assignments yet.</div>
+              {learnerAssignments.length === 0 ? (
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active assignments available for your class.</div>
               ) : (
-                publishedAssignments.map(assignment => {
+                learnerAssignments.map(assignment => {
                   const submission = submissions.assignments?.[assignment.id]
                   return (
                     <div key={assignment.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
@@ -403,10 +487,10 @@ export default function LearnerDashboard() {
           <div>
             <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Quizzes</h3>
             <div className="grid grid-cols-1 gap-6">
-              {publishedQuizzes.length === 0 ? (
-                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active quizzes yet.</div>
+              {learnerQuizzes.length === 0 ? (
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active quizzes available for your class.</div>
               ) : (
-                publishedQuizzes.map(quiz => {
+                learnerQuizzes.map(quiz => {
                   const submission = submissions.quizzes?.[quiz.id]
                   const startedAt = quizStartTimes[quiz.id] ? new Date(quizStartTimes[quiz.id]).getTime() : null
                   const durationMs = quiz.durationMinutes * 60 * 1000
