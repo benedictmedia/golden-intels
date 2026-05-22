@@ -12,6 +12,9 @@ export default function LearnerDashboard() {
   const [submissions, setSubmissions] = useState({ assignments: {}, quizzes: {} })
   const [quizAnswers, setQuizAnswers] = useState({})
   const [assignmentAnswers, setAssignmentAnswers] = useState({})
+  const [quizStartTimes, setQuizStartTimes] = useState({})
+  const [assignmentStartTimes, setAssignmentStartTimes] = useState({})
+  const [activeQuizId, setActiveQuizId] = useState(null)
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
@@ -35,24 +38,84 @@ export default function LearnerDashboard() {
     window.localStorage.setItem('goldenIntelsSubmissions', JSON.stringify(submissions))
   }, [submissions])
 
+  const saveTeacherSubmissionRecord = (record) => {
+    const existing = JSON.parse(window.localStorage.getItem('goldenIntelsSubmissionRecords') || '[]')
+    const updated = [record, ...existing.filter(r => !(r.type === record.type && r.itemId === record.itemId && r.learnerEmail === record.learnerEmail))]
+    window.localStorage.setItem('goldenIntelsSubmissionRecords', JSON.stringify(updated))
+  }
+
+  const getDeviceInfo = () => {
+    if (typeof navigator === 'undefined') return 'Unknown device'
+    return navigator.userAgent || navigator.platform || 'Unknown device'
+  }
+
+  const formatDateTime = (value) => {
+    if (!value) return '-'
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? value : date.toLocaleString()
+  }
+
   const publishedAssignments = assignments.filter(item => item.published)
   const publishedLessons = lessons.filter(item => item.published)
   const publishedQuizzes = quizzes.filter(item => item.published)
 
+  const handleStartQuiz = (quizId) => {
+    setActiveQuizId(quizId)
+    setQuizStartTimes(prev => ({
+      ...prev,
+      [quizId]: prev[quizId] || new Date().toISOString()
+    }))
+  }
+
+  const handleAssignmentAnswerChange = (assignmentId, value) => {
+    setAssignmentAnswers(prev => ({ ...prev, [assignmentId]: value }))
+    setAssignmentStartTimes(prev => ({
+      ...prev,
+      [assignmentId]: prev[assignmentId] || new Date().toISOString()
+    }))
+  }
+
   const handleSubmitAssignment = (assignment) => {
     const answer = assignmentAnswers[assignment.id] || ''
     if (!answer.trim()) return
+    const submittedAt = new Date().toISOString()
+    const startedAt = assignmentStartTimes[assignment.id] || submittedAt
+    const timeUsedSeconds = Math.round((new Date(submittedAt).getTime() - new Date(startedAt).getTime()) / 1000)
+    const learnerName = user?.name || 'Learner'
+    const learnerEmail = user?.email || ''
+    const device = getDeviceInfo()
+    const record = {
+      type: 'assignment',
+      itemId: assignment.id,
+      title: assignment.title,
+      learnerName,
+      learnerEmail,
+      device,
+      startedAt,
+      submittedAt,
+      timeUsedSeconds,
+      answer,
+      questions: [
+        { prompt: assignment.description || assignment.title, selected: answer, answer: 'Student response' }
+      ]
+    }
+
+    saveTeacherSubmissionRecord(record)
     setSubmissions(prev => ({
       ...prev,
       assignments: {
         ...prev.assignments,
-        [assignment.id]: { answer, submittedAt: new Date().toISOString() }
+        [assignment.id]: { answer, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds }
       }
     }))
     setAssignmentAnswers(prev => ({ ...prev, [assignment.id]: '' }))
   }
 
   const handleQuizAnswer = (quizId, questionIndex, value) => {
+    setQuizStartTimes(prev => ({
+      ...prev,
+      [quizId]: prev[quizId] || new Date().toISOString()
+    }))
     setQuizAnswers(prev => ({
       ...prev,
       [quizId]: {
@@ -69,11 +132,36 @@ export default function LearnerDashboard() {
       if (value === question.answer) return sum + 1
       return sum
     }, 0)
+    const submittedAt = new Date().toISOString()
+    const startedAt = quizStartTimes[quiz.id] || submittedAt
+    const timeUsedSeconds = Math.round((new Date(submittedAt).getTime() - new Date(startedAt).getTime()) / 1000)
+    const learnerName = user?.name || 'Learner'
+    const learnerEmail = user?.email || ''
+    const device = getDeviceInfo()
+    const record = {
+      type: 'quiz',
+      itemId: quiz.id,
+      title: quiz.title,
+      learnerName,
+      learnerEmail,
+      device,
+      startedAt,
+      submittedAt,
+      timeUsedSeconds,
+      score,
+      questions: quiz.questions.map((question, idx) => ({
+        prompt: question.prompt,
+        selected: answers[idx] || 'No answer',
+        answer: question.answer
+      }))
+    }
+
+    saveTeacherSubmissionRecord(record)
     setSubmissions(prev => ({
       ...prev,
       quizzes: {
         ...prev.quizzes,
-        [quiz.id]: { answers, score, submittedAt: new Date().toISOString() }
+        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds }
       }
     }))
   }
@@ -169,13 +257,13 @@ export default function LearnerDashboard() {
                   {publishedAssignments.slice(0, 1).map(item => (
                     <div key={item.id}>
                       <p className="text-sm font-bold text-[#0f6e56]">Assignment: {item.title}</p>
-                      <p className="text-xs text-gray-500">Due {new Date(item.dueDate).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-500">Due {formatDateTime(item.dueDate)}</p>
                     </div>
                   ))}
                   {publishedQuizzes.slice(0, 1).map(item => (
                     <div key={item.id}>
                       <p className="text-sm font-bold text-[#0f6e56]">Quiz: {item.title}</p>
-                      <p className="text-xs text-gray-500">Due {new Date(item.dueDate).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-500">Due {formatDateTime(item.dueDate)}</p>
                     </div>
                   ))}
                 </div>
@@ -221,7 +309,7 @@ export default function LearnerDashboard() {
                           <p className="text-sm text-gray-500">{assignment.subject} · {assignment.gradeLevel}</p>
                         </div>
                         <div className="text-sm text-gray-500">
-                          Due {new Date(assignment.dueDate).toLocaleDateString()}
+                          Due {formatDateTime(assignment.dueDate)}
                         </div>
                       </div>
                       <p className="text-gray-600 mb-4">{assignment.description}</p>
@@ -236,7 +324,7 @@ export default function LearnerDashboard() {
                           <textarea
                             placeholder="Write your assignment answer here..."
                             value={assignmentAnswers[assignment.id] || ''}
-                            onChange={e => setAssignmentAnswers(prev => ({ ...prev, [assignment.id]: e.target.value }))}
+                            onChange={e => handleAssignmentAnswerChange(assignment.id, e.target.value)}
                             rows={4}
                             className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                           />
@@ -265,9 +353,12 @@ export default function LearnerDashboard() {
               ) : (
                 publishedQuizzes.map(quiz => {
                   const submission = submissions.quizzes?.[quiz.id]
-                  const dueTime = quiz.dueDate ? new Date(quiz.dueDate).getTime() : null
-                  const timeLeft = dueTime ? Math.max(0, dueTime - now) : null
-                  const expired = timeLeft !== null && timeLeft <= 0
+                  const startedAt = quizStartTimes[quiz.id] ? new Date(quizStartTimes[quiz.id]).getTime() : null
+                  const durationMs = quiz.durationMinutes * 60 * 1000
+                  const elapsed = startedAt ? Math.max(0, now - startedAt) : 0
+                  const timeLeft = startedAt ? Math.max(0, durationMs - elapsed) : null
+                  const dueDateExpired = quiz.dueDate ? new Date(quiz.dueDate).getTime() <= now : false
+                  const expired = dueDateExpired || (startedAt !== null && timeLeft <= 0)
                   return (
                     <div key={quiz.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
@@ -276,10 +367,14 @@ export default function LearnerDashboard() {
                           <p className="text-sm text-gray-500">{quiz.subject} · {quiz.gradeLevel}</p>
                         </div>
                         <div className="text-sm text-gray-500">
-                          {expired ? 'Quiz closed' : `Time left: ${timeLeft !== null ? Math.floor(timeLeft / 1000 / 60) : '-'} min`}
+                          {expired
+                            ? 'Quiz closed'
+                            : startedAt
+                              ? `Time left: ${Math.floor(timeLeft / 1000 / 60)}:${String(Math.floor((timeLeft / 1000) % 60)).padStart(2, '0')}`
+                              : 'Not started'}
                         </div>
                       </div>
-                      <p className="text-gray-600 mb-4">Due {quiz.dueDate ? new Date(quiz.dueDate).toLocaleDateString() : 'No deadline'}. Duration: {quiz.durationMinutes} mins.</p>
+                      <p className="text-gray-600 mb-4">Due {formatDateTime(quiz.dueDate)} · Duration: {quiz.durationMinutes} mins.</p>
                       {submission ? (
                         <div className="space-y-4">
                           <div className="bg-green-50 border border-green-200 text-green-700 rounded-2xl p-4">
@@ -308,6 +403,15 @@ export default function LearnerDashboard() {
                               })}
                             </div>
                           </div>
+                        </div>
+                      ) : !activeQuizId || activeQuizId !== quiz.id ? (
+                        <div className="space-y-4">
+                          <button
+                            onClick={() => handleStartQuiz(quiz.id)}
+                            className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-3 rounded-xl"
+                          >
+                            {quizStartTimes[quiz.id] ? 'Continue Quiz' : 'Start Quiz'}
+                          </button>
                         </div>
                       ) : expired ? (
                         <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4">This quiz is now closed.</div>

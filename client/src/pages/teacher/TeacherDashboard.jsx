@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   FileText, GraduationCap, LogOut, Menu, X, Bell
 } from 'lucide-react'
+import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
 
 const menuItems = [
@@ -457,16 +458,17 @@ export default function TeacherDashboard() {
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
-  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', description: '', gradeLevel: 'Year 1' })
+  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Year 1' })
   const [lessons, setLessons] = useState([])
   const [showAddLesson, setShowAddLesson] = useState(false)
   const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
   const [quizzes, setQuizzes] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
-  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
+  const [submissionRecords, setSubmissionRecords] = useState([])
 
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
 
@@ -478,11 +480,19 @@ export default function TeacherDashboard() {
       setLessons(parsed.lessons || [])
       setQuizzes(parsed.quizzes || [])
     }
+    const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissionRecords')
+    if (savedSubmissions) {
+      setSubmissionRecords(JSON.parse(savedSubmissions))
+    }
   }, [])
 
   useEffect(() => {
     window.localStorage.setItem('goldenIntelsLms', JSON.stringify({ assignments, lessons, quizzes }))
   }, [assignments, lessons, quizzes])
+
+  useEffect(() => {
+    window.localStorage.setItem('goldenIntelsSubmissionRecords', JSON.stringify(submissionRecords))
+  }, [submissionRecords])
 
   useEffect(() => {
   if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
@@ -557,23 +567,81 @@ export default function TeacherDashboard() {
     setTimeout(() => setGradesSaved(false), 3000)
   }
 
+  const formatDateTime = (value) => {
+    if (!value) return '-'
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split('-')
+      return `${day}/${month}/${year}`
+    }
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? value : date.toLocaleString()
+  }
+
+  const combineDateTime = (date, time) => {
+    if (!date) return ''
+    if (!time) return date
+    return `${date}T${time}`
+  }
+
   const resetLmsForm = () => {
     setEditingLmsItem(null)
     setLmsItemView(null)
-    setNewAssignment({ title: '', subject: '', dueDate: '', description: '', gradeLevel: 'Year 1' })
+    setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Year 1' })
     setNewLesson({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
+    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', options: ['', '', '', ''], answer: '' }], published: false })
   }
 
   const handleViewLmsItem = (item, type) => {
+    setShowAddAssignment(false)
+    setShowAddLesson(false)
+    setShowAddQuiz(false)
     setLmsItemView({ item, type })
+  }
+
+  const handleDownloadSubmissionPdf = (record) => {
+    const doc = new jsPDF()
+    doc.setFontSize(16)
+    doc.text('Student Submission Report', 14, 20)
+    doc.setFontSize(11)
+    doc.text(`Student: ${record.learnerName || 'Unknown'}`, 14, 34)
+    doc.text(`Email: ${record.learnerEmail || 'Unknown'}`, 14, 40)
+    doc.text(`Device: ${record.device || 'Unknown'}`, 14, 46)
+    doc.text(`Submitted: ${formatDateTime(record.submittedAt)}`, 14, 52)
+    doc.text(`Time used: ${record.timeUsedSeconds != null ? `${Math.round(record.timeUsedSeconds)} sec` : 'N/A'}`, 14, 58)
+    doc.text(`Resource: ${record.type} - ${record.title || record.itemTitle || 'N/A'}`, 14, 64)
+    if (record.score != null) {
+      doc.text(`Score: ${record.score} / ${record.totalQuestions ?? record.questions?.length ?? 'N/A'}`, 14, 70)
+    }
+    doc.text('Answers:', 14, 82)
+    let y = 88
+    ;(record.questions || []).forEach((question, index) => {
+      if (y > 270) {
+        doc.addPage()
+        y = 20
+      }
+      doc.text(`Q${index + 1}: ${question.prompt}`, 14, y)
+      y += 6
+      doc.text(`Your: ${question.selected || 'N/A'}`, 18, y)
+      y += 6
+      doc.text(`Correct: ${question.answer || 'N/A'}`, 18, y)
+      y += 8
+    })
+    doc.save(`${record.learnerName || 'student'}-${record.type}-submission.pdf`)
   }
 
   const handleEditLmsItem = (item, type) => {
     setEditingLmsItem({ item, type })
     setLmsItemView({ item, type })
     if (type === 'assignment') {
-      setNewAssignment({ title: item.title, subject: item.subject, dueDate: item.dueDate, description: item.description, gradeLevel: item.gradeLevel })
+      const parsedDate = item.dueDate ? new Date(item.dueDate) : null
+      setNewAssignment({
+        title: item.title,
+        subject: item.subject,
+        dueDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : item.dueDate || '',
+        dueTime: parsedDate ? parsedDate.toISOString().slice(11, 16) : (item.dueTime || ''),
+        description: item.description,
+        gradeLevel: item.gradeLevel
+      })
       setShowAddAssignment(true)
       setShowAddLesson(false)
       setShowAddQuiz(false)
@@ -585,7 +653,17 @@ export default function TeacherDashboard() {
       setShowAddQuiz(false)
     }
     if (type === 'quiz') {
-      setNewQuiz({ title: item.title, subject: item.subject, gradeLevel: item.gradeLevel, dueDate: item.dueDate, durationMinutes: item.durationMinutes, questions: item.questions, published: item.published })
+      const parsedDate = item.dueDate ? new Date(item.dueDate) : null
+      setNewQuiz({
+        title: item.title,
+        subject: item.subject,
+        gradeLevel: item.gradeLevel,
+        dueDate: parsedDate ? parsedDate.toISOString().slice(0, 10) : item.dueDate || '',
+        dueTime: parsedDate ? parsedDate.toISOString().slice(11, 16) : (item.dueTime || ''),
+        durationMinutes: item.durationMinutes,
+        questions: item.questions,
+        published: item.published
+      })
       setShowAddQuiz(true)
       setShowAddAssignment(false)
       setShowAddLesson(false)
@@ -609,11 +687,12 @@ export default function TeacherDashboard() {
 
   const handleAddAssignment = () => {
     if (!newAssignment.title) return
+    const assignmentToSave = { ...newAssignment, dueDate: combineDateTime(newAssignment.dueDate, newAssignment.dueTime) }
     if (editingLmsItem?.type === 'assignment') {
-      setAssignments(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newAssignment, published: editingLmsItem.item.published } : item))
+      setAssignments(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...assignmentToSave, published: editingLmsItem.item.published } : item))
       setEditingLmsItem(null)
     } else {
-      setAssignments([{ id: Date.now(), published: false, ...newAssignment }, ...assignments])
+      setAssignments([{ id: Date.now(), published: false, ...assignmentToSave }, ...assignments])
     }
     resetLmsForm()
     setShowAddAssignment(false)
@@ -633,11 +712,12 @@ export default function TeacherDashboard() {
 
   const handleAddQuiz = () => {
     if (!newQuiz.title || newQuiz.questions.length === 0) return
+    const quizToSave = { ...newQuiz, dueDate: combineDateTime(newQuiz.dueDate, newQuiz.dueTime) }
     if (editingLmsItem?.type === 'quiz') {
-      setQuizzes(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newQuiz, published: editingLmsItem.item.published } : item))
+      setQuizzes(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...quizToSave, published: editingLmsItem.item.published } : item))
       setEditingLmsItem(null)
     } else {
-      setQuizzes([{ id: Date.now(), published: false, ...newQuiz }, ...quizzes])
+      setQuizzes([{ id: Date.now(), published: false, ...quizToSave }, ...quizzes])
     }
     resetLmsForm()
     setShowAddQuiz(false)
@@ -1264,6 +1344,10 @@ export default function TeacherDashboard() {
                       <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Date</label>
                       <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
                     </div>
+                    <div>
+                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Time</label>
+                      <input type="time" value={newAssignment.dueTime} onChange={e => setNewAssignment({ ...newAssignment, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                    </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-[#0f6e56] mb-2">Description</label>
                       <textarea value={newAssignment.description} onChange={e => setNewAssignment({ ...newAssignment, description: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
@@ -1308,6 +1392,7 @@ export default function TeacherDashboard() {
                   <button onClick={() => setLmsView('resources')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'resources' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Resources</button>
                   <button onClick={() => setLmsView('assignments')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'assignments' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Assignments</button>
                   <button onClick={() => setLmsView('quizzes')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'quizzes' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Quizzes</button>
+                  <button onClick={() => setLmsView('submissions')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'submissions' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Submissions</button>
                 </div>
               </div>
 
@@ -1345,13 +1430,13 @@ export default function TeacherDashboard() {
                   {lmsItemView.type === 'assignment' && (
                     <div className="space-y-3">
                       <p className="text-gray-600">{lmsItemView.item.description}</p>
-                      <p className="text-sm text-gray-500">Due: {lmsItemView.item.dueDate}</p>
+                      <p className="text-sm text-gray-500">Due: {formatDateTime(lmsItemView.item.dueDate)}</p>
                       <p className="text-xs text-gray-400">Status: {lmsItemView.item.published ? 'Published' : 'Draft'}</p>
                     </div>
                   )}
                   {lmsItemView.type === 'quiz' && (
                     <div className="space-y-3">
-                      <p className="text-gray-600">Due: {lmsItemView.item.dueDate} · Duration: {lmsItemView.item.durationMinutes} mins</p>
+                      <p className="text-gray-600">Due: {formatDateTime(lmsItemView.item.dueDate)} · Duration: {lmsItemView.item.durationMinutes} mins</p>
                       <div className="space-y-4">
                         {lmsItemView.item.questions.map((question, index) => (
                           <div key={index} className="bg-slate-50 rounded-2xl p-4">
@@ -1462,6 +1547,10 @@ export default function TeacherDashboard() {
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Date</label>
                           <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
                         </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Time</label>
+                          <input type="time" value={newAssignment.dueTime} onChange={e => setNewAssignment({ ...newAssignment, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                        </div>
                         <div className="md:col-span-2">
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Description</label>
                           <textarea value={newAssignment.description} onChange={e => setNewAssignment({ ...newAssignment, description: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
@@ -1489,7 +1578,7 @@ export default function TeacherDashboard() {
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{assignment.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
                           <p className="text-sm text-gray-600 mb-3">{assignment.description}</p>
-                          <p className="text-xs text-gray-400 mb-4">Due: {assignment.dueDate}</p>
+                          <p className="text-xs text-gray-400 mb-4">Due: {formatDateTime(assignment.dueDate)}</p>
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
                             {assignment.published ? 'Learners can now access this assignment.' : 'Draft: publish to send it to learners.'}
                           </div>
@@ -1532,6 +1621,10 @@ export default function TeacherDashboard() {
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Date</label>
                           <input type="date" value={newQuiz.dueDate} onChange={e => setNewQuiz({ ...newQuiz, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Time</label>
+                          <input type="time" value={newQuiz.dueTime} onChange={e => setNewQuiz({ ...newQuiz, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Duration (minutes)</label>
@@ -1585,7 +1678,7 @@ export default function TeacherDashboard() {
                           </div>
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{quiz.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{quiz.subject}</p>
-                          <p className="text-sm text-gray-600 mb-3">Due {quiz.dueDate} · {quiz.durationMinutes} minutes</p>
+                          <p className="text-sm text-gray-600 mb-3">Due {formatDateTime(quiz.dueDate)} · {quiz.durationMinutes} minutes</p>
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
                             {quiz.published ? 'Learners can now see and take this quiz.' : 'Draft: publish to send it to learners.'}
                           </div>
@@ -1598,6 +1691,49 @@ export default function TeacherDashboard() {
                       ))
                     )}
                   </div>
+                </div>
+              )}
+
+              {lmsView === 'submissions' && (
+                <div>
+                  <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Student Submissions</h3>
+                  {submissionRecords.length === 0 ? (
+                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No submission records are available yet.</div>
+                  ) : (
+                    <div className="space-y-6">
+                      {submissionRecords.map((record, index) => (
+                        <div key={`${record.type}-${record.itemId}-${record.learnerEmail}-${index}`} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-500 uppercase tracking-[0.2em]">{record.type} Submission</p>
+                              <h4 className="text-xl font-bold text-[#0f6e56] mt-2">{record.title}</h4>
+                              <p className="text-sm text-gray-500">Student: {record.learnerName || 'Unknown'} · {record.learnerEmail || 'No email'}</p>
+                            </div>
+                            <div className="text-sm text-gray-500 text-right">
+                              <p>Submitted: {formatDateTime(record.submittedAt)}</p>
+                              <p>Device: {record.device || 'Unknown'}</p>
+                              <p>Time used: {record.timeUsedSeconds != null ? `${Math.round(record.timeUsedSeconds)} sec` : 'N/A'}</p>
+                            </div>
+                          </div>
+                          <div className="bg-slate-50 rounded-2xl p-4 mb-4">
+                            <p className="text-sm text-gray-700">Answered Questions:</p>
+                            <div className="space-y-3 mt-3">
+                              {(record.questions || []).map((question, idx) => (
+                                <div key={idx} className="rounded-2xl p-3 bg-white border border-gray-200">
+                                  <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
+                                  <p className="text-sm text-gray-700 mt-1">Your answer: {question.selected || 'No answer'}</p>
+                                  <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <button onClick={() => handleDownloadSubmissionPdf(record)} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-4 py-2 rounded-full">Download PDF</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
