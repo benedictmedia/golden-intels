@@ -122,6 +122,7 @@ export default function AdminDashboard() {
 
   // Accounts state
   const [users, setUsers] = useState([])
+  const [parentAccounts, setParentAccounts] = useState([])
   const [accountTab, setAccountTab] = useState('parents')
   const [accountLoading, setAccountLoading] = useState(false)
   const [editingUser, setEditingUser] = useState(null)
@@ -143,6 +144,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeMenu === 'learners') {
       axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
+      axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params: { role: 'parent' } }).then(res => setParentAccounts(res.data.users || []))
     }
     if (activeMenu === 'performance') {
       axios.get(`${API_URL}/api/results`).then(res => setResults(res.data))
@@ -260,6 +262,23 @@ export default function AdminDashboard() {
       await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
       fetchAccounts()
     } catch (err) { alert('Failed to reactivate user') }
+  }
+
+  const handleDeleteUser = async (id, email) => {
+    if (!window.confirm(`Delete deactivated account ${email}? This will remove related data.`)) return
+    try {
+      await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to delete user account.') }
+  }
+
+  const handleParentAccountSelect = (email) => {
+    const parent = parentAccounts.find(p => p.email === email)
+    setNewStudent(prev => ({
+      ...prev,
+      parentEmail: email,
+      parentName: parent ? parent.name : prev.parentName
+    }))
   }
 
   const handleUpdateUser = async (id, payload) => {
@@ -1244,12 +1263,44 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {[['First Name','firstName','text'],['Last Name','lastName','text'],['Date of Birth','dateOfBirth','date'],['Parent Name','parentName','text'],['Parent Email','parentEmail','email'],['Parent Phone','parentPhone','text'],['Address','address','text']].map(([label, key, type]) => (
-                      <div key={key}>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">{label}</label>
-                        <input type={type} value={newStudent[key]} onChange={e => setNewStudent({ ...newStudent, [key]: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
-                      </div>
-                    ))}
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">First Name</label>
+                      <input type="text" value={newStudent.firstName} onChange={e => setNewStudent({ ...newStudent, firstName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Last Name</label>
+                      <input type="text" value={newStudent.lastName} onChange={e => setNewStudent({ ...newStudent, lastName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
+                      <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Existing Parent Account</label>
+                      <select value={newStudent.parentEmail} onChange={e => handleParentAccountSelect(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                        <option value="">Select existing parent or leave blank</option>
+                        {parentAccounts.map(parent => (
+                          <option key={parent.id} value={parent.email}>{parent.name} — {parent.email}</option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-400 mt-1">Link the learner to an existing parent user account for better reporting.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Name</label>
+                      <input type="text" value={newStudent.parentName} onChange={e => setNewStudent({ ...newStudent, parentName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Email</label>
+                      <input type="email" value={newStudent.parentEmail} onChange={e => setNewStudent({ ...newStudent, parentEmail: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Phone</label>
+                      <input type="text" value={newStudent.parentPhone} onChange={e => setNewStudent({ ...newStudent, parentPhone: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Address</label>
+                      <input type="text" value={newStudent.address} onChange={e => setNewStudent({ ...newStudent, address: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
                     <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Gender</label>
                       <select value={newStudent.gender} onChange={e => setNewStudent({ ...newStudent, gender: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
@@ -1393,13 +1444,21 @@ export default function AdminDashboard() {
                         <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                  {u.active ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
                               <p className="text-sm text-gray-500">{u.email}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                               {u.active === false ? (
-                                <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
+                                <>
+                                  <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
+                                  <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
+                                </>
                               ) : (
                                 <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
                               )}
@@ -1441,16 +1500,38 @@ export default function AdminDashboard() {
 
                   {accountTab === 'teachers' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {staffList.map(s => (
-                        <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-bold text-[#4a235a]">{s.name}</h3>
-                              <p className="text-sm text-gray-500">{s.email} | {s.department} {s.subject}</p>
-                            </div>
+                      {users.map(u => {
+                        const staffInfo = staffList.find(s => s.email === u.email)
+                        return (
+                          <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                    {u.active ? 'Active' : 'Inactive'}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-500">{u.email} | {u.role}</p>
+                                {staffInfo ? (
+                                  <div className="mt-3 text-sm text-gray-600 space-y-1">
+                                    {staffInfo.classes?.length > 0 && <p>Classes: {staffInfo.classes.join(', ')}</p>}
+                                    {staffInfo.subjects?.length > 0 && <p>Subjects: {staffInfo.subjects.join(', ')}</p>}
+                                  </div>
+                                ) : (
+                                  <p className="mt-3 text-xs text-orange-600">No staff assignment found for this teacher.</p>
+                                )}
+                              </div>
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setEditingUser({ id: null, name: s.name, email: s.email, role: 'teacher' })} className="px-3 py-2 bg-blue-600 text-white rounded">Edit User</button>
-                              <button onClick={() => handleDeactivateUser(s.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                              <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                              {u.active === false ? (
+                                <>
+                                  <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
+                                  <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
+                                </>
+                              ) : (
+                                <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1975,7 +2056,7 @@ export default function AdminDashboard() {
               {!editMode ? (
                 <div>
                   <div className="space-y-3 mb-6">
-                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
+                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
                       <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
                         <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
                         <span className="text-sm text-gray-600">{item[1] || '—'}</span>
@@ -2010,6 +2091,23 @@ export default function AdminDashboard() {
                       <select value={editStudent.gradeLevel} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
                         {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-1">Existing Parent Account</label>
+                      <select value={editStudent.parentEmail || ''} onChange={e => {
+                        const parent = parentAccounts.find(p => p.email === e.target.value)
+                        setEditStudent(prev => ({
+                          ...prev,
+                          parentEmail: e.target.value,
+                          parentName: parent ? parent.name : prev.parentName
+                        }))
+                      }} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
+                        <option value="">Select existing parent or use manual info</option>
+                        {parentAccounts.map(parent => (
+                          <option key={parent.id} value={parent.email}>{parent.name} — {parent.email}</option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-400 mt-1">Linking an existing parent account improves reporting and access.</p>
                     </div>
                     <div><label className="block text-sm font-bold text-cyan-700 mb-1">Parent Name</label><input type="text" value={editStudent.parentName} onChange={e => setEditStudent({ ...editStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
                     <div><label className="block text-sm font-bold text-cyan-700 mb-1">Parent Email</label><input type="email" value={editStudent.parentEmail} onChange={e => setEditStudent({ ...editStudent, parentEmail: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>

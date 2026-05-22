@@ -31,6 +31,9 @@ const createStaff = async (req, res) => {
     const { name, role, department, subject, bio, email, phone, category, classes, subjects } = req.body
     const parsedClasses = parseArrayField(classes)
     const parsedSubjects = parseArrayField(subjects)
+    if (role === 'teacher' && parsedClasses.length === 0 && parsedSubjects.length === 0) {
+      return res.status(400).json({ message: 'Teachers must be assigned at least one class or subject.' })
+    }
     const photo = req.file ? req.file.path : null
     const staff = await prisma.staff.create({
       data: {
@@ -60,6 +63,9 @@ const updateStaff = async (req, res) => {
     const existing = await prisma.staff.findUnique({ where: { id: parseInt(id) } })
     const parsedClasses = parseArrayField(classes)
     const parsedSubjects = parseArrayField(subjects)
+    if (role === 'teacher' && parsedClasses.length === 0 && parsedSubjects.length === 0) {
+      return res.status(400).json({ message: 'Teachers must be assigned at least one class or subject.' })
+    }
     const photo = req.file ? req.file.path : existing?.photo
     const staff = await prisma.staff.update({
       where: { id: parseInt(id) },

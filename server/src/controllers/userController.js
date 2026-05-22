@@ -31,7 +31,18 @@ const updateUser = async (req, res) => {
   const { id } = req.params
   try {
     const { name, email, role } = req.body
+    const existingUser = await prisma.user.findUnique({ where: { id: parseInt(id) } })
     const user = await prisma.user.update({ where: { id: parseInt(id) }, data: { name, email, role } })
+
+    if (existingUser && existingUser.email !== email) {
+      if (existingUser.role === 'parent') {
+        await prisma.student.updateMany({ where: { parentEmail: existingUser.email }, data: { parentEmail: email } })
+      }
+      if (existingUser.role === 'teacher') {
+        await prisma.staff.updateMany({ where: { email: existingUser.email }, data: { email } })
+      }
+    }
+
     res.json(user)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -63,6 +74,38 @@ const reactivateUser = async (req, res) => {
   }
 }
 
+const deleteUser = async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
+  const { id } = req.params
+  try {
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    if (user.active) return res.status(400).json({ message: 'Deactivate account before deleting it' })
+
+    const operations = []
+    if (user.role === 'parent') {
+      const children = await prisma.student.findMany({ where: { parentEmail: user.email } })
+      const studentIds = children.map(s => s.id)
+      if (studentIds.length) {
+        operations.push(prisma.result.deleteMany({ where: { studentId: { in: studentIds } } }))
+        operations.push(prisma.feePayment.deleteMany({ where: { studentId: { in: studentIds } } }))
+        operations.push(prisma.attendanceRecord.deleteMany({ where: { studentId: { in: studentIds } } }))
+        operations.push(prisma.student.deleteMany({ where: { id: { in: studentIds } } }))
+      }
+    }
+    if (user.role === 'teacher') {
+      operations.push(prisma.staff.deleteMany({ where: { email: user.email } }))
+    }
+    operations.push(prisma.accountAudit.deleteMany({ where: { userId: user.id } }))
+    operations.push(prisma.user.delete({ where: { id: user.id } }))
+
+    await prisma.$transaction(operations)
+    res.json({ message: 'User deleted and related data cleared' })
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 const getAccountAudits = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   try {
@@ -81,4 +124,4 @@ const getAccountAudits = async (req, res) => {
   }
 }
 
-module.exports = { getUsers, updateUser, deactivateUser, reactivateUser, getAccountAudits }
+module.exports = { getUsers, updateUser, deactivateUser, reactivateUser, deleteUser, getAccountAudits }

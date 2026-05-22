@@ -15,6 +15,7 @@ model User {
   role          String         @default("parent")
   active        Boolean        @default(true)
   accountAudits AccountAudit[]
+  students      Student[]      @relation("ParentStudents")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -27,6 +28,8 @@ model Student {
   dateOfBirth String?
   gender      String
   gradeLevel  String
+  parentId    Int?
+  parent      User?              @relation("ParentStudents", fields: [parentId], references: [id])
   parentName  String
   parentEmail String?
   parentPhone String?

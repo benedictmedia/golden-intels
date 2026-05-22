@@ -21,13 +21,19 @@ const generateStudentId = async () => {
 
 const getStudents = async (req, res) => {
   try {
-    // Parents should only see their own children; admins/teachers see all or may filter via query
+    const order = { createdAt: 'desc' }
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
-      const students = await prisma.student.findMany({ where: { parentEmail: email }, orderBy: { createdAt: 'desc' } })
+      const students = await prisma.student.findMany({
+        where: {
+          OR: [{ parentEmail: email }, { parentId: req.user.id }]
+        },
+        orderBy: order,
+        include: { parent: { select: { id: true, name: true, email: true } } }
+      })
       return res.json(students)
     }
-    const students = await prisma.student.findMany({ orderBy: { createdAt: 'desc' } })
+    const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
     res.json(students)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -43,8 +49,13 @@ const createStudent = async (req, res) => {
       photo = req.file.path
       console.log('Photo saved at:', photo)
     }
+    let parentId = null
+    if (parentEmail) {
+      const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
+      if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
+    }
     const student = await prisma.student.create({
-      data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentName, parentEmail, parentPhone, address, photo }
+      data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentId, parentName, parentEmail, parentPhone, address, photo }
     })
     console.log('✅ Student created successfully:', student.id)
     res.status(201).json(student)
@@ -59,9 +70,15 @@ const updateStudent = async (req, res) => {
   try {
     const existing = await prisma.student.findUnique({ where: { id: parseInt(id) } })
     const photo = req.file ? req.file.path : existing?.photo
+    let parentId = existing?.parentId || null
+    if (req.body.parentEmail) {
+      const parentUser = await prisma.user.findUnique({ where: { email: req.body.parentEmail } })
+      if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
+      else parentId = null
+    }
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
-      data: { ...req.body, photo }
+      data: { ...req.body, photo, parentId }
     })
     res.json(student)
   } catch (error) {
