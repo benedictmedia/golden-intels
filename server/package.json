@@ -8,8 +8,10 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "seed": "node prisma/seed.js",
-    "prisma:generate": "prisma generate --schema=prisma/schema.prisma"
+    "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma"
   },
+  "postinstall": "npm run migrate:deploy && npm run prisma:generate",
   "keywords": [],
   "author": "",
   "license": "ISC",
