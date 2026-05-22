@@ -5,10 +5,26 @@ const prisma = new PrismaClient()
 // Get all results
 const getResults = async (req, res) => {
   try {
-    const results = await prisma.result.findMany({
-      include: { student: true },
-      orderBy: { createdAt: 'desc' }
-    })
+    // If parent, only return results for their children
+    if (req.user && req.user.role === 'parent') {
+      const email = req.user.email
+      const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
+      const ids = children.map(c => c.id)
+      const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(results)
+    }
+
+    // If teacher, restrict to their assigned class (staff.department) or results they submitted
+    if (req.user && req.user.role === 'teacher') {
+      const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
+      const where = {}
+      if (staff?.department) where.OR = [{ gradeLevel: staff.department }, { submittedBy: req.user.name }]
+      else where.submittedBy = req.user.name
+      const results = await prisma.result.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(results)
+    }
+
+    const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
     res.json(results)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -19,11 +35,12 @@ const getResults = async (req, res) => {
 const getResultsByStudent = async (req, res) => {
   const { studentId } = req.params
   try {
-    const results = await prisma.result.findMany({
-      where: { studentId: parseInt(studentId) },
-      include: { student: true },
-      orderBy: { createdAt: 'desc' }
-    })
+    // If parent, ensure the requested student belongs to them
+    if (req.user && req.user.role === 'parent') {
+      const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+    }
+    const results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
     res.json(results)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })

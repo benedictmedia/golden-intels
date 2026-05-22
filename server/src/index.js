@@ -41,6 +41,7 @@ app.use('/api/news', require('./routes/newsEvents'))
 app.use('/api/staff', require('./routes/staff'))
 app.use('/api/fees', require('./routes/fees'))
 app.use('/api/attendance', require('./routes/attendance'))
+app.use('/api/users', require('./routes/users'))
 
 const seedDefaultUsers = async () => {
   const defaultUsers = [

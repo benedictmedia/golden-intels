@@ -13,6 +13,7 @@ model User {
   email     String   @unique
   password  String
   role      String   @default("parent")
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -214,4 +215,14 @@ model AttendanceRecord {
   recordedBy  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model AccountAudit {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id])
+  action      String
+  performedBy String
+  details     Json?
+  createdAt   DateTime @default(now())
 }

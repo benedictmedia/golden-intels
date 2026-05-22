@@ -21,6 +21,12 @@ const generateStudentId = async () => {
 
 const getStudents = async (req, res) => {
   try {
+    // Parents should only see their own children; admins/teachers see all or may filter via query
+    if (req.user && req.user.role === 'parent') {
+      const email = req.user.email
+      const students = await prisma.student.findMany({ where: { parentEmail: email }, orderBy: { createdAt: 'desc' } })
+      return res.json(students)
+    }
     const students = await prisma.student.findMany({ orderBy: { createdAt: 'desc' } })
     res.json(students)
   } catch (error) {

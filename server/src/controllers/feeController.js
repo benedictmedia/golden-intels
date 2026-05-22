@@ -28,10 +28,15 @@ const upsertFeeStructure = async (req, res) => {
 // Fee Payments
 const getFeePayments = async (req, res) => {
   try {
-    const payments = await prisma.feePayment.findMany({
-      include: { student: true },
-      orderBy: { createdAt: 'desc' }
-    })
+    // Parents should only see payments for their children
+    if (req.user && req.user.role === 'parent') {
+      const email = req.user.email
+      const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
+      const ids = children.map(c => c.id)
+      const payments = await prisma.feePayment.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(payments)
+    }
+    const payments = await prisma.feePayment.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
     res.json(payments)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -41,11 +46,14 @@ const getFeePayments = async (req, res) => {
 const getStudentFeePayments = async (req, res) => {
   const { studentId } = req.params
   try {
-    const payments = await prisma.feePayment.findMany({
-      where: { studentId: parseInt(studentId) },
-      include: { student: true },
-      orderBy: { createdAt: 'desc' }
-    })
+    // If parent, ensure the requested student belongs to them
+    if (req.user && req.user.role === 'parent') {
+      const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+      if (!student || student.parentEmail !== req.user.email) {
+        return res.status(403).json({ message: 'Forbidden' })
+      }
+    }
+    const payments = await prisma.feePayment.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
     res.json(payments)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })

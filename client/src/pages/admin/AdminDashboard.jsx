@@ -15,6 +15,7 @@ const menuItems = [
   { icon: <BarChart2 size={20} />, label: 'Performance Review', id: 'performance' },
   { icon: <Users size={20} />, label: 'Learners', id: 'learners' },
   { icon: <UserPlus size={20} />, label: 'Create Account', id: 'create-account' },
+  { icon: <Users size={20} />, label: 'Accounts', id: 'accounts' },
   { icon: <Key size={20} />, label: 'Admission Tokens', id: 'admission-tokens' },
   { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery' },
   { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
@@ -118,6 +119,20 @@ export default function AdminDashboard() {
   Authorization: `Bearer ${localStorage.getItem('token')}`
 })
 
+  // Accounts state
+  const [users, setUsers] = useState([])
+  const [accountTab, setAccountTab] = useState('parents')
+  const [accountLoading, setAccountLoading] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
+  const [accountQuery, setAccountQuery] = useState('')
+  const [accountPage, setAccountPage] = useState(1)
+  const [accountLimit, setAccountLimit] = useState(10)
+  const [accountTotal, setAccountTotal] = useState(0)
+  const [audits, setAudits] = useState([])
+  const [showAuditsModal, setShowAuditsModal] = useState(false)
+  const [auditPage, setAuditPage] = useState(1)
+  const [auditLimit, setAuditLimit] = useState(20)
+
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
   const filteredStudents = activeClass === 'All' ? students : students.filter(s => s.gradeLevel === activeClass)
@@ -156,6 +171,11 @@ export default function AdminDashboard() {
       axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
     }
   }, [activeMenu])
+
+  useEffect(() => {
+    if (activeMenu === 'accounts') fetchAccounts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMenu, accountTab, accountPage, accountLimit])
 
   const handleLogout = () => { logout(); navigate('/') }
 
@@ -203,6 +223,60 @@ export default function AdminDashboard() {
       setNewUser({ name: '', email: '', password: '', role: 'teacher' })
     } catch (err) { setCreateError(err.response?.data?.message || 'Failed to create account.') }
     finally { setCreateLoading(false) }
+  }
+
+  // Accounts actions
+  const fetchAccounts = async () => {
+    setAccountLoading(true)
+    try {
+      const params = { q: accountQuery, page: accountPage, limit: accountLimit }
+      if (accountTab === 'parents') params.role = 'parent'
+      if (accountTab === 'teachers') params.role = 'teacher'
+      const res = await axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params })
+      setUsers(res.data.users || [])
+      setAccountTotal(res.data.total || 0)
+      const [studentsRes, staffRes] = await Promise.all([
+        axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
+        axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
+      ])
+      setStudents(studentsRes.data)
+      setStaffList(staffRes.data)
+    } catch (err) {
+      console.error('Failed to fetch accounts:', err)
+    } finally { setAccountLoading(false) }
+  }
+
+  const handleDeactivateUser = async (email) => {
+    if (!window.confirm(`Deactivate ${email}?`)) return
+    try {
+      await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to deactivate user') }
+  }
+
+  const handleReactivateUser = async (email) => {
+    try {
+      await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to reactivate user') }
+  }
+
+  const handleUpdateUser = async (id, payload) => {
+    try {
+      const res = await axios.put(`${API_URL}/api/users/${id}`, payload, { headers: getAuthHeaders() })
+      setUsers(users.map(u => u.id === res.data.id ? res.data : u))
+      setEditingUser(null)
+    } catch (err) { alert('Failed to update user') }
+  }
+
+  const fetchAudits = async (userId = null) => {
+    try {
+      const params = { page: auditPage, limit: auditLimit }
+      if (userId) params.userId = userId
+      const res = await axios.get(`${API_URL}/api/users/audits`, { headers: getAuthHeaders(), params })
+      setAudits(res.data.audits || [])
+      setShowAuditsModal(true)
+    } catch (err) { console.error('Failed to fetch audits', err) }
   }
 
   const handleApproveResult = async (id) => {
@@ -1262,6 +1336,158 @@ export default function AdminDashboard() {
                 </div>
                 <button onClick={handleCreateAccount} disabled={createLoading} className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50">{createLoading ? 'Creating...' : 'Create Account'}</button>
               </div>
+            </div>
+          )}
+
+          {/* Accounts */}
+          {activeMenu === 'accounts' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Accounts</h2>
+                  <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. You can view, edit or deactivate accounts.</p>
+                </div>
+                <div className="space-x-2">
+                  <button onClick={() => { setAccountTab('parents'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='parents'?'bg-blue-600 text-white':'bg-white border'}`}>Parents</button>
+                  <button onClick={() => { setAccountTab('learners'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='learners'?'bg-blue-600 text-white':'bg-white border'}`}>Learners</button>
+                  <button onClick={() => { setAccountTab('teachers'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='teachers'?'bg-blue-600 text-white':'bg-white border'}`}>Teachers</button>
+                  <button onClick={fetchAccounts} className="px-4 py-2 rounded-lg bg-green-50 border">Refresh</button>
+                  <button onClick={() => fetchAudits()} className="px-4 py-2 rounded-lg bg-gray-50 border">View Audits</button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 mb-4">
+                <input value={accountQuery} onChange={e => setAccountQuery(e.target.value)} placeholder="Search accounts by name or email" className="flex-1 border px-3 py-2 rounded" />
+                <select value={accountLimit} onChange={e => { setAccountLimit(parseInt(e.target.value)); setAccountPage(1) }} className="border px-3 py-2 rounded">
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                </select>
+                <button onClick={() => { setAccountPage(1); fetchAccounts() }} className="px-4 py-2 bg-blue-600 text-white rounded">Search</button>
+              </div>
+
+              {accountLoading ? (
+                <div className="text-gray-500">Loading...</div>
+              ) : (
+                <div>
+                  {accountTab === 'parents' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {users.map(u => (
+                        <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                              <p className="text-sm text-gray-500">{u.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                              {u.active === false ? (
+                                <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
+                              ) : (
+                                <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* pagination */}
+                      <div className="col-span-full flex items-center justify-between mt-4">
+                        <div className="text-sm text-gray-500">Showing {(accountPage-1)*accountLimit + 1} - {Math.min(accountPage*accountLimit, accountTotal)} of {accountTotal}</div>
+                        <div className="flex items-center gap-2">
+                          <button disabled={accountPage <= 1} onClick={() => { setAccountPage(p => Math.max(1, p-1)); fetchAccounts() }} className="px-3 py-1 border rounded">Prev</button>
+                          <div className="px-3 py-1 border rounded">{accountPage}</div>
+                          <button disabled={accountPage*accountLimit >= accountTotal} onClick={() => { setAccountPage(p => p+1); fetchAccounts() }} className="px-3 py-1 border rounded">Next</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {accountTab === 'learners' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {students.map(s => (
+                        <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-bold text-[#4a235a]">{s.firstName} {s.lastName}</h3>
+                              <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setSelectedStudent(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
+                              <button onClick={() => { setEditStudent(s); setEditMode(true) }} className="px-3 py-2 bg-yellow-400 text-white rounded">Edit</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {accountTab === 'teachers' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {staffList.map(s => (
+                        <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-bold text-[#4a235a]">{s.name}</h3>
+                              <p className="text-sm text-gray-500">{s.email} | {s.department} {s.subject}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => setEditingUser({ id: null, name: s.name, email: s.email, role: 'teacher' })} className="px-3 py-2 bg-blue-600 text-white rounded">Edit User</button>
+                              <button onClick={() => handleDeactivateUser(s.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Edit user modal */}
+              {editingUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                    <h3 className="font-bold mb-4">Edit User</h3>
+                    <div className="space-y-3">
+                      <input className="w-full border px-3 py-2" value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} />
+                      <input className="w-full border px-3 py-2" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} />
+                      <select className="w-full border px-3 py-2" value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}>
+                        <option value="parent">Parent</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => setEditingUser(null)} className="px-4 py-2">Cancel</button>
+                        <button onClick={() => handleUpdateUser(editingUser.id, { name: editingUser.name, email: editingUser.email, role: editingUser.role })} className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Audits modal */}
+              {showAuditsModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold">Account Audits</h3>
+                      <button onClick={() => setShowAuditsModal(false)} className="px-3 py-1 border rounded">Close</button>
+                    </div>
+                    <div className="space-y-3 max-h-80 overflow-auto">
+                      {audits.length === 0 && <div className="text-sm text-gray-500">No recent audits</div>}
+                      {audits.map(a => (
+                        <div key={a.id} className="p-3 border rounded">
+                          <div className="flex items-center justify-between text-sm text-gray-700">
+                            <div>{a.action} — {a.performedBy}</div>
+                            <div className="text-xs text-gray-400">{new Date(a.createdAt).toLocaleString()}</div>
+                          </div>
+                          {a.details && <pre className="text-xs text-gray-500 mt-2">{JSON.stringify(a.details)}</pre>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -7,11 +7,26 @@ const getAttendance = async (req, res) => {
     const where = {}
     if (date) where.date = date
     if (gradeLevel) where.gradeLevel = gradeLevel
-    const records = await prisma.attendanceRecord.findMany({
-      where,
-      include: { student: true },
-      orderBy: { createdAt: 'desc' }
-    })
+    // If parent, restrict to their children
+    if (req.user && req.user.role === 'parent') {
+      const children = await prisma.student.findMany({ where: { parentEmail: req.user.email }, select: { id: true } })
+      const ids = children.map(c => c.id)
+      where.studentId = { in: ids }
+      const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(records)
+    }
+
+    // If teacher, restrict to their assigned class (staff.department) or records they recorded
+    if (req.user && req.user.role === 'teacher') {
+      const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
+      const teacherWhere = { ...where }
+      if (staff?.department) teacherWhere.OR = [{ gradeLevel: staff.department }, { recordedBy: req.user.name }]
+      else teacherWhere.recordedBy = req.user.name
+      const records = await prisma.attendanceRecord.findMany({ where: teacherWhere, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(records)
+    }
+
+    const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
     res.json(records)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -21,11 +36,12 @@ const getAttendance = async (req, res) => {
 const getStudentAttendance = async (req, res) => {
   const { studentId } = req.params
   try {
-    const records = await prisma.attendanceRecord.findMany({
-      where: { studentId: parseInt(studentId) },
-      include: { student: true },
-      orderBy: { date: 'desc' }
-    })
+    // If parent, ensure the requested student belongs to them
+    if (req.user && req.user.role === 'parent') {
+      const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+    }
+    const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { date: 'desc' } })
     res.json(records)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -58,9 +74,12 @@ const saveAttendance = async (req, res) => {
 const getAttendanceSummary = async (req, res) => {
   const { studentId } = req.params
   try {
-    const records = await prisma.attendanceRecord.findMany({
-      where: { studentId: parseInt(studentId) }
-    })
+    // If parent, ensure the requested student belongs to them
+    if (req.user && req.user.role === 'parent') {
+      const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+    }
+    const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) } })
     const total = records.length
     const present = records.filter(r => r.status === 'present').length
     const absent = records.filter(r => r.status === 'absent').length
