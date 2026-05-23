@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
@@ -54,22 +55,54 @@ const getStudents = async (req, res) => {
 }
 
 const createStudent = async (req, res) => {
-  const { firstName, lastName, dateOfBirth, gender, gradeLevel, parentName, parentEmail, parentPhone, address } = req.body
+  const { firstName, lastName, dateOfBirth, gender, gradeLevel, parentName, parentEmail, parentPhone, address, email, password } = req.body
+  const learnerCredentialsProvided = Boolean(String(email || '').trim()) || Boolean(String(password || '').trim())
+
+  if (learnerCredentialsProvided && (!email || !password)) {
+    return res.status(400).json({ message: 'Learner email and password are required to create a learner dashboard account.' })
+  }
+
   try {
+    if (email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } })
+      if (existingUser) {
+        return res.status(400).json({ message: 'User already exists' })
+      }
+    }
+
     const studentId = await generateStudentId()
     let photo = null
     if (req.file) {
       photo = req.file.path
       console.log('Photo saved at:', photo)
     }
+
     let parentId = null
     if (parentEmail) {
       const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
       if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
     }
-    const student = await prisma.student.create({
-      data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentId, parentName, parentEmail, parentPhone, address, photo }
+
+    const student = await prisma.$transaction(async (tx) => {
+      const createdStudent = await tx.student.create({
+        data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentId, parentName, parentEmail, parentPhone, address, photo }
+      })
+
+      if (email && password) {
+        const hashedPassword = await bcrypt.hash(password, 10)
+        await tx.user.create({
+          data: {
+            name: [firstName, lastName].filter(Boolean).join(' ') || email,
+            email,
+            password: hashedPassword,
+            role: 'learner'
+          }
+        })
+      }
+
+      return createdStudent
     })
+
     console.log('✅ Student created successfully:', student.id)
     res.status(201).json(student)
   } catch (error) {

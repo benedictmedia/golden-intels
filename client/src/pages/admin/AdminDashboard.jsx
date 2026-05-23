@@ -60,7 +60,8 @@ export default function AdminDashboard() {
   const [editStudent, setEditStudent] = useState(null)
   const [newStudent, setNewStudent] = useState({
     firstName: '', lastName: '', dateOfBirth: '', gender: '',
-    gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: ''
+    gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+    learnerEmail: '', learnerPassword: ''
   })
 
   // Results state
@@ -194,14 +195,37 @@ export default function AdminDashboard() {
 
   const handleAddStudent = async () => {
     try {
+      const learnerEmail = newStudent.learnerEmail?.trim()
+      const learnerPassword = newStudent.learnerPassword?.trim()
+
+      if ((learnerEmail || learnerPassword) && (!learnerEmail || !learnerPassword)) {
+        alert('Please enter both a learner email and password to create a dashboard account.')
+        return
+      }
+
       const formData = new FormData()
-      Object.entries(newStudent).forEach(([key, value]) => formData.append(key, value))
+      Object.entries(newStudent).forEach(([key, value]) => {
+        if (key === 'learnerEmail' || key === 'learnerPassword') return
+        formData.append(key, value)
+      })
+
+      if (learnerEmail) {
+        formData.append('email', learnerEmail)
+        formData.append('password', learnerPassword)
+      }
+
       if (photoFile) formData.append('photo', photoFile)
+
       const res = await axios.post(`${API_URL}/api/students`, formData, { headers: getAuthHeaders() })
       setStudents([res.data, ...students])
       setShowAddStudent(false)
-      setPhotoFile(null); setPhotoPreview(null)
-      setNewStudent({ firstName: '', lastName: '', dateOfBirth: '', gender: '', gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '' })
+      setPhotoFile(null)
+      setPhotoPreview(null)
+      setNewStudent({
+        firstName: '', lastName: '', dateOfBirth: '', gender: '',
+        gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+        learnerEmail: '', learnerPassword: ''
+      })
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
     }
@@ -1318,6 +1342,15 @@ export default function AdminDashboard() {
                       <input type="text" value={newStudent.lastName} onChange={e => setNewStudent({ ...newStudent, lastName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Email</label>
+                      <input type="email" value={newStudent.learnerEmail} onChange={e => setNewStudent({ ...newStudent, learnerEmail: e.target.value })} placeholder="Create learner dashboard email" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      <p className="text-xs text-gray-400 mt-1">Optional, but recommended if the learner should access their dashboard.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Password</label>
+                      <input type="password" value={newStudent.learnerPassword} onChange={e => setNewStudent({ ...newStudent, learnerPassword: e.target.value })} placeholder="Create learner dashboard password" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
+                    <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
                       <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
@@ -1429,7 +1462,7 @@ export default function AdminDashboard() {
           {activeMenu === 'create-account' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-2xl">
               <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-2">Create Account</h2>
-              <p className="text-gray-500 mb-8">Create accounts for teachers, parents, and learners to access their respective portals.</p>
+              <p className="text-gray-500 mb-8">Create accounts for teachers and parents to access their respective portals.</p>
               {createSuccess && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">Account created successfully!</div>}
               {createError && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{createError}</div>}
               <div className="space-y-5">
@@ -1444,7 +1477,6 @@ export default function AdminDashboard() {
                   <select value={newUser.role} onChange={e => setNewUser({ ...initialNewUserState, role: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
-                    <option value="learner">Learner</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
