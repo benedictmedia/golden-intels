@@ -48,7 +48,7 @@ const buildUserResponse = async (user) => {
   }
 
   if (user.role === 'teacher') {
-    const staff = await prisma.staff.findUnique({ where: { email: user.email } })
+    const staff = await prisma.staff.findFirst({ where: { email: user.email } })
     if (staff) {
       responseUser.classes = staff.classes || []
       responseUser.subjects = staff.subjects || []
