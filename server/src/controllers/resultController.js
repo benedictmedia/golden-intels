@@ -4,29 +4,178 @@ const prisma = new PrismaClient()
 
 const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
+const normalizeSubject = (value) => String(value ?? '').trim().toLowerCase()
+const normalizeSubjectList = (subjects = []) => Array.from(new Set((subjects || []).map(normalizeSubject).filter(Boolean)))
+
+const buildTeacherAssignments = async (email) => {
+  const staff = await prisma.staff.findFirst({ where: { email } })
+  if (!staff) {
+    return { classes: [], classTeacherClasses: [], subjects: [] }
+  }
+
+  const subjects = normalizeSubjectList(staff.subjects)
+  if (!subjects.length && staff.subject) {
+    subjects.push(normalizeSubject(staff.subject))
+  }
+
+  return {
+    classes: normalizeClassList(staff.classes),
+    classTeacherClasses: normalizeClassList(staff.classTeacherClasses),
+    subjects
+  }
+}
+
+const getExpectedSubjectsForClass = async (gradeLevel) => {
+  const teachers = await prisma.staff.findMany()
+  const expectedSubjects = teachers
+    .filter((teacher) => normalizeClassList(teacher.classes).includes(normalizeClassName(gradeLevel)))
+    .flatMap((teacher) => normalizeSubjectList(teacher.subjects))
+
+  if (expectedSubjects.length === 0) {
+    const fallbackTeacher = teachers.find((teacher) => normalizeClassList(teacher.classes).includes(normalizeClassName(gradeLevel)))
+    if (fallbackTeacher?.subject) {
+      return [normalizeSubject(fallbackTeacher.subject)]
+    }
+  }
+
+  return Array.from(new Set(expectedSubjects))
+}
+
+const isClassTeacherForClass = (teacherClasses = [], gradeLevel = '') =>
+  teacherClasses.includes(normalizeClassName(gradeLevel))
+
+const hasScoreData = (scoreEntry) => {
+  if (!scoreEntry || typeof scoreEntry !== 'object') {
+    return false
+  }
+
+  return ['classScore', 'cat1', 'cat2', 'exam'].every((field) => {
+    const value = scoreEntry[field]
+    return value !== undefined && value !== null && value !== ''
+  })
+}
+
+const isScoresCompleteForSubjects = (scores = {}, requiredSubjects = []) =>
+  requiredSubjects.every((subject) => subject in scores && hasScoreData(scores[subject]))
+
+const sanitizeTeacherScores = (scores = {}, allowedSubjects = []) => {
+  const normalizedAllowed = new Set(allowedSubjects)
+  const sanitized = {}
+
+  Object.entries(scores || {}).forEach(([subject, value]) => {
+    if (normalizedAllowed.has(normalizeSubject(subject))) {
+      sanitized[subject] = value
+    }
+  })
+
+  return sanitized
+}
+
+const validateTeacherScores = (scores = {}, allowedSubjects = []) => {
+  const invalidSubjects = Object.keys(scores || {}).filter((subject) => !allowedSubjects.includes(normalizeSubject(subject)))
+  if (invalidSubjects.length > 0) {
+    return {
+      ok: false,
+      message: `You may only submit scores for your assigned subjects: ${Array.from(new Set(allowedSubjects)).join(', ') || 'none assigned'}.`
+    }
+  }
+
+  return { ok: true }
+}
+
+const getResultByScope = async (studentId, gradeLevel, academicYear, term) => {
+  return prisma.result.findFirst({
+    where: {
+      studentId: parseInt(studentId),
+      gradeLevel,
+      academicYear,
+      term
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => {
+  if (!req.user || req.user.role !== 'teacher') return true
+
+  const teacherAssignments = await buildTeacherAssignments(req.user.email)
+  const allowedTeacherClasses = Array.from(new Set([
+    ...teacherAssignments.classes,
+    ...teacherAssignments.classTeacherClasses
+  ]))
+  if (!allowedTeacherClasses.length) return false
+
+  const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+  if (!student) return false
+
+  const allowedClass = allowedTeacherClasses.includes(normalizeClassName(student.gradeLevel))
+  const allowedGradeLevel = gradeLevel == null
+    ? true
+    : allowedTeacherClasses.includes(normalizeClassName(gradeLevel))
+
+  return allowedClass && allowedGradeLevel
+}
+
+const getTeacherResultPayload = async (req, body) => {
+  const teacherAssignments = await buildTeacherAssignments(req.user.email)
+  const { scores = {}, remarks, gradeLevel } = body
+  const isClassTeacherForSelectedClass = teacherAssignments.classTeacherClasses.includes(normalizeClassName(gradeLevel))
+
+  if (isClassTeacherForSelectedClass) {
+    const sanitizedScores = typeof scores === 'object' && scores !== null ? scores : {}
+    if (!Object.keys(sanitizedScores).length) {
+      return { error: { ok: false, message: 'You must provide scores for at least one subject.' } }
+    }
+
+    return {
+      scores: sanitizedScores,
+      remarks,
+      teacherAssignments
+    }
+  }
+
+  const validation = validateTeacherScores(scores, teacherAssignments.subjects)
+  if (!validation.ok) {
+    return { error: validation }
+  }
+
+  const sanitizedScores = sanitizeTeacherScores(scores, teacherAssignments.subjects)
+  if (!Object.keys(sanitizedScores).length) {
+    return { error: { ok: false, message: 'You must provide scores for at least one assigned subject.' } }
+  }
+
+  return {
+    scores: sanitizedScores,
+    remarks,
+    teacherAssignments
+  }
+}
+
+const filterApprovedResults = (results = []) => results.filter((result) => result.status === 'approved')
 
 // Get all results
 const getResults = async (req, res) => {
   try {
-    // If parent, only return results for their children
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
       const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
-      const ids = children.map(c => c.id)
+      const ids = children.map((child) => child.id)
       const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
-      return res.json(results)
+      return res.json(filterApprovedResults(results))
     }
 
-    // If teacher, restrict to their assigned classes or results they submitted
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const teacherClasses = normalizeClassList(staff?.classes)
+      const teacherClasses = Array.from(new Set([
+        ...normalizeClassList(staff?.classes),
+        ...normalizeClassList(staff?.classTeacherClasses)
+      ]))
       const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
       const filteredResults = teacherClasses.length
-        ? results.filter(result => teacherClasses.includes(normalizeClassName(result.gradeLevel)) || result.submittedBy === req.user.name)
+        ? results.filter((result) => teacherClasses.includes(normalizeClassName(result.gradeLevel)) || result.submittedBy === req.user.name)
         : staff?.department
-          ? results.filter(result => normalizeClassName(result.gradeLevel) === normalizeClassName(staff.department) || result.submittedBy === req.user.name)
-          : results.filter(result => result.submittedBy === req.user.name)
+          ? results.filter((result) => normalizeClassName(result.gradeLevel) === normalizeClassName(staff.department) || result.submittedBy === req.user.name)
+          : results.filter((result) => result.submittedBy === req.user.name)
       return res.json(filteredResults)
     }
 
@@ -37,45 +186,32 @@ const getResults = async (req, res) => {
   }
 }
 
-const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => {
-  if (!req.user || req.user.role !== 'teacher') return true
-  const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-  if (!staff) return true
-  if ((!staff.classes || staff.classes.length === 0) && !staff.department) return true
-
-  const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-  if (!student) return false
-  const teacherClasses = normalizeClassList(staff?.classes)
-  const allowedClass = teacherClasses.length
-    ? teacherClasses.includes(normalizeClassName(student.gradeLevel))
-    : normalizeClassName(staff.department) === normalizeClassName(student.gradeLevel)
-  const allowedGradeLevel = gradeLevel == null
-    ? true
-    : teacherClasses.length
-      ? teacherClasses.includes(normalizeClassName(gradeLevel))
-      : normalizeClassName(staff.department) === normalizeClassName(gradeLevel)
-  return allowedClass && allowedGradeLevel
-}
-
 // Get results by student
 const getResultsByStudent = async (req, res) => {
   const { studentId } = req.params
   try {
-    // If parent, ensure the requested student belongs to them
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
     }
+
     if (req.user && req.user.role === 'teacher') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const teacherClasses = normalizeClassList(staff?.classes)
+      const teacherClasses = Array.from(new Set([
+        ...normalizeClassList(staff?.classes),
+        ...normalizeClassList(staff?.classTeacherClasses)
+      ]))
       const allowedByClass = teacherClasses.length
         ? teacherClasses.includes(normalizeClassName(student?.gradeLevel))
         : normalizeClassName(staff?.department) === normalizeClassName(student?.gradeLevel)
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
+
     const results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    if (req.user && req.user.role === 'parent') {
+      return res.json(filterApprovedResults(results))
+    }
     res.json(results)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -85,10 +221,51 @@ const getResultsByStudent = async (req, res) => {
 // Create result
 const createResult = async (req, res) => {
   const { studentId, gradeLevel, academicYear, term, scores, remarks, submittedBy } = req.body
+
   try {
     if (req.user && req.user.role === 'teacher') {
       const allowed = await isTeacherAllowedForStudent(req, studentId, gradeLevel)
-      if (!allowed) return res.status(403).json({ message: 'Forbidden: You may only submit results for your assigned classes.' })
+      if (!allowed) {
+        return res.status(403).json({ message: 'Forbidden: You may only submit results for your assigned classes.' })
+      }
+
+      const payload = await getTeacherResultPayload(req, req.body)
+      if (payload.error) {
+        return res.status(400).json({ message: payload.error.message })
+      }
+
+      const teacherAssignments = payload.teacherAssignments
+      const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, gradeLevel)
+      const existingResult = await getResultByScope(studentId, gradeLevel, academicYear, term)
+      const mergedScores = existingResult ? { ...(existingResult.scores || {}), ...payload.scores } : payload.scores
+      const nextRemarks = canEditRemarks ? (remarks || existingResult?.remarks || '') : (existingResult?.remarks || '')
+
+      const result = existingResult
+        ? await prisma.result.update({
+            where: { id: existingResult.id },
+            data: {
+              scores: mergedScores,
+              remarks: nextRemarks,
+              submittedBy,
+              status: 'pending'
+            },
+            include: { student: true }
+          })
+        : await prisma.result.create({
+            data: {
+              studentId: parseInt(studentId),
+              gradeLevel,
+              academicYear,
+              term,
+              scores: payload.scores,
+              remarks: nextRemarks,
+              submittedBy,
+              status: 'pending'
+            },
+            include: { student: true }
+          })
+
+      return res.status(existingResult ? 200 : 201).json(result)
     }
 
     const result = await prisma.result.create({
@@ -104,6 +281,7 @@ const createResult = async (req, res) => {
       },
       include: { student: true }
     })
+
     res.status(201).json(result)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -114,37 +292,73 @@ const createResult = async (req, res) => {
 const updateResult = async (req, res) => {
   const { id } = req.params
   const { scores, remarks, status } = req.body
+
   try {
     const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
+    if (!existing) {
+      return res.status(404).json({ message: 'Result not found' })
+    }
+
     if (req.user && req.user.role === 'teacher') {
       const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
-      if (!allowed && existing.submittedBy !== req.user.name) {
+      if (!allowed) {
         return res.status(403).json({ message: 'Forbidden: You may only update results for your assigned classes.' })
+      }
+
+      const payload = await getTeacherResultPayload(req, { ...req.body, gradeLevel: existing.gradeLevel })
+      if (payload.error) {
+        return res.status(400).json({ message: payload.error.message })
+      }
+
+      const teacherAssignments = payload.teacherAssignments
+      const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, existing.gradeLevel)
+      const mergedScores = { ...(existing.scores || {}), ...payload.scores }
+      const nextRemarks = canEditRemarks ? (remarks || existing.remarks || '') : (existing.remarks || '')
+
+      const result = await prisma.result.update({
+        where: { id: parseInt(id) },
+        data: {
+          scores: mergedScores,
+          remarks: nextRemarks,
+          status: 'pending'
+        },
+        include: { student: true }
+      })
+
+      return res.json(result)
+    }
+
+    const nextScores = scores === undefined ? existing.scores : scores
+    const nextRemarksValue = remarks === undefined ? existing.remarks : remarks
+    const nextStatus = status === undefined ? existing.status : status
+
+    if (nextStatus === 'approved') {
+      const requiredSubjects = await getExpectedSubjectsForClass(existing.gradeLevel)
+      if (!isScoresCompleteForSubjects(nextScores || {}, requiredSubjects)) {
+        return res.status(400).json({ message: 'Cannot approve until all subject teachers have submitted their scores.' })
       }
     }
 
     const result = await prisma.result.update({
       where: { id: parseInt(id) },
-      data: { scores, remarks, status },
+      data: { scores: nextScores, remarks: nextRemarksValue, status: nextStatus },
       include: { student: true }
     })
+
     res.json(result)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
 
-// Delete result (teacher only — admin results are protected on frontend)
+// Delete result
 const deleteResult = async (req, res) => {
   const { id } = req.params
   try {
-    const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
     if (req.user && req.user.role === 'teacher') {
-      const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
-      if (!allowed && existing.submittedBy !== req.user.name) {
-        return res.status(403).json({ message: 'Forbidden: You may only delete results for your assigned classes.' })
-      }
+      return res.status(403).json({ message: 'Teachers cannot delete shared results. Please contact admin.' })
     }
+
     await prisma.result.delete({ where: { id: parseInt(id) } })
     res.json({ message: 'Result deleted successfully' })
   } catch (error) {

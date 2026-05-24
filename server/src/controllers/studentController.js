@@ -44,9 +44,10 @@ const getStudents = async (req, res) => {
         return res.json([])
       }
 
-      const teacherClasses = (staff.classes || [])
-        .map(normalizeClassName)
-        .filter(Boolean)
+      const teacherClasses = Array.from(new Set([
+        ...(staff.classes || []),
+        ...(staff.classTeacherClasses || [])
+      ].map(normalizeClassName).filter(Boolean)))
 
       const filteredStudents = teacherClasses.length
         ? students.filter(student => teacherClasses.includes(normalizeClassName(student.gradeLevel)))

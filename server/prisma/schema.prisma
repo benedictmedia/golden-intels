@@ -174,20 +174,21 @@ model NewsEvent {
 }
 
 model Staff {
-  id         Int      @id @default(autoincrement())
-  name       String
-  role       String
-  department String
-  subject    String?
-  subjects   String[]  @default([])
-  classes    String[]  @default([])
-  bio        String?
-  photo      String?
-  email      String?
-  phone      String?
-  category   String   @default("teaching")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  name                String
+  role                String
+  department          String
+  subject             String?
+  subjects            String[] @default([])
+  classes             String[] @default([])
+  classTeacherClasses String[] @default([])
+  bio                 String?
+  photo               String?
+  email               String?
+  phone               String?
+  category            String   @default("teaching")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model FeeStructure {

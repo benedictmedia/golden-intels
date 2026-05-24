@@ -19,16 +19,12 @@ const getAttendance = async (req, res) => {
       return res.json(records)
     }
 
-    // If teacher, restrict to their assigned classes or records they recorded
+    // If teacher, restrict to their class-teacher classes or records they recorded
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const teacherClasses = normalizeClassList(staff?.classes)
+      const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
       const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
-      const filteredRecords = teacherClasses.length
-        ? records.filter(record => teacherClasses.includes(normalizeClassName(record.gradeLevel)) || record.recordedBy === req.user.name)
-        : staff?.department
-          ? records.filter(record => normalizeClassName(record.gradeLevel) === normalizeClassName(staff.department) || record.recordedBy === req.user.name)
-          : records.filter(record => record.recordedBy === req.user.name)
+      const filteredRecords = records.filter(record => classTeacherClasses.includes(normalizeClassName(record.gradeLevel)) || record.recordedBy === req.user.name)
       return res.json(filteredRecords)
     }
 
@@ -50,10 +46,8 @@ const getStudentAttendance = async (req, res) => {
     if (req.user && req.user.role === 'teacher') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const teacherClasses = normalizeClassList(staff?.classes)
-      const allowedByClass = teacherClasses.length
-        ? teacherClasses.includes(normalizeClassName(student?.gradeLevel))
-        : normalizeClassName(staff?.department) === normalizeClassName(student?.gradeLevel)
+      const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
+      const allowedByClass = classTeacherClasses.includes(normalizeClassName(student?.gradeLevel))
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
     const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { date: 'desc' } })
@@ -68,14 +62,12 @@ const saveAttendance = async (req, res) => {
   try {
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const teacherClasses = normalizeClassList(staff?.classes)
+      const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
       const normalizedGradeLevel = normalizeClassName(gradeLevel)
-      const allowed = teacherClasses.length
-        ? teacherClasses.includes(normalizedGradeLevel)
-        : !staff?.department || normalizeClassName(staff.department) === normalizedGradeLevel
+      const allowed = classTeacherClasses.includes(normalizedGradeLevel)
 
       if (!allowed) {
-        return res.status(403).json({ message: 'Forbidden: You may only record attendance for your assigned classes.' })
+        return res.status(403).json({ message: 'Forbidden: You may only record attendance for classes where you are assigned as class teacher.' })
       }
     }
 
@@ -107,6 +99,15 @@ const getAttendanceSummary = async (req, res) => {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
     }
+
+    if (req.user && req.user.role === 'teacher') {
+      const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
+      const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
+      const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
+      const allowedByClass = classTeacherClasses.includes(normalizeClassName(student?.gradeLevel))
+      if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
+    }
+
     const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) } })
     const total = records.length
     const present = records.filter(r => r.status === 'present').length

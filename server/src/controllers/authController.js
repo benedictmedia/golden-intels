@@ -52,6 +52,7 @@ const buildUserResponse = async (user) => {
     if (staff) {
       responseUser.classes = staff.classes || []
       responseUser.subjects = staff.subjects || []
+      responseUser.classTeacherClasses = staff.classTeacherClasses || []
       responseUser.department = staff.department
       responseUser.staffSubject = staff.subject || null
     }
@@ -71,6 +72,7 @@ const register = async (req, res) => {
     subject: teacherSubject,
     classes,
     subjects,
+    classTeacherClasses,
     firstName,
     lastName,
     dateOfBirth,
@@ -98,6 +100,7 @@ const register = async (req, res) => {
       if (createdUser.role === 'teacher') {
         const parsedClasses = parseArrayField(classes)
         const parsedSubjects = parseArrayField(subjects)
+        const parsedClassTeacherClasses = parseArrayField(classTeacherClasses)
         if (parsedClasses.length > 0 || parsedSubjects.length > 0 || teacherSubject) {
           await tx.staff.create({
             data: {
@@ -107,6 +110,7 @@ const register = async (req, res) => {
               subject: teacherSubject || parsedSubjects[0] || null,
               subjects: parsedSubjects,
               classes: parsedClasses,
+              classTeacherClasses: parsedClassTeacherClasses,
               email,
               phone: null,
               category: 'teaching'

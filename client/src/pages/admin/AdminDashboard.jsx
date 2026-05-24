@@ -110,7 +110,7 @@ export default function AdminDashboard() {
   const [staffLoading, setStaffLoading] = useState(false)
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
-  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
+  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
 
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
@@ -777,8 +777,8 @@ export default function AdminDashboard() {
   const handleAddStaff = async () => {
     if (!staffForm.name || !staffForm.role) { alert('Please fill in name and role.'); return }
     const isTeacher = staffForm.role.toLowerCase() === 'teacher'
-    if (isTeacher && (!staffForm.classes.length || !staffForm.subjects.length)) {
-      alert('Teachers must be assigned at least one class and one subject.')
+    if (isTeacher && (!staffForm.classes.length && !staffForm.subjects.length && !staffForm.classTeacherClasses.length)) {
+      alert('Teachers must be assigned at least one class, one subject, or one class-teacher class.')
       return
     }
     setStaffLoading(true)
@@ -791,7 +791,7 @@ export default function AdminDashboard() {
       if (staffPhoto) data.append('photo', staffPhoto)
       const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList]); setShowAddStaff(false)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert('Failed to add staff member.') }
     finally { setStaffLoading(false) }
@@ -800,8 +800,8 @@ export default function AdminDashboard() {
   const handleEditStaff = async () => {
     try {
       const isTeacher = staffForm.role.toLowerCase() === 'teacher'
-      if (isTeacher && (!staffForm.classes.length || !staffForm.subjects.length)) {
-        alert('Teachers must be assigned at least one class and one subject.')
+      if (isTeacher && (!staffForm.classes.length && !staffForm.subjects.length && !staffForm.classTeacherClasses.length)) {
+        alert('Teachers must be assigned at least one class, one subject, or one class-teacher class.')
         return
       }
       const data = new FormData()
@@ -813,7 +813,7 @@ export default function AdminDashboard() {
       const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList(staffList.map(s => s.id === editingStaff.id ? res.data : s))
       setEditingStaff(null)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert('Failed to update staff member.') }
   }
@@ -2146,6 +2146,23 @@ export default function AdminDashboard() {
                                 ))}
                               </div>
                             </div>
+                            <div className="lg:col-span-2">
+                              <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For (optional)</label>
+                              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
+                                {classes.slice(1).map(cls => (
+                                  <label key={cls} className="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" checked={staffForm.classTeacherClasses.includes(cls)} onChange={() => {
+                                      const next = staffForm.classTeacherClasses.includes(cls)
+                                        ? staffForm.classTeacherClasses.filter(c => c !== cls)
+                                        : [...staffForm.classTeacherClasses, cls]
+                                      setStaffForm({ ...staffForm, classTeacherClasses: next })
+                                    }} className="rounded text-cyan-600" />
+                                    {cls}
+                                  </label>
+                                ))}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">These classes unlock attendance and class-teacher remarks for the selected teacher, even if they are not assigned to teach that class.</p>
+                            </div>
                           </div>
                         </div>
                         <div>
@@ -2185,11 +2202,12 @@ export default function AdminDashboard() {
                       <div className="p-5">
                         <h3 className="font-bold text-cyan-700 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
-                        {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Classes: {member.classes.join(', ')}</p>}
+                        {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Assigned Classes: {member.classes.join(', ')}</p>}
+                        {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#0f6e56] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
                         {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>

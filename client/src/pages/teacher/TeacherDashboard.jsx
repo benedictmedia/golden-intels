@@ -44,10 +44,36 @@ export default function TeacherDashboard() {
   const [gradebookStudent, setGradebookStudent] = useState('')
   const [subjectScores, setSubjectScores] = useState({})
   const [teacherRemarks, setTeacherRemarks] = useState('')
- const [gradebookSubmitted, setGradebookSubmitted] = useState(false)
+  const [gradebookSubmitted, setGradebookSubmitted] = useState(false)
   const [submittedResults, setSubmittedResults] = useState([])
   const [editingResult, setEditingResult] = useState(null)
+  const [currentResult, setCurrentResult] = useState(null)
+  const [gradebookLoading, setGradebookLoading] = useState(false)
+  const [gradebookError, setGradebookError] = useState('')
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
+
+  const normalizeSubjectKey = (value) => String(value ?? '').trim().toLowerCase()
+  const subjects = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
+  const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
+  const canonicalizeClass = (value) => {
+    const normalizedValue = normalizeClassKey(value)
+    if (!normalizedValue) return ''
+    return classes.find(cls => normalizeClassKey(cls) === normalizedValue) || String(value ?? '').trim()
+  }
+  const matchesClass = (gradeLevel, targetClass) => normalizeClassKey(gradeLevel) === normalizeClassKey(targetClass)
+  const assignedClassOptions = Array.from(
+    new Set((user?.classes || []).map(canonicalizeClass).filter(Boolean))
+  )
+  const classTeacherClassOptions = Array.from(
+    new Set((user?.classTeacherClasses || []).map(canonicalizeClass).filter(Boolean))
+  )
+  const teacherClassOptions = Array.from(
+    new Set([...assignedClassOptions, ...classTeacherClassOptions])
+  )
+  const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
+  const teacherSubjectOptions = user?.subjects?.length ? user.subjects : subjects
+  const normalizedTeacherSubjectKeys = new Set((teacherSubjectOptions || []).map(normalizeSubjectKey))
 
   useEffect(() => {
   if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
@@ -85,60 +111,116 @@ export default function TeacherDashboard() {
   }, [activeMenu, activeClass, attendanceDate])
 
   useEffect(() => {
-  if (activeMenu === 'gradebook') {
+    if (activeMenu !== 'gradebook') return
+
     const token = localStorage.getItem('token')
     const headers = { Authorization: `Bearer ${token}` }
+
     axios.get(`${API_URL}/api/results`, { headers })
-      .then(res => setSubmittedResults(res.data.filter(r => r.submittedBy === user?.name)))
+      .then(res => setSubmittedResults(res.data))
+      .catch(err => console.error('Failed to fetch results:', err))
+
     axios.get(`${API_URL}/api/students`, { headers })
       .then(res => setStudents(res.data))
+      .catch(err => console.error('Failed to fetch students:', err))
+  }, [activeMenu])
+
+  useEffect(() => {
+    if (activeMenu !== 'gradebook' || !gradebookStudent || editingResult) return
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setGradebookLoading(true)
+    setGradebookError('')
+
+    axios.get(`${API_URL}/api/results/student/${gradebookStudent}`, { headers })
+      .then(res => {
+        const match = res.data.find(result =>
+          matchesClass(result.gradeLevel, gradebookClass) &&
+          result.academicYear === gradebookYear &&
+          result.term === gradebookTerm
+        )
+
+        setCurrentResult(match || null)
+        if (match) {
+          setSubjectScores(match.scores || {})
+          setTeacherRemarks(match.remarks || '')
+        } else {
+          setSubjectScores({})
+          setTeacherRemarks('')
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load current result:', err)
+        setGradebookError('Unable to load the current result. You can still enter a new one.')
+      })
+      .finally(() => setGradebookLoading(false))
+  }, [activeMenu, gradebookStudent, gradebookClass, gradebookYear, gradebookTerm, editingResult])
+
+  const getEditableSubjectScores = () => {
+    const editableScores = {}
+    Object.entries(subjectScores || {}).forEach(([subject, score]) => {
+      if (normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))) {
+        editableScores[subject] = score
+      }
+    })
+    return editableScores
   }
-}, [activeMenu])
 
   const handleGradebookSubmit = async () => {
-  if (!gradebookStudent) return
-  const token = localStorage.getItem('token')
-  const headers = { Authorization: `Bearer ${token}` }
-  try {
-    if (editingResult) {
-      const res = await axios.put(`${API_URL}/api/results/${editingResult.id}`, {
-        scores: subjectScores,
-        remarks: teacherRemarks,
-        status: 'pending'
-      }, { headers })
-      setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
-      setEditingResult(null)
-    } else {
-      const res = await axios.post(`${API_URL}/api/results`, {
-        studentId: gradebookStudent,
-        gradeLevel: gradebookClass,
-        academicYear: gradebookYear,
-        term: gradebookTerm,
-        scores: subjectScores,
-        remarks: teacherRemarks,
-        submittedBy: user?.name
-      }, { headers })
-      setSubmittedResults([res.data, ...submittedResults])
+    if (!gradebookStudent) return
+
+    const payloadScores = getEditableSubjectScores()
+    if (!Object.keys(payloadScores).length) {
+      alert('You do not have any assigned subjects for this class. Please contact admin to update your assignments.')
+      return
     }
-    setGradebookSubmitted(true)
-    setSubjectScores({})
-    setTeacherRemarks('')
-    setGradebookStudent('')
-    setActiveGradebookTab('submitted')
-    setTimeout(() => setGradebookSubmitted(false), 4000)
-  } catch (error) {
-    console.error('Submit error:', error)
-    alert('Failed to submit results. Please try again.')
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+
+    try {
+      if (editingResult) {
+        const res = await axios.put(`${API_URL}/api/results/${editingResult.id}`, {
+          scores: payloadScores,
+          remarks: teacherRemarks,
+          status: 'pending'
+        }, { headers })
+        setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
+        setEditingResult(null)
+      } else {
+        const res = await axios.post(`${API_URL}/api/results`, {
+          studentId: gradebookStudent,
+          gradeLevel: gradebookClass,
+          academicYear: gradebookYear,
+          term: gradebookTerm,
+          scores: payloadScores,
+          remarks: teacherRemarks,
+          submittedBy: user?.name
+        }, { headers })
+        setSubmittedResults([res.data, ...submittedResults])
+      }
+
+      setGradebookSubmitted(true)
+      setCurrentResult(editingResult ? null : currentResult)
+      setSubjectScores({})
+      setTeacherRemarks('')
+      setActiveGradebookTab('submitted')
+      setTimeout(() => setGradebookSubmitted(false), 4000)
+    } catch (error) {
+      console.error('Submit error:', error)
+      alert(error?.response?.data?.message || 'Failed to submit results. Please try again.')
+    }
   }
-}
 
   const handleEditResult = (result) => {
     setEditingResult(result)
+    setCurrentResult(result)
     setGradebookClass(result.gradeLevel)
     setGradebookYear(result.academicYear)
     setGradebookTerm(result.term)
     setGradebookStudent(result.studentId.toString())
-    setSubjectScores(result.scores)
+    setSubjectScores(result.scores || {})
     setTeacherRemarks(result.remarks || '')
     setActiveGradebookTab('enter')
   }
@@ -432,9 +514,6 @@ export default function TeacherDashboard() {
     doc.save(`${student.firstName}_${student.lastName}_${result.term}_${result.academicYear}.pdf`)
   }
 
-  const subjects = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
-  const teacherSubjectOptions = user?.subjects?.length ? user.subjects : subjects
-
   const handleSubjectScore = (subject, field, value) => {
     setSubjectScores(prev => ({
       ...prev,
@@ -442,7 +521,12 @@ export default function TeacherDashboard() {
     }))
   }
 
-  const totalAllSubjects = subjects.reduce((total, subject) => {
+  const isClassTeacherForSelectedClass = classTeacherClassOptions.some(cls => matchesClass(gradebookClass, cls))
+  const visibleSubjects = isClassTeacherForSelectedClass
+    ? subjects
+    : subjects.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
+
+  const totalAllSubjects = visibleSubjects.reduce((total, subject) => {
     const scores = subjectScores[subject] || {}
     const classScore = parseFloat(scores.classScore) || 0
     const cat1 = parseFloat(scores.cat1) || 0
@@ -452,7 +536,7 @@ export default function TeacherDashboard() {
     return total + classScore + cat1 + cat2 + wExam
   }, 0)
 
-  const subjectsCompleted = subjects.filter(subject => {
+  const subjectsCompleted = visibleSubjects.filter(subject => {
     const scores = subjectScores[subject] || {}
     return scores.classScore && scores.cat1 && scores.cat2 && scores.exam
   }).length
@@ -470,19 +554,6 @@ export default function TeacherDashboard() {
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
   const [submissionRecords, setSubmissionRecords] = useState([])
-
-  const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
-  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
-  const canonicalizeClass = (value) => {
-    const normalizedValue = normalizeClassKey(value)
-    if (!normalizedValue) return ''
-    return classes.find(cls => normalizeClassKey(cls) === normalizedValue) || String(value ?? '').trim()
-  }
-  const matchesClass = (gradeLevel, targetClass) => normalizeClassKey(gradeLevel) === normalizeClassKey(targetClass)
-  const teacherClassOptions = Array.from(
-    new Set((user?.classes || []).map(canonicalizeClass).filter(Boolean))
-  )
-  const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
 
   useEffect(() => {
     const saved = window.localStorage.getItem('goldenIntelsLms')
@@ -985,7 +1056,7 @@ export default function TeacherDashboard() {
               </div>
 
               <div className="flex flex-wrap gap-3 mb-6">
-                {teacherClassOptions.map(cls => (
+                {classTeacherClassOptions.map(cls => (
                   <button
                     key={cls}
                     onClick={() => setActiveClass(cls)}
@@ -997,6 +1068,11 @@ export default function TeacherDashboard() {
                   </button>
                 ))}
               </div>
+              {classTeacherClassOptions.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                  You are not assigned as class teacher for any class yet. Contact admin to add a class-teacher assignment.
+                </div>
+              )}
               {attendanceSaved && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
                   Attendance saved for {activeClass} on {new Date(attendanceDate).toLocaleDateString()}.
@@ -1144,12 +1220,6 @@ export default function TeacherDashboard() {
                               >
                                 Download PDF
                               </button>
-                              <button
-                                onClick={() => handleDeleteResult(result.id)}
-                                className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-                              >
-                                Delete
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -1217,9 +1287,16 @@ export default function TeacherDashboard() {
 
                 {/* Subject Scores */}
                 <h4 className="text-md font-bold text-[#0f6e56] mb-4">Subject Scores</h4>
+                {gradebookLoading && (
+                  <p className="text-sm text-gray-500 mb-4">Loading the current result for this student...</p>
+                )}
+                {gradebookError && (
+                  <p className="text-sm text-amber-600 mb-4">{gradebookError}</p>
+                )}
                 <div className="space-y-6 mb-8">
-                  {subjects.map(subject => {
+                  {visibleSubjects.map(subject => {
                     const scores = subjectScores[subject] || { classScore: '', cat1: '', cat2: '', exam: '' }
+                    const editable = normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))
                     const classScore = parseFloat(scores.classScore) || 0
                     const cat1 = parseFloat(scores.cat1) || 0
                     const cat2 = parseFloat(scores.cat2) || 0
@@ -1237,7 +1314,12 @@ export default function TeacherDashboard() {
                     }
                     return (
                       <div key={subject} className="bg-blue-50 rounded-2xl p-6 border border-gray-100">
-                        <h5 className="text-md font-bold text-[#0f6e56] mb-4">{subject}</h5>
+                        <div className="flex items-center justify-between gap-4 mb-4">
+                          <h5 className="text-md font-bold text-[#0f6e56]">{subject}</h5>
+                          {!editable && (
+                            <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-700">Read-only</span>
+                          )}
+                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                           <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">Class Score (10%)</label>
@@ -1245,7 +1327,8 @@ export default function TeacherDashboard() {
                               type="number" min="0" max="100"
                               value={scores.classScore}
                               onChange={e => handleSubjectScore(subject, 'classScore', e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm"
+                              readOnly={!editable}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 10</p>
                           </div>
@@ -1255,7 +1338,8 @@ export default function TeacherDashboard() {
                               type="number" min="0" max="100"
                               value={scores.cat1}
                               onChange={e => handleSubjectScore(subject, 'cat1', e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm"
+                              readOnly={!editable}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 20</p>
                           </div>
@@ -1265,7 +1349,8 @@ export default function TeacherDashboard() {
                               type="number" min="0" max="100"
                               value={scores.cat2}
                               onChange={e => handleSubjectScore(subject, 'cat2', e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm"
+                              readOnly={!editable}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 20</p>
                           </div>
@@ -1275,7 +1360,8 @@ export default function TeacherDashboard() {
                               type="number" min="0" max="100"
                               value={scores.exam}
                               onChange={e => handleSubjectScore(subject, 'exam', e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm"
+                              readOnly={!editable}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Weighted: {wExam.toFixed(2)}</p>
                           </div>
@@ -1296,13 +1382,18 @@ export default function TeacherDashboard() {
                 {/* Teacher Remarks */}
                 <div className="mb-8">
                   <label className="block text-sm font-bold text-[#0f6e56] mb-2">Class Teacher's Remarks</label>
-                  <p className="text-xs text-gray-400 mb-2">Provide constructive feedback on the student's overall performance across all subjects</p>
+                  <p className="text-xs text-gray-400 mb-2">
+                    {isClassTeacherForSelectedClass
+                      ? 'Provide constructive feedback on the student\'s overall performance across all subjects.'
+                      : 'Only class teachers can edit remarks for this class.'}
+                  </p>
                   <textarea
                     value={teacherRemarks}
                     onChange={e => setTeacherRemarks(e.target.value)}
                     rows={4}
-                    placeholder="Enter remarks here..."
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
+                    placeholder={isClassTeacherForSelectedClass ? 'Enter remarks here...' : 'Remarks are read-only for non-class teachers.'}
+                    readOnly={!isClassTeacherForSelectedClass}
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 ${!isClassTeacherForSelectedClass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                 </div>
 
