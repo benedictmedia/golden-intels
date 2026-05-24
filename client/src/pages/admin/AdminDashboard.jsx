@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle
 } from 'lucide-react'
+import { SUBJECTS } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -30,7 +31,6 @@ const stats = [
 ]
 
 const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
-const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -140,6 +140,8 @@ export default function AdminDashboard() {
   const [showAuditsModal, setShowAuditsModal] = useState(false)
   const [auditPage, setAuditPage] = useState(1)
   const [auditLimit, setAuditLimit] = useState(20)
+  const [editPhotoFile, setEditPhotoFile] = useState(null)
+  const [editPhotoPreview, setEditPhotoPreview] = useState('')
 
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
@@ -259,6 +261,34 @@ export default function AdminDashboard() {
     })
   }
 
+  const toggleEditSelection = (field, value) => {
+    setEditingUser(prev => {
+      if (!prev) return prev
+      const list = prev[field] || []
+      return {
+        ...prev,
+        [field]: list.includes(value) ? list.filter(item => item !== value) : [...list, value]
+      }
+    })
+  }
+
+  const openEditUser = (userRecord) => {
+    const staffInfo = userRecord.teacherInfo || null
+    setEditPhotoFile(null)
+    setEditPhotoPreview(staffInfo?.photo || '')
+    setEditingUser({
+      ...userRecord,
+      teacherDepartment: staffInfo?.department || 'Teaching',
+      teacherSubject: staffInfo?.subject || '',
+      subjects: staffInfo?.subjects || [],
+      classes: staffInfo?.classes || [],
+      classTeacherClasses: staffInfo?.classTeacherClasses || [],
+      bio: staffInfo?.bio || '',
+      phone: staffInfo?.phone || '',
+      photo: staffInfo?.photo || ''
+    })
+  }
+
   const handleCreateAccount = async () => {
     setCreateError(''); setCreateSuccess(false); setCreateLoading(true)
     try {
@@ -354,10 +384,44 @@ export default function AdminDashboard() {
 
   const handleUpdateUser = async (id, payload) => {
     try {
-      const res = await axios.put(`${API_URL}/api/users/${id}`, payload, { headers: getAuthHeaders() })
-      setUsers(users.map(u => u.id === res.data.id ? res.data : u))
+      const requestPayload = {
+        name: payload.name,
+        email: payload.email,
+        role: payload.role
+      }
+
+      if (payload.role === 'teacher') {
+        requestPayload.department = payload.teacherDepartment || 'Teaching'
+        requestPayload.subject = payload.teacherSubject || ''
+        requestPayload.subjects = payload.subjects || []
+        requestPayload.classes = payload.classes || []
+        requestPayload.classTeacherClasses = payload.classTeacherClasses || []
+        requestPayload.bio = payload.bio || ''
+        requestPayload.phone = payload.phone || ''
+      }
+
+      if (payload.role === 'teacher' && editPhotoFile) {
+        const formData = new FormData()
+        Object.entries(requestPayload).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value))
+          } else if (value !== undefined && value !== null) {
+            formData.append(key, value)
+          }
+        })
+        formData.append('photo', editPhotoFile)
+        await axios.put(`${API_URL}/api/users/${id}`, formData, { headers: getAuthHeaders() })
+      } else {
+        await axios.put(`${API_URL}/api/users/${id}`, requestPayload, { headers: getAuthHeaders() })
+      }
+
+      setEditPhotoFile(null)
+      setEditPhotoPreview('')
       setEditingUser(null)
-    } catch (err) { alert('Failed to update user') }
+      fetchAccounts()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update user')
+    }
   }
 
   const fetchAudits = async (userId = null) => {
@@ -497,7 +561,6 @@ export default function AdminDashboard() {
       doc.text('Grade', 186, y + 7)
       y += 10
 
-      const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
       let grandTotal = 0
 
       const getGrade = (t) => {
@@ -517,7 +580,7 @@ export default function AdminDashboard() {
         return [220, 50, 50]
       }
 
-      subjectsList.forEach((subject, index) => {
+      SUBJECTS.forEach((subject, index) => {
         const s = scores[subject] || {}
         const classScore = parseFloat(s.classScore) || 0
         const cat1 = parseFloat(s.cat1) || 0
@@ -1282,7 +1345,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="p-6 space-y-4">
                       <p className="text-sm text-gray-500">Editing result for <span className="font-bold text-cyan-700">{adminEditResult.student?.firstName} {adminEditResult.student?.lastName}</span></p>
-                      {['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS'].map(subject => {
+                      {SUBJECTS.map(subject => {
                         const s = adminEditScores[subject] || {}
                         return (
                           <div key={subject} className="bg-blue-50 rounded-xl p-4">
@@ -1509,13 +1572,13 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
                       <select value={newUser.teacherSubject} onChange={e => setNewUser({ ...newUser, teacherSubject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select primary subject</option>
-                        {subjectsList.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                        {SUBJECTS.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Additional Subjects</label>
                       <div className="grid grid-cols-2 gap-2">
-                        {subjectsList.map(subject => (
+                        {SUBJECTS.map(subject => (
                           <button key={subject} type="button" onClick={() => toggleSelection('subjects', subject)} className={`text-left px-3 py-2 rounded-xl border ${newUser.subjects.includes(subject) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
                             {subject}
                           </button>
@@ -1634,7 +1697,7 @@ export default function AdminDashboard() {
                               <p className="text-sm text-gray-500">{u.email}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                              <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                               {u.active === false ? (
                                 <>
                                   <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
@@ -1682,7 +1745,7 @@ export default function AdminDashboard() {
                   {accountTab === 'teachers' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {users.map(u => {
-                        const staffInfo = staffList.find(s => s.email === u.email)
+                        const staffInfo = u.teacherInfo
                         return (
                           <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex items-center justify-between">
@@ -1704,7 +1767,7 @@ export default function AdminDashboard() {
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
-                                <button onClick={() => setEditingUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                                <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                                 {u.active === false ? (
                                   <>
                                     <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
@@ -1725,20 +1788,107 @@ export default function AdminDashboard() {
 
               {/* Edit user modal */}
               {editingUser && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-                  <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                    <h3 className="font-bold mb-4">Edit User</h3>
-                    <div className="space-y-3">
-                      <input className="w-full border px-3 py-2" value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} />
-                      <input className="w-full border px-3 py-2" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} />
-                      <select className="w-full border px-3 py-2" value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}>
-                        <option value="parent">Parent</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => setEditingUser(null)} className="px-4 py-2">Cancel</button>
-                        <button onClick={() => handleUpdateUser(editingUser.id, { name: editingUser.name, email: editingUser.email, role: editingUser.role })} className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
+                  <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-start justify-between gap-4 mb-5">
+                      <div>
+                        <h3 className="font-bold text-cyan-700 text-xl">Edit Account</h3>
+                        <p className="text-sm text-gray-500">Update the account details and teacher profile information for this user.</p>
+                      </div>
+                      <button onClick={() => { setEditingUser(null); setEditPhotoFile(null); setEditPhotoPreview('') }} className="text-gray-500">✕</button>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Full Name</label>
+                        <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Email</label>
+                        <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-cyan-700 mb-2">Role</label>
+                        <select className="w-full border px-3 py-2 rounded-lg" value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}>
+                          <option value="parent">Parent</option>
+                          <option value="teacher">Teacher</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+
+                      {editingUser.role === 'teacher' && (
+                        <div className="space-y-4 border border-gray-100 rounded-2xl p-4 bg-gray-50">
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Department</label>
+                            <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.teacherDepartment || ''} onChange={e => setEditingUser({ ...editingUser, teacherDepartment: e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
+                            <select className="w-full border px-3 py-2 rounded-lg" value={editingUser.teacherSubject || ''} onChange={e => setEditingUser({ ...editingUser, teacherSubject: e.target.value })}>
+                              <option value="">Select primary subject</option>
+                              {SUBJECTS.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Phone</label>
+                            <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.phone || ''} onChange={e => setEditingUser({ ...editingUser, phone: e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Profile Photo</label>
+                            <div className="space-y-3">
+                              {editPhotoPreview || editingUser.photo ? (
+                                <img src={editPhotoPreview || editingUser.photo} alt="Teacher preview" className="h-24 w-24 rounded-full object-cover border" />
+                              ) : (
+                                <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">No photo</div>
+                              )}
+                              <input type="file" accept="image/*" onChange={e => {
+                                const file = e.target.files?.[0]
+                                if (file) {
+                                  setEditPhotoFile(file)
+                                  setEditPhotoPreview(URL.createObjectURL(file))
+                                }
+                              }} className="block w-full text-sm" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Classes</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {classes.filter(c => c !== 'All').map(className => (
+                                <button key={className} type="button" onClick={() => toggleEditSelection('classes', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classes.includes(className) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                  {className}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {classes.filter(c => c !== 'All').map(className => (
+                                <button key={className} type="button" onClick={() => toggleEditSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classTeacherClasses.includes(className) ? 'bg-[#0f6e56] text-white border-[#0f6e56]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                  {className}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Additional Subjects</label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {SUBJECTS.map(subject => (
+                                <button key={subject} type="button" onClick={() => toggleEditSelection('subjects', subject)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.subjects.includes(subject) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                  {subject}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold text-cyan-700 mb-2">Bio</label>
+                            <textarea className="w-full border px-3 py-2 rounded-lg" rows={4} value={editingUser.bio || ''} onChange={e => setEditingUser({ ...editingUser, bio: e.target.value })} />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button onClick={() => { setEditingUser(null); setEditPhotoFile(null); setEditPhotoPreview('') }} className="px-4 py-2 rounded-lg border">Cancel</button>
+                        <button onClick={() => handleUpdateUser(editingUser.id, editingUser)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save</button>
                       </div>
                     </div>
                   </div>
@@ -2145,7 +2295,7 @@ export default function AdminDashboard() {
                             <div>
                               <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Subjects</label>
                               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
-                                {subjectsList.map(subj => (
+                                {SUBJECTS.map(subj => (
                                   <label key={subj} className="flex items-center gap-2 text-sm">
                                     <input type="checkbox" checked={staffForm.subjects.includes(subj)} onChange={() => {
                                       const next = staffForm.subjects.includes(subj)

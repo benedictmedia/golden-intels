@@ -4,6 +4,26 @@ const ensureAdmin = (req, res) => {
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
 }
 
+const parseArrayField = (value) => {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [parsed].filter(Boolean)
+    } catch {
+      return value.split(',').map(v => v.trim()).filter(Boolean)
+    }
+  }
+  return []
+}
+
+const normalizeOptionalField = (value) => {
+  if (value === undefined) return undefined
+  if (typeof value === 'string' && value.trim() === '') return null
+  return value
+}
+
 const getUsers = async (req, res) => {
   try {
     // query params: q, page, limit, role
@@ -20,7 +40,24 @@ const getUsers = async (req, res) => {
       prisma.user.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (pageNum - 1) * pageSize, take: pageSize })
     ])
 
-    res.json({ users, total, page: pageNum, limit: pageSize })
+    const usersWithTeacherInfo = await Promise.all(users.map(async (user) => {
+      if (user.role !== 'teacher') return user
+
+      const teacherInfo = await prisma.staff.findFirst({
+        where: { email: user.email, source: 'account' },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      return {
+        ...user,
+        teacherInfo: teacherInfo ? {
+          ...teacherInfo,
+          photo: teacherInfo.photo || null
+        } : null
+      }
+    }))
+
+    res.json({ users: usersWithTeacherInfo, total, page: pageNum, limit: pageSize })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -29,17 +66,74 @@ const getUsers = async (req, res) => {
 const updateUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { id } = req.params
-  try {
-    const { name, email, role } = req.body
-    const existingUser = await prisma.user.findUnique({ where: { id: parseInt(id) } })
-    const user = await prisma.user.update({ where: { id: parseInt(id) }, data: { name, email, role } })
 
-    if (existingUser && existingUser.email !== email) {
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { id: parseInt(id) } })
+    if (!existingUser) return res.status(404).json({ message: 'User not found' })
+
+    const nextName = req.body.name || existingUser.name
+    const nextEmail = req.body.email || existingUser.email
+    const nextRole = req.body.role || existingUser.role
+
+    const user = await prisma.user.update({
+      where: { id: parseInt(id) },
+      data: { name: nextName, email: nextEmail, role: nextRole }
+    })
+
+    if (existingUser.role === 'teacher' && nextRole !== 'teacher') {
+      await prisma.staff.deleteMany({ where: { email: existingUser.email, source: 'account' } })
+    }
+
+    if (nextRole === 'teacher') {
+      const parsedClasses = parseArrayField(req.body.classes)
+      const parsedSubjects = parseArrayField(req.body.subjects)
+      const parsedClassTeacherClasses = parseArrayField(req.body.classTeacherClasses)
+
+      if (parsedClasses.length === 0 && parsedSubjects.length === 0 && parsedClassTeacherClasses.length === 0) {
+        return res.status(400).json({ message: 'Teachers must be assigned at least one class, subject, or class-teacher class.' })
+      }
+
+      const existingAccountStaff = await prisma.staff.findFirst({
+        where: { email: existingUser.email, source: 'account' },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      const nextSubject = normalizeOptionalField(req.body.subject)
+      const nextBio = normalizeOptionalField(req.body.bio)
+      const nextPhone = normalizeOptionalField(req.body.phone)
+
+      const staffData = {
+        name: nextName,
+        role: 'teacher',
+        department: req.body.department || existingAccountStaff?.department || 'Teaching',
+        subject: nextSubject === undefined ? (existingAccountStaff?.subject ?? null) : nextSubject,
+        subjects: parsedSubjects,
+        classes: parsedClasses,
+        classTeacherClasses: parsedClassTeacherClasses,
+        source: 'account',
+        bio: nextBio === undefined ? (existingAccountStaff?.bio ?? null) : nextBio,
+        email: nextEmail,
+        phone: nextPhone === undefined ? (existingAccountStaff?.phone ?? null) : nextPhone,
+        category: existingAccountStaff?.category || 'teaching',
+        photo: req.file ? req.file.path : existingAccountStaff?.photo || null
+      }
+
+      if (existingAccountStaff) {
+        await prisma.staff.update({
+          where: { id: existingAccountStaff.id },
+          data: staffData
+        })
+      } else {
+        await prisma.staff.create({ data: staffData })
+      }
+    }
+
+    if (existingUser.email !== nextEmail) {
       if (existingUser.role === 'parent') {
-        await prisma.student.updateMany({ where: { parentEmail: existingUser.email }, data: { parentEmail: email } })
+        await prisma.student.updateMany({ where: { parentEmail: existingUser.email }, data: { parentEmail: nextEmail } })
       }
       if (existingUser.role === 'teacher') {
-        await prisma.staff.updateMany({ where: { email: existingUser.email }, data: { email } })
+        await prisma.staff.updateMany({ where: { email: existingUser.email, source: 'account' }, data: { email: nextEmail } })
       }
     }
 

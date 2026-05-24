@@ -64,6 +64,9 @@ const buildUserResponse = async (user) => {
       responseUser.classTeacherClasses = staff.classTeacherClasses || []
       responseUser.department = staff.department
       responseUser.staffSubject = staff.subject || null
+      responseUser.bio = staff.bio || null
+      responseUser.phone = staff.phone || null
+      responseUser.photo = staff.photo || null
     }
   }
 

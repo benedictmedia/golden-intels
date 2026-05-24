@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
+import { SUBJECTS } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -19,10 +20,11 @@ const menuItems = [
 ]
 
 export default function TeacherDashboard() {
-  const { user, logout } = useAuth()
+  const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('Year 1')
   const [attendance, setAttendance] = useState({})
@@ -53,7 +55,6 @@ export default function TeacherDashboard() {
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
 
   const normalizeSubjectKey = (value) => String(value ?? '').trim().toLowerCase()
-  const subjects = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
   const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
   const canonicalizeClass = (value) => {
@@ -62,18 +63,36 @@ export default function TeacherDashboard() {
     return classes.find(cls => normalizeClassKey(cls) === normalizedValue) || String(value ?? '').trim()
   }
   const matchesClass = (gradeLevel, targetClass) => normalizeClassKey(gradeLevel) === normalizeClassKey(targetClass)
+  const effectiveUser = profileUser || user
   const assignedClassOptions = Array.from(
-    new Set((user?.classes || []).map(canonicalizeClass).filter(Boolean))
+    new Set((effectiveUser?.classes || []).map(canonicalizeClass).filter(Boolean))
   )
   const classTeacherClassOptions = Array.from(
-    new Set((user?.classTeacherClasses || []).map(canonicalizeClass).filter(Boolean))
+    new Set((effectiveUser?.classTeacherClasses || []).map(canonicalizeClass).filter(Boolean))
   )
   const teacherClassOptions = Array.from(
     new Set([...assignedClassOptions, ...classTeacherClassOptions])
   )
   const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
-  const teacherSubjectOptions = user?.subjects?.length ? user.subjects : subjects
+  const teacherSubjectOptions = effectiveUser?.subjects?.length ? effectiveUser.subjects : SUBJECTS
   const normalizedTeacherSubjectKeys = new Set((teacherSubjectOptions || []).map(normalizeSubjectKey))
+
+  useEffect(() => {
+    let mounted = true
+
+    const syncProfile = async () => {
+      const refreshedUser = await refreshUser()
+      if (mounted) {
+        setProfileUser(refreshedUser || user)
+      }
+    }
+
+    syncProfile()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   useEffect(() => {
   if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
@@ -349,7 +368,6 @@ export default function TeacherDashboard() {
 
     y += 10
 
-    const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
     let grandTotal = 0
 
     const getGrade = (t) => {
@@ -369,7 +387,7 @@ export default function TeacherDashboard() {
       return [220, 50, 50]
     }
 
-    subjectsList.forEach((subject, index) => {
+    SUBJECTS.forEach((subject, index) => {
       const s = scores[subject] || {}
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0

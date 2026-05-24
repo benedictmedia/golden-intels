@@ -7,6 +7,7 @@ import {
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send
 } from 'lucide-react'
 import API_URL from '../../api/config'
+import { SUBJECTS } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -165,7 +166,6 @@ export default function ParentDashboard() {
     doc.text('Grade', 186, y + 7)
     y += 10
 
-    const subjectsList = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS']
     let grandTotal = 0
 
     const getGrade = (t) => {
@@ -185,7 +185,7 @@ export default function ParentDashboard() {
       return [220, 50, 50]
     }
 
-    subjectsList.forEach((subject, index) => {
+    SUBJECTS.forEach((subject, index) => {
       const s = scores[subject] || {}
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
@@ -622,7 +622,7 @@ export default function ParentDashboard() {
                         {/* Subject Summary */}
                         <div className="flex-1 min-w-[200px]">
                           <div className="grid grid-cols-3 gap-2">
-                            {['English', 'Maths', 'Science', 'Computing', 'RME', 'History'].map(subject => {
+                            {SUBJECTS.map(subject => {
                               const s = result.scores[subject] || {}
                               const classScore = parseFloat(s.classScore) || 0
                               const cat1 = parseFloat(s.cat1) || 0
@@ -877,7 +877,7 @@ export default function ParentDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS'].map((subject, index) => {
+                    {SUBJECTS.map((subject, index) => {
                       const s = viewingResult.scores[subject] || {}
                       const classScore = parseFloat(s.classScore) || 0
                       const cat1 = parseFloat(s.cat1) || 0
@@ -916,7 +916,7 @@ export default function ParentDashboard() {
                     <tr className="bg-blue-500">
                       <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
                       <td className="px-4 py-3 text-center font-bold text-cyan-700">
-                        {['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS'].reduce((acc, subject) => {
+                        {SUBJECTS.reduce((acc, subject) => {
                           const s = viewingResult.scores[subject] || {}
                           const classScore = parseFloat(s.classScore) || 0
                           const cat1 = parseFloat(s.cat1) || 0
