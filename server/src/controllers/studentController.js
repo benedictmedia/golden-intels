@@ -37,14 +37,19 @@ const getStudents = async (req, res) => {
 
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findUnique({ where: { email: req.user.email } })
-      const where = {}
-      if (staff?.classes?.length) {
-        where.gradeLevel = { in: staff.classes }
-      } else if (staff?.department) {
-        where.gradeLevel = staff.department
-      }
-      const students = await prisma.student.findMany({ where, orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
-      return res.json(students)
+      const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
+      const teacherClasses = (staff?.classes || [])
+        .map(normalizeClassName)
+        .filter(Boolean)
+
+      const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
+      const filteredStudents = teacherClasses.length
+        ? students.filter(student => teacherClasses.includes(normalizeClassName(student.gradeLevel)))
+        : staff?.department
+          ? students.filter(student => normalizeClassName(student.gradeLevel) === normalizeClassName(staff.department))
+          : students
+
+      return res.json(filteredStudents)
     }
 
     const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })

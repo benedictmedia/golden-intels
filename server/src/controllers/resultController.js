@@ -2,6 +2,9 @@ const { PrismaClient } = require('@prisma/client')
 
 const prisma = new PrismaClient()
 
+const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
+const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
+
 // Get all results
 const getResults = async (req, res) => {
   try {
@@ -17,12 +20,14 @@ const getResults = async (req, res) => {
     // If teacher, restrict to their assigned classes or results they submitted
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const where = {}
-      if (staff?.classes?.length) where.OR = [{ gradeLevel: { in: staff.classes } }, { submittedBy: req.user.name }]
-      else if (staff?.department) where.OR = [{ gradeLevel: staff.department }, { submittedBy: req.user.name }]
-      else where.submittedBy = req.user.name
-      const results = await prisma.result.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
-      return res.json(results)
+      const teacherClasses = normalizeClassList(staff?.classes)
+      const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const filteredResults = teacherClasses.length
+        ? results.filter(result => teacherClasses.includes(normalizeClassName(result.gradeLevel)) || result.submittedBy === req.user.name)
+        : staff?.department
+          ? results.filter(result => normalizeClassName(result.gradeLevel) === normalizeClassName(staff.department) || result.submittedBy === req.user.name)
+          : results.filter(result => result.submittedBy === req.user.name)
+      return res.json(filteredResults)
     }
 
     const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
@@ -40,8 +45,15 @@ const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => 
 
   const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
   if (!student) return false
-  const allowedClass = staff.classes?.includes(student.gradeLevel) || staff.department === student.gradeLevel
-  const allowedGradeLevel = gradeLevel == null || staff.classes?.includes(gradeLevel) || staff.department === gradeLevel
+  const teacherClasses = normalizeClassList(staff?.classes)
+  const allowedClass = teacherClasses.length
+    ? teacherClasses.includes(normalizeClassName(student.gradeLevel))
+    : normalizeClassName(staff.department) === normalizeClassName(student.gradeLevel)
+  const allowedGradeLevel = gradeLevel == null
+    ? true
+    : teacherClasses.length
+      ? teacherClasses.includes(normalizeClassName(gradeLevel))
+      : normalizeClassName(staff.department) === normalizeClassName(gradeLevel)
   return allowedClass && allowedGradeLevel
 }
 
@@ -57,7 +69,10 @@ const getResultsByStudent = async (req, res) => {
     if (req.user && req.user.role === 'teacher') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const allowedByClass = staff?.classes?.includes(student?.gradeLevel) || staff?.department === student?.gradeLevel
+      const teacherClasses = normalizeClassList(staff?.classes)
+      const allowedByClass = teacherClasses.length
+        ? teacherClasses.includes(normalizeClassName(student?.gradeLevel))
+        : normalizeClassName(staff?.department) === normalizeClassName(student?.gradeLevel)
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
     const results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })

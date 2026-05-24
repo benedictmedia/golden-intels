@@ -472,7 +472,17 @@ export default function TeacherDashboard() {
   const [submissionRecords, setSubmissionRecords] = useState([])
 
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
-  const teacherClassOptions = user?.classes?.length ? user.classes : classes
+  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
+  const canonicalizeClass = (value) => {
+    const normalizedValue = normalizeClassKey(value)
+    if (!normalizedValue) return ''
+    return classes.find(cls => normalizeClassKey(cls) === normalizedValue) || String(value ?? '').trim()
+  }
+  const matchesClass = (gradeLevel, targetClass) => normalizeClassKey(gradeLevel) === normalizeClassKey(targetClass)
+  const teacherClassOptions = Array.from(
+    new Set((user?.classes || []).map(canonicalizeClass).filter(Boolean))
+  )
+  const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
 
   useEffect(() => {
     const saved = window.localStorage.getItem('goldenIntelsLms')
@@ -489,10 +499,19 @@ export default function TeacherDashboard() {
   }, [])
 
   useEffect(() => {
-    if (user?.classes?.length && !user.classes.includes(activeClass)) {
-      setActiveClass(user.classes[0])
+    if (!classOptions.length) return
+    if (!classOptions.some(cls => matchesClass(activeClass, cls))) {
+      setActiveClass(classOptions[0])
     }
-  }, [user?.classes, activeClass])
+  }, [classOptions, activeClass])
+
+  useEffect(() => {
+    if (!classOptions.length) return
+    if (!classOptions.some(cls => matchesClass(gradebookClass, cls))) {
+      setGradebookClass(classOptions[0])
+      setGradebookStudent('')
+    }
+  }, [classOptions, gradebookClass])
 
   useEffect(() => {
     window.localStorage.setItem('goldenIntelsLms', JSON.stringify({ assignments, lessons, quizzes }))
@@ -517,7 +536,7 @@ export default function TeacherDashboard() {
     navigate('/')
   }
 
-  const filteredStudents = students.filter(s => s.gradeLevel === activeClass)
+  const filteredStudents = students.filter(student => matchesClass(student.gradeLevel, activeClass))
   const attendanceStats = filteredStudents.reduce((stats, student) => {
     const status = attendance[student.id] || 'present'
     return { ...stats, [status]: (stats[status] || 0) + 1 }
@@ -533,7 +552,7 @@ export default function TeacherDashboard() {
   const saveAttendance = async () => {
     const token = localStorage.getItem('token')
     const headers = { Authorization: `Bearer ${token}` }
-    const classStudents = students.filter(s => s.gradeLevel === activeClass)
+    const classStudents = students.filter(student => matchesClass(student.gradeLevel, activeClass))
     setAttendanceSaving(true)
     setAttendanceError('')
     try {
@@ -1189,8 +1208,8 @@ export default function TeacherDashboard() {
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                     >
                       <option value="">Choose a student...</option>
-                      {students.filter(s => s.gradeLevel === gradebookClass).map(s => (
-                        <option key={s.id} value={s.id}>{s.firstName} {s.lastName}</option>
+                      {students.filter(student => matchesClass(student.gradeLevel, gradebookClass)).map(student => (
+                        <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
                       ))}
                     </select>
                   </div>
