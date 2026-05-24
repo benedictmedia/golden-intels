@@ -55,8 +55,20 @@ const hasScoreData = (scoreEntry) => {
   })
 }
 
-const isScoresCompleteForSubjects = (scores = {}, requiredSubjects = []) =>
-  requiredSubjects.every((subject) => subject in scores && hasScoreData(scores[subject]))
+const normalizeScoreMap = (scores = {}) => {
+  const normalized = {}
+
+  Object.entries(scores || {}).forEach(([subject, value]) => {
+    normalized[normalizeSubject(subject)] = value
+  })
+
+  return normalized
+}
+
+const isScoresCompleteForSubjects = (scores = {}, requiredSubjects = []) => {
+  const normalizedScores = normalizeScoreMap(scores)
+  return requiredSubjects.every((subject) => subject in normalizedScores && hasScoreData(normalizedScores[subject]))
+}
 
 const sanitizeTeacherScores = (scores = {}, allowedSubjects = []) => {
   const normalizedAllowed = new Set(allowedSubjects)

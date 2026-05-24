@@ -541,8 +541,8 @@ export default function TeacherDashboard() {
 
   const isClassTeacherForSelectedClass = classTeacherClassOptions.some(cls => matchesClass(gradebookClass, cls))
   const visibleSubjects = isClassTeacherForSelectedClass
-    ? subjects
-    : subjects.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
+    ? SUBJECTS
+    : SUBJECTS.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
 
   const totalAllSubjects = visibleSubjects.reduce((total, subject) => {
     const scores = subjectScores[subject] || {}
@@ -1423,7 +1423,7 @@ export default function TeacherDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Subjects Completed</p>
-                    <p className="text-2xl font-bold text-[#0f6e56]">{subjectsCompleted}/{subjects.length}</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{subjectsCompleted}/{visibleSubjects.length}</p>
                   </div>
                 </div>
 

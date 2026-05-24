@@ -436,7 +436,7 @@ export default function AdminDashboard() {
 
   const handleApproveResult = async (id) => {
     try {
-      const res = await axios.put(`${API_URL}/api/results/${id}`, { status: 'approved' })
+      const res = await axios.put(`${API_URL}/api/results/${id}`, { status: 'approved' }, { headers: getAuthHeaders() })
       setResults(results.map(r => r.id === id ? res.data : r))
     } catch (err) { alert('Failed to approve result.') }
   }
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
 
   const handleAdminSaveEdit = async () => {
     try {
-      const res = await axios.put(`${API_URL}/api/results/${adminEditResult.id}`, { scores: adminEditScores, remarks: adminEditRemarks, status: adminEditResult.status })
+      const res = await axios.put(`${API_URL}/api/results/${adminEditResult.id}`, { scores: adminEditScores, remarks: adminEditRemarks, status: adminEditResult.status }, { headers: getAuthHeaders() })
       setResults(results.map(r => r.id === adminEditResult.id ? res.data : r))
       setAdminEditResult(null)
     } catch (err) { alert('Failed to save changes.') }
