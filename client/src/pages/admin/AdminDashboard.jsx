@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   // Create account state
   const initialNewUserState = {
     name: '', email: '', password: '', role: 'teacher',
-    classes: [], subjects: [], teacherSubject: '', teacherDepartment: 'Teaching',
+    classes: [], subjects: [], classTeacherClasses: [], teacherSubject: '', teacherDepartment: 'Teaching',
     learnerFirstName: '', learnerLastName: '', learnerDateOfBirth: '', learnerGender: '', learnerGradeLevel: '', learnerParentEmail: '', learnerParentName: '', learnerParentPhone: ''
   }
   const [newUser, setNewUser] = useState(initialNewUserState)
@@ -274,6 +274,7 @@ export default function AdminDashboard() {
         payload.department = newUser.teacherDepartment
         payload.subjects = newUser.subjects
         payload.classes = newUser.classes
+        payload.classTeacherClasses = newUser.classTeacherClasses
         if (newUser.teacherSubject) payload.subject = newUser.teacherSubject
       }
 
@@ -1494,6 +1495,17 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div>
+                      <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For (optional)</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {classes.filter(c => c !== 'All').map(className => (
+                          <button key={className} type="button" onClick={() => toggleSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classTeacherClasses.includes(className) ? 'bg-[#0f6e56] text-white border-[#0f6e56]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                            {className}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">Select classes that should unlock class-teacher attendance and remarks access for this teacher.</p>
+                    </div>
+                    <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
                       <select value={newUser.teacherSubject} onChange={e => setNewUser({ ...newUser, teacherSubject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select primary subject</option>
@@ -2145,23 +2157,6 @@ export default function AdminDashboard() {
                                   </label>
                                 ))}
                               </div>
-                            </div>
-                            <div className="lg:col-span-2">
-                              <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For (optional)</label>
-                              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
-                                {classes.slice(1).map(cls => (
-                                  <label key={cls} className="flex items-center gap-2 text-sm">
-                                    <input type="checkbox" checked={staffForm.classTeacherClasses.includes(cls)} onChange={() => {
-                                      const next = staffForm.classTeacherClasses.includes(cls)
-                                        ? staffForm.classTeacherClasses.filter(c => c !== cls)
-                                        : [...staffForm.classTeacherClasses, cls]
-                                      setStaffForm({ ...staffForm, classTeacherClasses: next })
-                                    }} className="rounded text-cyan-600" />
-                                    {cls}
-                                  </label>
-                                ))}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-2">These classes unlock attendance and class-teacher remarks for the selected teacher, even if they are not assigned to teach that class.</p>
                             </div>
                           </div>
                         </div>

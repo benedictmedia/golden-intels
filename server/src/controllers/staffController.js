@@ -5,7 +5,10 @@ const prisma = new PrismaClient()
 
 const getStaff = async (req, res) => {
   try {
-    const staff = await prisma.staff.findMany({ orderBy: { createdAt: 'desc' } })
+    const staff = await prisma.staff.findMany({
+      where: { source: 'manual' },
+      orderBy: { createdAt: 'desc' }
+    })
     res.json(staff)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -45,6 +48,7 @@ const createStaff = async (req, res) => {
         subjects: parsedSubjects,
         classes: parsedClasses,
         classTeacherClasses: parsedClassTeacherClasses,
+        source: 'manual',
         bio,
         email,
         phone,
@@ -80,6 +84,7 @@ const updateStaff = async (req, res) => {
         subjects: parsedSubjects,
         classes: parsedClasses,
         classTeacherClasses: parsedClassTeacherClasses,
+        source: existing?.source || 'manual',
         bio,
         email,
         phone,

@@ -48,7 +48,16 @@ const buildUserResponse = async (user) => {
   }
 
   if (user.role === 'teacher') {
-    const staff = await prisma.staff.findFirst({ where: { email: user.email } })
+    const accountStaff = await prisma.staff.findFirst({
+      where: { email: user.email, source: 'account' },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const staff = accountStaff || await prisma.staff.findFirst({
+      where: { email: user.email, source: 'manual' },
+      orderBy: { createdAt: 'desc' }
+    })
+
     if (staff) {
       responseUser.classes = staff.classes || []
       responseUser.subjects = staff.subjects || []
@@ -101,7 +110,9 @@ const register = async (req, res) => {
         const parsedClasses = parseArrayField(classes)
         const parsedSubjects = parseArrayField(subjects)
         const parsedClassTeacherClasses = parseArrayField(classTeacherClasses)
-        if (parsedClasses.length > 0 || parsedSubjects.length > 0 || teacherSubject) {
+        const hasTeacherAssignments = parsedClasses.length > 0 || parsedSubjects.length > 0 || parsedClassTeacherClasses.length > 0 || Boolean(teacherSubject)
+
+        if (hasTeacherAssignments) {
           await tx.staff.create({
             data: {
               name,
@@ -111,6 +122,7 @@ const register = async (req, res) => {
               subjects: parsedSubjects,
               classes: parsedClasses,
               classTeacherClasses: parsedClassTeacherClasses,
+              source: 'account',
               email,
               phone: null,
               category: 'teaching'

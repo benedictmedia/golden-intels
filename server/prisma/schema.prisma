@@ -182,6 +182,7 @@ model Staff {
   subjects            String[] @default([])
   classes             String[] @default([])
   classTeacherClasses String[] @default([])
+  source              String   @default("manual")
   bio                 String?
   photo               String?
   email               String?
