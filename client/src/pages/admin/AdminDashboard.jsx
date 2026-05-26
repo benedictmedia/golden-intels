@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle
 } from 'lucide-react'
-import { SUBJECTS } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -441,7 +441,7 @@ export default function AdminDashboard() {
     } catch (err) { alert('Failed to approve result.') }
   }
 
-  const handleAdminEditResult = (result) => { setAdminEditResult(result); setAdminEditScores(result.scores); setAdminEditRemarks(result.remarks || '') }
+  const handleAdminEditResult = (result) => { setAdminEditResult(result); setAdminEditScores(getNormalizedScores(result.scores || {})); setAdminEditRemarks(result.remarks || '') }
 
   const handleAdminSaveEdit = async () => {
     try {
@@ -464,7 +464,7 @@ export default function AdminDashboard() {
       const { jsPDF } = await import('jspdf')
       const doc = new jsPDF()
       const student = result.student || {}
-      const scores = result.scores || {}
+      const scores = getNormalizedScores(result.scores || {})
       const pageWidth = doc.internal.pageSize.getWidth()
 
       const getLogoBase64 = () => new Promise((resolve) => {
@@ -581,13 +581,13 @@ export default function AdminDashboard() {
       }
 
       SUBJECTS.forEach((subject, index) => {
-        const s = scores[subject] || {}
+        const s = getSubjectScore(scores, subject)
         const classScore = parseFloat(s.classScore) || 0
         const cat1 = parseFloat(s.cat1) || 0
         const cat2 = parseFloat(s.cat2) || 0
         const exam = parseFloat(s.exam) || 0
         const wExam = (exam / 100) * 50
-        const total = classScore + cat1 + cat2 + wExam
+        const total = getSubjectTotal(s)
         grandTotal += total
 
         if (index % 2 === 0) {
@@ -626,7 +626,7 @@ export default function AdminDashboard() {
       doc.setFontSize(10)
       doc.setTextColor(26, 60, 110)
       doc.text('Grand Total', 15, y + 7)
-      doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
+      doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
       y += 18
 
       let attendanceSummary = null
@@ -660,20 +660,23 @@ export default function AdminDashboard() {
         doc.restoreGraphicsState()
       }
 
+      const remarksText = getRemarksText(result.remarks)
+      const remarksLines = doc.splitTextToSize(remarksText, 170)
+      const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
+
       doc.setFillColor(240, 245, 255)
-      doc.rect(10, y, pageWidth - 20, 22, 'F')
+      doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
       doc.setDrawColor(26, 60, 110)
       doc.setLineWidth(0.5)
-      doc.rect(10, y, pageWidth - 20, 22)
+      doc.rect(10, y, pageWidth - 20, remarksHeight)
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
       doc.setTextColor(26, 60, 110)
       doc.text("Class Teacher's Remarks:", 15, y + 8)
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(50, 50, 50)
-      const remarksLines = doc.splitTextToSize(result.remarks || 'No remarks provided.', 170)
       doc.text(remarksLines, 15, y + 16)
-      y += 30
+      y += remarksHeight + 8
 
       doc.setDrawColor(26, 60, 110)
       doc.setLineWidth(0.3)

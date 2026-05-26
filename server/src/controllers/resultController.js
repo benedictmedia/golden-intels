@@ -1,11 +1,17 @@
 const { PrismaClient } = require('@prisma/client')
+const {
+  getMissingSubjects,
+  isScoresCompleteForSubjects,
+  normalizeSubject,
+  normalizeSubjectList,
+  sanitizeTeacherScores,
+  validateTeacherScores
+} = require('../utils/resultSubjectHelpers')
 
 const prisma = new PrismaClient()
 
 const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
-const normalizeSubject = (value) => String(value ?? '').trim().toLowerCase()
-const normalizeSubjectList = (subjects = []) => Array.from(new Set((subjects || []).map(normalizeSubject).filter(Boolean)))
 
 const buildTeacherAssignments = async (email) => {
   const staff = await prisma.staff.findFirst({ where: { email } })
@@ -29,71 +35,16 @@ const getExpectedSubjectsForClass = async (gradeLevel) => {
   const teachers = await prisma.staff.findMany()
   const expectedSubjects = teachers
     .filter((teacher) => normalizeClassList(teacher.classes).includes(normalizeClassName(gradeLevel)))
-    .flatMap((teacher) => normalizeSubjectList(teacher.subjects))
-
-  if (expectedSubjects.length === 0) {
-    const fallbackTeacher = teachers.find((teacher) => normalizeClassList(teacher.classes).includes(normalizeClassName(gradeLevel)))
-    if (fallbackTeacher?.subject) {
-      return [normalizeSubject(fallbackTeacher.subject)]
-    }
-  }
+    .flatMap((teacher) => [
+      ...normalizeSubjectList(teacher.subjects),
+      ...(teacher.subject ? [normalizeSubject(teacher.subject)] : [])
+    ])
 
   return Array.from(new Set(expectedSubjects))
 }
 
 const isClassTeacherForClass = (teacherClasses = [], gradeLevel = '') =>
   teacherClasses.includes(normalizeClassName(gradeLevel))
-
-const hasScoreData = (scoreEntry) => {
-  if (!scoreEntry || typeof scoreEntry !== 'object') {
-    return false
-  }
-
-  return ['classScore', 'cat1', 'cat2', 'exam'].every((field) => {
-    const value = scoreEntry[field]
-    return value !== undefined && value !== null && value !== ''
-  })
-}
-
-const normalizeScoreMap = (scores = {}) => {
-  const normalized = {}
-
-  Object.entries(scores || {}).forEach(([subject, value]) => {
-    normalized[normalizeSubject(subject)] = value
-  })
-
-  return normalized
-}
-
-const isScoresCompleteForSubjects = (scores = {}, requiredSubjects = []) => {
-  const normalizedScores = normalizeScoreMap(scores)
-  return requiredSubjects.every((subject) => subject in normalizedScores && hasScoreData(normalizedScores[subject]))
-}
-
-const sanitizeTeacherScores = (scores = {}, allowedSubjects = []) => {
-  const normalizedAllowed = new Set(allowedSubjects)
-  const sanitized = {}
-
-  Object.entries(scores || {}).forEach(([subject, value]) => {
-    if (normalizedAllowed.has(normalizeSubject(subject))) {
-      sanitized[subject] = value
-    }
-  })
-
-  return sanitized
-}
-
-const validateTeacherScores = (scores = {}, allowedSubjects = []) => {
-  const invalidSubjects = Object.keys(scores || {}).filter((subject) => !allowedSubjects.includes(normalizeSubject(subject)))
-  if (invalidSubjects.length > 0) {
-    return {
-      ok: false,
-      message: `You may only submit scores for your assigned subjects: ${Array.from(new Set(allowedSubjects)).join(', ') || 'none assigned'}.`
-    }
-  }
-
-  return { ok: true }
-}
 
 const getResultByScope = async (studentId, gradeLevel, academicYear, term) => {
   return prisma.result.findFirst({
@@ -347,7 +298,12 @@ const updateResult = async (req, res) => {
     if (nextStatus === 'approved') {
       const requiredSubjects = await getExpectedSubjectsForClass(existing.gradeLevel)
       if (!isScoresCompleteForSubjects(nextScores || {}, requiredSubjects)) {
-        return res.status(400).json({ message: 'Cannot approve until all subject teachers have submitted their scores.' })
+        const missingSubjects = getMissingSubjects(nextScores || {}, requiredSubjects)
+        const missingMessage = missingSubjects.length
+          ? `Cannot approve until all subject teachers have submitted their scores. Missing: ${missingSubjects.join(', ')}`
+          : 'Cannot approve until all subject teachers have submitted their scores.'
+
+        return res.status(400).json({ message: missingMessage })
       }
     }
 

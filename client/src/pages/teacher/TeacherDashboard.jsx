@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
-import { SUBJECTS } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -54,7 +54,7 @@ export default function TeacherDashboard() {
   const [gradebookError, setGradebookError] = useState('')
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
 
-  const normalizeSubjectKey = (value) => String(value ?? '').trim().toLowerCase()
+  const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
   const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
   const canonicalizeClass = (value) => {
@@ -162,7 +162,7 @@ export default function TeacherDashboard() {
 
         setCurrentResult(match || null)
         if (match) {
-          setSubjectScores(match.scores || {})
+          setSubjectScores(getNormalizedScores(match.scores || {}))
           setTeacherRemarks(match.remarks || '')
         } else {
           setSubjectScores({})
@@ -239,7 +239,7 @@ export default function TeacherDashboard() {
     setGradebookYear(result.academicYear)
     setGradebookTerm(result.term)
     setGradebookStudent(result.studentId.toString())
-    setSubjectScores(result.scores || {})
+    setSubjectScores(getNormalizedScores(result.scores || {}))
     setTeacherRemarks(result.remarks || '')
     setActiveGradebookTab('enter')
   }
@@ -261,7 +261,7 @@ export default function TeacherDashboard() {
     const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     const student = result.student
-    const scores = result.scores
+    const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
 
     // Load logo as base64
@@ -388,13 +388,13 @@ export default function TeacherDashboard() {
     }
 
     SUBJECTS.forEach((subject, index) => {
-      const s = scores[subject] || {}
+      const s = getSubjectScore(scores, subject)
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
       const cat2 = parseFloat(s.cat2) || 0
       const exam = parseFloat(s.exam) || 0
       const wExam = (exam / 100) * 50
-      const total = classScore + cat1 + cat2 + wExam
+      const total = getSubjectTotal(s)
       grandTotal += total
 
       // Alternating row colors
@@ -438,7 +438,7 @@ export default function TeacherDashboard() {
     doc.setFontSize(10)
     doc.setTextColor(26, 60, 110)
     doc.text('Grand Total', 15, y + 7)
-    doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
+    doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
 
     y += 18
 
@@ -477,11 +477,15 @@ export default function TeacherDashboard() {
     }
 
     // Remarks box
+    const remarksText = getRemarksText(result.remarks)
+    const remarksLines = doc.splitTextToSize(remarksText, 170)
+    const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
+
     doc.setFillColor(240, 245, 255)
-    doc.rect(10, y, pageWidth - 20, 22, 'F')
+    doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.5)
-    doc.rect(10, y, pageWidth - 20, 22)
+    doc.rect(10, y, pageWidth - 20, remarksHeight)
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9)
@@ -490,10 +494,9 @@ export default function TeacherDashboard() {
 
     doc.setFont('helvetica', 'italic')
     doc.setTextColor(50, 50, 50)
-    const remarksLines = doc.splitTextToSize(result.remarks || 'No remarks provided.', 170)
     doc.text(remarksLines, 15, y + 16)
 
-    y += 30
+    y += remarksHeight + 8
 
     // Signature section
     doc.setDrawColor(26, 60, 110)
@@ -544,15 +547,7 @@ export default function TeacherDashboard() {
     ? SUBJECTS
     : SUBJECTS.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
 
-  const totalAllSubjects = visibleSubjects.reduce((total, subject) => {
-    const scores = subjectScores[subject] || {}
-    const classScore = parseFloat(scores.classScore) || 0
-    const cat1 = parseFloat(scores.cat1) || 0
-    const cat2 = parseFloat(scores.cat2) || 0
-    const exam = parseFloat(scores.exam) || 0
-    const wExam = (exam / 100) * 50
-    return total + classScore + cat1 + cat2 + wExam
-  }, 0)
+  const totalAllSubjects = calculateGrandTotal(subjectScores, visibleSubjects)
 
   const subjectsCompleted = visibleSubjects.filter(subject => {
     const scores = subjectScores[subject] || {}
@@ -1419,7 +1414,7 @@ export default function TeacherDashboard() {
                 <div className="bg-blue-50 rounded-2xl p-6 mb-6 flex flex-wrap gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Total Score (All Subjects)</p>
-                    <p className="text-2xl font-bold text-[#0f6e56]">{totalAllSubjects.toFixed(2)}/900</p>
+                    <p className="text-2xl font-bold text-[#0f6e56]">{totalAllSubjects.toFixed(2)}/1100</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Subjects Completed</p>

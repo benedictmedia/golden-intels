@@ -7,7 +7,7 @@ import {
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send
 } from 'lucide-react'
 import API_URL from '../../api/config'
-import { SUBJECTS } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -75,7 +75,7 @@ export default function ParentDashboard() {
     const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     const student = result.student
-    const scores = result.scores
+    const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
 
     // Load logo as base64
@@ -186,13 +186,13 @@ export default function ParentDashboard() {
     }
 
     SUBJECTS.forEach((subject, index) => {
-      const s = scores[subject] || {}
+      const s = getSubjectScore(scores, subject)
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
       const cat2 = parseFloat(s.cat2) || 0
       const exam = parseFloat(s.exam) || 0
       const wExam = (exam / 100) * 50
-      const total = classScore + cat1 + cat2 + wExam
+      const total = getSubjectTotal(s)
       grandTotal += total
 
       if (index % 2 === 0) { doc.setFillColor(245, 248, 255) } else { doc.setFillColor(255, 255, 255) }
@@ -225,7 +225,7 @@ export default function ParentDashboard() {
     doc.setFontSize(10)
     doc.setTextColor(26, 60, 110)
     doc.text('Grand Total', 15, y + 7)
-    doc.text(`${grandTotal.toFixed(2)} / 900`, 155, y + 7)
+    doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
     y += 18
 
     const token = localStorage.getItem('token')
@@ -261,20 +261,23 @@ export default function ParentDashboard() {
       doc.restoreGraphicsState()
     }
 
+    const remarksText = getRemarksText(result.remarks)
+    const remarksLines = doc.splitTextToSize(remarksText, 170)
+    const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
+
     doc.setFillColor(240, 245, 255)
-    doc.rect(10, y, pageWidth - 20, 22, 'F')
+    doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.5)
-    doc.rect(10, y, pageWidth - 20, 22)
+    doc.rect(10, y, pageWidth - 20, remarksHeight)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9)
     doc.setTextColor(26, 60, 110)
     doc.text("Class Teacher's Remarks:", 15, y + 8)
     doc.setFont('helvetica', 'italic')
     doc.setTextColor(50, 50, 50)
-    const remarksLines = doc.splitTextToSize(result.remarks || 'No remarks provided.', 170)
     doc.text(remarksLines, 15, y + 16)
-    y += 30
+    y += remarksHeight + 8
 
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.3)
@@ -623,13 +626,8 @@ export default function ParentDashboard() {
                         <div className="flex-1 min-w-[200px]">
                           <div className="grid grid-cols-3 gap-2">
                             {SUBJECTS.map(subject => {
-                              const s = result.scores[subject] || {}
-                              const classScore = parseFloat(s.classScore) || 0
-                              const cat1 = parseFloat(s.cat1) || 0
-                              const cat2 = parseFloat(s.cat2) || 0
-                              const exam = parseFloat(s.exam) || 0
-                              const wExam = (exam / 100) * 50
-                              const total = classScore + cat1 + cat2 + wExam
+                              const s = getSubjectScore(result.scores || {}, subject)
+                              const total = getSubjectTotal(s)
                               const getGrade = (t) => {
                                 if (t >= 90) return 'A+'
                                 if (t >= 80) return 'A'
@@ -878,13 +876,13 @@ export default function ParentDashboard() {
                   </thead>
                   <tbody>
                     {SUBJECTS.map((subject, index) => {
-                      const s = viewingResult.scores[subject] || {}
+                      const s = getSubjectScore(viewingResult.scores || {}, subject)
                       const classScore = parseFloat(s.classScore) || 0
                       const cat1 = parseFloat(s.cat1) || 0
                       const cat2 = parseFloat(s.cat2) || 0
                       const exam = parseFloat(s.exam) || 0
                       const wExam = (exam / 100) * 50
-                      const total = classScore + cat1 + cat2 + wExam
+                      const total = getSubjectTotal(s)
                       const getGrade = (t) => {
                         if (t >= 90) return 'A+'
                         if (t >= 80) return 'A'
@@ -916,15 +914,7 @@ export default function ParentDashboard() {
                     <tr className="bg-blue-500">
                       <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
                       <td className="px-4 py-3 text-center font-bold text-cyan-700">
-                        {SUBJECTS.reduce((acc, subject) => {
-                          const s = viewingResult.scores[subject] || {}
-                          const classScore = parseFloat(s.classScore) || 0
-                          const cat1 = parseFloat(s.cat1) || 0
-                          const cat2 = parseFloat(s.cat2) || 0
-                          const exam = parseFloat(s.exam) || 0
-                          const wExam = (exam / 100) * 50
-                          return acc + classScore + cat1 + cat2 + wExam
-                        }, 0).toFixed(2)} / 900
+                        {calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / 1100
                       </td>
                       <td className="px-4 py-3"></td>
                     </tr>
