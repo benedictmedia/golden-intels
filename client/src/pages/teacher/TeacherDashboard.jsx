@@ -77,18 +77,185 @@ export default function TeacherDashboard() {
   const teacherSubjectOptions = effectiveUser?.subjects?.length ? effectiveUser.subjects : SUBJECTS
   const normalizedTeacherSubjectKeys = new Set((teacherSubjectOptions || []).map(normalizeSubjectKey))
 
-  // All your existing useEffects and logic (unchanged)
   useEffect(() => {
     let mounted = true
+
     const syncProfile = async () => {
       const refreshedUser = await refreshUser()
-      if (mounted) setProfileUser(refreshedUser || user)
+      if (mounted) {
+        setProfileUser(refreshedUser || user)
+      }
     }
+
     syncProfile()
-    return () => { mounted = false }
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
-  // ... (All other useEffects, handlers, LMS logic, etc. remain exactly as you provided) ...
+  useEffect(() => {
+  if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
+    const token = localStorage.getItem('token')
+    axios.get(`${API_URL}/api/students`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => setStudents(res.data))
+      .catch(err => console.error('Failed to fetch students:', err))
+  }
+}, [activeMenu])
+
+  useEffect(() => {
+    if (activeMenu !== 'attendance') return
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setAttendanceLoading(true)
+    setAttendanceError('')
+    axios.get(`${API_URL}/api/attendance`, {
+      headers,
+      params: { date: attendanceDate, gradeLevel: activeClass }
+    })
+      .then(res => {
+        setAttendanceRecords(res.data)
+        const nextAttendance = {}
+        res.data.forEach(record => {
+          nextAttendance[record.studentId] = record.status
+        })
+        setAttendance(nextAttendance)
+      })
+      .catch(err => {
+        console.error('Failed to fetch attendance:', err)
+        setAttendanceError('Unable to load attendance for this date.')
+      })
+      .finally(() => setAttendanceLoading(false))
+  }, [activeMenu, activeClass, attendanceDate])
+
+  useEffect(() => {
+    if (activeMenu !== 'gradebook') return
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+
+    axios.get(`${API_URL}/api/results`, { headers })
+      .then(res => setSubmittedResults(res.data))
+      .catch(err => console.error('Failed to fetch results:', err))
+
+    axios.get(`${API_URL}/api/students`, { headers })
+      .then(res => setStudents(res.data))
+      .catch(err => console.error('Failed to fetch students:', err))
+  }, [activeMenu])
+
+  useEffect(() => {
+    if (activeMenu !== 'gradebook' || !gradebookStudent || editingResult) return
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setGradebookLoading(true)
+    setGradebookError('')
+
+    axios.get(`${API_URL}/api/results/student/${gradebookStudent}`, { headers })
+      .then(res => {
+        const match = res.data.find(result =>
+          matchesClass(result.gradeLevel, gradebookClass) &&
+          result.academicYear === gradebookYear &&
+          result.term === gradebookTerm
+        )
+
+        setCurrentResult(match || null)
+        if (match) {
+          setSubjectScores(getNormalizedScores(match.scores || {}))
+          setTeacherRemarks(match.remarks || '')
+        } else {
+          setSubjectScores({})
+          setTeacherRemarks('')
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load current result:', err)
+        setGradebookError('Unable to load the current result. You can still enter a new one.')
+      })
+      .finally(() => setGradebookLoading(false))
+  }, [activeMenu, gradebookStudent, gradebookClass, gradebookYear, gradebookTerm, editingResult])
+
+  const getEditableSubjectScores = () => {
+    const editableScores = {}
+    Object.entries(subjectScores || {}).forEach(([subject, score]) => {
+      if (normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))) {
+        editableScores[subject] = score
+      }
+    })
+    return editableScores
+  }
+
+  const handleGradebookSubmit = async () => {
+    if (!gradebookStudent) return
+
+    const payloadScores = getEditableSubjectScores()
+    if (!Object.keys(payloadScores).length) {
+      alert('You do not have any assigned subjects for this class. Please contact admin to update your assignments.')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+
+    try {
+      if (editingResult) {
+        const res = await axios.put(`${API_URL}/api/results/${editingResult.id}`, {
+          scores: payloadScores,
+          remarks: teacherRemarks,
+          status: 'pending'
+        }, { headers })
+        setSubmittedResults(submittedResults.map(r => r.id === editingResult.id ? res.data : r))
+        setEditingResult(null)
+      } else {
+        const res = await axios.post(`${API_URL}/api/results`, {
+          studentId: gradebookStudent,
+          gradeLevel: gradebookClass,
+          academicYear: gradebookYear,
+          term: gradebookTerm,
+          scores: payloadScores,
+          remarks: teacherRemarks,
+          submittedBy: user?.name
+        }, { headers })
+        setSubmittedResults([res.data, ...submittedResults])
+      }
+
+      setGradebookSubmitted(true)
+      setCurrentResult(editingResult ? null : currentResult)
+      setSubjectScores({})
+      setTeacherRemarks('')
+      setActiveGradebookTab('submitted')
+      setTimeout(() => setGradebookSubmitted(false), 4000)
+    } catch (error) {
+      console.error('Submit error:', error)
+      alert(error?.response?.data?.message || 'Failed to submit results. Please try again.')
+    }
+  }
+
+  const handleEditResult = (result) => {
+    setEditingResult(result)
+    setCurrentResult(result)
+    setGradebookClass(result.gradeLevel)
+    setGradebookYear(result.academicYear)
+    setGradebookTerm(result.term)
+    setGradebookStudent(result.studentId.toString())
+    setSubjectScores(getNormalizedScores(result.scores || {}))
+    setTeacherRemarks(result.remarks || '')
+    setActiveGradebookTab('enter')
+  }
+
+  const handleDeleteResult = async (id) => {
+  if (!window.confirm('Are you sure you want to delete this result?')) return
+  const token = localStorage.getItem('token')
+  try {
+    await axios.delete(`${API_URL}/api/results/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    setSubmittedResults(submittedResults.filter(r => r.id !== id))
+  } catch (error) {
+    alert('Failed to delete result.')
+  }
+}
 
   const handleDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
@@ -97,6 +264,7 @@ export default function TeacherDashboard() {
     const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
 
+    // Load logo as base64
     const getLogoBase64 = () => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
@@ -113,16 +281,20 @@ export default function TeacherDashboard() {
     })
     const logoData = await getLogoBase64()
 
-    // Navy header
+    // Navy header background
     doc.setFillColor(26, 60, 110)
     doc.rect(0, 0, pageWidth, 45, 'F')
+
+    // Gold accent bar
     doc.setFillColor(212, 160, 23)
     doc.rect(0, 45, pageWidth, 4, 'F')
 
+    // Logo in header - larger
     if (logoData) {
       doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
     }
 
+    // School name in header
     doc.setFontSize(20)
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
@@ -138,6 +310,7 @@ export default function TeacherDashboard() {
     doc.setTextColor(200, 220, 255)
     doc.text(`Academic Year: ${result.academicYear}   |   Term: ${result.term}`, pageWidth / 2 + 10, 36, { align: 'center' })
 
+    // Report title bar
     doc.setFillColor(240, 245, 255)
     doc.rect(0, 49, pageWidth, 12, 'F')
     doc.setFontSize(13)
@@ -145,7 +318,7 @@ export default function TeacherDashboard() {
     doc.setTextColor(26, 60, 110)
     doc.text('STUDENT ACADEMIC REPORT', pageWidth / 2, 57, { align: 'center' })
 
-    // Student Info Section (unchanged from your original)
+    // Student info section
     doc.setFillColor(255, 255, 255)
     doc.rect(10, 64, pageWidth - 20, 28, 'F')
     doc.setDrawColor(212, 160, 23)
@@ -177,7 +350,7 @@ export default function TeacherDashboard() {
     doc.text(`${student.dateOfBirth}`, 150, 82)
     doc.text(`${student.status}`, 150, 91)
 
-    // Subjects Table (unchanged - full logic from your original)
+    // Subjects table header
     let y = 100
     doc.setFillColor(26, 60, 110)
     doc.rect(10, y, pageWidth - 20, 10, 'F')
@@ -224,6 +397,7 @@ export default function TeacherDashboard() {
       const total = getSubjectTotal(s)
       grandTotal += total
 
+      // Alternating row colors
       if (index % 2 === 0) {
         doc.setFillColor(245, 248, 255)
       } else {
@@ -248,6 +422,7 @@ export default function TeacherDashboard() {
       doc.text(wExam.toFixed(2), 150, y + 7)
       doc.text(total.toFixed(2), 170, y + 7)
 
+      // Colored grade
       const gradeColor = getGradeColor(total)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
@@ -256,7 +431,7 @@ export default function TeacherDashboard() {
       y += 10
     })
 
-    // Grand Total
+    // Grand total row
     doc.setFillColor(212, 160, 23)
     doc.rect(10, y, pageWidth - 20, 10, 'F')
     doc.setFont('helvetica', 'bold')
@@ -267,7 +442,6 @@ export default function TeacherDashboard() {
 
     y += 18
 
-    // Attendance Summary (unchanged)
     const token = localStorage.getItem('token')
     const headers = { Authorization: `Bearer ${token}` }
     let attendanceSummary = null
@@ -302,12 +476,8 @@ export default function TeacherDashboard() {
       doc.restoreGraphicsState()
     }
 
-    // ==================== FIXED REMARKS SECTION ====================
-    let remarksText = result.remarks || teacherRemarks || 'No remarks provided for this term.'
-    if (typeof getRemarksText === 'function') {
-      remarksText = getRemarksText(remarksText) || remarksText
-    }
-
+    // Remarks box
+    const remarksText = getRemarksText(result.remarks)
     const remarksLines = doc.splitTextToSize(remarksText, 170)
     const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
 
@@ -328,7 +498,7 @@ export default function TeacherDashboard() {
 
     y += remarksHeight + 8
 
-    // Signature Section & Footer (unchanged)
+    // Signature section
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.3)
     doc.line(15, y + 10, 70, y + 10)

@@ -34,27 +34,27 @@ export default function ParentDashboard() {
   const [attendanceRecords, setAttendanceRecords] = useState([])
   const [attendanceLoading, setAttendanceLoading] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
-  const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    const headers = { Authorization: `Bearer ${token}` }
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
 
-    axios.get(`${API_URL}/api/students`, { headers })
-      .then(res => {
-        setStudents(res.data)
-        if (res.data.length > 0) setSelectedChild(res.data[0])
-      })
+  axios.get(`${API_URL}/api/students`, { headers })
+    .then(res => {
+      setStudents(res.data)
+      if (res.data.length > 0) setSelectedChild(res.data[0])
+    })
 
-    axios.get(`${API_URL}/api/results`, { headers })
-      .then(res => {
-        const approved = res.data.filter(r => r.status === 'approved')
-        setApprovedResults(approved)
-      })
+  axios.get(`${API_URL}/api/results`, { headers })
+    .then(res => {
+      const approved = res.data.filter(r => r.status === 'approved')
+      setApprovedResults(approved)
+    })
 
-    axios.get(`${API_URL}/api/fees/payments`, { headers })
-      .then(res => setFeePayments(res.data))
-  }, [])
+  axios.get(`${API_URL}/api/fees/payments`, { headers })
+    .then(res => setFeePayments(res.data))
+}, [])
+  const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
     if (activeMenu !== 'attendance' || !selectedChild?.id) return
@@ -71,7 +71,6 @@ export default function ParentDashboard() {
       .finally(() => setAttendanceLoading(false))
   }, [activeMenu, selectedChild])
 
-  // ==================== FIXED PDF DOWNLOAD FUNCTION ====================
   const handleParentDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
@@ -79,6 +78,7 @@ export default function ParentDashboard() {
     const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
 
+    // Load logo as base64
     const getLogoBase64 = () => new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
@@ -123,7 +123,6 @@ export default function ParentDashboard() {
     doc.setTextColor(26, 60, 110)
     doc.text('STUDENT ACADEMIC REPORT', pageWidth / 2, 57, { align: 'center' })
 
-    // Student Info
     doc.setFillColor(255, 255, 255)
     doc.rect(10, 64, pageWidth - 20, 28, 'F')
     doc.setDrawColor(212, 160, 23)
@@ -136,19 +135,16 @@ export default function ParentDashboard() {
     doc.text('Student Name:', 15, 73)
     doc.text('Student ID:', 15, 82)
     doc.text('Class:', 15, 91)
-
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(50, 50, 50)
     doc.text(`${student.firstName} ${student.lastName}`, 50, 73)
     doc.text(`${student.studentId}`, 50, 82)
     doc.text(`${result.gradeLevel}`, 50, 91)
-
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(26, 60, 110)
     doc.text('Gender:', 120, 73)
     doc.text('Date of Birth:', 120, 82)
     doc.text('Status:', 120, 91)
-
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(50, 50, 50)
     doc.text(`${student.gender}`, 150, 73)
@@ -156,10 +152,8 @@ export default function ParentDashboard() {
     doc.text(`${student.status}`, 150, 91)
 
     let y = 100
-    // Subjects Table (unchanged)
     doc.setFillColor(26, 60, 110)
     doc.rect(10, y, pageWidth - 20, 10, 'F')
-
     doc.setFontSize(9)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(255, 255, 255)
@@ -218,7 +212,6 @@ export default function ParentDashboard() {
       doc.text(cat2.toString(), 126, y + 7)
       doc.text(wExam.toFixed(2), 150, y + 7)
       doc.text(total.toFixed(2), 170, y + 7)
-
       const gradeColor = getGradeColor(total)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
@@ -235,7 +228,6 @@ export default function ParentDashboard() {
     doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
     y += 18
 
-    // Attendance Summary
     const token = localStorage.getItem('token')
     const headers = { Authorization: `Bearer ${token}` }
     let attendanceSummaryForReport = null
@@ -269,12 +261,7 @@ export default function ParentDashboard() {
       doc.restoreGraphicsState()
     }
 
-    // ==================== FIXED REMARKS SECTION ====================
-    let remarksText = result.remarks || 'No remarks provided for this term.'
-    if (typeof getRemarksText === 'function') {
-      remarksText = getRemarksText(result.remarks) || remarksText
-    }
-
+    const remarksText = getRemarksText(result.remarks)
     const remarksLines = doc.splitTextToSize(remarksText, 170)
     const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
 
@@ -283,25 +270,20 @@ export default function ParentDashboard() {
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.5)
     doc.rect(10, y, pageWidth - 20, remarksHeight)
-
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9)
     doc.setTextColor(26, 60, 110)
     doc.text("Class Teacher's Remarks:", 15, y + 8)
-
     doc.setFont('helvetica', 'italic')
     doc.setTextColor(50, 50, 50)
     doc.text(remarksLines, 15, y + 16)
-
     y += remarksHeight + 8
 
-    // Signatures and Footer
     doc.setDrawColor(26, 60, 110)
     doc.setLineWidth(0.3)
     doc.line(15, y + 10, 70, y + 10)
     doc.line(85, y + 10, 140, y + 10)
     doc.line(155, y + 10, 200, y + 10)
-
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(100, 100, 100)
@@ -313,7 +295,6 @@ export default function ParentDashboard() {
     doc.rect(0, 280, pageWidth, 17, 'F')
     doc.setFillColor(212, 160, 23)
     doc.rect(0, 278, pageWidth, 2, 'F')
-
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(8)
     doc.setTextColor(255, 255, 255)
@@ -324,6 +305,26 @@ export default function ParentDashboard() {
 
     doc.save(`${student.firstName}_${student.lastName}_${result.term}_${result.academicYear}.pdf`)
   }
+
+  useEffect(() => {
+  const token = localStorage.getItem('token')
+  const headers = { Authorization: `Bearer ${token}` }
+
+  axios.get(`${API_URL}/api/students`, { headers })
+    .then(res => {
+      setStudents(res.data)
+      if (res.data.length > 0) setSelectedChild(res.data[0])
+    })
+
+  axios.get(`${API_URL}/api/results`, { headers })
+    .then(res => {
+      const approved = res.data.filter(r => r.status === 'approved')
+      setApprovedResults(approved)
+    })
+
+  axios.get(`${API_URL}/api/fees/payments`, { headers })
+    .then(res => setFeePayments(res.data))
+}, [])
 
   const handleLogout = () => {
     logout()

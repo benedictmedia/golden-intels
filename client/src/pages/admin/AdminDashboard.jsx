@@ -23,6 +23,15 @@ const menuItems = [
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
 ]
 
+const stats = [
+  { label: 'Total Learners', value: '0', color: 'bg-blue-600', textColor: 'text-cyan-100' },
+  { label: 'Admissions', value: '0', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
+  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
+  { label: 'Staff Members', value: '0', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
+]
+
+const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -62,14 +71,18 @@ export default function AdminDashboard() {
   const [adminEditScores, setAdminEditScores] = useState({})
   const [adminEditRemarks, setAdminEditRemarks] = useState('')
 
-  // Admissions, Tokens, Gallery, News, Staff, Finance, Accounts states (kept from your original)
+  // Admissions state
   const [applications, setApplications] = useState([])
   const [admissionFilter, setAdmissionFilter] = useState('All')
   const [viewingApplication, setViewingApplication] = useState(null)
+
+  // Tokens state
   const [tokens, setTokens] = useState([])
   const [newToken, setNewToken] = useState(null)
   const [tokenLoading, setTokenLoading] = useState(false)
   const [copiedId, setCopiedId] = useState(null)
+
+  // Gallery state
   const [galleryItems, setGalleryItems] = useState([])
   const [showAddGallery, setShowAddGallery] = useState(false)
   const [galleryLoading, setGalleryLoading] = useState(false)
@@ -79,6 +92,8 @@ export default function AdminDashboard() {
   const [viewingGallery, setViewingGallery] = useState(null)
   const [activeGalleryImage, setActiveGalleryImage] = useState(0)
   const [editingGallery, setEditingGallery] = useState(null)
+
+  // News state
   const [newsItems, setNewsItems] = useState([])
   const [showAddNews, setShowAddNews] = useState(false)
   const [editingNews, setEditingNews] = useState(null)
@@ -87,6 +102,8 @@ export default function AdminDashboard() {
   const [newsForm, setNewsForm] = useState({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
   const [newsImages, setNewsImages] = useState([])
   const [newsPreviews, setNewsPreviews] = useState([])
+
+  // Staff state
   const [staffList, setStaffList] = useState([])
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [editingStaff, setEditingStaff] = useState(null)
@@ -94,6 +111,8 @@ export default function AdminDashboard() {
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
   const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
+
+  // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
   const [feeStructures, setFeeStructures] = useState({})
   const [feePayments, setFeePayments] = useState([])
@@ -103,6 +122,11 @@ export default function AdminDashboard() {
   const [feeClassFilter, setFeeClassFilter] = useState('All')
   const [paymentForm, setPaymentForm] = useState({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
 
+  const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem('token')}`
+})
+
+  // Accounts state
   const [users, setUsers] = useState([])
   const [parentAccounts, setParentAccounts] = useState([])
   const [accountTab, setAccountTab] = useState('parents')
@@ -159,7 +183,281 @@ export default function AdminDashboard() {
     }
   }, [activeMenu])
 
-  // ... (All your other useEffects, handlers, functions remain unchanged) ...
+  useEffect(() => {
+    if (activeMenu === 'accounts') fetchAccounts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMenu, accountTab, accountPage, accountLimit])
+
+  const handleLogout = () => { logout(); navigate('/') }
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0]
+    if (file) { setPhotoFile(file); setPhotoPreview(URL.createObjectURL(file)) }
+  }
+
+  const handleAddStudent = async () => {
+    try {
+      const learnerEmail = newStudent.learnerEmail?.trim()
+      const learnerPassword = newStudent.learnerPassword?.trim()
+
+      if ((learnerEmail || learnerPassword) && (!learnerEmail || !learnerPassword)) {
+        alert('Please enter both a learner email and password to create a dashboard account.')
+        return
+      }
+
+      const formData = new FormData()
+      Object.entries(newStudent).forEach(([key, value]) => {
+        if (key === 'learnerEmail' || key === 'learnerPassword') return
+        formData.append(key, value)
+      })
+
+      if (learnerEmail) {
+        formData.append('email', learnerEmail)
+        formData.append('password', learnerPassword)
+      }
+
+      if (photoFile) formData.append('photo', photoFile)
+
+      const res = await axios.post(`${API_URL}/api/students`, formData, { headers: getAuthHeaders() })
+      setStudents([res.data, ...students])
+      setShowAddStudent(false)
+      setPhotoFile(null)
+      setPhotoPreview(null)
+      setNewStudent({
+        firstName: '', lastName: '', dateOfBirth: '', gender: '',
+        gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+        learnerEmail: '', learnerPassword: ''
+      })
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
+    }
+  }
+
+  const handleDeleteStudent = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this learner?')) return
+    try {
+      await axios.delete(`${API_URL}/api/students/${id}`)
+      setStudents(students.filter(s => s.id !== id))
+      if (selectedStudent?.id === id) setSelectedStudent(null)
+    } catch (err) { alert('Failed to delete learner.') }
+  }
+
+  const handleEditStudent = async () => {
+    try {
+      const res = await axios.put(`${API_URL}/api/students/${editStudent.id}`, editStudent)
+      setStudents(students.map(s => s.id === editStudent.id ? res.data : s))
+      setSelectedStudent(res.data)
+      setEditMode(false)
+    } catch (err) { alert('Failed to update learner details.') }
+  }
+
+  const toggleSelection = (field, value) => {
+    setNewUser(prev => {
+      const list = prev[field] || []
+      return {
+        ...prev,
+        [field]: list.includes(value) ? list.filter(item => item !== value) : [...list, value]
+      }
+    })
+  }
+
+  const toggleEditSelection = (field, value) => {
+    setEditingUser(prev => {
+      if (!prev) return prev
+      const list = prev[field] || []
+      return {
+        ...prev,
+        [field]: list.includes(value) ? list.filter(item => item !== value) : [...list, value]
+      }
+    })
+  }
+
+  const openEditUser = (userRecord) => {
+    const staffInfo = userRecord.teacherInfo || null
+    setEditPhotoFile(null)
+    setEditPhotoPreview(staffInfo?.photo || '')
+    setEditingUser({
+      ...userRecord,
+      teacherDepartment: staffInfo?.department || 'Teaching',
+      teacherSubject: staffInfo?.subject || '',
+      subjects: staffInfo?.subjects || [],
+      classes: staffInfo?.classes || [],
+      classTeacherClasses: staffInfo?.classTeacherClasses || [],
+      bio: staffInfo?.bio || '',
+      phone: staffInfo?.phone || '',
+      photo: staffInfo?.photo || ''
+    })
+  }
+
+  const handleCreateAccount = async () => {
+    setCreateError(''); setCreateSuccess(false); setCreateLoading(true)
+    try {
+      const userName = newUser.name || `${newUser.learnerFirstName} ${newUser.learnerLastName}`.trim() || newUser.email
+      const payload = {
+        name: userName,
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role
+      }
+
+      if (newUser.role === 'teacher') {
+        payload.department = newUser.teacherDepartment
+        payload.subjects = newUser.subjects
+        payload.classes = newUser.classes
+        payload.classTeacherClasses = newUser.classTeacherClasses
+        if (newUser.teacherSubject) payload.subject = newUser.teacherSubject
+      }
+
+      if (newUser.role === 'learner') {
+        payload.firstName = newUser.learnerFirstName || newUser.name.split(' ')[0] || ''
+        payload.lastName = newUser.learnerLastName || newUser.name.split(' ').slice(1).join(' ') || ''
+        payload.dateOfBirth = newUser.learnerDateOfBirth
+        payload.gender = newUser.learnerGender
+        payload.gradeLevel = newUser.learnerGradeLevel
+        payload.parentEmail = newUser.learnerParentEmail
+        payload.parentName = newUser.learnerParentName
+        payload.parentPhone = newUser.learnerParentPhone
+      }
+
+      await axios.post(`${API_URL}/api/auth/register`, payload)
+      setCreateSuccess(true)
+      setNewUser(initialNewUserState)
+    } catch (err) {
+      setCreateError(err.response?.data?.message || 'Failed to create account.')
+    } finally {
+      setCreateLoading(false)
+    }
+  }
+
+  // Accounts actions
+  const fetchAccounts = async () => {
+    setAccountLoading(true)
+    try {
+      const params = { q: accountQuery, page: accountPage, limit: accountLimit }
+      if (accountTab === 'parents') params.role = 'parent'
+      if (accountTab === 'teachers') params.role = 'teacher'
+      const res = await axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params })
+      setUsers(res.data.users || [])
+      setAccountTotal(res.data.total || 0)
+      const [studentsRes, staffRes] = await Promise.all([
+        axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
+        axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
+      ])
+      setStudents(studentsRes.data)
+      setStaffList(staffRes.data)
+    } catch (err) {
+      console.error('Failed to fetch accounts:', err)
+    } finally { setAccountLoading(false) }
+  }
+
+  const handleDeactivateUser = async (email) => {
+    if (!window.confirm(`Deactivate ${email}?`)) return
+    try {
+      await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to deactivate user') }
+  }
+
+  const handleReactivateUser = async (email) => {
+    try {
+      await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to reactivate user') }
+  }
+
+  const handleDeleteUser = async (id, email) => {
+    if (!window.confirm(`Delete deactivated account ${email}? This will remove related data.`)) return
+    try {
+      await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
+      fetchAccounts()
+    } catch (err) { alert('Failed to delete user account.') }
+  }
+
+  const handleParentAccountSelect = (email) => {
+    const parent = parentAccounts.find(p => p.email === email)
+    setNewStudent(prev => ({
+      ...prev,
+      parentEmail: email,
+      parentName: parent ? parent.name : prev.parentName
+    }))
+  }
+
+  const handleUpdateUser = async (id, payload) => {
+    try {
+      const requestPayload = {
+        name: payload.name,
+        email: payload.email,
+        role: payload.role
+      }
+
+      if (payload.role === 'teacher') {
+        requestPayload.department = payload.teacherDepartment || 'Teaching'
+        requestPayload.subject = payload.teacherSubject || ''
+        requestPayload.subjects = payload.subjects || []
+        requestPayload.classes = payload.classes || []
+        requestPayload.classTeacherClasses = payload.classTeacherClasses || []
+        requestPayload.bio = payload.bio || ''
+        requestPayload.phone = payload.phone || ''
+      }
+
+      if (payload.role === 'teacher' && editPhotoFile) {
+        const formData = new FormData()
+        Object.entries(requestPayload).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value))
+          } else if (value !== undefined && value !== null) {
+            formData.append(key, value)
+          }
+        })
+        formData.append('photo', editPhotoFile)
+        await axios.put(`${API_URL}/api/users/${id}`, formData, { headers: getAuthHeaders() })
+      } else {
+        await axios.put(`${API_URL}/api/users/${id}`, requestPayload, { headers: getAuthHeaders() })
+      }
+
+      setEditPhotoFile(null)
+      setEditPhotoPreview('')
+      setEditingUser(null)
+      fetchAccounts()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update user')
+    }
+  }
+
+  const fetchAudits = async (userId = null) => {
+    try {
+      const params = { page: auditPage, limit: auditLimit }
+      if (userId) params.userId = userId
+      const res = await axios.get(`${API_URL}/api/users/audits`, { headers: getAuthHeaders(), params })
+      setAudits(res.data.audits || [])
+      setShowAuditsModal(true)
+    } catch (err) { console.error('Failed to fetch audits', err) }
+  }
+
+  const handleApproveResult = async (id) => {
+    try {
+      const res = await axios.put(`${API_URL}/api/results/${id}`, { status: 'approved' }, { headers: getAuthHeaders() })
+      setResults(results.map(r => r.id === id ? res.data : r))
+    } catch (err) { alert('Failed to approve result.') }
+  }
+
+  const handleAdminEditResult = (result) => { setAdminEditResult(result); setAdminEditScores(getNormalizedScores(result.scores || {})); setAdminEditRemarks(result.remarks || '') }
+
+  const handleAdminSaveEdit = async () => {
+    try {
+      const res = await axios.put(`${API_URL}/api/results/${adminEditResult.id}`, { scores: adminEditScores, remarks: adminEditRemarks, status: adminEditResult.status }, { headers: getAuthHeaders() })
+      setResults(results.map(r => r.id === adminEditResult.id ? res.data : r))
+      setAdminEditResult(null)
+    } catch (err) { alert('Failed to save changes.') }
+  }
+
+  const handleAdminDeleteResult = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this result?')) return
+    try {
+      await axios.delete(`${API_URL}/api/results/${id}`)
+      setResults(results.filter(r => r.id !== id))
+    } catch (err) { alert('Failed to delete result.') }
+  }
 
   const handleAdminDownloadPDF = async (result) => {
     try {
@@ -190,7 +488,9 @@ export default function AdminDashboard() {
       doc.rect(0, 0, pageWidth, 45, 'F')
       doc.setFillColor(212, 160, 23)
       doc.rect(0, 45, pageWidth, 4, 'F')
-      if (logoData) doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+      if (logoData) {
+        doc.addImage(logoData, 'PNG', 12, 5, 32, 32)
+      }
 
       doc.setFontSize(20)
       doc.setTextColor(255, 255, 255)
@@ -209,12 +509,12 @@ export default function AdminDashboard() {
 
       doc.setFillColor(240, 245, 255)
       doc.rect(0, 49, pageWidth, 12, 'F')
+
       doc.setFontSize(13)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(26, 60, 110)
       doc.text('STUDENT ACADEMIC REPORT', pageWidth / 2, 57, { align: 'center' })
 
-      // Student Info Section
       doc.setFillColor(255, 255, 255)
       doc.rect(10, 64, pageWidth - 20, 28, 'F')
       doc.setDrawColor(212, 160, 23)
@@ -247,10 +547,8 @@ export default function AdminDashboard() {
       doc.text(`${student.status || ''}`, 150, 91)
 
       let y = 100
-      // Subjects Table (your original logic)
       doc.setFillColor(26, 60, 110)
       doc.rect(10, y, pageWidth - 20, 10, 'F')
-
       doc.setFontSize(9)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(255, 255, 255)
@@ -292,8 +590,11 @@ export default function AdminDashboard() {
         const total = getSubjectTotal(s)
         grandTotal += total
 
-        if (index % 2 === 0) doc.setFillColor(245, 248, 255)
-        else doc.setFillColor(255, 255, 255)
+        if (index % 2 === 0) {
+          doc.setFillColor(245, 248, 255)
+        } else {
+          doc.setFillColor(255, 255, 255)
+        }
         doc.rect(10, y, pageWidth - 20, 10, 'F')
         doc.setDrawColor(220, 225, 235)
         doc.setLineWidth(0.2)
@@ -328,7 +629,6 @@ export default function AdminDashboard() {
       doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
       y += 18
 
-      // Attendance Summary
       let attendanceSummary = null
       try {
         const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: getAuthHeaders() })
@@ -360,12 +660,7 @@ export default function AdminDashboard() {
         doc.restoreGraphicsState()
       }
 
-      // ==================== FIXED REMARKS SECTION ====================
-      let remarksText = result.remarks || 'No remarks provided for this term.'
-      if (typeof getRemarksText === 'function') {
-        remarksText = getRemarksText(result.remarks) || remarksText
-      }
-
+      const remarksText = getRemarksText(result.remarks)
       const remarksLines = doc.splitTextToSize(remarksText, 170)
       const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
 
@@ -374,51 +669,43 @@ export default function AdminDashboard() {
       doc.setDrawColor(26, 60, 110)
       doc.setLineWidth(0.5)
       doc.rect(10, y, pageWidth - 20, remarksHeight)
-
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(9)
       doc.setTextColor(26, 60, 110)
       doc.text("Class Teacher's Remarks:", 15, y + 8)
-
       doc.setFont('helvetica', 'italic')
       doc.setTextColor(50, 50, 50)
       doc.text(remarksLines, 15, y + 16)
-
       y += remarksHeight + 8
 
-      // Signature Section
       doc.setDrawColor(26, 60, 110)
       doc.setLineWidth(0.3)
       doc.line(15, y + 10, 70, y + 10)
       doc.line(85, y + 10, 140, y + 10)
       doc.line(155, y + 10, 200, y + 10)
-
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
       doc.setTextColor(100, 100, 100)
       doc.text("Class Teacher's Signature", 15, y + 15)
       doc.text("Head Teacher's Signature", 85, y + 15)
       doc.text("Parent's Signature", 155, y + 15)
-
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(8)
       doc.setTextColor(26, 60, 110)
-      doc.text(`Submitted by: ${result.submittedBy || 'Admin'}`, 15, y + 25)
+      doc.text(`Submitted by: ${result.submittedBy}`, 15, y + 25)
       doc.text(`Date: ${new Date(result.createdAt).toLocaleDateString()}`, 140, y + 25)
 
-      // Footer
       doc.setFillColor(26, 60, 110)
       doc.rect(0, 280, pageWidth, 17, 'F')
       doc.setFillColor(212, 160, 23)
       doc.rect(0, 278, pageWidth, 2, 'F')
-
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(8)
       doc.setTextColor(255, 255, 255)
       doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, 287, { align: 'center' })
       doc.setFont('helvetica', 'normal')
       doc.setTextColor(212, 160, 23)
-      doc.text('We Nurture for Nature', pageWidth / 2, 293, { align: 'center' })
+      doc.text('Oxford Accredited | We Nurture for Nature', pageWidth / 2, 293, { align: 'center' })
 
       doc.save(`${student.firstName || 'student'}_${student.lastName || ''}_${result.term || ''}_${result.academicYear || ''}.pdf`)
     } catch (error) {
