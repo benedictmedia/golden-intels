@@ -237,3 +237,15 @@ model AccountAudit {
   details     Json?
   createdAt   DateTime @default(now())
 }
+
+model Message {
+  id                 Int      @id @default(autoincrement())
+  content            String
+  senderId           Int
+  senderName         String
+  senderRole         String
+  receiverId         Int
+  conversationUserId Int
+  read               Boolean  @default(false)
+  createdAt          DateTime @default(now())
+}
