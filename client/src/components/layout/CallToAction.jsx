@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 export default function CallToAction() {
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-700 via-cyan-500 to-sky-500">
+    <section className="py-20 bg-[#009dff] text-white">
       <div className="max-w-4xl mx-auto px-4 text-center">
 
         {/* Badge */}
-        <span className="inline-block bg-yellow-300 text-blue-950 text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm">
+        <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm border border-white/70">
           Admissions Open
         </span>
 
@@ -16,7 +16,7 @@ export default function CallToAction() {
         </h2>
 
         {/* Subtext */}
-        <p className="text-cyan-50 text-lg max-w-2xl mx-auto mb-10">
+        <p className="text-white text-lg max-w-2xl mx-auto mb-10">
           Join a community dedicated to excellence, innovation, and nurturing the leaders of tomorrow.
         </p>
 
@@ -24,13 +24,13 @@ export default function CallToAction() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/admissions"
-            className="bg-yellow-300 hover:bg-yellow-200 text-blue-950 font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20"
+            className="bg-[#009dff] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
           >
             Start Application
           </Link>
           <Link
             to="/contact"
-            className="border-2 border-white hover:border-yellow-200 hover:text-yellow-200 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
+            className="border-2 border-white hover:text-white/80 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors"
           >
             Schedule a Visit
           </Link>

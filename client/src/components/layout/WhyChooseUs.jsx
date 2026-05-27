@@ -35,18 +35,18 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-gradient-to-br from-sky-400 via-cyan-200 to-blue-500">
+    <section className="py-20 bg-[#009dff] text-white">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <span className="inline-block bg-yellow-300 text-blue-950 text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm">
+          <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
             Why Choose Us
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-blue-950 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
             Why Choose Golden-Intels
           </h2>
-          <p className="text-blue-950/80 text-lg max-w-2xl mx-auto">
+          <p className="text-white text-lg max-w-2xl mx-auto">
             We provide world-class education that prepares students for global success.
           </p>
         </div>
@@ -54,12 +54,12 @@ export default function WhyChooseUs() {
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {reasons.map((reason, index) => (
-            <div key={index} className="bg-blue-600 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-cyan-200/40">
-              <div className="text-yellow-300 mb-4">
+            <div key={index} className="bg-[#009dff] rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-white/40">
+              <div className="text-white mb-4">
                 {reason.icon}
               </div>
               <h3 className="text-xl font-bold text-white mb-2">{reason.title}</h3>
-              <p className="text-cyan-50">{reason.description}</p>
+              <p className="text-white">{reason.description}</p>
             </div>
           ))}
         </div>

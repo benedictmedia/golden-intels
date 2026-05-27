@@ -13,7 +13,7 @@ const activities = [
 
 export default function CampusLife() {
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-500 via-sky-400 to-emerald-300">
+    <section className="py-20 bg-[#009dff] text-white">
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
         {/* Left: Photo */}
@@ -21,26 +21,26 @@ export default function CampusLife() {
           <img
             src={campusImg}
             alt="Our Activities & Clubs at Golden-Intels"
-            className="w-full h-[420px] object-cover rounded-2xl shadow-xl border-4 border-cyan-100/80" loading="lazy" decoding="async" />
+            className="w-full h-[420px] object-cover rounded-2xl shadow-xl border-4 border-white/70" loading="lazy" decoding="async" />
         </div>
 
         {/* Right: Text */}
         <div className="flex-1">
-          <span className="inline-block bg-yellow-300 text-blue-950 text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm">
+          <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
             Activities & Clubs
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-blue-950 mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6">
             Discover Our Activities & Clubs
           </h2>
-          <p className="text-blue-950/80 text-lg leading-relaxed mb-8">
+          <p className="text-white text-lg leading-relaxed mb-8">
             Beyond academics, our students thrive in a rich environment of coding, computer skills, STEM, arts and music, baking, sewing and braiding, physical education and sports, and many more. We believe in developing well-rounded individuals prepared for all aspects of life.
           </p>
 
           {/* Activities */}
           <div className="grid grid-cols-2 gap-4 mb-10">
             {activities.map((item, index) => (
-              <div key={index} className="flex items-center gap-3 text-blue-950 font-medium">
-                <div className="text-fuchsia-700">{item.icon}</div>
+              <div key={index} className="flex items-center gap-3 text-white font-medium">
+                <div className="text-white">{item.icon}</div>
                 <span>{item.label}</span>
               </div>
             ))}
@@ -48,7 +48,7 @@ export default function CampusLife() {
 
           <Link
             to="/campus-life"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20"
+            className="inline-block bg-[#009dff] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
           >
             Discover Our Activities & Clubs
           </Link>
