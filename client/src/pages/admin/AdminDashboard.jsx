@@ -654,13 +654,17 @@ export default function AdminDashboard() {
       }
 
       if (logoData) {
-        doc.saveGraphicsState()
-        doc.setGState(new doc.GState({ opacity: 0.06 }))
-        doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
-        doc.restoreGraphicsState()
-      }
+      doc.saveGraphicsState()
+      doc.setGState(new doc.GState({ opacity: 0.06 }))
+      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
+      doc.restoreGraphicsState()
+    }
 
-      const remarksText = getRemarksText(result.remarks)
+    // Add new page if remarks/signatures won't fit
+    if (y + 80 > 258) { doc.addPage(); y = 20 }
+
+    // Remarks box
+    const remarksText = getRemarksText(result.remarks)
       const remarksLines = doc.splitTextToSize(remarksText, 170)
       const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
 
@@ -695,17 +699,18 @@ export default function AdminDashboard() {
       doc.text(`Submitted by: ${result.submittedBy}`, 15, y + 25)
       doc.text(`Date: ${new Date(result.createdAt).toLocaleDateString()}`, 140, y + 25)
 
-      doc.setFillColor(26, 60, 110)
-      doc.rect(0, 280, pageWidth, 17, 'F')
-      doc.setFillColor(212, 160, 23)
-      doc.rect(0, 278, pageWidth, 2, 'F')
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(8)
-      doc.setTextColor(255, 255, 255)
-      doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, 287, { align: 'center' })
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(212, 160, 23)
-      doc.text('Oxford Accredited | We Nurture for Nature', pageWidth / 2, 293, { align: 'center' })
+      const pageH = doc.internal.pageSize.getHeight()
+    doc.setFillColor(26, 60, 110)
+    doc.rect(0, pageH - 17, pageWidth, 17, 'F')
+    doc.setFillColor(212, 160, 23)
+    doc.rect(0, pageH - 19, pageWidth, 2, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(8)
+    doc.setTextColor(255, 255, 255)
+    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, pageH - 10, { align: 'center' })
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(212, 160, 23)
+    doc.text('Oxford Accredited | We Nurture for Nature', pageWidth / 2, pageH - 4, { align: 'center' })
 
       doc.save(`${student.firstName || 'student'}_${student.lastName || ''}_${result.term || ''}_${result.academicYear || ''}.pdf`)
     } catch (error) {
