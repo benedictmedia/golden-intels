@@ -3,7 +3,7 @@ import heroBg from '../../assets/hero-bg.jpg'
 
 export default function Hero() {
   return (
-    <div className="relative text-[#2D2D2D] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#F8FAFC]">
+    <div className="relative text-white min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#2563EB]">
       
       {/* Background image */}
       <div
@@ -12,13 +12,13 @@ export default function Hero() {
       ></div>
 
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-[#0F172A]/65"></div>
+      <div className="absolute inset-0 bg-[#2563EB]/70"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
         
         {/* Badge */}
-        <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
+        <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
           Oxford Accredited School
         </span>
 
@@ -30,7 +30,7 @@ export default function Hero() {
         </h1>
 
         {/* Subheading */}
-        <p className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto mb-10">
+        <p className="text-lg md:text-xl text-[#E5E7EB]/200 max-w-2xl mx-auto mb-10">
           We nurture for nature.
         </p>
 
@@ -40,7 +40,7 @@ export default function Hero() {
           {/* Primary Button */}
           <Link
             to="/admissions"
-            className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
           >
             Apply Now
           </Link>
@@ -48,7 +48,7 @@ export default function Hero() {
           {/* Secondary Button */}
           <Link
             to="/about"
-            className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+            className="bg-[#F4B400] hover:bg-[#e0a800] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
           >
             Discover Our Story
           </Link>

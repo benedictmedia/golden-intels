@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 export default function CallToAction() {
   return (
 
-    <section className="py-20 bg-[#0F172A] text-white">
+    <section className="py-20 bg-[#2563EB] text-white">
 
       <div className="max-w-4xl mx-auto px-4 text-center">
 
         {/* Badge */}
-        <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
+        <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
           Admissions Open
         </span>
 
@@ -19,7 +19,7 @@ export default function CallToAction() {
         </h2>
 
         {/* Subtext */}
-        <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-[#E5E7EB] text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
           Join a community dedicated to excellence, innovation, and nurturing the leaders of tomorrow.
         </p>
 
@@ -29,7 +29,7 @@ export default function CallToAction() {
           {/* Primary Button */}
           <Link
             to="/admissions"
-            className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
+            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
           >
             Start Application
           </Link>
@@ -37,7 +37,7 @@ export default function CallToAction() {
           {/* Secondary Button */}
           <Link
             to="/contact"
-            className="border-2 border-white/70 hover:border-[#F4B400] hover:text-[#F4B400] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300"
+            className="border-2 border-white/80 hover:border-[#F4B400] hover:text-[#F4B400] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300"
           >
             Schedule a Visit
           </Link>

@@ -13,7 +13,7 @@ const activities = [
 
 export default function CampusLife() {
   return (
-    <section className="py-20 bg-[#0F172A] text-white">
+    <section className="py-20 bg-[#1D4ED8] text-white">
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
@@ -23,7 +23,7 @@ export default function CampusLife() {
           <img
             src={campusImg}
             alt="Our Activities & Clubs at Golden-Intels"
-            className="w-full h-[420px] object-cover rounded-2xl shadow-2xl border-4 border-white/10"
+            className="w-full h-[420px] object-cover rounded-2xl shadow-2xl border-4 border-white/20"
             loading="lazy"
             decoding="async"
           />
@@ -34,7 +34,7 @@ export default function CampusLife() {
         <div className="flex-1">
 
           {/* Badge */}
-          <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Activities & Clubs
           </span>
 
@@ -44,7 +44,7 @@ export default function CampusLife() {
           </h2>
 
           {/* Description */}
-          <p className="text-gray-300 text-lg leading-relaxed mb-8">
+          <p className="text-[#E5E7EB] text-lg leading-relaxed mb-8">
             Beyond academics, our students thrive in a rich environment of coding, computer skills, STEM, arts and music, baking, sewing and braiding, physical education and sports, and many more. We believe in developing well-rounded individuals prepared for all aspects of life.
           </p>
 
@@ -55,7 +55,7 @@ export default function CampusLife() {
 
               <div
                 key={index}
-                className="flex items-center gap-3 bg-[#1E293B] rounded-xl p-4 border border-white/10 shadow-md"
+                className="flex items-center gap-3 bg-white/10 rounded-xl p-4 border border-white/20 shadow-md"
               >
 
                 <div className="text-[#F4B400]">
@@ -75,7 +75,7 @@ export default function CampusLife() {
           {/* Button */}
           <Link
             to="/campus-life"
-            className="inline-block bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
+            className="inline-block bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
           >
             Discover Our Activities & Clubs
           </Link>

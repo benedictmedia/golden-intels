@@ -35,14 +35,15 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-[#0F172A] text-white">
+    <section className="py-20 bg-[#2563EB] text-white">
+
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
 
           {/* Badge */}
-          <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Why Choose Us
           </span>
 
@@ -52,9 +53,10 @@ export default function WhyChooseUs() {
           </h2>
 
           {/* Description */}
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+          <p className="text-[#E5E7EB] text-lg max-w-2xl mx-auto">
             We provide world-class education that prepares students for global success.
           </p>
+
         </div>
 
         {/* Cards */}
@@ -63,7 +65,7 @@ export default function WhyChooseUs() {
           {reasons.map((reason, index) => (
             <div
               key={index}
-              className="bg-[#1E293B] rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-white/10"
+              className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-white/20"
             >
 
               {/* Icon */}
@@ -77,15 +79,17 @@ export default function WhyChooseUs() {
               </h3>
 
               {/* Description */}
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[#E5E7EB] leading-relaxed">
                 {reason.description}
               </p>
 
             </div>
           ))}
+
         </div>
 
       </div>
+
     </section>
   )
 }
