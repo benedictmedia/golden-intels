@@ -35,31 +35,52 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-[#0000FF] text-white">
+    <section className="py-20 bg-[#0F172A] text-white">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <span className="inline-block bg-[#0000FF] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
+
+          {/* Badge */}
+          <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Why Choose Us
           </span>
+
+          {/* Title */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
-            Why Choose Golden-Intels
+            Why Choose <span className="text-[#F4B400]">Golden-Intels</span>
           </h2>
-          <p className="text-white text-lg max-w-2xl mx-auto">
+
+          {/* Description */}
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
             We provide world-class education that prepares students for global success.
           </p>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
           {reasons.map((reason, index) => (
-            <div key={index} className="bg-[#0000FF] rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-white/40">
-              <div className="text-white mb-4">
+            <div
+              key={index}
+              className="bg-[#1E293B] rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-white/10"
+            >
+
+              {/* Icon */}
+              <div className="text-[#F4B400] mb-4">
                 {reason.icon}
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">{reason.title}</h3>
-              <p className="text-white">{reason.description}</p>
+
+              {/* Title */}
+              <h3 className="text-xl font-bold text-white mb-3">
+                {reason.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-gray-300 leading-relaxed">
+                {reason.description}
+              </p>
+
             </div>
           ))}
         </div>

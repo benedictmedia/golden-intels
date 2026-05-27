@@ -3,27 +3,29 @@ import heroBg from '../../assets/hero-bg.jpg'
 
 export default function Hero() {
   return (
-    <div className="relative text-[#2D2D2D] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#F4F7F9]">
+    <div className="relative text-[#2D2D2D] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#F8FAFC]">
+      
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110 animate-[slowZoom_15s_ease-in-out_infinite_alternate]"
         style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
+
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-[#1A2A40]/60"></div>
+      <div className="absolute inset-0 bg-[#0F172A]/65"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
         
         {/* Badge */}
-        <span className="inline-block bg-[#20A4A4] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm">
+        <span className="inline-block bg-[#2563EB] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
           Oxford Accredited School
         </span>
 
         {/* Heading */}
         <h1 className="text-4xl md:text-6xl font-bold font-serif leading-tight mb-6">
           Welcome to <br />
-          <span className="text-[#F2C94C]">Golden-Intels</span> <br />
+          <span className="text-[#F4B400]">Golden-Intels</span> <br />
           International School
         </h1>
 
@@ -34,10 +36,20 @@ export default function Hero() {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/admissions" className="bg-[#20A4A4] hover:bg-[#1a8a8a] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors">
+          
+          {/* Primary Button */}
+          <Link
+            to="/admissions"
+            className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+          >
             Apply Now
           </Link>
-          <Link to="/about" className="bg-[#7B61FF] hover:bg-[#6a54d9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors">
+
+          {/* Secondary Button */}
+          <Link
+            to="/about"
+            className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+          >
             Discover Our Story
           </Link>
         </div>
