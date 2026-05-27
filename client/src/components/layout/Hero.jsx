@@ -10,13 +10,13 @@ export default function Hero() {
         style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#000000]/85"></div>
+      <div className="absolute inset-0 bg-[#000000]/30"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         
         {/* Badge */}
-        <span className="inline-block bg-[#2D2D2D] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm border border-white/70">
+        <span className="inline-block bg-[#7B61FF] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm border border-white/70">
           Oxford Accredited School
         </span>
 
@@ -37,10 +37,10 @@ export default function Hero() {
           <Link to="/admissions" className="bg-[#F2C94C] hover:bg-[#7B61FF] text-#666666 font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-[#E0E0E0]/80">
             Apply Now
           </Link>
-          <Link to="/about" className="border-2 border-white hover:text-#666666/80 text-#666666 font-bold px-8 py-3 rounded-lg text-lg transition-colors">
+          <Link to="/about" className="border-2 border-#F2C94C hover:text-#666666/80 text-#666666 font-bold px-8 py-3 rounded-lg text-lg transition-colors">
             Learn More
           </Link>
-          <Link to="/about" className="bg-[#0000FF] hover:bg-[#008ee6] text-#666666 font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-[#E0E0E0]/80">
+          <Link to="/about" className="bg-[#F2C94C] hover:bg-[#008ee6] text-#666666 font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-[#E0E0E0]/80">
             Discover Our Story
           </Link>
         </div>
