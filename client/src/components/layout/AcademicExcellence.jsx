@@ -11,12 +11,12 @@ const highlights = [
 
 export default function AcademicExcellence() {
   return (
-    <section className="py-20 bg-[#009dff] text-white">
+    <section className="py-20 bg-[#0000FF] text-white">
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
         {/* Left: Text */}
         <div className="flex-1">
-          <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
+          <span className="inline-block bg-[#0000FF] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
             Academic Excellence
           </span>
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6">
@@ -38,7 +38,7 @@ export default function AcademicExcellence() {
 
           <Link
             to="/academics"
-            className="inline-block bg-[#009dff] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
+            className="inline-block bg-[#0000FF] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
           >
             Explore Our Programs
           </Link>

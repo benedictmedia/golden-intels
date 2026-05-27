@@ -35,12 +35,12 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-[#009dff] text-white">
+    <section className="py-20 bg-[#0000FF] text-white">
       <div className="max-w-7xl mx-auto px-4">
 
         {/* Heading */}
         <div className="text-center mb-14">
-          <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
+          <span className="inline-block bg-[#0000FF] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-sm border border-white/70">
             Why Choose Us
           </span>
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
@@ -54,7 +54,7 @@ export default function WhyChooseUs() {
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {reasons.map((reason, index) => (
-            <div key={index} className="bg-[#009dff] rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-white/40">
+            <div key={index} className="bg-[#0000FF] rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-white/40">
               <div className="text-white mb-4">
                 {reason.icon}
               </div>

@@ -6,7 +6,7 @@ import CallToAction from '../components/layout/CallToAction'
 
 export default function Home() {
   return (
-    <div className="bg-[#009dff] text-white">
+    <div className="bg-[#0000FF] text-white">
       <Hero />
       <WhyChooseUs />
       <AcademicExcellence />

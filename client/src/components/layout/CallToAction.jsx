@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 
 export default function CallToAction() {
   return (
-    <section className="py-20 bg-[#009dff] text-white">
+    <section className="py-20 bg-[#0000FF] text-white">
       <div className="max-w-4xl mx-auto px-4 text-center">
 
         {/* Badge */}
-        <span className="inline-block bg-[#009dff] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm border border-white/70">
+        <span className="inline-block bg-[#0000FF] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-sm border border-white/70">
           Admissions Open
         </span>
 
@@ -24,7 +24,7 @@ export default function CallToAction() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             to="/admissions"
-            className="bg-[#009dff] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
+            className="bg-[#0000FF] hover:bg-[#008ee6] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg shadow-blue-950/20 border border-white/80"
           >
             Start Application
           </Link>
