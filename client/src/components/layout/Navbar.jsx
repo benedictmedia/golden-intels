@@ -19,12 +19,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-[#0000FF] text-white border-b border-white/30 shadow-lg shadow-blue-950/10 backdrop-blur-xl">
+    <nav className="bg-[#FFFFFF] text-white border-b border-white/30 shadow-lg shadow-blue-950/10 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-[#0000FF] border-2 border-white rounded-full flex items-center justify-center font-bold text-white text-lg shadow-sm">G</div>
+          <div className="w-10 h-10 bg-[#FFFFFF] border-2 border-white rounded-full flex items-center justify-center font-bold text-white text-lg shadow-sm">G</div>
           <div className="leading-tight">
             <p className="font-bold text-sm text-white">Golden-Intels</p>
             <p className="text-xs text-white">International School</p>
@@ -43,12 +43,12 @@ export default function Navbar() {
         </ul>
 
         {/* Portal button */}
-        <Link to="/login" className="hidden lg:block bg-[#0000FF] hover:bg-[#008ee6] text-white font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm shadow-blue-950/20 border border-white/70">
+        <Link to="/login" className="hidden lg:block bg-[#7B61FF] hover:bg-[#008ee6] text-#1E293B font-bold text-sm px-4 py-2 rounded-lg transition-colors shadow-sm shadow-blue-950/20 border border-white/70">
           Portal Login
         </Link>
 
         {/* Mobile menu button */}
-        <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white">
+        <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-#1E293B">
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
