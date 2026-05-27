@@ -14,7 +14,7 @@ const menuItems = [
   { icon: <Users size={20} />, label: 'My Children', id: 'children' },
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
   { icon: <BookOpen size={20} />, label: 'Grades', id: 'grades' },
-  { icon: <FileText size={20} />, label: 'Assignments', id: 'assignments' },
+  { icon: <FileText size={20} />, label: 'Assessments', id: 'assessments' },
   { icon: <DollarSign size={20} />, label: 'Fee Status', id: 'fees' },
   { icon: <MessageSquare size={20} />, label: 'Messages', id: 'messages' },
 ]
@@ -309,14 +309,13 @@ export default function ParentDashboard() {
     return getStudentFullName(student) && String(record.learnerName || '').trim().toLowerCase() === getStudentFullName(student)
   }
 
-  const markedAssignmentRecords = assignmentRecords.filter(record =>
-    record.type === 'assignment' &&
-    record.marked &&
+  const markedAssessmentRecords = assignmentRecords.filter(record =>
+    ['assignment', 'quiz'].includes(record.type) &&
+    (record.marked || (record.type === 'quiz' && record.score != null)) &&
     students.some(student => matchesParentChild(record, student))
   )
 
   useEffect(() => {
-    if (activeMenu !== 'assignments') return
     const loadAssignmentRecords = () => {
       try {
         const saved = window.localStorage.getItem('goldenIntelsSubmissionRecords')
@@ -328,7 +327,7 @@ export default function ParentDashboard() {
     loadAssignmentRecords()
     window.addEventListener('storage', loadAssignmentRecords)
     return () => window.removeEventListener('storage', loadAssignmentRecords)
-  }, [activeMenu])
+  }, [])
 
   return (
     <div className="flex h-screen bg-blue-100 overflow-hidden">
@@ -402,7 +401,7 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Children', value: students.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Marked Assignments', value: markedAssignmentRecords.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
+                  { label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
                   { label: 'Avg Grade', value: 'A', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
                   { label: 'Messages', value: messages.length, color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
                 ].map((stat, index) => (
@@ -414,7 +413,7 @@ export default function ParentDashboard() {
               </div>
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                 <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-2">Parent Dashboard</h2>
-                <p className="text-gray-600">Welcome to your Parent Portal. Use the sidebar to view your child's progress, attendance, grades, assignments, and fee status.</p>
+                <p className="text-gray-600">Welcome to your Parent Portal. Use the sidebar to view your child's progress, attendance, grades, assessments, and fee status.</p>
               </div>
             </div>
           )}
@@ -627,25 +626,25 @@ export default function ParentDashboard() {
             </div>
           )}
 
-          {/* Assignments */}
-          {activeMenu === 'assignments' && (
+          {/* Assessments */}
+          {activeMenu === 'assessments' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Marked Assignments</h2>
-                <p className="text-gray-500 text-sm">Only answered assignments that have been marked by a teacher are shown here.</p>
+                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Marked Assessments</h2>
+                <p className="text-gray-500 text-sm">Only answered assignments and quizzes that have been marked are shown here.</p>
               </div>
-              {markedAssignmentRecords.length === 0 ? (
+              {markedAssessmentRecords.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
-                  No marked assignment submissions are available yet.
+                  No marked assessment submissions are available yet.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {markedAssignmentRecords.map((assignment, index) => (
+                  {markedAssessmentRecords.map((assignment, index) => (
                     <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-start justify-between gap-4 mb-4">
                         <div>
                           <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
-                            Marked
+                            {assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
                           </span>
                           <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
                           <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
@@ -665,7 +664,7 @@ export default function ParentDashboard() {
                       </div>
                       <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                         <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
-                        <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}</p>
+                        <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
                         {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
                         <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
                       </div>

@@ -228,6 +228,10 @@ export default function LearnerDashboard() {
       type: 'quiz',
       itemId: quiz.id,
       title: quiz.title,
+      subject: quiz.subject,
+      gradeLevel: quiz.gradeLevel,
+      dueDate: quiz.dueDate,
+      studentId: studentProfile?.studentId,
       learnerName,
       learnerEmail,
       device,
@@ -235,6 +239,10 @@ export default function LearnerDashboard() {
       submittedAt,
       timeUsedSeconds,
       score,
+      totalQuestions: quiz.questions.length,
+      marked: true,
+      markedAt: submittedAt,
+      markedBy: 'Auto-marked',
       questions: quiz.questions.map((question, idx) => ({
         prompt: question.prompt,
         selected: answers[idx] || 'No answer',
@@ -247,7 +255,7 @@ export default function LearnerDashboard() {
       ...prev,
       quizzes: {
         ...prev.quizzes,
-        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds }
+        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds, studentId: studentProfile?.studentId }
       }
     }))
   }
@@ -273,8 +281,7 @@ export default function LearnerDashboard() {
           {[
             { id: 'dashboard', label: 'Dashboard' },
             { id: 'resources', label: 'Resources' },
-            { id: 'assignments', label: 'Assignments' },
-            { id: 'quizzes', label: 'Quizzes' },
+            { id: 'assessments', label: 'Assessments' },
           ].map(item => (
             <button
               key={item.id}
@@ -294,7 +301,7 @@ export default function LearnerDashboard() {
           <div>
             <span className="inline-block bg-yellow-400 text-[#0f6e56] uppercase text-xs font-bold px-3 py-1 rounded-full mb-3">Learner Portal</span>
             <h2 className="text-3xl font-bold text-[#0f6e56]">Your Learning Hub</h2>
-            <p className="text-gray-600 mt-2 max-w-2xl">Access published lessons, complete assignments online and take quizzes with time-bound delivery.</p>
+            <p className="text-gray-600 mt-2 max-w-2xl">Access published lessons and complete online assessments with time-bound delivery.</p>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 text-center">
@@ -422,9 +429,10 @@ export default function LearnerDashboard() {
           </div>
         )}
 
-        {activeTab === 'assignments' && (
+        {activeTab === 'assessments' && (
           <div>
-            <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Assignments</h3>
+            <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Assessments</h3>
+            <h4 className="text-lg font-bold text-[#0f6e56] mb-4">Written Assignments</h4>
             <div className="grid grid-cols-1 gap-6">
               {learnerAssignments.length === 0 ? (
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active assignments available for your class.</div>
@@ -488,9 +496,9 @@ export default function LearnerDashboard() {
           </div>
         )}
 
-        {activeTab === 'quizzes' && (
-          <div>
-            <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Quizzes</h3>
+        {activeTab === 'assessments' && (
+          <div className="mt-8">
+            <h4 className="text-lg font-bold text-[#0f6e56] mb-4">Quizzes</h4>
             <div className="grid grid-cols-1 gap-6">
               {learnerQuizzes.length === 0 ? (
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No active quizzes available for your class.</div>

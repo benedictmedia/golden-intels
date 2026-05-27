@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
-  FileText, GraduationCap, LogOut, Menu, X, Bell
+  GraduationCap, LogOut, Menu, X, Bell
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
@@ -15,7 +15,6 @@ const menuItems = [
   { icon: <Users size={20} />, label: 'My Classes', id: 'classes' },
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
   { icon: <BookOpen size={20} />, label: 'Gradebook', id: 'gradebook' },
-  { icon: <FileText size={20} />, label: 'Assignments', id: 'assignments' },
   { icon: <GraduationCap size={20} />, label: 'LMS', id: 'lms' },
 ]
 
@@ -669,6 +668,8 @@ export default function TeacherDashboard() {
     )))
   }
 
+  const getResponsesForItem = (item, type) => submissionRecords.filter(record => record.type === type && String(record.itemId) === String(item.id))
+
   const handleEditLmsItem = (item, type) => {
     setEditingLmsItem({ item, type })
     setLmsItemView({ item, type })
@@ -880,7 +881,7 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Students', value: students.length, color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-                  { label: 'Assignments', value: assignments.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
+                  { label: 'Assessments', value: assignments.length + quizzes.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
                   { label: 'Lessons', value: lessons.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
                   { label: 'Classes', value: '1', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
                 ].map((stat, index) => (
@@ -1453,13 +1454,12 @@ export default function TeacherDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-2xl font-bold font-serif text-[#0f6e56]">Learning Management System</h2>
-                  <p className="text-gray-500">Create lessons, publish assignments, and send quizzes learners can answer online.</p>
+                  <p className="text-gray-500">Create lessons and publish assessments learners can answer online.</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button onClick={() => setLmsView('resources')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'resources' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Resources</button>
-                  <button onClick={() => setLmsView('assignments')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'assignments' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Assignments</button>
-                  <button onClick={() => setLmsView('quizzes')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'quizzes' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Quizzes</button>
-                  <button onClick={() => setLmsView('submissions')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'submissions' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Submissions</button>
+                  <button onClick={() => setLmsView('assessments')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'assessments' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Assessments</button>
+                  <button onClick={() => setLmsView('submissions')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'submissions' ? 'bg-[#0f6e56] text-white' : 'bg-white text-[#0f6e56] border border-[#0f6e56]'}`}>Responses</button>
                 </div>
               </div>
 
@@ -1518,6 +1518,49 @@ export default function TeacherDashboard() {
                         ))}
                       </div>
                       <p className="text-xs text-gray-400">Status: {lmsItemView.item.published ? 'Published' : 'Draft'}</p>
+                    </div>
+                  )}
+                  {lmsItemView.type !== 'lesson' && (
+                    <div className="mt-6 border-t border-gray-100 pt-6">
+                      <div className="flex items-center justify-between gap-4 mb-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Responses</p>
+                          <h4 className="text-lg font-bold text-[#0f6e56]">Student answers and marks</h4>
+                        </div>
+                        <span className="bg-blue-50 text-[#0f6e56] text-sm font-bold px-3 py-1 rounded-full">
+                          {getResponsesForItem(lmsItemView.item, lmsItemView.type).length} responses
+                        </span>
+                      </div>
+                      {getResponsesForItem(lmsItemView.item, lmsItemView.type).length === 0 ? (
+                        <div className="bg-slate-50 rounded-2xl p-5 text-gray-400 text-center">No learner has answered this assessment yet.</div>
+                      ) : (
+                        <div className="overflow-hidden rounded-2xl border border-gray-100">
+                          <table className="w-full text-sm">
+                            <thead className="bg-slate-50 text-gray-600">
+                              <tr>
+                                <th className="px-4 py-3 text-left">Student</th>
+                                <th className="px-4 py-3 text-left">Submitted</th>
+                                <th className="px-4 py-3 text-left">Score</th>
+                                <th className="px-4 py-3 text-left">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {getResponsesForItem(lmsItemView.item, lmsItemView.type).map((record, index) => (
+                                <tr key={`${record.itemId}-${record.learnerEmail}-${index}`} className="border-t border-gray-100">
+                                  <td className="px-4 py-3 font-bold text-[#0f6e56]">{record.learnerName || 'Unknown'}</td>
+                                  <td className="px-4 py-3 text-gray-600">{formatDateTime(record.submittedAt)}</td>
+                                  <td className="px-4 py-3 text-gray-700">{record.score ?? '-'}{record.totalQuestions ? ` / ${record.totalQuestions}` : ''}</td>
+                                  <td className="px-4 py-3">
+                                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${record.marked || (record.type === 'quiz' && record.score != null) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                      {record.marked || (record.type === 'quiz' && record.score != null) ? 'Marked' : 'Awaiting mark'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1593,10 +1636,11 @@ export default function TeacherDashboard() {
                 </div>
               )}
 
-              {lmsView === 'assignments' && (
+              {lmsView === 'assessments' && (
                 <div>
                   <div className="flex flex-wrap gap-3 mb-6">
                     <button onClick={() => setShowAddAssignment(true)} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Assignment</button>
+                    <button onClick={() => setShowAddQuiz(true)} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Quiz</button>
                   </div>
 
                   {showAddAssignment && (
@@ -1668,12 +1712,8 @@ export default function TeacherDashboard() {
                 </div>
               )}
 
-              {lmsView === 'quizzes' && (
-                <div>
-                  <div className="flex flex-wrap gap-3 mb-6">
-                    <button onClick={() => setShowAddQuiz(true)} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Quiz</button>
-                  </div>
-
+              {lmsView === 'assessments' && (
+                <div className="mt-8">
                   {showAddQuiz && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
                       <h3 className="text-xl font-bold text-[#0f6e56] mb-6">{editingLmsItem?.type === 'quiz' ? 'Edit Quiz' : 'Create Quiz'}</h3>

@@ -156,7 +156,7 @@ export default function Footer() {
             <li className="flex items-center gap-3">
               <Phone size={16} className="text-[#2563EB] shrink-0" />
               <span className="text-slate-300">
-                +233 000 000 000
+                +233 59 433 0816
               </span>
             </li>
 
