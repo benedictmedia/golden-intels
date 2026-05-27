@@ -352,40 +352,18 @@ export default function TeacherDashboard() {
 
     // Subjects table header
     let y = 100
-    doc.setFillColor(26, 60, 110)
-    doc.rect(10, y, pageWidth - 20, 10, 'F')
 
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(255, 255, 255)
-    doc.text('Subject', 15, y + 7)
-    doc.text('Class(10)', 65, y + 7)
-    doc.text('CAT1(20)', 92, y + 7)
-    doc.text('CAT2(20)', 119, y + 7)
-    doc.text('Exam(50)', 146, y + 7)
-    doc.text('Total', 170, y + 7)
-    doc.text('Grade', 186, y + 7)
-
-    y += 10
+    // Subjects table header — compact 8mm rows
+    doc.setFillColor(26, 60, 110); doc.rect(10, y, pageWidth - 20, 8, 'F')
+    doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
+    doc.text('Subject', 15, y + 5.5); doc.text('Class(10)', 65, y + 5.5)
+    doc.text('CAT1(20)', 92, y + 5.5); doc.text('CAT2(20)', 119, y + 5.5)
+    doc.text('Exam(50)', 146, y + 5.5); doc.text('Total', 170, y + 5.5); doc.text('Grade', 186, y + 5.5)
+    y += 8
 
     let grandTotal = 0
-
-    const getGrade = (t) => {
-      if (t >= 90) return 'A+'
-      if (t >= 80) return 'A'
-      if (t >= 70) return 'B+'
-      if (t >= 60) return 'B'
-      if (t >= 50) return 'C'
-      if (t >= 40) return 'D'
-      return 'F'
-    }
-
-    const getGradeColor = (t) => {
-      if (t >= 80) return [15, 110, 86]
-      if (t >= 60) return [26, 60, 110]
-      if (t >= 50) return [212, 160, 23]
-      return [220, 50, 50]
-    }
+    const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 70) return 'B+'; if (t >= 60) return 'B'; if (t >= 50) return 'C'; if (t >= 40) return 'D'; return 'F' }
+    const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
 
     SUBJECTS.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
@@ -397,144 +375,70 @@ export default function TeacherDashboard() {
       const total = getSubjectTotal(s)
       grandTotal += total
 
-      // Alternating row colors
-      if (index % 2 === 0) {
-        doc.setFillColor(245, 248, 255)
-      } else {
-        doc.setFillColor(255, 255, 255)
-      }
-      doc.rect(10, y, pageWidth - 20, 10, 'F')
-
-      doc.setDrawColor(220, 225, 235)
-      doc.setLineWidth(0.2)
-      doc.rect(10, y, pageWidth - 20, 10)
-
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9)
-      doc.setTextColor(26, 60, 110)
-      doc.text(subject, 15, y + 7)
-
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(50, 50, 50)
-      doc.text(classScore.toString(), 72, y + 7)
-      doc.text(cat1.toString(), 99, y + 7)
-      doc.text(cat2.toString(), 126, y + 7)
-      doc.text(wExam.toFixed(2), 150, y + 7)
-      doc.text(total.toFixed(2), 170, y + 7)
-
-      // Colored grade
-      const gradeColor = getGradeColor(total)
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
-      doc.text(total > 0 ? getGrade(total) : '-', 188, y + 7)
-
-      y += 10
+      if (index % 2 === 0) { doc.setFillColor(245, 248, 255) } else { doc.setFillColor(255, 255, 255) }
+      doc.rect(10, y, pageWidth - 20, 8, 'F')
+      doc.setDrawColor(220, 225, 235); doc.setLineWidth(0.2); doc.rect(10, y, pageWidth - 20, 8)
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 60, 110); doc.text(subject, 15, y + 5.5)
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
+      doc.text(classScore.toString(), 72, y + 5.5); doc.text(cat1.toString(), 99, y + 5.5)
+      doc.text(cat2.toString(), 126, y + 5.5); doc.text(wExam.toFixed(2), 150, y + 5.5); doc.text(total.toFixed(2), 170, y + 5.5)
+      const gradeColor = getGradeColor(total); doc.setFont('helvetica', 'bold'); doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
+      doc.text(total > 0 ? getGrade(total) : '-', 188, y + 5.5)
+      y += 8
     })
 
     // Grand total row
-    doc.setFillColor(212, 160, 23)
-    doc.rect(10, y, pageWidth - 20, 10, 'F')
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10)
-    doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 7)
-    doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 7)
+    doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 5.5)
+    y += 10
 
-    y += 18
-
-    const token = localStorage.getItem('token')
-    const headers = { Authorization: `Bearer ${token}` }
+    // Attendance summary — compact single line
+    const _attToken = localStorage.getItem('token')
+    const _attHeaders = { Authorization: `Bearer ${_attToken}` }
     let attendanceSummary = null
     try {
-      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers })
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: _attHeaders })
       attendanceSummary = attendanceRes.data
-    } catch (error) {
-      console.error('Attendance summary unavailable:', error)
-    }
+    } catch {}
 
     if (attendanceSummary) {
-      doc.setFillColor(245, 248, 255)
-      doc.rect(10, y, pageWidth - 20, 18, 'F')
-      doc.setDrawColor(212, 160, 23)
-      doc.setLineWidth(0.4)
-      doc.rect(10, y, pageWidth - 20, 18)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9)
-      doc.setTextColor(26, 60, 110)
-      doc.text('Attendance Summary', 15, y + 7)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(50, 50, 50)
-      doc.text(`Days: ${attendanceSummary.total}   Present: ${attendanceSummary.present}   Absent: ${attendanceSummary.absent}   Late: ${attendanceSummary.late}   Attendance: ${attendanceSummary.percentage}%`, 15, y + 14)
-      y += 26
+      doc.setFillColor(245, 248, 255); doc.rect(10, y, pageWidth - 20, 10, 'F')
+      doc.setDrawColor(212, 160, 23); doc.setLineWidth(0.3); doc.rect(10, y, pageWidth - 20, 10)
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+      doc.text('Attendance:', 15, y + 4.5)
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
+      doc.text(`Total: ${attendanceSummary.total}  Present: ${attendanceSummary.present}  Absent: ${attendanceSummary.absent}  Late: ${attendanceSummary.late}  Rate: ${attendanceSummary.percentage}%`, 48, y + 4.5)
+      y += 12
     }
 
     // Watermark
     if (logoData) {
-      doc.saveGraphicsState()
-      doc.setGState(new doc.GState({ opacity: 0.06 }))
-      doc.addImage(logoData, 'PNG', 55, 100, 100, 100)
-      doc.restoreGraphicsState()
+      doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: 0.06 }))
+      doc.addImage(logoData, 'PNG', 55, 100, 100, 100); doc.restoreGraphicsState()
     }
 
-    // Add new page if remarks/signatures won't fit
-    if (y + 80 > 258) { doc.addPage(); y = 20 }
-
-    // Remarks box
+    // Compact remarks — max 2 lines
     const remarksText = getRemarksText(result.remarks)
-    const remarksLines = doc.splitTextToSize(remarksText, 170)
-    const remarksHeight = Math.max(22, 12 + remarksLines.length * 5)
+    const allRemarksLines = doc.splitTextToSize(remarksText, 172)
+    const clampedRemarksLines = allRemarksLines.slice(0, 2)
+    const remarksHeight = 12
 
-    doc.setFillColor(240, 245, 255)
-    doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
-    doc.setDrawColor(26, 60, 110)
-    doc.setLineWidth(0.5)
-    doc.rect(10, y, pageWidth - 20, remarksHeight)
+    doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+    doc.text("Class Teacher's Remarks:", 15, y + 4.5)
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
+    doc.text(clampedRemarksLines, 15, y + 9)
+    y += remarksHeight + 4
 
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9)
-    doc.setTextColor(26, 60, 110)
-    doc.text("Class Teacher's Remarks:", 15, y + 8)
-
-    doc.setFont('helvetica', 'italic')
-    doc.setTextColor(50, 50, 50)
-    doc.text(remarksLines, 15, y + 16)
-
-    y += remarksHeight + 8
-
-    // Signature section
-    doc.setDrawColor(26, 60, 110)
-    doc.setLineWidth(0.3)
-    doc.line(15, y + 10, 70, y + 10)
-    doc.line(85, y + 10, 140, y + 10)
-    doc.line(155, y + 10, 200, y + 10)
-
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(8)
-    doc.setTextColor(100, 100, 100)
-    doc.text("Class Teacher's Signature", 15, y + 15)
-    doc.text("Head Teacher's Signature", 85, y + 15)
-    doc.text("Parent's Signature", 155, y + 15)
-
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    doc.setTextColor(26, 60, 110)
-    doc.text(`Submitted by: ${result.submittedBy}`, 15, y + 25)
-    doc.text(`Date: ${new Date(result.createdAt).toLocaleDateString()}`, 140, y + 25)
-
-    // Footer — always at bottom of current page
-    const pageH = doc.internal.pageSize.getHeight()
-    doc.setFillColor(26, 60, 110)
-    doc.rect(0, pageH - 17, pageWidth, 17, 'F')
-    doc.setFillColor(212, 160, 23)
-    doc.rect(0, pageH - 19, pageWidth, 2, 'F')
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    doc.setTextColor(255, 255, 255)
-    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, pageH - 10, { align: 'center' })
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(212, 160, 23)
-    doc.text('We Nurture for Nature', pageWidth / 2, pageH - 4, { align: 'center' })
-
+    // Inline footer — follows content directly
+    doc.setFillColor(26, 60, 110); doc.rect(0, y, pageWidth, 11, 'F')
+    doc.setFillColor(212, 160, 23); doc.rect(0, y, pageWidth, 1.5, 'F')
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255)
+    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, y + 5.5, { align: 'center' })
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(212, 160, 23)
+    doc.text('We Nurture for Nature', pageWidth / 2, y + 9.5, { align: 'center' })
     doc.save(`${student.firstName}_${student.lastName}_${result.term}_${result.academicYear}.pdf`)
   }
 
