@@ -10,7 +10,7 @@ export default function Hero() {
         style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#0000FF]/85"></div>
+      <div className="absolute inset-0 bg-[#f5f5f5]/85"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
