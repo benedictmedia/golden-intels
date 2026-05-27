@@ -3,10 +3,16 @@ import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 
 const navLinks = [
+
   { name: 'Home', path: '/' },
   { name: 'About Us', path: '/about' },
   { name: 'Academics', path: '/academics' },
+  { name: 'Curriculum', path: '/curriculum' },
+  { name: 'Our Activities & Clubs', path: '/campus-life' },
+  { name: 'Gallery', path: '/gallery' },
   { name: 'Admissions', path: '/admissions' },
+  { name: 'Our Staff', path: '/staff' },
+  { name: 'News & Events', path: '/news' },
   { name: 'Contact', path: '/contact' },
 ]
 
