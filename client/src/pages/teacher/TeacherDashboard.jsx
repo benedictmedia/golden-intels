@@ -18,10 +18,15 @@ const menuItems = [
   { icon: <GraduationCap size={20} />, label: 'LMS', id: 'lms' },
 ]
 
+const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
+const terms = ['Term 1', 'Term 2', 'Term 3']
+
 export default function TeacherDashboard() {
   const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
+  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
@@ -75,6 +80,9 @@ export default function TeacherDashboard() {
   const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
   const teacherSubjectOptions = effectiveUser?.subjects?.length ? effectiveUser.subjects : SUBJECTS
   const normalizedTeacherSubjectKeys = new Set((teacherSubjectOptions || []).map(normalizeSubjectKey))
+  const teacherEmail = user?.email || effectiveUser?.email || ''
+  const teacherName = user?.name || effectiveUser?.name || 'Teacher'
+  const matchesAcademicContext = (item) => (item.academicYear || selectedAcademicYear) === selectedAcademicYear && (item.term || selectedTerm) === selectedTerm
 
   useEffect(() => {
     let mounted = true
@@ -459,6 +467,9 @@ export default function TeacherDashboard() {
     const scores = subjectScores[subject] || {}
     return scores.classScore && scores.cat1 && scores.cat2 && scores.exam
   }).length
+  const contextualSubmittedResults = submittedResults.filter(result =>
+    result.academicYear === selectedAcademicYear && result.term === selectedTerm
+  )
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
@@ -646,16 +657,17 @@ export default function TeacherDashboard() {
     doc.save(`${record.learnerName || 'student'}-${record.type}-submission.pdf`)
   }
 
-  const getSubmissionRecordKey = (record, index) => `${record.type}-${record.itemId}-${record.learnerEmail || record.learnerName || 'learner'}-${index}`
+  const getSubmissionRecordKey = (record) => `${record.type}-${record.itemId}-${record.learnerEmail || record.learnerName || 'learner'}`
 
   const handleMarkAssignmentSubmission = (record, index) => {
-    const score = window.prompt('Enter assignment score or mark:', record.score ?? '')
+    const label = record.type === 'quiz' ? 'quiz' : 'assignment'
+    const score = window.prompt(`Enter ${label} score or mark:`, record.score ?? '')
     if (score === null) return
     const feedback = window.prompt('Enter teacher feedback:', record.feedback ?? '')
     if (feedback === null) return
-    const targetKey = getSubmissionRecordKey(record, index)
+    const targetKey = getSubmissionRecordKey(record)
     setSubmissionRecords(prev => prev.map((item, itemIndex) => (
-      getSubmissionRecordKey(item, itemIndex) === targetKey
+      getSubmissionRecordKey(item) === targetKey
         ? {
             ...item,
             score: score.trim(),
@@ -668,7 +680,12 @@ export default function TeacherDashboard() {
     )))
   }
 
-  const getResponsesForItem = (item, type) => submissionRecords.filter(record => record.type === type && String(record.itemId) === String(item.id))
+  const ownsLmsItem = (item) => item.teacherEmail === teacherEmail
+  const teacherAssignments = assignments.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
+  const teacherLessons = lessons.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
+  const teacherQuizzes = quizzes.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
+  const teacherSubmissionRecords = submissionRecords.filter(record => record.teacherEmail === teacherEmail && matchesAcademicContext(record))
+  const getResponsesForItem = (item, type) => teacherSubmissionRecords.filter(record => record.type === type && String(record.itemId) === String(item.id))
 
   const handleEditLmsItem = (item, type) => {
     setEditingLmsItem({ item, type })
@@ -728,7 +745,7 @@ export default function TeacherDashboard() {
 
   const handleAddAssignment = () => {
     if (!newAssignment.title) return
-    const assignmentToSave = { ...newAssignment, dueDate: combineDateTime(newAssignment.dueDate, newAssignment.dueTime) }
+    const assignmentToSave = { ...newAssignment, dueDate: combineDateTime(newAssignment.dueDate, newAssignment.dueTime), teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm }
     if (editingLmsItem?.type === 'assignment') {
       setAssignments(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...assignmentToSave, published: editingLmsItem.item.published } : item))
       setEditingLmsItem(null)
@@ -745,7 +762,7 @@ export default function TeacherDashboard() {
       setLessons(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newLesson, published: editingLmsItem.item.published } : item))
       setEditingLmsItem(null)
     } else {
-      setLessons([{ id: Date.now(), published: false, ...newLesson }, ...lessons])
+      setLessons([{ id: Date.now(), published: false, teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm, ...newLesson }, ...lessons])
     }
     resetLmsForm()
     setShowAddLesson(false)
@@ -753,7 +770,7 @@ export default function TeacherDashboard() {
 
   const handleAddQuiz = () => {
     if (!newQuiz.title || newQuiz.questions.length === 0) return
-    const quizToSave = { ...newQuiz, dueDate: combineDateTime(newQuiz.dueDate, newQuiz.dueTime) }
+    const quizToSave = { ...newQuiz, dueDate: combineDateTime(newQuiz.dueDate, newQuiz.dueTime), teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm }
     if (editingLmsItem?.type === 'quiz') {
       setQuizzes(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...quizToSave, published: editingLmsItem.item.published } : item))
       setEditingLmsItem(null)
@@ -767,7 +784,14 @@ export default function TeacherDashboard() {
   const handleQuizQuestionChange = (index, field, value) => {
     setNewQuiz(prev => ({
       ...prev,
-      questions: prev.questions.map((q, i) => i === index ? { ...q, [field]: value } : q)
+      questions: prev.questions.map((q, i) => {
+        if (i !== index) return q
+        if (field === 'type') {
+          const needsOptions = value === 'multiple-choice' || value === 'dropdown'
+          return { ...q, type: value, options: needsOptions ? (q.options?.length ? q.options : ['', '', '', '']) : q.options }
+        }
+        return { ...q, [field]: value }
+      })
     }))
   }
 
@@ -874,6 +898,34 @@ export default function TeacherDashboard() {
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
+              <p className="text-lg font-bold text-[#0f6e56]">{selectedAcademicYear} | {selectedTerm}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select
+                value={selectedAcademicYear}
+                onChange={e => {
+                  setSelectedAcademicYear(e.target.value)
+                  setGradebookYear(e.target.value)
+                }}
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 bg-white"
+              >
+                {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+              </select>
+              <select
+                value={selectedTerm}
+                onChange={e => {
+                  setSelectedTerm(e.target.value)
+                  setGradebookTerm(e.target.value)
+                }}
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 bg-white"
+              >
+                {terms.map(term => <option key={term} value={term}>{term}</option>)}
+              </select>
+            </div>
+          </div>
 
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
@@ -881,8 +933,8 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Students', value: students.length, color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-                  { label: 'Assessments', value: assignments.length + quizzes.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
-                  { label: 'Lessons', value: lessons.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
+                  { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
+                  { label: 'Lessons', value: teacherLessons.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
                   { label: 'Classes', value: '1', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
@@ -1116,7 +1168,7 @@ export default function TeacherDashboard() {
                 >
                   Submitted Results
                   <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                    {submittedResults.length}
+                    {contextualSubmittedResults.length}
                   </span>
                 </button>
               </div>
@@ -1129,13 +1181,13 @@ export default function TeacherDashboard() {
 
               {activeGradebookTab === 'submitted' && (
                 <div>
-                  {submittedResults.length === 0 ? (
+                  {contextualSubmittedResults.length === 0 ? (
                     <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
                       No results submitted yet.
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {submittedResults.map(result => (
+                      {contextualSubmittedResults.map(result => (
                         <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between flex-wrap gap-4">
                             <div>
@@ -1193,24 +1245,26 @@ export default function TeacherDashboard() {
                     <label className="block text-sm font-bold text-[#0f6e56] mb-2">Academic Year <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookYear}
-                      onChange={e => setGradebookYear(e.target.value)}
+                      onChange={e => {
+                        setGradebookYear(e.target.value)
+                        setSelectedAcademicYear(e.target.value)
+                      }}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                     >
-                      <option value="2024/2025">2024/2025</option>
-                      <option value="2025/2026">2025/2026</option>
-                      <option value="2026/2027">2026/2027</option>
+                      {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-[#0f6e56] mb-2">Term <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookTerm}
-                      onChange={e => setGradebookTerm(e.target.value)}
+                      onChange={e => {
+                        setGradebookTerm(e.target.value)
+                        setSelectedTerm(e.target.value)
+                      }}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                     >
-                      <option value="Term 1">Term 1</option>
-                      <option value="Term 2">Term 2</option>
-                      <option value="Term 3">Term 3</option>
+                      {terms.map(term => <option key={term} value={term}>{term}</option>)}
                     </select>
                   </div>
                   <div>
@@ -1370,84 +1424,6 @@ export default function TeacherDashboard() {
               )}
             </div>
           )}
-          {/* Assignments */}
-          {activeMenu === 'assignments' && (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#0f6e56]">Assignments</h2>
-                <button
-                  onClick={() => setShowAddAssignment(true)}
-                  className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
-                >
-                  + New Assignment
-                </button>
-              </div>
-
-              {showAddAssignment && (
-                <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                  <h3 className="text-xl font-bold text-[#0f6e56] mb-6">Create Assignment</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Title</label>
-                      <input type="text" value={newAssignment.title} onChange={e => setNewAssignment({ ...newAssignment, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
-                      {teacherSubjectOptions.length > 0 ? (
-                        <select value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                          <option value="">Choose subject</option>
-                          {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
-                        </select>
-                      ) : (
-                        <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
-                      <select value={newAssignment.gradeLevel} onChange={e => setNewAssignment({ ...newAssignment, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
-                        {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Date</label>
-                      <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Due Time</label>
-                      <input type="time" value={newAssignment.dueTime} onChange={e => setNewAssignment({ ...newAssignment, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-[#0f6e56] mb-2">Description</label>
-                      <textarea value={newAssignment.description} onChange={e => setNewAssignment({ ...newAssignment, description: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                    </div>
-                  </div>
-                  <div className="flex gap-4 mt-6">
-                    <button onClick={handleAddAssignment} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Assignment</button>
-                    <button onClick={() => setShowAddAssignment(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {assignments.length === 0 ? (
-                  <div className="col-span-3 bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
-                    No assignments yet. Click "New Assignment" to create one.
-                  </div>
-                ) : (
-                  assignments.map(assignment => (
-                    <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-3">{assignment.gradeLevel}</span>
-                      <h3 className="text-lg font-bold text-[#0f6e56] mb-1">{assignment.title}</h3>
-                      <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
-                      <p className="text-sm text-gray-600 mb-3">{assignment.description}</p>
-                      <p className="text-xs text-gray-400">Due: {assignment.dueDate}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-
           {/* LMS */}
           {activeMenu === 'lms' && (
             <div>
@@ -1466,15 +1442,15 @@ export default function TeacherDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Lessons</p>
-                  <p className="text-3xl font-bold text-[#0f6e56]">{lessons.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#0f6e56]">{teacherLessons.filter(item => item.published).length}</p>
                 </div>
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Assignments</p>
-                  <p className="text-3xl font-bold text-[#0f6e56]">{assignments.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#0f6e56]">{teacherAssignments.filter(item => item.published).length}</p>
                 </div>
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Quizzes</p>
-                  <p className="text-3xl font-bold text-[#0f6e56]">{quizzes.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#0f6e56]">{teacherQuizzes.filter(item => item.published).length}</p>
                 </div>
               </div>
 
@@ -1551,8 +1527,8 @@ export default function TeacherDashboard() {
                                   <td className="px-4 py-3 text-gray-600">{formatDateTime(record.submittedAt)}</td>
                                   <td className="px-4 py-3 text-gray-700">{record.score ?? '-'}{record.totalQuestions ? ` / ${record.totalQuestions}` : ''}</td>
                                   <td className="px-4 py-3">
-                                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${record.marked || (record.type === 'quiz' && record.score != null) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                      {record.marked || (record.type === 'quiz' && record.score != null) ? 'Marked' : 'Awaiting mark'}
+                                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                      {record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false) ? 'Marked' : 'Awaiting mark'}
                                     </span>
                                   </td>
                                 </tr>
@@ -1610,10 +1586,10 @@ export default function TeacherDashboard() {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {lessons.length === 0 ? (
+                    {teacherLessons.length === 0 ? (
                       <div className="col-span-3 bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No lessons yet. Click "+ New Lesson" to publish learning resources.</div>
                     ) : (
-                      lessons.map(lesson => (
+                      teacherLessons.map(lesson => (
                         <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{lesson.gradeLevel}</span>
@@ -1623,6 +1599,7 @@ export default function TeacherDashboard() {
                           </div>
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{lesson.title}</h3>
                           <p className="text-sm text-gray-500 mb-3">{lesson.subject}</p>
+                          <p className="text-xs font-bold text-gray-400 mb-3">{lesson.academicYear || selectedAcademicYear} | {lesson.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 leading-relaxed">{lesson.content}</p>
                           <div className="flex flex-wrap gap-2 mt-4">
                             <button onClick={() => handleViewLmsItem(lesson, 'lesson')} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
@@ -1653,7 +1630,14 @@ export default function TeacherDashboard() {
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
-                          <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                          {teacherSubjectOptions.length > 0 ? (
+                            <select value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                              <option value="">Choose subject</option>
+                              {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                            </select>
+                          ) : (
+                            <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                          )}
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-[#0f6e56] mb-2">Grade Level</label>
@@ -1682,10 +1666,10 @@ export default function TeacherDashboard() {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {assignments.length === 0 ? (
+                    {teacherAssignments.length === 0 ? (
                       <div className="col-span-2 bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No assignments available. Publish assignments to make them visible to learners.</div>
                     ) : (
-                      assignments.map(assignment => (
+                      teacherAssignments.map(assignment => (
                         <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{assignment.gradeLevel}</span>
@@ -1695,6 +1679,7 @@ export default function TeacherDashboard() {
                           </div>
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{assignment.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
+                          <p className="text-xs font-bold text-gray-400 mb-2">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 mb-3">{assignment.description}</p>
                           <p className="text-xs text-gray-400 mb-4">Due: {formatDateTime(assignment.dueDate)}</p>
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
@@ -1762,13 +1747,16 @@ export default function TeacherDashboard() {
                                 <select value={question.type || 'multiple-choice'} onChange={e => handleQuizQuestionChange(index, 'type', e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
                                   <option value="multiple-choice">Multiple choice</option>
                                   <option value="fill-in">Fill in the blank</option>
+                                  <option value="dropdown">Dropdown</option>
+                                  <option value="short-answer">Short answer</option>
+                                  <option value="paragraph">Paragraph</option>
                                 </select>
                               </div>
                               <button type="button" onClick={() => removeQuizQuestion(index)} className="text-red-600 text-sm">Remove</button>
                             </div>
                             <label className="block text-sm font-bold text-[#0f6e56] mb-2">Prompt</label>
                             <input type="text" value={question.prompt} onChange={e => handleQuizQuestionChange(index, 'prompt', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 mb-4" />
-                            {question.type === 'multiple-choice' ? (
+                            {question.type === 'multiple-choice' || question.type === 'dropdown' ? (
                               <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                   {question.options.map((option, optionIndex) => (
@@ -1786,9 +1774,15 @@ export default function TeacherDashboard() {
                               </>
                             ) : (
                               <>
-                                <label className="block text-sm font-bold text-[#0f6e56] mb-2">Correct Answer</label>
-                                <input type="text" value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
-                                <p className="text-xs text-gray-500 mt-2">Learners will type the answer directly.</p>
+                                {question.type === 'short-answer' || question.type === 'paragraph' ? (
+                                  <p className="text-xs text-gray-500 mt-2">This response type will be marked manually in Responses after learners submit.</p>
+                                ) : (
+                                  <>
+                                    <label className="block text-sm font-bold text-[#0f6e56] mb-2">Correct Answer</label>
+                                    <input type="text" value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                                    <p className="text-xs text-gray-500 mt-2">Learners will type the answer directly.</p>
+                                  </>
+                                )}
                               </>
                             )}
                           </div>
@@ -1803,10 +1797,10 @@ export default function TeacherDashboard() {
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {quizzes.length === 0 ? (
+                    {teacherQuizzes.length === 0 ? (
                       <div className="col-span-2 bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No quizzes created yet. Publish quizzes to give learners online practice.</div>
                     ) : (
-                      quizzes.map(quiz => (
+                      teacherQuizzes.map(quiz => (
                         <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{quiz.gradeLevel}</span>
@@ -1816,6 +1810,7 @@ export default function TeacherDashboard() {
                           </div>
                           <h3 className="text-lg font-bold text-[#0f6e56] mb-2">{quiz.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{quiz.subject}</p>
+                          <p className="text-xs font-bold text-gray-400 mb-2">{quiz.academicYear || selectedAcademicYear} | {quiz.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 mb-3">Due {formatDateTime(quiz.dueDate)} · {quiz.durationMinutes} minutes</p>
                           <div className="bg-blue-50 rounded-2xl p-4 text-sm text-gray-600">
                             {quiz.published ? 'Learners can now see and take this quiz.' : 'Draft: publish to send it to learners.'}
@@ -1835,11 +1830,11 @@ export default function TeacherDashboard() {
               {lmsView === 'submissions' && (
                 <div>
                   <h3 className="text-2xl font-bold text-[#0f6e56] mb-4">Student Submissions</h3>
-                  {submissionRecords.length === 0 ? (
+                  {teacherSubmissionRecords.length === 0 ? (
                     <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No submission records are available yet.</div>
                   ) : (
                     <div className="space-y-6">
-                      {submissionRecords.map((record, index) => (
+                      {teacherSubmissionRecords.map((record, index) => (
                         <div key={`${record.type}-${record.itemId}-${record.learnerEmail}-${index}`} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                             <div>
@@ -1865,19 +1860,19 @@ export default function TeacherDashboard() {
                               ))}
                             </div>
                           </div>
-                          {record.type === 'assignment' && record.marked && (
+                          {['assignment', 'quiz'].includes(record.type) && record.marked && (
                             <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4">
-                              <p className="text-sm font-bold text-green-700">Marked Assignment</p>
-                              <p className="text-sm text-gray-700 mt-1">Score: {record.score || 'Marked'}</p>
+                              <p className="text-sm font-bold text-green-700">Marked {record.type === 'quiz' ? 'Quiz' : 'Assignment'}</p>
+                              <p className="text-sm text-gray-700 mt-1">Score: {record.score || 'Marked'}{record.totalQuestions ? ` / ${record.totalQuestions}` : ''}</p>
                               {record.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {record.feedback}</p>}
                               <p className="text-xs text-gray-500 mt-2">Marked by {record.markedBy || 'Teacher'} on {formatDateTime(record.markedAt)}</p>
                             </div>
                           )}
                           <div className="flex flex-wrap gap-3">
                             <button onClick={() => handleDownloadSubmissionPdf(record)} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-4 py-2 rounded-full">Download PDF</button>
-                            {record.type === 'assignment' && (
+                            {['assignment', 'quiz'].includes(record.type) && (
                               <button onClick={() => handleMarkAssignmentSubmission(record, index)} className="bg-blue-600 hover:bg-blue-400 text-white text-xs font-bold px-4 py-2 rounded-full">
-                                {record.marked ? 'Update Mark' : 'Mark Assignment'}
+                                {record.marked ? 'Update Mark' : `Mark ${record.type === 'quiz' ? 'Quiz' : 'Assignment'}`}
                               </button>
                             )}
                           </div>

@@ -19,10 +19,15 @@ const menuItems = [
   { icon: <MessageSquare size={20} />, label: 'Messages', id: 'messages' },
 ]
 
+const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
+const terms = ['Term 1', 'Term 2', 'Term 3']
+
 export default function ParentDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
+  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [students, setStudents] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
@@ -296,6 +301,26 @@ export default function ParentDashboard() {
     ? Math.round((attendanceSummary.present / attendanceRecords.length) * 100)
     : 0
   const formatAttendanceStatus = (status) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
+  const getAcademicYearFromDate = (value) => {
+    const date = new Date(value)
+    if (isNaN(date.getTime())) return selectedAcademicYear
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    return month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`
+  }
+  const getTermFromDate = (value) => {
+    const date = new Date(value)
+    if (isNaN(date.getTime())) return selectedTerm
+    const month = date.getMonth() + 1
+    if (month >= 9 || month <= 12) return 'Term 1'
+    if (month >= 1 && month <= 4) return 'Term 2'
+    return 'Term 3'
+  }
+  const matchesAcademicContext = (item) => {
+    const academicYear = item.academicYear || item.year || getAcademicYearFromDate(item.date || item.submittedAt || item.createdAt)
+    const term = item.term || getTermFromDate(item.date || item.submittedAt || item.createdAt)
+    return academicYear === selectedAcademicYear && term === selectedTerm
+  }
   const formatDateTime = (value) => {
     if (!value) return '-'
     const date = new Date(value)
@@ -311,9 +336,25 @@ export default function ParentDashboard() {
 
   const markedAssessmentRecords = assignmentRecords.filter(record =>
     ['assignment', 'quiz'].includes(record.type) &&
-    (record.marked || (record.type === 'quiz' && record.score != null)) &&
+    (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
+    matchesAcademicContext(record) &&
     students.some(student => matchesParentChild(record, student))
   )
+  const contextualApprovedResults = approvedResults.filter(matchesAcademicContext)
+  const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
+  const contextualFeePayments = feePayments.filter(payment => {
+    const monthValue = payment.month ? `${payment.month} 1, ${payment.year || new Date().getFullYear()}` : payment.createdAt
+    const paymentAcademicYear = payment.academicYear || (payment.year && String(payment.year).includes('/') ? payment.year : getAcademicYearFromDate(monthValue))
+    const paymentTerm = payment.term || getTermFromDate(monthValue)
+    return paymentAcademicYear === selectedAcademicYear && paymentTerm === selectedTerm
+  })
+  const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
+    ...summary,
+    [record.status]: (summary[record.status] || 0) + 1
+  }), { present: 0, absent: 0, late: 0 })
+  const contextualAttendancePercentage = contextualAttendanceRecords.length
+    ? Math.round((contextualAttendanceSummary.present / contextualAttendanceRecords.length) * 100)
+    : 0
 
   useEffect(() => {
     const loadAssignmentRecords = () => {
@@ -394,6 +435,20 @@ export default function ParentDashboard() {
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
+              <p className="text-lg font-bold text-[#4a235a]">{selectedAcademicYear} | {selectedTerm}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)} className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700 bg-white">
+                {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+              </select>
+              <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)} className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700 bg-white">
+                {terms.map(term => <option key={term} value={term}>{term}</option>)}
+              </select>
+            </div>
+          </div>
 
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
@@ -489,10 +544,10 @@ export default function ParentDashboard() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {[
-                  ['Attendance', `${attendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
-                  ['Present', attendanceSummary.present, 'bg-[#0f6e56]', 'text-green-100'],
-                  ['Absent', attendanceSummary.absent, 'bg-red-500', 'text-red-100'],
-                  ['Late', attendanceSummary.late, 'bg-blue-500', 'text-cyan-700/80'],
+                  ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
+                  ['Present', contextualAttendanceSummary.present, 'bg-[#0f6e56]', 'text-green-100'],
+                  ['Absent', contextualAttendanceSummary.absent, 'bg-red-500', 'text-red-100'],
+                  ['Late', contextualAttendanceSummary.late, 'bg-blue-500', 'text-cyan-700/80'],
                 ].map(([label, value, color, textColor]) => (
                   <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                     <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
@@ -522,11 +577,11 @@ export default function ParentDashboard() {
                       <tr>
                         <td colSpan="4" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
                       </tr>
-                    ) : attendanceRecords.length === 0 ? (
+                    ) : contextualAttendanceRecords.length === 0 ? (
                       <tr>
                         <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No attendance records available yet.</td>
                       </tr>
-                    ) : attendanceRecords.map((record, index) => (
+                    ) : contextualAttendanceRecords.map((record, index) => (
                       <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                         <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
                         <td className="px-6 py-4">
@@ -556,13 +611,13 @@ export default function ParentDashboard() {
                 <p className="text-gray-500 text-sm">View and download your child's approved academic results.</p>
               </div>
 
-              {approvedResults.length === 0 ? (
+              {contextualApprovedResults.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
                   No approved results available yet. Please check back later.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {approvedResults.map(result => (
+                  {contextualApprovedResults.map(result => (
                     <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-start justify-between flex-wrap gap-4">
 
@@ -648,6 +703,7 @@ export default function ParentDashboard() {
                           </span>
                           <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
                           <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
+                          <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                         </div>
                         <div className="text-right text-xs text-gray-400">
                           <p>Submitted: {formatDateTime(assignment.submittedAt)}</p>
@@ -659,8 +715,18 @@ export default function ParentDashboard() {
                         <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
                       </div>
                       <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                        <p className="text-xs font-bold text-[#4a235a] mb-1">Answer</p>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{assignment.answer || assignment.questions?.[0]?.selected || 'No answer recorded.'}</p>
+                        <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
+                        <div className="space-y-3">
+                          {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
+                            <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
+                              <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
+                              <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
+                              {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
+                                <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                         <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
@@ -687,20 +753,20 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
                 <div className="bg-[#4a235a] text-white rounded-2xl p-6 shadow-md">
                   <p className="text-purple-200 text-sm mb-1">Total Paid</p>
-                  <p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p>
+                  <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-red-500 text-white rounded-2xl p-6 shadow-md">
                   <p className="text-red-100 text-sm mb-1">Total Balance</p>
-                  <p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p>
+                  <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-[#0f6e56] text-white rounded-2xl p-6 shadow-md">
                   <p className="text-green-200 text-sm mb-1">Months Paid</p>
-                  <p className="text-3xl font-bold">{feePayments.filter(p => p.status === 'paid').length}</p>
+                  <p className="text-3xl font-bold">{contextualFeePayments.filter(p => p.status === 'paid').length}</p>
                 </div>
               </div>
 
               {/* Payments Table */}
-              {feePayments.length === 0 ? (
+              {contextualFeePayments.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
                   No fee records found for your child.
                 </div>
@@ -719,7 +785,7 @@ export default function ParentDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {feePayments.map((payment, index) => (
+                      {contextualFeePayments.map((payment, index) => (
                         <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4 font-medium text-[#4a235a]">{payment.student?.firstName} {payment.student?.lastName}</td>
                           <td className="px-6 py-4 text-gray-600">{payment.month}</td>

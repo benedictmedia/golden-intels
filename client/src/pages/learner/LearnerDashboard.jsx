@@ -4,10 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import API_URL from '../../api/config'
 
+const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
+const terms = ['Term 1', 'Term 2', 'Term 3']
+
 export default function LearnerDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
+  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [assignments, setAssignments] = useState([])
   const [lessons, setLessons] = useState([])
   const [quizzes, setQuizzes] = useState([])
@@ -19,6 +24,7 @@ export default function LearnerDashboard() {
   const [assignmentStartTimes, setAssignmentStartTimes] = useState({})
   const [activeQuizId, setActiveQuizId] = useState(null)
   const [now, setNow] = useState(Date.now())
+  const learnerSubmissionKey = `goldenIntelsSubmissions:${user?.email || 'anonymous'}`
 
   useEffect(() => {
     const saved = window.localStorage.getItem('goldenIntelsLms')
@@ -28,7 +34,7 @@ export default function LearnerDashboard() {
       setLessons(parsed.lessons || [])
       setQuizzes(parsed.quizzes || [])
     }
-    const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissions')
+    const savedSubmissions = window.localStorage.getItem(learnerSubmissionKey)
     if (savedSubmissions) setSubmissions(JSON.parse(savedSubmissions))
 
     const fetchStudentProfile = async () => {
@@ -41,7 +47,7 @@ export default function LearnerDashboard() {
     }
 
     fetchStudentProfile()
-  }, [])
+  }, [learnerSubmissionKey])
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000)
@@ -49,8 +55,8 @@ export default function LearnerDashboard() {
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem('goldenIntelsSubmissions', JSON.stringify(submissions))
-  }, [submissions])
+    window.localStorage.setItem(learnerSubmissionKey, JSON.stringify(submissions))
+  }, [submissions, learnerSubmissionKey])
 
   const saveTeacherSubmissionRecord = (record) => {
     const existing = JSON.parse(window.localStorage.getItem('goldenIntelsSubmissionRecords') || '[]')
@@ -117,25 +123,18 @@ export default function LearnerDashboard() {
   const getLearnerGradeLevel = () => {
     if (studentProfile?.gradeLevel) return studentProfile.gradeLevel
     if (user?.gradeLevel) return user.gradeLevel
-    const allGrades = [...publishedAssignments, ...publishedLessons, ...publishedQuizzes]
-      .map(item => item.gradeLevel)
-      .filter(Boolean)
-
-    if (allGrades.length === 0) return null
-    const counts = allGrades.reduce((acc, grade) => {
-      acc[grade] = (acc[grade] || 0) + 1
-      return acc
-    }, {})
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
+    return null
   }
 
   const learnerGradeLevel = getLearnerGradeLevel()
-  const learnerLessons = publishedLessons.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
-  const learnerAssignments = publishedAssignments.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
-  const learnerQuizzes = publishedQuizzes.filter(item => !learnerGradeLevel || item.gradeLevel === learnerGradeLevel)
+  const matchesAcademicContext = (item) => (item.academicYear || selectedAcademicYear) === selectedAcademicYear && (item.term || selectedTerm) === selectedTerm
+  const isForLearnerClass = (item) => item.teacherEmail && learnerGradeLevel && item.gradeLevel === learnerGradeLevel && matchesAcademicContext(item)
+  const learnerLessons = publishedLessons.filter(isForLearnerClass)
+  const learnerAssignments = publishedAssignments.filter(isForLearnerClass)
+  const learnerQuizzes = publishedQuizzes.filter(isForLearnerClass)
 
-  const completedAssignmentCount = Object.keys(submissions.assignments || {}).length
-  const completedQuizCount = Object.keys(submissions.quizzes || {}).length
+  const completedAssignmentCount = learnerAssignments.filter(item => submissions.assignments?.[item.id]).length
+  const completedQuizCount = learnerQuizzes.filter(item => submissions.quizzes?.[item.id]).length
   const totalLearnerItems = learnerLessons.length + learnerAssignments.length + learnerQuizzes.length
   const completionRate = totalLearnerItems ? Math.round(((completedAssignmentCount + completedQuizCount) / totalLearnerItems) * 100) : 0
   const latestQuizScore = learnerQuizzes.length === 0 ? '-' : submissions.quizzes?.[learnerQuizzes[0].id]?.score ?? '-'
@@ -174,6 +173,10 @@ export default function LearnerDashboard() {
       dueDate: assignment.dueDate,
       description: assignment.description,
       studentId: studentProfile?.studentId,
+      teacherEmail: assignment.teacherEmail,
+      teacherName: assignment.teacherName,
+      academicYear: assignment.academicYear,
+      term: assignment.term,
       learnerName,
       learnerEmail,
       device,
@@ -213,7 +216,10 @@ export default function LearnerDashboard() {
 
   const handleSubmitQuiz = (quiz) => {
     const answers = quizAnswers[quiz.id] || {}
+    const manualTypes = new Set(['short-answer', 'paragraph'])
+    const hasManualQuestions = quiz.questions.some(question => manualTypes.has(question.type))
     const score = quiz.questions.reduce((sum, question, index) => {
+      if (manualTypes.has(question.type)) return sum
       const value = answers[index]
       if (value === question.answer) return sum + 1
       return sum
@@ -232,6 +238,10 @@ export default function LearnerDashboard() {
       gradeLevel: quiz.gradeLevel,
       dueDate: quiz.dueDate,
       studentId: studentProfile?.studentId,
+      teacherEmail: quiz.teacherEmail,
+      teacherName: quiz.teacherName,
+      academicYear: quiz.academicYear,
+      term: quiz.term,
       learnerName,
       learnerEmail,
       device,
@@ -240,13 +250,15 @@ export default function LearnerDashboard() {
       timeUsedSeconds,
       score,
       totalQuestions: quiz.questions.length,
-      marked: true,
-      markedAt: submittedAt,
-      markedBy: 'Auto-marked',
+      marked: !hasManualQuestions,
+      markedAt: hasManualQuestions ? null : submittedAt,
+      markedBy: hasManualQuestions ? null : 'Auto-marked',
+      requiresManualMark: hasManualQuestions,
       questions: quiz.questions.map((question, idx) => ({
         prompt: question.prompt,
         selected: answers[idx] || 'No answer',
-        answer: question.answer
+        answer: question.answer,
+        type: question.type
       }))
     }
 
@@ -255,7 +267,7 @@ export default function LearnerDashboard() {
       ...prev,
       quizzes: {
         ...prev.quizzes,
-        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds, studentId: studentProfile?.studentId }
+        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds, studentId: studentProfile?.studentId, marked: !hasManualQuestions }
       }
     }))
   }
@@ -297,6 +309,20 @@ export default function LearnerDashboard() {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-8">
+        <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
+            <p className="text-lg font-bold text-[#0f6e56]">{selectedAcademicYear} | {selectedTerm}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)} className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 bg-white">
+              {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+            </select>
+            <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)} className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 bg-white">
+              {terms.map(term => <option key={term} value={term}>{term}</option>)}
+            </select>
+          </div>
+        </div>
         <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
           <div>
             <span className="inline-block bg-yellow-400 text-[#0f6e56] uppercase text-xs font-bold px-3 py-1 rounded-full mb-3">Learner Portal</span>
@@ -420,7 +446,8 @@ export default function LearnerDashboard() {
                   <div key={lesson.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                     <span className="inline-block bg-blue-100 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mb-3">{lesson.gradeLevel}</span>
                     <h4 className="text-xl font-bold text-[#0f6e56] mb-2">{lesson.title}</h4>
-                    <p className="text-sm text-gray-500 mb-4">{lesson.subject}</p>
+                    <p className="text-sm text-gray-500 mb-2">{lesson.subject}</p>
+                    <p className="text-xs font-bold text-gray-400 mb-4">{lesson.academicYear || selectedAcademicYear} | {lesson.term || selectedTerm}</p>
                     <p className="text-gray-600 leading-relaxed">{lesson.content}</p>
                   </div>
                 ))
@@ -445,6 +472,7 @@ export default function LearnerDashboard() {
                         <div>
                           <h4 className="text-xl font-bold text-[#0f6e56]">{assignment.title}</h4>
                           <p className="text-sm text-gray-500">{assignment.subject} · {assignment.gradeLevel}</p>
+                          <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                         </div>
                         <div className="text-sm text-gray-500">
                           Due {formatDateTime(assignment.dueDate)}
@@ -517,6 +545,7 @@ export default function LearnerDashboard() {
                         <div>
                           <h4 className="text-xl font-bold text-[#0f6e56]">{quiz.title}</h4>
                           <p className="text-sm text-gray-500">{quiz.subject} · {quiz.gradeLevel}</p>
+                          <p className="text-xs font-bold text-gray-400 mt-1">{quiz.academicYear || selectedAcademicYear} | {quiz.term || selectedTerm}</p>
                         </div>
                         <div className="text-sm text-gray-500">
                           {expired
@@ -540,17 +569,19 @@ export default function LearnerDashboard() {
                               <div className="space-y-4">
                                 {quiz.questions.map((question, idx) => {
                                   const selected = submission.answers?.[idx] || 'No answer'
-                                  const isCorrect = String(selected).trim().toLowerCase() === String(question.answer).trim().toLowerCase()
+                                  const needsManualMark = ['short-answer', 'paragraph'].includes(question.type)
+                                  const isCorrect = !needsManualMark && String(selected).trim().toLowerCase() === String(question.answer).trim().toLowerCase()
                                   return (
-                                    <div key={idx} className={`rounded-2xl p-4 border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                                    <div key={idx} className={`rounded-2xl p-4 border ${needsManualMark ? 'border-yellow-200 bg-yellow-50' : isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                                       <div className="flex items-start justify-between gap-4">
                                         <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
-                                        <span className={`text-xs font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                                        <span className={`text-xs font-bold ${needsManualMark ? 'hidden' : isCorrect ? 'text-green-700' : 'text-red-700'}`}>
                                           {isCorrect ? '✔ Correct' : '✖ Incorrect'}
                                         </span>
+                                        {needsManualMark && <span className="text-xs font-bold text-yellow-700">Awaiting teacher mark</span>}
                                       </div>
                                       <p className="text-sm text-gray-700 mt-2">Your answer: {selected}</p>
-                                      <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
+                                      {!needsManualMark && <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>}
                                     </div>
                                   )
                                 })}
@@ -588,14 +619,25 @@ export default function LearnerDashboard() {
                         <div className="space-y-6">
                           {quiz.questions.map((question, idx) => {
                             const selectedAnswer = quizAnswers[quiz.id]?.[idx] || ''
-                            const isFillIn = question.type === 'fill-in'
+                            const isFillIn = question.type === 'fill-in' || question.type === 'short-answer'
+                            const isParagraph = question.type === 'paragraph'
+                            const isDropdown = question.type === 'dropdown'
+                            const typeLabel = isParagraph ? 'Paragraph' : isFillIn ? 'Short answer' : isDropdown ? 'Dropdown' : 'Multiple choice'
                             return (
                               <div key={idx} className="bg-blue-50 rounded-2xl p-4">
                                 <div className="flex items-center justify-between gap-4 mb-2">
                                   <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
-                                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">{isFillIn ? 'Fill in' : 'Multiple choice'}</span>
+                                  <span className="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500">{typeLabel}</span>
                                 </div>
-                                {isFillIn ? (
+                                {isParagraph ? (
+                                  <textarea
+                                    value={selectedAnswer}
+                                    placeholder="Write your paragraph answer here"
+                                    onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)}
+                                    rows={5}
+                                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
+                                  />
+                                ) : isFillIn ? (
                                   <input
                                     type="text"
                                     value={selectedAnswer}
@@ -603,9 +645,20 @@ export default function LearnerDashboard() {
                                     onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)}
                                     className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700"
                                   />
+                                ) : isDropdown ? (
+                                  <select
+                                    value={selectedAnswer}
+                                    onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)}
+                                    className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700 bg-white"
+                                  >
+                                    <option value="">Choose an answer</option>
+                                    {(question.options || []).map((option, optionIndex) => (
+                                      <option key={optionIndex} value={option}>{option}</option>
+                                    ))}
+                                  </select>
                                 ) : (
                                   <div className="space-y-2">
-                                    {question.options.map((option, optionIndex) => (
+                                    {(question.options || []).map((option, optionIndex) => (
                                       <label key={optionIndex} className="flex items-center gap-3 cursor-pointer rounded-2xl border border-gray-200 p-3 hover:bg-white bg-white">
                                         <input
                                           type="radio"
