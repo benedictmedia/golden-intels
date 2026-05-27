@@ -34,6 +34,7 @@ export default function ParentDashboard() {
   const [attendanceRecords, setAttendanceRecords] = useState([])
   const [attendanceLoading, setAttendanceLoading] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
+  const [assignmentRecords, setAssignmentRecords] = useState([])
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -295,21 +296,39 @@ export default function ParentDashboard() {
     ? Math.round((attendanceSummary.present / attendanceRecords.length) * 100)
     : 0
   const formatAttendanceStatus = (status) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
+  const formatDateTime = (value) => {
+    if (!value) return '-'
+    const date = new Date(value)
+    return isNaN(date.getTime()) ? value : date.toLocaleString()
+  }
 
-  const grades = [
-    { subject: 'Mathematics', score: 85, grade: 'A' },
-    { subject: 'English', score: 78, grade: 'B' },
-    { subject: 'Science', score: 92, grade: 'A+' },
-    { subject: 'Computing', score: 88, grade: 'A' },
-    { subject: 'Geography', score: 74, grade: 'B' },
-    { subject: 'Creative Arts', score: 95, grade: 'A+' },
-  ]
+  const getStudentFullName = (student) => `${student?.firstName || ''} ${student?.lastName || ''}`.trim().toLowerCase()
+  const matchesParentChild = (record, student) => {
+    if (!student) return false
+    if (record.studentId && student.studentId && record.studentId === student.studentId) return true
+    return getStudentFullName(student) && String(record.learnerName || '').trim().toLowerCase() === getStudentFullName(student)
+  }
 
-  const assignments = [
-    { title: 'Math Worksheet', subject: 'Mathematics', dueDate: '2024-01-20', status: 'Pending' },
-    { title: 'English Essay', subject: 'English', dueDate: '2024-01-22', status: 'Submitted' },
-    { title: 'Science Project', subject: 'Science', dueDate: '2024-01-25', status: 'Pending' },
-  ]
+  const markedAssignmentRecords = assignmentRecords.filter(record =>
+    record.type === 'assignment' &&
+    record.marked &&
+    students.some(student => matchesParentChild(record, student))
+  )
+
+  useEffect(() => {
+    if (activeMenu !== 'assignments') return
+    const loadAssignmentRecords = () => {
+      try {
+        const saved = window.localStorage.getItem('goldenIntelsSubmissionRecords')
+        setAssignmentRecords(saved ? JSON.parse(saved) : [])
+      } catch {
+        setAssignmentRecords([])
+      }
+    }
+    loadAssignmentRecords()
+    window.addEventListener('storage', loadAssignmentRecords)
+    return () => window.removeEventListener('storage', loadAssignmentRecords)
+  }, [activeMenu])
 
   return (
     <div className="flex h-screen bg-blue-100 overflow-hidden">
@@ -383,7 +402,7 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'My Children', value: students.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Assignments', value: assignments.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
+                  { label: 'Marked Assignments', value: markedAssignmentRecords.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
                   { label: 'Avg Grade', value: 'A', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
                   { label: 'Messages', value: messages.length, color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
                 ].map((stat, index) => (
@@ -611,21 +630,49 @@ export default function ParentDashboard() {
           {/* Assignments */}
           {activeMenu === 'assignments' && (
             <div>
-              <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-6">Assignments</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {assignments.map((assignment, index) => (
-                  <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 ${
-                      assignment.status === 'Submitted' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-cyan-700'
-                    }`}>
-                      {assignment.status}
-                    </span>
-                    <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
-                    <p className="text-xs text-gray-400">Due: {assignment.dueDate}</p>
-                  </div>
-                ))}
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Marked Assignments</h2>
+                <p className="text-gray-500 text-sm">Only answered assignments that have been marked by a teacher are shown here.</p>
               </div>
+              {markedAssignmentRecords.length === 0 ? (
+                <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
+                  No marked assignment submissions are available yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {markedAssignmentRecords.map((assignment, index) => (
+                    <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                      <div className="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                          <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
+                            Marked
+                          </span>
+                          <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
+                          <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
+                        </div>
+                        <div className="text-right text-xs text-gray-400">
+                          <p>Submitted: {formatDateTime(assignment.submittedAt)}</p>
+                          <p>Marked: {formatDateTime(assignment.markedAt)}</p>
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                        <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
+                        <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
+                      </div>
+                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                        <p className="text-xs font-bold text-[#4a235a] mb-1">Answer</p>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{assignment.answer || assignment.questions?.[0]?.selected || 'No answer recorded.'}</p>
+                      </div>
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                        <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
+                        <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}</p>
+                        {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
+                        <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

@@ -169,6 +169,11 @@ export default function LearnerDashboard() {
       type: 'assignment',
       itemId: assignment.id,
       title: assignment.title,
+      subject: assignment.subject,
+      gradeLevel: assignment.gradeLevel,
+      dueDate: assignment.dueDate,
+      description: assignment.description,
+      studentId: studentProfile?.studentId,
       learnerName,
       learnerEmail,
       device,
@@ -186,7 +191,7 @@ export default function LearnerDashboard() {
       ...prev,
       assignments: {
         ...prev.assignments,
-        [assignment.id]: { answer, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds }
+        [assignment.id]: { answer, submittedAt, learnerName, learnerEmail, device, startedAt, timeUsedSeconds, studentId: studentProfile?.studentId }
       }
     }))
     setAssignmentAnswers(prev => ({ ...prev, [assignment.id]: '' }))

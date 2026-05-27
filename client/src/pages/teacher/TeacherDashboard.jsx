@@ -647,6 +647,28 @@ export default function TeacherDashboard() {
     doc.save(`${record.learnerName || 'student'}-${record.type}-submission.pdf`)
   }
 
+  const getSubmissionRecordKey = (record, index) => `${record.type}-${record.itemId}-${record.learnerEmail || record.learnerName || 'learner'}-${index}`
+
+  const handleMarkAssignmentSubmission = (record, index) => {
+    const score = window.prompt('Enter assignment score or mark:', record.score ?? '')
+    if (score === null) return
+    const feedback = window.prompt('Enter teacher feedback:', record.feedback ?? '')
+    if (feedback === null) return
+    const targetKey = getSubmissionRecordKey(record, index)
+    setSubmissionRecords(prev => prev.map((item, itemIndex) => (
+      getSubmissionRecordKey(item, itemIndex) === targetKey
+        ? {
+            ...item,
+            score: score.trim(),
+            feedback: feedback.trim(),
+            marked: true,
+            markedAt: new Date().toISOString(),
+            markedBy: user?.name || 'Teacher'
+          }
+        : item
+    )))
+  }
+
   const handleEditLmsItem = (item, type) => {
     setEditingLmsItem({ item, type })
     setLmsItemView({ item, type })
@@ -1798,13 +1820,26 @@ export default function TeacherDashboard() {
                                 <div key={idx} className="rounded-2xl p-3 bg-white border border-gray-200">
                                   <p className="font-bold text-[#0f6e56]">Q{idx + 1}. {question.prompt}</p>
                                   <p className="text-sm text-gray-700 mt-1">Your answer: {question.selected || 'No answer'}</p>
-                                  <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
+                              <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
                                 </div>
                               ))}
                             </div>
                           </div>
+                          {record.type === 'assignment' && record.marked && (
+                            <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4">
+                              <p className="text-sm font-bold text-green-700">Marked Assignment</p>
+                              <p className="text-sm text-gray-700 mt-1">Score: {record.score || 'Marked'}</p>
+                              {record.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {record.feedback}</p>}
+                              <p className="text-xs text-gray-500 mt-2">Marked by {record.markedBy || 'Teacher'} on {formatDateTime(record.markedAt)}</p>
+                            </div>
+                          )}
                           <div className="flex flex-wrap gap-3">
                             <button onClick={() => handleDownloadSubmissionPdf(record)} className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-4 py-2 rounded-full">Download PDF</button>
+                            {record.type === 'assignment' && (
+                              <button onClick={() => handleMarkAssignmentSubmission(record, index)} className="bg-blue-600 hover:bg-blue-400 text-white text-xs font-bold px-4 py-2 rounded-full">
+                                {record.marked ? 'Update Mark' : 'Mark Assignment'}
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
