@@ -39,7 +39,7 @@ export default function Navbar() {
               Golden-Intels
             </p>
 
-            <p className="text-xs text-[#E5E7EB]">
+            <p className="text-xs text-white">
               International School
             </p>
 
@@ -88,7 +88,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
 
-        <div className="lg:hidden bg-[#2563EB] border-t border-white/20 px-4 pb-6">
+        <div className="lg:hidden bg-[#800080] border-t border-white/20 px-4 pb-6">
 
           <ul className="flex flex-col gap-4 mt-4 text-sm">
             
