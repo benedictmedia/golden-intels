@@ -20,7 +20,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-[#ffff00] text-white border-b border-blue/80 shadow-lg">
+    <nav className="bg-[#ffff00] text-blue border-b border-blue/80 shadow-lg">
       
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         
