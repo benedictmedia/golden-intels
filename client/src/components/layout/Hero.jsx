@@ -3,7 +3,7 @@ import heroBg from '../../assets/hero-bg.jpg'
 
 export default function Hero() {
   return (
-    <div className="relative text-white min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#7C3AED]">
+    <div className="relative text-white min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
       
       {/* Background image */}
       <div
