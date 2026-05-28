@@ -12,7 +12,7 @@ export default function Hero() {
       ></div>
 
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-[#2563EB]/70"></div>
+      <div className="absolute inset-0 bg-[#2563EB]/30"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
@@ -25,7 +25,7 @@ export default function Hero() {
         {/* Heading */}
         <h1 className="text-4xl md:text-6xl font-bold font-serif leading-tight mb-6">
           Welcome to <br />
-          <span className="text-[#F4B400]">Golden-Intels</span> <br />
+          <span className="text-[#ffff00]">Golden-Intels</span> <br />
           International School
         </h1>
 
