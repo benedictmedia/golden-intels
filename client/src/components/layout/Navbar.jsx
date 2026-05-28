@@ -20,7 +20,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-[#ffff00] text-white border-b border-white/20 shadow-lg">
+    <nav className="bg-[#ffff00] text-white border-b border-blue/80 shadow-lg">
       
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         
@@ -28,7 +28,7 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-2">
           
           {/* Logo Circle */}
-          <div className="w-10 h-10 bg-[#F4B400] rounded-full flex items-center justify-center font-bold text-white shadow-md">
+          <div className="w-10 h-10 bg-[#7C3AED] rounded-full flex items-center justify-center font-bold text-white shadow-md">
             G
           </div>
 
