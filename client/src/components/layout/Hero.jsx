@@ -3,7 +3,7 @@ import heroBg from '../../assets/hero-bg.jpg'
 
 export default function Hero() {
   return (
-    <div className="relative text-white min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
+    <div className="relative text-[#800080] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
       
       {/* Background image */}
       <div
@@ -48,7 +48,7 @@ export default function Hero() {
           {/* Secondary Button */}
           <Link
             to="/about"
-            className="bg-[#F4B400] hover:bg-[#e0a800] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
           >
             Discover Our Story
           </Link>
