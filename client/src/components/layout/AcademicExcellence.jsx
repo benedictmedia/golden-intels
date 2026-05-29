@@ -12,7 +12,7 @@ const highlights = [
 
   { icon: <Brain size={24} />, label: 'Critical Thinking' },
 
-  { icon: <Heart size={24} />, label: 'Love of Learning' },
+  { icon: <Heart size={24} />, label: 'Love for Learning' },
 
 ]
 
@@ -34,12 +34,12 @@ export default function AcademicExcellence() {
 
           {/* Heading */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#2563EB] mb-6 leading-tight">
-            A Curriculum Built for the Future
+           A British Curriculum Built for the Future
           </h2>
 
           {/* Description */}
           <p className="text-[#374151] text-lg leading-relaxed mb-8">
-            Our comprehensive curriculum combines rigorous academics with innovative teaching methods. From Early Years through Primary education, we foster critical thinking, creativity, innovation and a lifelong love of learning.
+            Our British Curriculum - from Oxford University Press combines strong academics with innovative teaching methods. From Early Years through Primary education, our British Curriculum fosters critical thinking, creativity, innovation, and a love for learning.
           </p>
 
           {/* Highlights */}

@@ -3,8 +3,8 @@ import { Award, Globe, Users, BookOpen, Shield, Star } from 'lucide-react'
 const reasons = [
   {
     icon: <Award size={32} />,
-    title: 'Oxford Accredited',
-    description: 'Our curriculum meets the highest international standards recognized by Oxford.',
+    title: 'British Curriculum',
+    description: 'Our curriculum meets the highest international standards recognized by Oxford University.',
   },
   {
     icon: <Globe size={32} />,
@@ -18,7 +18,7 @@ const reasons = [
   },
   {
     icon: <BookOpen size={32} />,
-    title: 'Rich Curriculum',
+    title: 'British Curriculum',
     description: 'A balanced mix of academics, arts, sports, and character development.',
   },
   {
@@ -49,7 +49,7 @@ export default function WhyChooseUs() {
 
           {/* Title */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
-            Why Choose <span className="text-[#F4B400]">Golden-Intels</span>
+            Why Choose <span className="text-[#ffff00]">Golden-Intels</span>
           </h2>
 
           {/* Description */}

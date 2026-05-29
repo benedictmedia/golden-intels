@@ -16,10 +16,10 @@ export default function Hero() {
       
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
-        
+
         {/* Badge */}
         <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
-          Oxford Accredited School
+          A school Accredited by Oxford University Press
         </span>
 
         {/* Heading */}

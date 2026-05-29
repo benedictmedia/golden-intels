@@ -149,7 +149,7 @@ export default function Footer() {
             <li className="flex items-start gap-3">
               <MapPin size={16} className="text-[#2563EB] mt-0.5 shrink-0" />
               <span className="text-slate-300">
-                Golden-Intels International School, Ghana
+                Golden-Intels International School, Ho-Volta Region, Ghana
               </span>
             </li>
 

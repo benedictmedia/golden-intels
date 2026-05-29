@@ -15,7 +15,7 @@ export default function CallToAction() {
         {/* Heading */}
         <h2 className="text-3xl md:text-5xl font-bold font-serif text-white mb-6 leading-tight">
           Begin Your Journey <br />
-          <span className="text-[#F4B400]">With Us</span>
+          <span className="text-[#ffff00]">With Us</span>
         </h2>
 
         {/* Subtext */}

@@ -3,10 +3,10 @@ import { Code, Music, Dumbbell, Scissors, FlaskConical, Palette } from 'lucide-r
 import campusImg from '../../assets/campus.jpg'
 
 const activities = [
-  { icon: <Code size={24} />, label: 'Coding & Computer Skills' },
+  { icon: <Code size={24} />, label: 'Computer Skills' },
   { icon: <FlaskConical size={24} />, label: 'STEM Programs' },
   { icon: <Music size={24} />, label: 'Arts & Music' },
-  { icon: <Scissors size={24} />, label: 'Baking, Sewing & Braiding' },
+  { icon: <Scissors size={24} />, label: 'Global Skills Projects' },
   { icon: <Dumbbell size={24} />, label: 'Physical Education & Sports' },
   { icon: <Palette size={24} />, label: 'Creative Arts' },
 ]
@@ -40,12 +40,12 @@ export default function CampusLife() {
 
           {/* Heading */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6 leading-tight">
-            Discover Our <span className="text-[#F4B400]">Activities & Clubs</span>
+            Discover Our <span className="text-[#ffff00]">Activities & Clubs</span>
           </h2>
 
           {/* Description */}
           <p className="text-[#E5E7EB] text-lg leading-relaxed mb-8">
-            Beyond academics, our students thrive in a rich environment of coding, computer skills, STEM, arts and music, baking, sewing and braiding, physical education and sports, and many more. We believe in developing well-rounded individuals prepared for all aspects of life.
+            Beyond academics, our British Curriculum helps students thrive in computer skills, STEM, arts, physical education and sports, and Global Skills Projects. We believe our British Curriculum develops well-rounded learners prepared for every aspect of life.
           </p>
 
           {/* Activities */}
