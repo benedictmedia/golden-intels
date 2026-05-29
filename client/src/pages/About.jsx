@@ -35,21 +35,21 @@ export default function About() {
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#7C3AED] text-[#ffff00] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#7C3AED] text-[#ffffff] text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Story
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#ffff00] mb-6">
               How It All Began
             </h2>
             <div className="text-gray-600 text-lg leading-relaxed space-y-5">
               <p>
-                Founded in 2017, Golden-Intels International School emerged from a vision to create an educational institution that combines academic rigor with holistic development. Golden-Intels International School is an Oxford-accredited institution dedicated to developing confident, creative, and globally minded learners. Our Oxford accreditation reflects our commitment to maintaining higher standards of educational excellence.
+                Founded as Goldenintels Educare in 2017, Golden-Intels International School is the first British school in the Volta Region of Ghana to be accredited by Oxford University Press.
               </p>
               <p>
-                Over the years, we have grown from a small school to a thriving community of learners, educators, and families united by a shared commitment to excellence.
+                Our British Curriculum develops confident, creative, and globally minded learners through academic excellence and holistic development.            
               </p>
               <p>
-                Today, we continue to innovate and adapt, ensuring our students receive an education that prepares them not just for university, but for life in an ever-changing global landscape.
+                From a small care center to a thriving learning community, we continue to provide a British Curriculum education that prepares students for university and life in an ever-changing world.
               </p>
             </div>
           </div>
@@ -70,7 +70,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Mission */}
-          <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-md">
             <div className="text-cyan-600 mb-4">
               <Target size={40} />
             </div>
@@ -81,7 +81,7 @@ export default function About() {
           </div>
 
           {/* Vision */}
-          <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-md">
             <div className="text-cyan-600 mb-4">
               <Eye size={40} />
             </div>
@@ -98,21 +98,18 @@ export default function About() {
      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
-              What We Stand For
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700">
+            <span className="inline-block bg-[#8a2be2] text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Core Values
-            </h2>
+            </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div key={index} className="bg-blue-600 text-white rounded-2xl p-8 text-center shadow-md">
-                <div className="text-cyan-600 flex justify-center mb-4">
+              <div key={index} className="bg-[#ffff00] text-white rounded-2xl p-8 text-center shadow-md">
+                <div className="text-white flex justify-center mb-4">
                   <Heart size={36} />
                 </div>
                 <h4 className="text-xl font-bold mb-2">{value.title}</h4>
-                <p className="text-cyan-100 text-sm leading-relaxed">{value.description}</p>
+                <p className="text-white text-sm leading-relaxed">{value.description}</p>
               </div>
             ))}
           </div>
@@ -123,20 +120,20 @@ export default function About() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
-              Where We Are Headed
+            <span className="inline-block bg-blue-500 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+              Our Goals
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-yellow-600 mb-6">
               Our Goals
             </h2>
           </div>
           <div className="space-y-4">
             {goals.map((goal, index) => (
-              <div key={index} className="flex items-start gap-4 bg-blue-600 text-white rounded-xl p-6 shadow-md">
-                <div className="text-cyan-600 mt-1">
+              <div key={index} className="flex items-start gap-4 bg-white text-yellow-600 rounded-xl p-6 shadow-md">
+                <div className="text-yellow-600 mt-1">
                   <CheckCircle size={24} />
                 </div>
-                <p className="text-cyan-100 text-lg">{goal}</p>
+                <p className="text-yellow-100 text-lg">{goal}</p>
               </div>
             ))}
           </div>
@@ -149,21 +146,21 @@ export default function About() {
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#8a2be2] text-yellow-600 text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Accreditation
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-yellow-700 mb-6">
               Oxford Accreditation
             </h2>
             <div className="text-gray-600 text-lg leading-relaxed space-y-5">
               <p>
-                Our Oxford accreditation is a testament to our unwavering commitment to educational excellence. This prestigious recognition validates our curriculum, teaching standards, and student outcomes against internationally recognized benchmarks.
+                Golden-Intels International School is proud to be the first school in the Volta Region of Ghana to be accredited by Oxford University Press. This prestigious Oxford accreditation reflects our strong commitment to educational excellence and validates our curriculum, teaching standards, and student outcomes against internationally recognized benchmarks.          
               </p>
               <p>
-                The accreditation process involves rigorous evaluation of our academic programs, faculty qualifications, facilities, and student support services. It ensures that our students receive an education that meets higher global standards.
+                This accreditation confirms the strength of our curriculum, teaching, learning environment, and student development.
               </p>
               <p>
-                This accreditation opens doors for our graduates, providing them with credentials recognized by universities and employers worldwide.
+                It also provides our learners with globally recognized credentials that support future academic and career opportunities.
               </p>
             </div>
           </div>
