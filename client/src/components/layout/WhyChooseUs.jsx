@@ -4,7 +4,7 @@ const reasons = [
   {
     icon: <Award size={32} />,
     title: 'British Curriculum',
-    description: 'Our curriculum meets the highest international standards recognized by Oxford University.',
+    description: 'Our curriculum meets the highest international standards recognized by Oxford University Press.',
   },
   {
     icon: <Globe size={32} />,

@@ -35,7 +35,7 @@ export default function About() {
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#7C3AED] text-[#ffff00] text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Story
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
