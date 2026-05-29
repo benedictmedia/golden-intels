@@ -4,7 +4,6 @@ import axios from 'axios'
 import { Search, Calendar, MapPin, X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 
-
 const categories = ['All', 'Event', 'News', 'Academic', 'Sports', 'Cultural', 'Community', 'Achievement']
 
 export default function NewsEvents() {
@@ -14,7 +13,6 @@ export default function NewsEvents() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [viewMode, setViewMode] = useState('grid')
   const [viewingItem, setViewingItem] = useState(null)
-
 
   useEffect(() => {
     let mounted = true
@@ -66,17 +64,18 @@ export default function NewsEvents() {
 
       {/* Hero Banner */}
       <PageHero badge="News & Events" title="News & Events" subtitle="Stay updated with the latest happenings at Golden-Intels International School." />
+
       {/* Upcoming Events Banner */}
       {upcomingEvents.length > 0 && (
-        <section className="bg-blue-500 py-4">
+        <section className="bg-[#8a2be2] py-4">
           <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto">
-            <span className="text-cyan-700 font-bold text-sm shrink-0">📅 Upcoming:</span>
+            <span className="text-white font-bold text-sm shrink-0">📅 Upcoming:</span>
             {upcomingEvents.map(event => (
               <div key={event.id} className="flex items-center gap-2 shrink-0">
-                <span className="text-cyan-700 text-sm font-bold">{event.title}</span>
-                <span className="text-cyan-700/70 text-xs">— {new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                {event.venue && <span className="text-cyan-700/70 text-xs">@ {event.venue}</span>}
-                <span className="text-cyan-700/40 mx-2">|</span>
+                <span className="text-white text-sm font-bold">{event.title}</span>
+                <span className="text-blue-100 text-xs">— {new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                {event.venue && <span className="text-blue-100 text-xs">@ {event.venue}</span>}
+                <span className="text-blue-200 mx-2">|</span>
               </div>
             ))}
           </div>
@@ -95,7 +94,7 @@ export default function NewsEvents() {
               placeholder="Search news and events..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-lg"
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-lg"
             />
           </div>
 
@@ -108,8 +107,8 @@ export default function NewsEvents() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                     activeCategory === cat
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'
+                      ? 'bg-[#8a2be2] text-white'
+                      : 'bg-white text-slate-700 border border-[#8a2be2] hover:bg-[#8a2be2] hover:text-white'
                   }`}
                 >
                   {cat}
@@ -119,13 +118,13 @@ export default function NewsEvents() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#8a2be2] text-white' : 'bg-white text-slate-700 border border-[#8a2be2]'}`}
               >
                 Grid
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${viewMode === 'list' ? 'bg-[#8a2be2] text-white' : 'bg-white text-slate-700 border border-[#8a2be2]'}`}
               >
                 List
               </button>
@@ -137,7 +136,7 @@ export default function NewsEvents() {
       </section>
 
       {/* News Grid / List */}
-      <section className="py-16 bg-blue-50">
+      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
         <div className="max-w-7xl mx-auto px-4">
           {loading ? (
             <div className="text-center text-gray-400 py-20">Loading...</div>
@@ -169,8 +168,8 @@ export default function NewsEvents() {
                       <span className="text-white text-5xl">▶</span>
                     </div>
                   ) : (
-                    <div className="w-full h-52 bg-blue-600 flex items-center justify-center">
-                      <span className="text-cyan-600 text-5xl font-bold font-serif">GI</span>
+                    <div className="w-full h-52 bg-[#8a2be2] flex items-center justify-center">
+                      <span className="text-white text-5xl font-bold font-serif">GI</span>
                     </div>
                   )}
 
@@ -178,23 +177,23 @@ export default function NewsEvents() {
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-3">
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'
+                        item.type === 'event' ? 'bg-green-600 text-white' : 'bg-[#8a2be2] text-white'
                       }`}>
                         {item.type === 'event' ? '📅 Event' : '📰 News'}
                       </span>
-                      <span className="text-xs text-gray-400">{item.category}</span>
+                      <span className="text-xs text-gray-500">{item.category}</span>
                     </div>
-                    <h3 className="font-bold text-cyan-700 text-lg mb-2 line-clamp-2">{item.title}</h3>
-                    <p className="text-sm text-gray-500 mb-4 line-clamp-3">{item.content}</p>
+                    <h3 className="font-bold text-slate-800 text-lg mb-2 line-clamp-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-3">{item.content}</p>
                     {item.type === 'event' && item.eventDate && (
                       <div className="bg-blue-50 rounded-xl px-4 py-3 mb-3 space-y-1">
                         <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-cyan-700" />
-                          <p className="text-xs font-bold text-cyan-700">{new Date(item.eventDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                          <Calendar size={14} className="text-[#8a2be2]" />
+                          <p className="text-xs font-bold text-[#8a2be2]">{new Date(item.eventDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
                         {item.venue && (
                           <div className="flex items-center gap-2">
-                            <MapPin size={14} className="text-cyan-700" />
+                            <MapPin size={14} className="text-[#8a2be2]" />
                             <p className="text-xs text-gray-600">{item.venue}</p>
                           </div>
                         )}
@@ -217,30 +216,30 @@ export default function NewsEvents() {
                   {item.images && item.images.length > 0 ? (
                     <img src={`${item.images[0]}`} alt={item.title} className="w-32 h-24 object-cover rounded-xl shrink-0" loading="lazy" decoding="async" />
                   ) : (
-                    <div className="w-32 h-24 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
-                      <span className="text-cyan-600 font-bold text-xl">GI</span>
+                    <div className="w-32 h-24 bg-[#8a2be2] rounded-xl flex items-center justify-center shrink-0">
+                      <span className="text-white font-bold text-xl">GI</span>
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'
+                        item.type === 'event' ? 'bg-green-600 text-white' : 'bg-[#8a2be2] text-white'
                       }`}>
                         {item.type === 'event' ? '📅 Event' : '📰 News'}
                       </span>
-                      <span className="text-xs text-gray-400">{item.category}</span>
+                      <span className="text-xs text-gray-500">{item.category}</span>
                     </div>
-                    <h3 className="font-bold text-cyan-700 text-lg mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-500 line-clamp-2 mb-2">{item.content}</p>
+                    <h3 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-2">{item.content}</p>
                     {item.type === 'event' && item.eventDate && (
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1">
-                          <Calendar size={12} className="text-cyan-700" />
-                          <p className="text-xs font-bold text-cyan-700">{new Date(item.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                          <Calendar size={12} className="text-[#8a2be2]" />
+                          <p className="text-xs font-bold text-[#8a2be2]">{new Date(item.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
                         {item.venue && (
                           <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-cyan-700" />
+                            <MapPin size={12} className="text-[#8a2be2]" />
                             <p className="text-xs text-gray-500">{item.venue}</p>
                           </div>
                         )}
@@ -261,16 +260,16 @@ export default function NewsEvents() {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 
             {/* Modal Header */}
-            <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-[#8a2be2] text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full mr-2 ${
-                  viewingItem.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-white/20 text-white'
+                  viewingItem.type === 'event' ? 'bg-green-600 text-white' : 'bg-white/20 text-white'
                 }`}>
                   {viewingItem.type === 'event' ? '📅 Event' : '📰 News'}
                 </span>
-                <span className="text-cyan-100 text-xs">{viewingItem.category}</span>
+                <span className="text-blue-100 text-xs">{viewingItem.category}</span>
               </div>
-              <button onClick={() => setViewingItem(null)} className="hover:text-cyan-600 transition-colors">
+              <button onClick={() => setViewingItem(null)} className="hover:text-yellow-300 transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -308,7 +307,7 @@ export default function NewsEvents() {
                       allowFullScreen
                       title={viewingItem.title}
                     />
-                 ) : (
+                  ) : (
                     <button
                       onClick={() => window.open(viewingItem.videoUrl, '_blank')}
                       className="block w-full bg-gray-900 text-white text-center py-4 rounded-xl hover:bg-gray-800 transition-colors"
@@ -320,18 +319,18 @@ export default function NewsEvents() {
               )}
 
               {/* Title */}
-              <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-4">{viewingItem.title}</h2>
+              <h2 className="text-2xl font-bold font-serif text-slate-800 mb-4">{viewingItem.title}</h2>
 
               {/* Event Details */}
               {viewingItem.type === 'event' && viewingItem.eventDate && (
                 <div className="bg-blue-50 rounded-xl p-4 mb-4 space-y-2">
                   <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-cyan-700" />
-                    <p className="text-sm font-bold text-cyan-700">{new Date(viewingItem.eventDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    <Calendar size={16} className="text-[#8a2be2]" />
+                    <p className="text-sm font-bold text-[#8a2be2]">{new Date(viewingItem.eventDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
                   </div>
                   {viewingItem.venue && (
                     <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-cyan-700" />
+                      <MapPin size={16} className="text-[#8a2be2]" />
                       <p className="text-sm text-gray-600">{viewingItem.venue}</p>
                     </div>
                   )}
@@ -345,7 +344,7 @@ export default function NewsEvents() {
 
               <button
                 onClick={() => setViewingItem(null)}
-                className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors mt-6"
+                className="w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors mt-6"
               >
                 Close
               </button>
