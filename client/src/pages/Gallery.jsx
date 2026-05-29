@@ -58,8 +58,8 @@ export default function Gallery() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
                   activeCategory === cat
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'
+                    ? 'bg-[#8a2be2] text-white'
+                    : 'bg-white text-slate-700 border border-[#8a2be2] hover:bg-[#8a2be2] hover:text-white'
                 }`}
               >
                 {cat}
@@ -70,7 +70,7 @@ export default function Gallery() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-16 bg-blue-50">
+      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
         <div className="max-w-7xl mx-auto px-4">
           {loading ? (
             <div className="text-center text-gray-400 py-20">Loading gallery...</div>
@@ -97,14 +97,14 @@ export default function Gallery() {
                         +{item.images.length - 1} more
                       </span>
                     )}
-                    <span className="absolute top-3 left-3 bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-[#8a2be2] text-white text-xs font-bold px-3 py-1 rounded-full">
                       {item.category}
                     </span>
                   </div>
 
                   {/* Info */}
                   <div className="p-5">
-                    <h3 className="font-bold text-cyan-700 text-lg mb-1">{item.title}</h3>
+                    <h3 className="font-bold text-slate-800 text-lg mb-1">{item.title}</h3>
                     {item.description && (
                       <p className="text-sm text-gray-500 mb-3">{item.description}</p>
                     )}
@@ -131,7 +131,10 @@ export default function Gallery() {
                 <h3 className="text-white font-bold text-xl">{viewingItem.title}</h3>
                 <p className="text-gray-400 text-sm">{viewingItem.category} | {new Date(viewingItem.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
               </div>
-              <button onClick={() => setViewingItem(null)} className="text-white hover:text-cyan-600 transition-colors">
+              <button 
+                onClick={() => setViewingItem(null)} 
+                className="text-white hover:text-[#8a2be2] transition-colors"
+              >
                 <X size={28} />
               </button>
             </div>
@@ -173,7 +176,9 @@ export default function Gallery() {
                     alt={`Photo ${index + 1}`}
                     onClick={() => setActiveImage(index)}
                     className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${
-                      activeImage === index ? 'ring-2 ring-cyan-500 opacity-100' : 'opacity-50 hover:opacity-100'
+                      activeImage === index 
+                        ? 'ring-2 ring-[#8a2be2] opacity-100' 
+                        : 'opacity-50 hover:opacity-100'
                     }`}
                     loading="lazy"
                     decoding="async"
