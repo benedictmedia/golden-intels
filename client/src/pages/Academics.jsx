@@ -15,41 +15,59 @@ export default function Academics() {
     <div>
 
       {/* Hero Banner */}
-     <PageHero badge="Academics" title="Academics" subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning." image={academicsImg}/>
+      <PageHero
+        badge="Academics"
+        title="Academics"
+        subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning."
+        image={academicsImg}
+      />
 
       {/* Our Hybrid Curriculum */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
+      <section className="py-20 bg-gradient-to-br from-[#eff6ff] to-[#dbeafe]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+
+            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Approach
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-6">
+
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-6">
               Our Hybrid Curriculum
             </h2>
-            <div className="text-gray-600 text-lg leading-relaxed space-y-5">
+
+            <div className="text-gray-700 text-lg leading-relaxed space-y-5">
+
               <p>
                 At Golden-Intels, we offer a unique hybrid curriculum that combines the best of international and local education standards. Our approach integrates Oxford International Curriculum (OIC) subjects with Ghana Education Service (GES) subjects for lower and upper primary learners, while Early Years and Reception learners are given pure Oxford and Montessori education, laying a good educational foundation.
               </p>
+
               <p>
-                We emphasize project-based learning, play-based learning, place-based learning and inquiry-based learning, encouraging students to ask questions, explore ideas, and develop solutions. Our approach nurtures intellectual curiosity while building strong foundational knowledge across all disciplines.
+                We emphasize project-based learning, play-based learning, place-based learning and inquiry-based learning, encouraging students to ask questions, explore ideas, and develop solutions.
               </p>
+
               <p>
                 Through personalized attention and differentiated instruction, we ensure each student reaches their full potential and develops the skills needed for success in higher education and beyond.
               </p>
+
             </div>
 
             {/* Approaches */}
             <div className="grid grid-cols-2 gap-4 mt-8">
               {approaches.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 text-cyan-700 font-medium">
-                  <div className="text-cyan-600">{item.icon}</div>
-                  <span>{item.label}</span>
+                <div
+                  key={index}
+                  className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm"
+                >
+                  <div className="text-[#22c55e]">{item.icon}</div>
+                  <span className="text-[#0654f9] font-semibold">
+                    {item.label}
+                  </span>
                 </div>
               ))}
             </div>
+
           </div>
 
           {/* Right: Photo */}
@@ -57,115 +75,151 @@ export default function Academics() {
             <img
               src={academicsImg}
               alt="Our Hybrid Curriculum"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
 
         </div>
       </section>
 
-    {/* Grade Levels & Curriculum Structure */}
+      {/* Grade Levels & Curriculum Structure */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+
+            <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Curriculum Structure
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
+
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2] mb-4">
               Grade Levels & Curriculum Structure
             </h2>
+
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               We serve students from Early Years through Reception to Primary with a balanced blend of international and local curricula.
             </p>
+
           </div>
 
           {/* Two Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
             {/* OIC Card */}
-            <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
+
+              <span className="inline-block bg-[#ffff00] text-[#0654f9] text-sm font-bold px-4 py-1 rounded-full mb-4">
                 International
               </span>
+
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Oxford International Curriculum (OIC)
               </h3>
-              <p className="text-cyan-100 mb-6">
+
+              <p className="text-blue-100 mb-6">
                 Our OIC subjects develop global competencies and critical thinking skills:
               </p>
+
               <ul className="space-y-3">
-                {['Science', 'Mathematics', 'English', 'Computing', 'Geography', 'Global Skills Projects', 'Wellbeing', 'Sustainability'].map((subject, index) => (
+                {[
+                  'Science',
+                  'Mathematics',
+                  'English',
+                  'Computing',
+                  'Geography',
+                  'Global Skills Projects',
+                  'Wellbeing',
+                  'Sustainability',
+                ].map((subject, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-[#ffff00]"></div>
                     <span className="text-blue-100">{subject}</span>
                   </li>
                 ))}
               </ul>
+
             </div>
 
             {/* GES Card */}
-            <div className="bg-[#4a235a] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-xl">
+
+              <span className="inline-block bg-[#22c55e] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Local
               </span>
+
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Ghana Education Service (GES)
               </h3>
-              <p className="text-purple-200 mb-6">
+
+              <p className="text-purple-100 mb-6">
                 Our GES subjects connect students to their cultural heritage and local context:
               </p>
+
               <ul className="space-y-3">
-                {['Creative Arts', 'History', 'Ghanaian Language (Ewe)', 'French', 'Religious and Moral Education (RME)'].map((subject, index) => (
+                {[
+                  'Creative Arts',
+                  'History',
+                  'Ghanaian Language (Ewe)',
+                  'French',
+                  'Religious and Moral Education (RME)',
+                ].map((subject, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-[#ffff00]"></div>
                     <span className="text-purple-100">{subject}</span>
                   </li>
                 ))}
               </ul>
+
             </div>
 
           </div>
         </div>
       </section>
 
-   {/* A Growing School */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
+      {/* A Growing School */}
+      <section className="py-20 bg-gradient-to-br from-[#ecfdf5] to-[#dbeafe]">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+
+            <span className="inline-block bg-[#22c55e] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Growth & Development
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
+
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-4">
               A Growing School
             </h2>
+
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Golden-Intels is a dynamic, expanding school committed to continuous growth and excellence.
             </p>
+
           </div>
 
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
 
-            {/* Expanding Every Year */}
-            <div className="bg-blue-500 text-cyan-700 rounded-2xl p-10 shadow-md">
+            <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Expanding Every Year
               </h3>
-              <p className="text-cyan-700/80 text-lg leading-relaxed">
-                Golden-Intels is actively growing and expanding its facilities and programs. We are committed to excellence.
+
+              <p className="text-blue-100 text-lg leading-relaxed">
+                Golden-Intels is actively growing and expanding its facilities and programs.
               </p>
             </div>
 
-            {/* Future Expansion Plans */}
-            <div className="bg-[#4a235a] text-white rounded-2xl p-10 shadow-md">
+            <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-xl">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Future Expansion Plans
               </h3>
-              <p className="text-purple-200 text-lg leading-relaxed">
-                As we grow, we are planning to introduce additional enhanced facilities and Lower and Upper Secondary levels for higher students.
+
+              <p className="text-purple-100 text-lg leading-relaxed">
+                We are planning to introduce enhanced facilities and Lower and Upper Secondary levels.
               </p>
             </div>
 
@@ -174,136 +228,109 @@ export default function Academics() {
           {/* Second Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-            {/* Modern Learning Facilities */}
-            <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
+            <div className="bg-[#22c55e] text-white rounded-2xl p-10 shadow-xl">
+
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Modern Learning Facilities
               </h3>
-              <p className="text-cyan-100 mb-6 text-lg">
+
+              <p className="text-green-100 mb-6 text-lg">
                 Our school is equipped with innovative learning spaces:
               </p>
+
               <ul className="space-y-3">
                 {[
                   'Computer Lab',
                   'Science Lab',
                   'Library',
-                  'Playgrounds, to enhance motto skills',
+                  'Playgrounds to enhance motor skills',
                 ].map((facility, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span className="text-blue-100">{facility}</span>
+                    <div className="w-2 h-2 rounded-full bg-[#ffff00]"></div>
+                    <span className="text-green-100">{facility}</span>
                   </li>
                 ))}
               </ul>
+
             </div>
 
-            {/* Current Offerings */}
-            <div className="bg-blue-500 text-cyan-700 rounded-2xl p-10 shadow-md">
+            <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
+
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Current Offerings
               </h3>
-              <p className="text-cyan-700/80 text-lg leading-relaxed">
-                Currently serving students from Early Years through Reception to Primary with our hybrid OIC and GES curriculum, with plans to expand progressively to Lower and Upper Secondary education.
+
+              <p className="text-blue-100 text-lg leading-relaxed">
+                Currently serving students from Early Years through Reception to Primary with our hybrid OIC and GES curriculum.
               </p>
+
             </div>
 
           </div>
+
         </div>
       </section>
 
-    {/* Educational Pathways */}
+      {/* Educational Pathways */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
 
-          {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+
+            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Pathways
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
+
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-4">
               Educational Pathways
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Clear progression routes for students advancing through our school system.
-            </p>
+
           </div>
 
-          {/* Three Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            {/* Ghana Education Pathway */}
-            <div className="bg-[#0f6e56] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#22c55e] text-white rounded-2xl p-10 shadow-xl">
+
+              <span className="inline-block bg-[#ffff00] text-[#0654f9] text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Local
               </span>
+
               <h3 className="text-2xl font-bold font-serif mb-6">
                 Ghana Education Pathway
               </h3>
-              <div className="space-y-5">
-                <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-cyan-300 mb-1">BECE</h4>
-                  <p className="text-green-100 text-sm">Basic Education Certificate Examination</p>
-                  <p className="text-green-200 text-sm mt-1">Taken at the end of Junior High School (Grade 9)</p>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-cyan-300 mb-1">SHS</h4>
-                  <p className="text-green-100 text-sm">Senior High School</p>
-                  <p className="text-green-200 text-sm mt-1">Three-year program following BECE qualification</p>
-                </div>
-                <p className="text-green-200 text-sm leading-relaxed">
-                  Students following the GES pathway progress through Ghana's national education system.
-                </p>
-              </div>
+
             </div>
 
-            {/* International Pathway */}
-            <div className="bg-[#4a235a] text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-xl">
+
+              <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 International
               </span>
+
               <h3 className="text-2xl font-bold font-serif mb-6">
                 International Pathway
               </h3>
-              <div className="space-y-5">
-                <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-cyan-300 mb-1">International GCSE</h4>
-                  <p className="text-purple-100 text-sm">Comprehensive qualification at Grade 10-11</p>
-                </div>
-                <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-cyan-300 mb-1">A-Level & OxfordAQA</h4>
-                  <p className="text-purple-100 text-sm">Advanced qualifications through Grade 12-13</p>
-                </div>
-                <p className="text-purple-200 text-sm leading-relaxed">
-                  Students can continue to Grade 13 for advanced international qualifications.
-                </p>
-              </div>
+
             </div>
 
-            {/* Flexible Progression */}
-            <div className="bg-blue-600 text-white rounded-2xl p-10 shadow-md">
-              <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
+
+              <span className="inline-block bg-[#22c55e] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Flexible
               </span>
+
               <h3 className="text-2xl font-bold font-serif mb-6">
                 Flexible Progression
               </h3>
-              <div className="space-y-5">
-                <p className="text-cyan-100 text-lg leading-relaxed">
-                  Our hybrid curriculum allows students to transition between pathways based on their academic goals and aspirations.
-                </p>
-                <div className="bg-white/10 rounded-xl p-4">
-                  <h4 className="font-bold text-cyan-300 mb-1">Grade 1 - Grade 9</h4>
-                  <p className="text-blue-100 text-sm">Students develop skills and knowledge to pursue either pathway successfully.</p>
-                </div>
-              </div>
+
             </div>
 
           </div>
         </div>
       </section>
 
-   {/* Programme Offerings */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 to-blue-100">
+      {/* Programme Offerings */}
+      <section className="py-20 bg-gradient-to-br from-[#dbeafe] to-[#ecfdf5]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Photo */}
@@ -311,122 +338,87 @@ export default function Academics() {
             <img
               src={programmesImg}
               alt="Programme Offerings"
-              className="w-full h-[420px] object-cover rounded-2xl shadow-xl" loading="lazy" decoding="async" />
+              className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
 
           {/* Right: Text Card */}
-          <div className="flex-1 bg-blue-600 text-white rounded-2xl p-10 shadow-md">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+          <div className="flex-1 bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
+
+            <span className="inline-block bg-[#ffff00] text-[#0654f9] text-sm font-bold px-4 py-1 rounded-full mb-4">
               What We Offer
             </span>
+
             <h3 className="text-2xl font-bold font-serif mb-6">
               Programme Offerings
             </h3>
-            <p className="text-cyan-100 text-lg leading-relaxed mb-6">
-              Golden-Intels offers Oxford International Curriculum (OIC) and Ghana Education Service (GES) programmes. Our focus is on providing quality education through our hybrid curriculum that combines international best practices with local educational standards, ensuring students receive a well-rounded education that prepares them for success in Ghana and on the global stage.
+
+            <p className="text-blue-100 text-lg leading-relaxed mb-6">
+              Golden-Intels offers Oxford International Curriculum (OIC) and Ghana Education Service (GES) programmes.
             </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 rounded-xl p-4 text-center">
-                <div className="text-cyan-300 font-bold text-lg mb-1">OIC</div>
-                <div className="text-cyan-100 text-sm">Oxford International Curriculum</div>
-              </div>
-              <div className="bg-white/10 rounded-xl p-4 text-center">
-                <div className="text-cyan-300 font-bold text-lg mb-1">GES</div>
-                <div className="text-cyan-100 text-sm">Ghana Education Service</div>
-              </div>
-            </div>
+
           </div>
 
         </div>
       </section>
 
-    {/* Our Learning Approach */}
+      {/* Our Learning Approach */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
 
-          {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-blue-500 text-cyan-700 text-sm font-bold px-4 py-1 rounded-full mb-4">
+
+            <span className="inline-block bg-[#22c55e] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               How We Teach
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-cyan-700 mb-4">
+
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2] mb-4">
               Our Learning Approach
             </h2>
+
           </div>
 
-          {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            <div className="bg-blue-600 text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">1</div>
-              <h4 className="text-xl font-bold mb-3">Inquiry-Based Learning</h4>
-              <p className="text-cyan-100 leading-relaxed">
-                Students explore concepts through questions and investigations, developing critical thinking and problem-solving skills.
-              </p>
-            </div>
+            {[
+              {
+                number: 1,
+                title: 'Inquiry-Based Learning',
+                text: 'Students explore concepts through questions and investigations.',
+                bg: 'bg-[#0654f9]',
+              },
+              {
+                number: 2,
+                title: 'Collaborative Project-Based Learning',
+                text: 'Team-based activities foster communication and leadership.',
+                bg: 'bg-[#8a2be2]',
+              },
+              {
+                number: 3,
+                title: 'Technology Integration',
+                text: 'Modern tools enhance learning experiences.',
+                bg: 'bg-[#22c55e]',
+              },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className={`${item.bg} text-white rounded-2xl p-8 shadow-xl`}
+              >
+                <div className="w-10 h-10 bg-[#ffff00] text-[#0654f9] rounded-full flex items-center justify-center font-bold mb-4">
+                  {item.number}
+                </div>
 
-            <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">2</div>
-              <h4 className="text-xl font-bold mb-3">Collaborative Project-Based Learning</h4>
-              <p className="text-purple-200 leading-relaxed">
-                Team-based activities foster communication, leadership, and cooperation while building real-world skills.
-              </p>
-            </div>
+                <h4 className="text-xl font-bold mb-3">
+                  {item.title}
+                </h4>
 
-            <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">3</div>
-              <h4 className="text-xl font-bold mb-3">Technology Integration</h4>
-              <p className="text-green-200 leading-relaxed">
-                Modern tools and digital resources enhance learning experiences and prepare students for the digital age.
-              </p>
-            </div>
-
-            <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">4</div>
-              <h4 className="text-xl font-bold mb-3">Personalized Support</h4>
-              <p className="text-green-200 leading-relaxed">
-                Individual attention and tailored instruction ensure every student receives the support they need to excel.
-              </p>
-            </div>
-
-            <div className="bg-blue-600 text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">5</div>
-              <h4 className="text-xl font-bold mb-3">Global Perspectives</h4>
-              <p className="text-cyan-100 leading-relaxed">
-                International curriculum and diverse viewpoints prepare students for success in a connected world.
-              </p>
-            </div>
-
-            <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">6</div>
-              <h4 className="text-xl font-bold mb-3">Play-Based Learning</h4>
-              <p className="text-purple-200 leading-relaxed">
-                Learners at the Early Years are exposed to concepts through playful activities.
-              </p>
-            </div>
-
-            <div className="bg-[#4a235a] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">7</div>
-              <h4 className="text-xl font-bold mb-3">Place-Based Learning</h4>
-              <p className="text-purple-200 leading-relaxed">
-                Learners are exposed to knowledge through drawing their attention to their immediate environment.
-              </p>
-            </div>
-
-            <div className="bg-[#0f6e56] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 mb-4">8</div>
-              <h4 className="text-xl font-bold mb-3">Assessment for Learning</h4>
-              <p className="text-green-200 leading-relaxed">
-                Continuous feedback and varied assessment methods guide student progress and inform instruction.
-              </p>
-            </div>
-
-            {/* Empty card to balance the grid */}
-            <div className="bg-blue-600 text-white rounded-2xl p-8 shadow-md flex items-center justify-center">
-              <p className="text-cyan-100 text-center text-lg font-serif italic">
-                "Education is not the filling of a pail, but the lighting of a fire."
-              </p>
-            </div>
+                <p className="text-white/90 leading-relaxed">
+                  {item.text}
+                </p>
+              </div>
+            ))}
 
           </div>
         </div>
