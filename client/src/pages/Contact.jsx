@@ -1,26 +1,34 @@
 import { useState } from 'react'
-import { Mail, MessageCircle, MessageSquare, Phone, MapPin } from 'lucide-react'
+import { Mail, MessageCircle, MessageSquare, Phone, MapPin, CheckCircle } from 'lucide-react'
+import axios from 'axios'
+import API_URL from '../api/config'
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
-  })
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (event) => {
     const { name, value } = event.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    console.log('Contact form submitted', formData)
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+    setLoading(true); setError('')
+    try {
+      await axios.post(`${API_URL}/api/contact`, formData)
+      setSuccess(true)
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' })
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send message. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
-
+  // ... add success/error UI before the button:
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   return (
     <main className="bg-gradient-to-br from-blue-50 via-white to-yellow-50 text-slate-900">
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
@@ -175,6 +183,23 @@ export default function Contact() {
                   placeholder="How can we help you today?"
                 />
               </label>
+
+              {success && (
+                <div className="flex items-center gap-3 bg-green-900/40 border border-green-500 text-green-300 px-4 py-3 rounded-2xl">
+                  <CheckCircle size={18} />
+                  <p className="text-sm font-semibold">Message sent! We'll get back to you within one business day.</p>
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-900/40 border border-red-500 text-red-300 px-4 py-3 rounded-2xl text-sm">{error}</div>
+              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-[#8a2be2] via-violet-600 to-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:opacity-50"
+        >
+          {loading ? 'Sending...' : 'Send Message'}
+        </button>
 
               <button
                 type="submit"

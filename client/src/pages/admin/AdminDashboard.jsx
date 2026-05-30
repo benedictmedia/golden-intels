@@ -5,7 +5,7 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import AdminMessages from '../../components/messages/AdminMessages'
@@ -23,6 +23,7 @@ const menuItems = [
   { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
   { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' }
+  { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
 ]
 
 const stats = [
@@ -39,6 +40,10 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  const [contactMessages, setContactMessages] = useState([])
+  const [contactLoading, setContactLoading] = useState(false)
+  const [viewingContact, setViewingContact] = useState(null)
 
   // Create account state
   const initialNewUserState = {
@@ -182,6 +187,13 @@ export default function AdminDashboard() {
       })
       axios.get(`${API_URL}/api/fees/payments`).then(res => setFeePayments(res.data))
       axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
+    }
+    if (activeMenu === 'contact-messages') {
+      setContactLoading(true)
+      axios.get(`${API_URL}/api/contact`, { headers: getAuthHeaders() })
+        .then(res => setContactMessages(res.data))
+        .catch(console.error)
+        .finally(() => setContactLoading(false))
     }
   }, [activeMenu])
 
@@ -2297,6 +2309,100 @@ export default function AdminDashboard() {
 
         </div>
       </div>
+
+      {/* Contact Messages */}
+{activeMenu === 'contact-messages' && (
+  <div>
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Contact Messages</h2>
+      <p className="text-gray-500 text-sm">Messages sent by visitors from the public contact page.</p>
+    </div>
+    {contactLoading ? (
+      <div className="text-gray-400 text-center py-12">Loading...</div>
+    ) : contactMessages.length === 0 ? (
+      <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No contact messages yet.</div>
+    ) : (
+      <div className="space-y-4">
+        {contactMessages.map(msg => (
+          <div key={msg.id} className={`bg-white rounded-2xl p-6 shadow-sm border transition-all ${msg.read ? 'border-gray-100' : 'border-blue-400 shadow-blue-100'}`}>
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                  {!msg.read && <span className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />}
+                  <h3 className="font-bold text-cyan-700 text-lg">{msg.name}</h3>
+                  <span className="text-xs text-gray-400">{new Date(msg.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-2">
+                  <span>✉️ <a href={`mailto:${msg.email}`} className="text-blue-600 hover:underline">{msg.email}</a></span>
+                  {msg.phone && <span>📞 <a href={`tel:${msg.phone}`} className="text-blue-600 hover:underline">{msg.phone}</a></span>}
+                  {msg.subject && <span>📌 {msg.subject}</span>}
+                </div>
+                <p className="text-gray-700 text-sm line-clamp-2">{msg.message}</p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setViewingContact(msg)
+                    if (!msg.read) {
+                      axios.put(`${API_URL}/api/contact/${msg.id}/read`, {}, { headers: getAuthHeaders() })
+                        .then(() => setContactMessages(prev => prev.map(m => m.id === msg.id ? { ...m, read: true } : m)))
+                        .catch(() => {})
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"
+                >
+                  <Eye size={14} /> View
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!window.confirm('Delete this message?')) return
+                    await axios.delete(`${API_URL}/api/contact/${msg.id}`, { headers: getAuthHeaders() })
+                    setContactMessages(prev => prev.filter(m => m.id !== msg.id))
+                  }}
+                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {/* View Contact Modal */}
+    {viewingContact && (
+      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
+          <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <h2 className="text-xl font-bold font-serif">Contact Message</h2>
+            <button onClick={() => setViewingContact(null)} className="hover:text-cyan-600"><X size={24} /></button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {[['Name', viewingContact.name], ['Email', viewingContact.email], ['Phone', viewingContact.phone || '—'], ['Subject', viewingContact.subject || '—'], ['Received', new Date(viewingContact.createdAt).toLocaleString()]].map(([label, value]) => (
+                <div key={label} className="bg-blue-50 rounded-xl px-4 py-3">
+                  <p className="text-xs font-bold text-cyan-700">{label}</p>
+                  <p className="text-sm text-gray-700">{value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="bg-blue-50 rounded-xl px-4 py-3">
+              <p className="text-xs font-bold text-cyan-700 mb-1">Message</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{viewingContact.message}</p>
+            </div>
+            <div className="flex gap-3">
+              <a href={`mailto:${viewingContact.email}`} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors text-center text-sm">
+                Reply via Email
+              </a>
+              <button onClick={() => setViewingContact(null)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
       {/* Messages */}
       {activeMenu === 'messages' && <AdminMessages />}

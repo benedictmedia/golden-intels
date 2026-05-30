@@ -59,6 +59,7 @@ app.use('/api/staff', require('./routes/staff'))
 app.use('/api/fees', require('./routes/fees'))
 app.use('/api/attendance', require('./routes/attendance'))
 app.use('/api/users', require('./routes/users'))
+app.use('/api/contact', require('./routes/contact'))
 app.use('/api/messages', require('./routes/messageRoutes'))
 
 const seedDefaultUsers = async () => {
