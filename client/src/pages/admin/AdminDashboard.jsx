@@ -22,7 +22,7 @@ const menuItems = [
   { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery' },
   { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
-  { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' }
+  { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' },
   { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
 ]
 
