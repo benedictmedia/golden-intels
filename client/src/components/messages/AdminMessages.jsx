@@ -356,9 +356,9 @@ export default function AdminMessages() {
                         <div key={msg.id} className={`flex mb-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
                           <div className={`relative max-w-[70%] px-3 py-2 rounded-2xl shadow-sm ${
                             isMine
-                              ? 'bg-[#d9fdd3] text-gray-800 rounded-tr-none'
-                              : 'bg-white text-gray-800 rounded-tl-none'
-                          }`} style={{ wordBreak: 'break-word' }}>
+                                ? 'bg-[#dce8ff] text-gray-800 rounded-tr-none'
+                                : 'bg-white text-gray-800 rounded-tl-none'
+                            }`} style={{ wordBreak: 'break-word' }}>
                             {/* Show parent name on their messages */}
                             {!isMine && (
                               <p className="text-[11px] font-bold mb-0.5 leading-tight"
@@ -373,10 +373,10 @@ export default function AdminMessages() {
                               <span className="text-[10px] text-gray-400 leading-none">{formatTime(msg.createdAt)}</span>
                               {isMine && (
                                 <CheckCheck size={13}
-                                  className={msg.read ? 'text-blue-500' : 'text-gray-400'}
-                                  strokeWidth={2.5}
+                                    className={msg.read ? 'text-[#1a3c6e]' : 'text-gray-400'}
+                                    strokeWidth={2.5}
                                 />
-                              )}
+                        )}
                             </span>
                           </div>
                         </div>
