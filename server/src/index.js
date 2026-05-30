@@ -5,6 +5,8 @@ const path = require('path')
 const bcrypt = require('bcryptjs')
 const { execSync } = require('child_process')
 const { PrismaClient } = require('@prisma/client')
+const { createServer } = require('http')
+const { initSocket } = require('./socket')
 
 dotenv.config()
 
@@ -21,6 +23,7 @@ try {
 
 const prisma = new PrismaClient()
 const app = express()
+const httpServer = createServer(app)
 
 app.use(cors({
   origin: [
@@ -31,6 +34,8 @@ app.use(cors({
   ],
   credentials: true
 }))
+
+initSocket(httpServer)
 
 app.use(express.json())
 
@@ -54,6 +59,7 @@ app.use('/api/staff', require('./routes/staff'))
 app.use('/api/fees', require('./routes/fees'))
 app.use('/api/attendance', require('./routes/attendance'))
 app.use('/api/users', require('./routes/users'))
+app.use('/api/messages', require('./routes/messageRoutes'))
 
 const seedDefaultUsers = async () => {
   const defaultUsers = [
@@ -82,9 +88,7 @@ const PORT = process.env.PORT || 5000
 
 seedDefaultUsers()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`)
-    })
+    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
   })
   .catch((error) => {
     console.error('Failed to seed default users:', error)

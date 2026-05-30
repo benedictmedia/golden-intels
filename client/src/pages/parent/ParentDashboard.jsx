@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import ParentMessages from '../components/messages/ParentMessages'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -812,59 +813,7 @@ export default function ParentDashboard() {
           )}
 
           {/* Messages */}
-          {activeMenu === 'messages' && (
-            <div>
-              <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-6">Messages to Admin</h2>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-
-                {/* Message List */}
-                <div className="p-6 min-h-[300px] max-h-[400px] overflow-y-auto space-y-4">
-                  {messages.length === 0 ? (
-                    <div className="text-center text-gray-400 py-10">
-                      No messages yet. Send a message to the admin below.
-                    </div>
-                  ) : (
-                    messages.map(msg => (
-                      <div key={msg.id} className="flex justify-end">
-                        <div className="bg-[#4a235a] text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-md">
-                          <p className="text-sm">{msg.text}</p>
-                          <p className="text-xs text-purple-300 mt-1 text-right">{msg.time}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Message Input */}
-                <div className="border-t border-gray-100 p-4">
-                  {messageSent && (
-                    <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-2 rounded-lg mb-3 text-sm">
-                      Message sent to admin!
-                    </div>
-                  )}
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Type your message to admin..."
-                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700 text-sm"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      className="bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors flex items-center gap-2"
-                    >
-                      <Send size={16} />
-                      Send
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          )}
-
+          {activeMenu === 'messages' && <ParentMessages />}
         </div>
       </div>
     {/* View Full Result Modal */}

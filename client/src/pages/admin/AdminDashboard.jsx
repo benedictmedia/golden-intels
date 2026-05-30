@@ -5,9 +5,10 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import AdminMessages from '../components/messages/AdminMessages'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -21,6 +22,7 @@ const menuItems = [
   { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery' },
   { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
+  { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' }
 ]
 
 const stats = [
@@ -2295,6 +2297,9 @@ export default function AdminDashboard() {
 
         </div>
       </div>
+
+      {/* Messages */}
+      {activeMenu === 'messages' && <AdminMessages />}
 
       {/* Student Detail Modal */}
       {selectedStudent && (
