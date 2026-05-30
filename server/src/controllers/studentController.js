@@ -93,13 +93,11 @@ const createStudent = async (req, res) => {
     }
 
     const student = await prisma.$transaction(async (tx) => {
-      const createdStudent = await tx.student.create({
-        data: { studentId, firstName, lastName, dateOfBirth, gender, gradeLevel, parentId, parentName, parentEmail, parentPhone, address, photo }
-      })
+      let learnerUserId = null
 
       if (email && password) {
         const hashedPassword = await bcrypt.hash(password, 10)
-        await tx.user.create({
+        const learnerUser = await tx.user.create({
           data: {
             name: [firstName, lastName].filter(Boolean).join(' ') || email,
             email,
@@ -107,7 +105,16 @@ const createStudent = async (req, res) => {
             role: 'learner'
           }
         })
+        learnerUserId = learnerUser.id
       }
+
+      const createdStudent = await tx.student.create({
+        data: {
+          studentId, firstName, lastName, dateOfBirth, gender,
+          gradeLevel, parentId, parentName, parentEmail,
+          parentPhone, address, photo, learnerUserId
+        }
+      })
 
       return createdStudent
     })
@@ -153,4 +160,37 @@ const deleteStudent = async (req, res) => {
   }
 }
 
-module.exports = { getStudents, createStudent, updateStudent, deleteStudent }
+const getMyProfile = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const userEmail = req.user.email
+
+    // Try by learnerUserId first (most reliable)
+    let student = await prisma.student.findFirst({
+      where: { learnerUserId: userId },
+      include: { parent: { select: { id: true, name: true, email: true } } }
+    })
+
+    // Fallback: match by email for older records created before learnerUserId existed
+    if (!student) {
+      student = await prisma.student.findFirst({
+        where: {
+          OR: [
+            { parentEmail: userEmail },
+          ]
+        },
+        include: { parent: { select: { id: true, name: true, email: true } } }
+      })
+    }
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student profile not found' })
+    }
+
+    res.json(student)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+module.exports = { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent }

@@ -260,7 +260,7 @@ export default function LearnerDashboard() {
     <div className="flex h-screen overflow-hidden" style={{ background: '#0f1729' }}>
 
       {/* ── Sidebar ── */}
-      <div className="w-64 flex flex-col flex-shrink-0" style={{ background: 'linear-gradient(180deg, #1a1f3a 0%, #0f1729 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="w-64 flex flex-col flex-shrink-0" style={{ background: 'linear-gradient(180deg, #0000ff 0%, #8a2be2 60%, #800080 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
@@ -332,7 +332,7 @@ export default function LearnerDashboard() {
       </div>
 
       {/* ── Main content ── */}
-      <div className="flex-1 overflow-y-auto" style={{ background: '#f1f5f9' }}>
+      <div className="flex-1 overflow-y-auto" style={{ background: '#ffffff' }}>
 
         {/* Top bar */}
         <div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between" style={{ background: 'rgba(241,245,249,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e2e8f0' }}>
@@ -372,67 +372,69 @@ export default function LearnerDashboard() {
               ) : (
                 <>
                   {/* Hero card */}
-                  <div className="rounded-3xl overflow-hidden shadow-lg">
-                    {/* Banner */}
-                    <div className="h-32 relative" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 70%, #1e3a5f 100%)' }}>
-                      <div className="absolute inset-0 opacity-20"
-                        style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
-                      <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.4)' }}>
-                        {studentProfile?.status?.toUpperCase() || 'ACTIVE'}
-                      </div>
-                    </div>
+<div className="rounded-3xl shadow-lg" style={{ background: '#fff', border: '1px solid #e2e8f0' }}>
+  {/* Banner */}
+  <div className="h-28 rounded-t-3xl relative" style={{ background: 'linear-gradient(135deg, #8a2be2 0%, #800080 50%, #0000ff 100%)' }}>
+    <div className="absolute inset-0 rounded-t-3xl opacity-20"
+      style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
+    <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full"
+      style={{ background: 'rgba(255,255,0,0.2)', color: '#ffff00', border: '1px solid rgba(255,255,0,0.5)' }}>
+      {studentProfile?.status?.toUpperCase() || 'ACTIVE'}
+    </div>
+  </div>
 
-                    {/* Profile area */}
-                    <div className="bg-white px-8 pb-8">
-                      <div className="flex items-end gap-6 -mt-12 mb-6">
-                        {studentProfile?.photo ? (
-                          <img src={studentProfile.photo} alt={displayName}
-                            className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg"
-                            style={{ border: '4px solid white' }} />
-                        ) : (
-                          <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg"
-                            style={{ backgroundColor: avatarColor, border: '4px solid white' }}>
-                            {initials}
-                          </div>
-                        )}
-                        <div className="pb-2">
-                          <h2 className="text-2xl font-black" style={{ color: '#1e293b' }}>{displayName}</h2>
-                          <p className="text-sm font-medium mt-0.5" style={{ color: '#7c3aed' }}>
-                            {studentProfile?.gradeLevel || 'Grade not assigned'}
-                          </p>
-                        </div>
-                        {studentProfile?.studentId && (
-                          <div className="ml-auto pb-2 text-right">
-                            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>Student ID</p>
-                            <p className="text-lg font-black" style={{ color: '#1e293b' }}>{studentProfile.studentId}</p>
-                          </div>
-                        )}
-                      </div>
+  {/* Profile area — avatar sits BELOW banner, not overlapping */}
+  <div className="px-8 pt-6 pb-8">
+    <div className="flex items-start gap-6 mb-6">
+      {studentProfile?.photo ? (
+        <img src={studentProfile.photo} alt={displayName}
+          className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg"
+          style={{ border: '4px solid #8a2be2' }} />
+      ) : (
+        <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg"
+          style={{ backgroundColor: avatarColor, border: '4px solid #8a2be2' }}>
+          {initials}
+        </div>
+      )}
+      <div className="flex-1 min-w-0 pt-2">
+        <h2 className="text-2xl font-black truncate" style={{ color: '#1e293b' }}>{displayName}</h2>
+        <p className="text-sm font-bold mt-0.5" style={{ color: '#8a2be2' }}>
+          {studentProfile?.gradeLevel || 'Grade not assigned'}
+        </p>
+      </div>
+      {studentProfile?.studentId && (
+        <div className="text-right pt-2 flex-shrink-0">
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>Student ID</p>
+          <p className="text-lg font-black" style={{ color: '#0000ff' }}>{studentProfile.studentId}</p>
+        </div>
+      )}
+    </div>
 
-                      {/* Info grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                          { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#7c3aed' },
-                          { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#2563eb' },
-                          { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#d97706' },
-                          { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#0891b2' },
-                          { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#7c3aed' },
-                          { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#059669' },
-                        ].map(({ icon: Icon, label, value, color }) => (
-                          <div key={label} className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                              style={{ background: `${color}15` }}>
-                              <Icon size={18} style={{ color }} />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
-                              <p className="font-semibold text-sm truncate mt-0.5" style={{ color: '#1e293b' }}>{value}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+    {/* Info grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {[
+        { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#8a2be2' },
+        { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#0000ff' },
+        { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#800080' },
+        { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#0000ff' },
+        { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#8a2be2' },
+        { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#059669' },
+      ].map(({ icon: Icon, label, value, color }) => (
+        <div key={label} className="flex items-center gap-4 p-4 rounded-2xl"
+          style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: `${color}18` }}>
+            <Icon size={18} style={{ color }} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
+            <p className="font-semibold text-sm truncate mt-0.5" style={{ color: '#1e293b' }}>{value}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
 
                   {/* Parent info card */}
                   {(studentProfile?.parentName || studentProfile?.parentEmail || studentProfile?.parentPhone) && (
