@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken')
 const prisma = require('../config/prismaClient')
 
 // Generate JWT
-const generateToken = (id, role, email) => {
-  return jwt.sign({ id, role, email }, process.env.JWT_SECRET, { expiresIn: '7d' })
+const generateToken = (id, role, name, email) => {
+  return jwt.sign({ id, role, name, email }, process.env.JWT_SECRET, { expiresIn: '7d' })
 }
 
 const parseArrayField = (value) => {
@@ -167,7 +167,7 @@ const register = async (req, res) => {
       return createdUser
     })
 
-    const token = generateToken(user.id, user.role, user.email)
+    const token = generateToken(user.id, user.role, user.name, user.email)
     const responseUser = await buildUserResponse(user)
     res.status(201).json({ token, user: responseUser })
   } catch (error) {
@@ -189,7 +189,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' })
     }
-    const token = generateToken(user.id, user.role, user.email)
+    const token = generateToken(user.id, user.role, user.name, user.email)
     const responseUser = await buildUserResponse(user)
     res.json({ token, user: responseUser })
   } catch (error) {
