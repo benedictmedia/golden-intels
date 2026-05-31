@@ -854,7 +854,7 @@ export default function TeacherDashboard() {
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>G</div>
               <div>
-                <p className="text-xs font-bold">Golden-Intels</p>
+                <p className="text-xs font-bold text-white">Golden-Intels</p>
                 <p className="text-xs text-cyan-100">Teacher Portal</p>
               </div>
             </div>
