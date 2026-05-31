@@ -8,14 +8,6 @@ import {
 } from 'lucide-react'
 import API_URL from '../../api/config'
 
-if (!gradeLevel) {
-  return (
-    <div className="p-8 text-center">
-      <p className="text-gray-500">Please wait while we load your class information...</p>
-    </div>
-  );
-}
-
 const JITSI_DOMAIN = 'meet.jit.si'
 
 const STATUS_CONFIG = {
@@ -65,6 +57,20 @@ export default function LearnerClassroom({ gradeLevel }) {
   const jitsiContainerRef = useRef(null)
   const jitsiApiRef = useRef(null)
   const pollRef = useRef(null)
+
+  // Early return if no grade level is assigned
+  if (!gradeLevel) {
+    return (
+      <div className="p-12 text-center">
+        <AlertCircle size={48} className="mx-auto mb-4 text-amber-500" />
+        <h3 className="text-xl font-bold text-gray-700 mb-2">No Grade Level Assigned</h3>
+        <p className="text-gray-500 max-w-md mx-auto">
+          Your profile doesn't have a grade level yet.<br />
+          Please contact your teacher or the school admin.
+        </p>
+      </div>
+    )
+  }
 
   // ── Load Jitsi script ─────────────────────────────────────────────────────
   useEffect(() => {
