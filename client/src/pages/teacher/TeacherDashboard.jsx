@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
-  GraduationCap, LogOut, Menu, X, Bell, MonitorPlay
+  GraduationCap, LogOut, Menu, X, Bell, MonitorPlay, 
+  User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
@@ -12,6 +13,7 @@ import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, get
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 
 const menuItems = [
+  { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
   { icon: <Users size={20} />, label: 'My Classes', id: 'classes' },
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
@@ -20,13 +22,16 @@ const menuItems = [
   { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' },
 ]
 
-const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
+const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
+
+const AVATAR_COLORS = ['#0000ff', '#8a2be2', '#800080', '#0369a1', '#0e7490', '#1a3c6e', '#4a235a']
+const getAvatarColor = (name = '') => AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
 
 export default function TeacherDashboard() {
   const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
-  const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [activeMenu, setActiveMenu] = useState('profile')
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
   const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -60,6 +65,9 @@ export default function TeacherDashboard() {
   const [gradebookError, setGradebookError] = useState('')
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
 
+  const displayName = (profileUser || user)?.name || user?.name || 'Teacher'
+  const avatarColor = getAvatarColor(displayName)
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
   const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
   const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
@@ -839,17 +847,35 @@ export default function TeacherDashboard() {
     <div className="flex h-screen bg-blue-100 overflow-hidden">
 
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-[#0f6e56] text-white transition-all duration-300 flex flex-col`}>
-        <div className="flex items-center justify-between p-4 border-b border-green-800">
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
+        style={{ background: '#0000ff' }}>
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>G</div>
               <div>
                 <p className="text-xs font-bold">Golden-Intels</p>
                 <p className="text-xs text-cyan-100">Teacher Portal</p>
               </div>
             </div>
           )}
+
+          {sidebarOpen && (
+          <div className="mx-3 my-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.12)' }}>
+            <div className="flex items-center gap-3">
+              {effectiveUser?.photo ? (
+                <img src={effectiveUser.photo} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" style={{ border: '2px solid #ffff00' }} />
+              ) : (
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: '#ffff00', color: '#0000ff' }}>{initials}</div>
+              )}
+              <div className="min-w-0">
+                <p className="text-white font-bold text-sm truncate">{displayName}</p>
+                <p className="text-xs truncate" style={{ color: '#ffff00' }}>{effectiveUser?.department || 'Teacher'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white hover:text-cyan-600">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -860,9 +886,13 @@ export default function TeacherDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
-                activeMenu === item.id ? 'bg-blue-500 text-cyan-700 font-bold' : 'hover:bg-green-800 text-green-200'
-              }`}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
+            style={{
+              background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
+              color: activeMenu === item.id ? '#ffff00' : 'rgba(255,255,255,0.8)',
+              borderLeft: activeMenu === item.id ? '3px solid #ffff00' : '3px solid transparent',
+              fontWeight: activeMenu === item.id ? '700' : '400'
+            }}
             >
               {item.icon}
               {sidebarOpen && <span className="text-sm">{item.label}</span>}
@@ -870,8 +900,8 @@ export default function TeacherDashboard() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-green-800">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-green-800 text-green-200 transition-colors rounded-lg">
+        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
@@ -882,17 +912,17 @@ export default function TeacherDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-        <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between flex-shrink-0" style={{ background: '#800080' }}>
           <div>
-            <h1 className="text-xl font-bold text-[#0f6e56] capitalize">{activeMenu.replace('-', ' ')}</h1>
-            <p className="text-sm text-gray-500">Welcome, {user?.name}</p>
+            <h1 className="text-lg font-bold text-white capitalize">{menuItems.find(m => m.id === activeMenu)?.label || activeMenu}</h1>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Welcome, {user?.name}</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative text-gray-500 hover:text-[#0f6e56]">
+            <button className="relative" style={{ color: 'rgba(255,255,255,0.8)' }}>
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#800080' }}>0</span>
             </button>
-            <div className="w-9 h-9 bg-[#0f6e56] rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#800080' }}>
               {user?.name?.charAt(0)}
             </div>
           </div>
@@ -929,6 +959,83 @@ export default function TeacherDashboard() {
             </div>
           </div>
 
+          {/* Profile */}
+          {activeMenu === 'profile' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="rounded-3xl overflow-hidden shadow-lg">
+                <div className="h-28 relative" style={{ background: 'linear-gradient(135deg, #800080, #8a2be2)' }}>
+                  <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
+                  <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,0,0.2)', color: '#ffff00', border: '1px solid rgba(255,255,0,0.5)' }}>
+                    {effectiveUser?.role?.toUpperCase() || 'TEACHER'}
+                  </div>
+                </div>
+                <div className="bg-white px-8 pt-6 pb-8">
+                  <div className="flex items-start gap-6 mb-6">
+                    {effectiveUser?.photo ? (
+                      <img src={effectiveUser.photo} alt={displayName} className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg" style={{ border: '4px solid #800080' }} />
+                    ) : (
+                      <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg" style={{ backgroundColor: avatarColor, border: '4px solid #800080' }}>{initials}</div>
+                    )}
+                    <div className="flex-1 min-w-0 pt-2">
+                      <h2 className="text-2xl font-black" style={{ color: '#1e293b' }}>{displayName}</h2>
+                      <p className="text-sm font-bold mt-0.5" style={{ color: '#800080' }}>{effectiveUser?.department || 'Teaching Staff'}</p>
+                      <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{teacherClassOptions.length > 0 ? `Classes: ${teacherClassOptions.join(', ')}` : 'No classes assigned yet'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {[
+                      { icon: Mail, label: 'Email Address', value: effectiveUser?.email || user?.email || '—', color: '#0000ff' },
+                      { icon: Phone, label: 'Phone Number', value: effectiveUser?.phone || '—', color: '#800080' },
+                      { icon: Briefcase, label: 'Department', value: effectiveUser?.department || '—', color: '#0000ff' },
+                      { icon: BookMarked, label: 'Primary Subject', value: effectiveUser?.staffSubject || effectiveUser?.subjects?.[0] || '—', color: '#800080' },
+                      { icon: Users, label: 'Assigned Classes', value: teacherClassOptions.length > 0 ? teacherClassOptions.join(', ') : '—', color: '#0000ff' },
+                      { icon: Award, label: 'Class Teacher For', value: classTeacherClassOptions.length > 0 ? classTeacherClassOptions.join(', ') : '—', color: '#800080' },
+                    ].map(({ icon: Icon, label, value, color }) => (
+                      <div key={label} className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}><Icon size={18} style={{ color }} /></div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#94a3b8' }}>{label}</p>
+                          <p className="font-semibold text-sm truncate mt-0.5" style={{ color: '#1e293b' }}>{value}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {effectiveUser?.subjects?.length > 0 && (
+                <div className="bg-white rounded-3xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
+                  <h3 className="font-bold text-sm uppercase tracking-widest mb-4" style={{ color: '#94a3b8' }}>All Assigned Subjects</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {effectiveUser.subjects.map(s => (
+                      <span key={s} className="text-sm font-bold px-3 py-1.5 rounded-full" style={{ background: '#f5f3ff', color: '#800080', border: '1px solid rgba(128,0,128,0.2)' }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {effectiveUser?.bio && (
+                <div className="bg-white rounded-3xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
+                  <h3 className="font-bold text-sm uppercase tracking-widest mb-3" style={{ color: '#94a3b8' }}>Bio</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>{effectiveUser.bio}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Students', value: students.length, color: '#0000ff', bg: '#eff6ff' },
+                  { label: 'Lessons', value: teacherLessons.length, color: '#800080', bg: '#fdf4ff' },
+                  { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: '#0000ff', bg: '#eff6ff' },
+                ].map(({ label, value, color, bg }) => (
+                  <div key={label} className="rounded-2xl p-5 text-center shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
+                    <p className="text-2xl font-black" style={{ color }}>{value}</p>
+                    <p className="text-xs font-bold uppercase tracking-wide mt-1" style={{ color: '#64748b' }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
             <div>
