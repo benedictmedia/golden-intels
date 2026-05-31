@@ -8,7 +8,7 @@ import {
   LogOut, GraduationCap, Calendar, Mail, Hash,
   ChevronRight, Award, Clock, CheckCircle, MonitorPlay
 } from 'lucide-react'
-import LearnerClassroom from '../components/classroom/LearnerClassroom'
+import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 
 const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
 const terms = ['Term 1', 'Term 2', 'Term 3']

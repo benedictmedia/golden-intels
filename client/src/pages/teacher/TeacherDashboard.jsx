@@ -9,7 +9,7 @@ import {
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName } from '../../utils/subjects'
-import TeacherClassroom from '../components/classroom/TeacherClassroom'
+import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
