@@ -8,6 +8,14 @@ import {
 } from 'lucide-react'
 import API_URL from '../../api/config'
 
+if (!gradeLevel) {
+  return (
+    <div className="p-8 text-center">
+      <p className="text-gray-500">Please wait while we load your class information...</p>
+    </div>
+  );
+}
+
 const JITSI_DOMAIN = 'meet.jit.si'
 
 const STATUS_CONFIG = {

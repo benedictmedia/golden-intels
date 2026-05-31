@@ -385,8 +385,22 @@ export default function LearnerDashboard() {
     </div>
   </div>
 
-  {activeTab === 'classroom' && (
-  <LearnerClassroom gradeLevel={learnerGradeLevel} />
+  {/* Golden Classroom Tab */}
+{activeTab === 'classroom' && (
+  <div className="p-6">
+    {learnerGradeLevel ? (
+      <LearnerClassroom gradeLevel={learnerGradeLevel} />
+    ) : (
+      <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
+        <MonitorPlay size={48} className="mx-auto mb-4 text-gray-300" />
+        <h3 className="text-xl font-bold text-gray-700 mb-2">No Class Assigned</h3>
+        <p className="text-gray-500 max-w-md mx-auto">
+          Your profile doesn't have a grade level assigned yet. 
+          Please contact your teacher or admin to update your class information.
+        </p>
+      </div>
+    )}
+  </div>
 )}
 
   {/* Profile area — avatar sits BELOW banner, not overlapping */}
