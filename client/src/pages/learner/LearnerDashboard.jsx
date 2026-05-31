@@ -6,8 +6,9 @@ import API_URL from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
-  ChevronRight, Award, Clock, CheckCircle
+  ChevronRight, Award, Clock, CheckCircle, MonitorPlay
 } from 'lucide-react'
+import LearnerClassroom from '../components/classroom/LearnerClassroom'
 
 const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
 const terms = ['Term 1', 'Term 2', 'Term 3']
@@ -247,6 +248,7 @@ export default function LearnerDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'resources', label: 'Resources', icon: BookOpen },
     { id: 'assessments', label: 'Assessments', icon: ClipboardList },
+    { id: 'classroom', label: 'Golden Classroom', icon: MonitorPlay },
   ]
 
   const displayName = studentProfile
@@ -383,6 +385,10 @@ export default function LearnerDashboard() {
     </div>
   </div>
 
+  {activeTab === 'classroom' && (
+  <LearnerClassroom gradeLevel={learnerGradeLevel} />
+)}
+
   {/* Profile area — avatar sits BELOW banner, not overlapping */}
   <div className="px-8 pt-6 pb-8">
     <div className="flex items-start gap-6 mb-6">
@@ -419,6 +425,7 @@ export default function LearnerDashboard() {
         { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#0000ff' },
         { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#8a2be2' },
         { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#059669' },
+        /* { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' } */
       ].map(({ icon: Icon, label, value, color }) => (
         <div key={label} className="flex items-center gap-4 p-4 rounded-2xl"
           style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>

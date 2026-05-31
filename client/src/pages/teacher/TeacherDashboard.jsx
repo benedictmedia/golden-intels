@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
-  GraduationCap, LogOut, Menu, X, Bell
+  GraduationCap, LogOut, Menu, X, Bell, MonitorPlay
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName } from '../../utils/subjects'
+import TeacherClassroom from '../components/classroom/TeacherClassroom'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -16,6 +17,7 @@ const menuItems = [
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
   { icon: <BookOpen size={20} />, label: 'Gradebook', id: 'gradebook' },
   { icon: <GraduationCap size={20} />, label: 'LMS', id: 'lms' },
+  { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' },
 ]
 
 const academicYears = ['2024/2025', '2025/2026', '2026/2027', '2027/2028']
@@ -1882,6 +1884,18 @@ export default function TeacherDashboard() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Golden Classroom */}
+          {activeMenu === 'classroom' && (
+            <div className="p-6">
+              <TeacherClassroom 
+                teacherName={teacherName}
+                teacherEmail={teacherEmail}
+                selectedAcademicYear={selectedAcademicYear}
+                selectedTerm={selectedTerm}
+              />
             </div>
           )}
 
