@@ -385,18 +385,25 @@ export default function LearnerDashboard() {
     </div>
   </div>
 
-  {/* Golden Classroom Tab */}
+ {/* Golden Classroom Tab */}
 {activeTab === 'classroom' && (
   <div className="p-6">
+    <div className="mb-4">
+      <h2 className="text-2xl font-bold text-[#4a235a]">Golden Classroom</h2>
+      <p className="text-gray-600">
+        Grade Level: <strong>{learnerGradeLevel || 'Not Assigned'}</strong>
+      </p>
+    </div>
+
     {learnerGradeLevel ? (
       <LearnerClassroom gradeLevel={learnerGradeLevel} />
     ) : (
-      <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
-        <MonitorPlay size={48} className="mx-auto mb-4 text-gray-300" />
-        <h3 className="text-xl font-bold text-gray-700 mb-2">No Class Assigned</h3>
-        <p className="text-gray-500 max-w-md mx-auto">
-          Your profile doesn't have a grade level assigned yet. 
-          Please contact your teacher or admin to update your class information.
+      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
+        <AlertCircle size={48} className="mx-auto mb-4 text-yellow-600" />
+        <h3 className="text-xl font-bold text-yellow-800 mb-2">No Grade Level Assigned</h3>
+        <p className="text-yellow-700">
+          Your profile doesn't have a grade level yet.<br />
+          Please ask your teacher or admin to update it.
         </p>
       </div>
     )}

@@ -58,6 +58,17 @@ export default function LearnerClassroom({ gradeLevel }) {
   const jitsiApiRef = useRef(null)
   const pollRef = useRef(null)
 
+    // Debug info
+  console.log("LearnerClassroom rendered with gradeLevel:", gradeLevel);
+
+  if (!gradeLevel) {
+    return (
+      <div className="p-12 text-center bg-white rounded-2xl border">
+        <p className="text-red-600">No grade level provided to LearnerClassroom</p>
+      </div>
+    );
+  }
+
   // Early return if no grade level is assigned
   if (!gradeLevel) {
     return (
@@ -85,17 +96,22 @@ export default function LearnerClassroom({ gradeLevel }) {
 
   // ── Fetch sessions for this grade ─────────────────────────────────────────
   const fetchSessions = useCallback(async () => {
-    if (!gradeLevel) return
-    const token = localStorage.getItem('token')
-    try {
-      const res = await axios.get(`${API_URL}/api/video-sessions`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { gradeLevel }
-      })
-      setSessions(res.data)
-    } catch (e) { console.error(e) }
-    finally { setLoading(false) }
-  }, [gradeLevel])
+  if (!gradeLevel) return;
+  const token = localStorage.getItem('token');
+  try {
+    const res = await axios.get(`${API_URL}/api/video-sessions`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { gradeLevel }
+    });
+    console.log("Fetched sessions:", res.data); // ← Debug
+    setSessions(res.data);
+  } catch (e) {
+    console.error("Failed to fetch sessions:", e.response?.data || e.message);
+    setSessions([]);
+  } finally {
+    setLoading(false);
+  }
+}, [gradeLevel]);
 
   useEffect(() => {
     fetchSessions()
