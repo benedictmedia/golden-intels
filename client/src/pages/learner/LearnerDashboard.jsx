@@ -6,7 +6,7 @@ import API_URL from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
-  ChevronRight, Award, Clock, CheckCircle, MonitorPlay
+  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle
 } from 'lucide-react'
 import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 
@@ -384,31 +384,6 @@ export default function LearnerDashboard() {
       {studentProfile?.status?.toUpperCase() || 'ACTIVE'}
     </div>
   </div>
-
- {/* Golden Classroom Tab */}
-{activeTab === 'classroom' && (
-  <div className="p-6">
-    <div className="mb-4">
-      <h2 className="text-2xl font-bold text-[#4a235a]">Golden Classroom</h2>
-      <p className="text-gray-600">
-        Grade Level: <strong>{learnerGradeLevel || 'Not Assigned'}</strong>
-      </p>
-    </div>
-
-    {learnerGradeLevel ? (
-      <LearnerClassroom gradeLevel={learnerGradeLevel} />
-    ) : (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
-        <AlertCircle size={48} className="mx-auto mb-4 text-yellow-600" />
-        <h3 className="text-xl font-bold text-yellow-800 mb-2">No Grade Level Assigned</h3>
-        <p className="text-yellow-700">
-          Your profile doesn't have a grade level yet.<br />
-          Please ask your teacher or admin to update it.
-        </p>
-      </div>
-    )}
-  </div>
-)}
 
   {/* Profile area — avatar sits BELOW banner, not overlapping */}
   <div className="px-8 pt-6 pb-8">
@@ -795,6 +770,24 @@ export default function LearnerDashboard() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* ════════════════ GOLDEN CLASSROOM TAB ════════════════ */}
+          {activeTab === 'classroom' && (
+            <div>
+              {learnerGradeLevel ? (
+                <LearnerClassroom gradeLevel={learnerGradeLevel} />
+              ) : (
+                <div className="rounded-2xl p-10 text-center" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
+                  <AlertCircle size={48} className="mx-auto mb-4" style={{ color: '#d97706' }} />
+                  <h3 className="text-xl font-bold mb-2" style={{ color: '#92400e' }}>No Grade Level Assigned</h3>
+                  <p style={{ color: '#b45309' }}>
+                    Your profile doesn't have a grade level yet.<br />
+                    Please ask your teacher or admin to update it.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
