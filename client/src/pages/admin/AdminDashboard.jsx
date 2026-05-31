@@ -27,10 +27,10 @@ const menuItems = [
 ]
 
 const stats = [
-  { label: 'Total Learners', value: '0', color: 'bg-blue-600', textColor: 'text-cyan-100' },
-  { label: 'Admissions', value: '0', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-  { label: 'Staff Members', value: '0', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
+  { label: 'Total Learners', value: '0', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
+  { label: 'Admissions', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
+  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
+  { label: 'Staff Members', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
 ]
 
 const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
@@ -870,13 +870,13 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-blue-100 overflow-hidden">
+   <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-blue-600 text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`}>
-        <div className="flex items-center justify-between p-4 border-b border-blue-300">
+     <div className={`${sidebarOpen ? 'w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#800080' }}>
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#800080' }}>G</div>
               <div><p className="text-xs font-bold">Golden-Intels</p><p className="text-xs text-cyan-100">Admin Portal</p></div>
             </div>
           )}
@@ -887,13 +887,19 @@ export default function AdminDashboard() {
         <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map(item => (
             <button key={item.id} onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${activeMenu === item.id ? 'bg-blue-500 text-cyan-700 font-bold' : 'hover:bg-blue-700 text-cyan-100'}`}>
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
+              style={{
+                background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
+                color: activeMenu === item.id ? '#ffff00' : 'rgba(255,255,255,0.85)',
+                borderLeft: activeMenu === item.id ? '3px solid #ffff00' : '3px solid transparent',
+                fontWeight: activeMenu === item.id ? '700' : '400'
+              }}>
               {item.icon}{sidebarOpen && <span className="text-sm">{item.label}</span>}
             </button>
           ))}
         </nav>
-        <div className="p-4 border-t border-blue-300">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-700 text-cyan-100 transition-colors rounded-lg">
+        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <LogOut size={20} />{sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
         </div>
@@ -902,17 +908,17 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
           <div>
-            <h1 className="text-xl font-bold text-cyan-700 capitalize">{activeMenu.replace(/-/g, ' ')}</h1>
-            <p className="text-sm text-gray-500">Welcome back, {user?.name}</p>
+            <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace(/-/g, ' ')}</h1>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>Welcome back, {user?.name}</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative text-gray-500 hover:text-cyan-700">
+            <button className="relative" style={{ color: 'rgba(255,255,255,0.85)' }}>
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#0000ff' }}>0</span>
             </button>
-            <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">{user?.name?.charAt(0)}</div>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>{user?.name?.charAt(0)}</div>
           </div>
         </div>
 

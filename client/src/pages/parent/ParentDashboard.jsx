@@ -372,17 +372,17 @@ export default function ParentDashboard() {
   }, [])
 
   return (
-    <div className="flex h-screen bg-blue-100 overflow-hidden">
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
 
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-[#4a235a] text-white transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col`} style={{ background: '#800080' }}>
         <div className="flex items-center justify-between p-4 border-b border-purple-900">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700">G</div>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#800080' }}>G</div>
               <div>
                 <p className="text-xs font-bold">Golden-Intels</p>
-                <p className="text-xs text-cyan-100">Parent Portal</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Parent Portal</p>
               </div>
             </div>
           )}
@@ -396,9 +396,13 @@ export default function ParentDashboard() {
             <button
               key={item.id}
               onClick={() => setActiveMenu(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 transition-colors ${
-                activeMenu === item.id ? 'bg-blue-500 text-cyan-700 font-bold' : 'hover:bg-purple-900 text-purple-200'
-              }`}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
+              style={{
+                background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
+                color: activeMenu === item.id ? '#ffff00' : 'rgba(255,255,255,0.85)',
+                borderLeft: activeMenu === item.id ? '3px solid #ffff00' : '3px solid transparent',
+                fontWeight: activeMenu === item.id ? '700' : '400'
+        }}
             >
               {item.icon}
               {sidebarOpen && <span className="text-sm">{item.label}</span>}
@@ -407,7 +411,7 @@ export default function ParentDashboard() {
         </nav>
 
         <div className="p-4 border-t border-purple-900">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-900 text-purple-200 transition-colors rounded-lg">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
@@ -418,17 +422,17 @@ export default function ParentDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-        <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
           <div>
-            <h1 className="text-xl font-bold text-[#4a235a] capitalize">{activeMenu.replace('-', ' ')}</h1>
+            <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace('-', ' ')}</h1>
             <p className="text-sm text-gray-500">Welcome, {user?.name}</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative text-gray-500 hover:text-[#4a235a]">
+            <button className="relative" style={{ color: 'rgba(255,255,255,0.85)' }}>
               <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-xs text-cyan-700 font-bold flex items-center justify-center">0</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#0000ff' }}>0</span>
             </button>
-            <div className="w-9 h-9 bg-[#4a235a] rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>
               {user?.name?.charAt(0)}
             </div>
           </div>
@@ -439,7 +443,7 @@ export default function ParentDashboard() {
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
-              <p className="text-lg font-bold text-[#4a235a]">{selectedAcademicYear} | {selectedTerm}</p>
+              <p className="text-lg font-bold text-[#800080]">{selectedAcademicYear} | {selectedTerm}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)} className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700 bg-white">
@@ -456,10 +460,10 @@ export default function ParentDashboard() {
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
-                  { label: 'My Children', value: students.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
-                  { label: 'Avg Grade', value: 'A', color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
-                  { label: 'Messages', value: messages.length, color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
+{ label: 'My Children', value: students.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
+{ label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
+{ label: 'Avg Grade', value: 'A', color: 'bg-[#800080]', textColor: 'text-purple-200' },
+{ label: 'Messages', value: messages.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
