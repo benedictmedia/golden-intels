@@ -849,7 +849,7 @@ export default function TeacherDashboard() {
       {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
         style={{ background: '#0000ff' }}>
-        <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(252, 247, 247, 0.91)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>G</div>
