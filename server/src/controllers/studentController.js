@@ -174,8 +174,17 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
   const { id } = req.params
+  const studentId = parseInt(id)
   try {
-    await prisma.student.delete({ where: { id: parseInt(id) } })
+    // Delete all related records first to avoid foreign key constraint errors
+    await prisma.result.deleteMany({ where: { studentId } })
+    await prisma.attendanceRecord.deleteMany({ where: { studentId } })
+    await prisma.feePayment.deleteMany({ where: { studentId } })
+    await prisma.message.deleteMany({ where: { conversationUserId: studentId } })
+
+    // Now safe to delete the student
+    await prisma.student.delete({ where: { id: studentId } })
+
     res.json({ message: 'Student deleted successfully' })
   } catch (error) {
     console.error('Delete student error:', error)
