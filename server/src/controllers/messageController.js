@@ -88,6 +88,7 @@ const sendMessage = async (req, res) => {
 
     // === CREATE NOTIFICATION ===
     const { createNotification } = require('./notificationController');
+    
     const receiverId = isAdmin ? conversationUserId : sender.id; // notify the other party
     await createNotification(
       receiverId,
@@ -96,7 +97,7 @@ const sendMessage = async (req, res) => {
       "message"
     );
 
-    // Socket emission (existing code)
+    // Socket emission (keep your existing code)
     const io = getIO();
     if (io) {
       if (isAdmin) {

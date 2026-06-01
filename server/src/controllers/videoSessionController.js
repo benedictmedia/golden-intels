@@ -57,21 +57,24 @@ const createSession = async (req, res) => {
 }
 
 // Notify all students in that grade (or their parents)
-const studentsInClass = await prisma.student.findMany({
-  where: { gradeLevel: gradeLevel },
-  include: { parent: true }
-});
+    // === NOTIFY PARENTS / LEARNERS ===
+    const { createNotification } = require('./notificationController');
 
-for (const student of studentsInClass) {
-  if (student.parent) {
-    await createNotification(
-      student.parent.id,
-      "New Live Class Scheduled",
-      `${title} for ${gradeLevel} has been scheduled.`,
-      "classroom"
-    );
-  }
-}
+    const studentsInClass = await prisma.student.findMany({
+      where: { gradeLevel: gradeLevel },
+      include: { parent: true }
+    });
+
+    for (const student of studentsInClass) {
+      if (student.parent) {
+        await createNotification(
+          student.parent.id,
+          "New Live Class Scheduled",
+          `${title} for ${gradeLevel} has been scheduled on ${new Date(scheduledAt).toLocaleDateString()}`,
+          "classroom"
+        );
+      }
+    }
 
 // Update session — start, end, or edit
 const updateSession = async (req, res) => {
