@@ -18,6 +18,7 @@ model User {
   students      Student[]      @relation("ParentStudents")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  notifications Notification[]
 }
 
 model Student {
@@ -280,7 +281,7 @@ model ContactMessage {
 
 model Notification {
   id          String   @id @default(cuid())
-  userId      String
+  userId      Int
   title       String
   message     String
   type        String   @default("general") // e.g. "message", "result", "classroom", "fee"

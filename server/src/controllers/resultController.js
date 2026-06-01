@@ -251,6 +251,21 @@ const createResult = async (req, res) => {
   }
 }
 
+// === NOTIFY PARENT ===
+if (result.student?.parentEmail) {
+  const parent = await prisma.user.findUnique({
+    where: { email: result.student.parentEmail }
+  });
+  if (parent) {
+    await createNotification(
+      parent.id,
+      "New Academic Result",
+      `A new result has been posted for ${result.student.firstName} ${result.student.lastName} (${result.term} ${result.academicYear})`,
+      "result"
+    );
+  }
+}
+
 // Update result
 const updateResult = async (req, res) => {
   const { id } = req.params
@@ -316,6 +331,21 @@ const updateResult = async (req, res) => {
     res.json(result)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+// === NOTIFY PARENT ===
+if (result.student?.parentEmail) {
+  const parent = await prisma.user.findUnique({
+    where: { email: result.student.parentEmail }
+  });
+  if (parent) {
+    await createNotification(
+      parent.id,
+      "New Academic Result",
+      `A new result has been posted for ${result.student.firstName} ${result.student.lastName} (${result.term} ${result.academicYear})`,
+      "result"
+    );
   }
 }
 

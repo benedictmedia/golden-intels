@@ -65,13 +65,15 @@ const getConversations = async (req, res) => {
 
 // Send a message
 const sendMessage = async (req, res) => {
-  const { content, conversationUserId } = req.body
-  const sender = req.user
+  const { content, conversationUserId } = req.body;
+  const sender = req.user;
+
   if (!content?.trim() || !conversationUserId) {
-    return res.status(400).json({ message: 'Content and conversationUserId are required' })
+    return res.status(400).json({ message: 'Content and conversationUserId are required' });
   }
+
   try {
-    const isAdmin = sender.role === 'admin'
+    const isAdmin = sender.role === 'admin';
     const message = await prisma.message.create({
       data: {
         content: content.trim(),
@@ -82,24 +84,33 @@ const sendMessage = async (req, res) => {
         conversationUserId: parseInt(conversationUserId),
         read: false
       }
-    })
+    });
 
-    const io = getIO()
+    // === CREATE NOTIFICATION ===
+    const { createNotification } = require('./notificationController');
+    const receiverId = isAdmin ? conversationUserId : sender.id; // notify the other party
+    await createNotification(
+      receiverId,
+      isAdmin ? "New Message from Admin" : "New Message from Parent",
+      `${sender.name}: ${content.substring(0, 80)}${content.length > 80 ? '...' : ''}`,
+      "message"
+    );
+
+    // Socket emission (existing code)
+    const io = getIO();
     if (io) {
       if (isAdmin) {
-        // Admin replying → emit only to that specific parent
-        io.to(`user_${conversationUserId}`).emit('receive_message', message)
+        io.to(`user_${conversationUserId}`).emit('receive_message', message);
       } else {
-        // Parent messaging → emit to all admins
-        io.to('admin_room').emit('receive_message', message)
+        io.to('admin_room').emit('receive_message', message);
       }
     }
 
-    res.json(message)
+    res.json(message);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
-}
+};
 
 // Mark messages in a conversation as read
 const markAsRead = async (req, res) => {

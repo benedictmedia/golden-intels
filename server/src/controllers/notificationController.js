@@ -4,7 +4,12 @@ const prisma = new PrismaClient();
 const createNotification = async (userId, title, message, type = "general") => {
   try {
     return await prisma.notification.create({
-      data: { userId, title, message, type }
+      data: { 
+        userId: parseInt(userId), 
+        title: title.trim(), 
+        message: message.trim(), 
+        type 
+      }
     });
   } catch (error) {
     console.error("Failed to create notification:", error);
@@ -15,8 +20,9 @@ const createNotification = async (userId, title, message, type = "general") => {
 const getNotifications = async (req, res) => {
   try {
     const notifications = await prisma.notification.findMany({
-      where: { userId: req.user.id },
-      orderBy: { createdAt: 'desc' }
+      where: { userId: parseInt(req.user.id) },
+      orderBy: { createdAt: 'desc' },
+      take: 30
     });
     res.json(notifications);
   } catch (error) {
