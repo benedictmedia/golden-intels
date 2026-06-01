@@ -89,10 +89,9 @@ const seedDefaultUsers = async () => {
 const PORT = process.env.PORT || 5000
 
 seedDefaultUsers()
-  .then(() => {
-    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-  })
   .catch((error) => {
-    console.error('Failed to seed default users:', error)
-    process.exit(1)
+    console.warn('⚠️ Seed skipped (DB may be waking up):', error.message)
+  })
+  .finally(() => {
+    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
   })
