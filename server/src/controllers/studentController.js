@@ -131,16 +131,39 @@ const updateStudent = async (req, res) => {
   const { id } = req.params
   try {
     const existing = await prisma.student.findUnique({ where: { id: parseInt(id) } })
-    const photo = req.file ? req.file.path : existing?.photo
-    let parentId = existing?.parentId || null
+    if (!existing) return res.status(404).json({ message: 'Student not found' })
+
+    const photo = req.file ? req.file.path : existing.photo
+
+    let parentId = existing.parentId || null
     if (req.body.parentEmail) {
       const parentUser = await prisma.user.findUnique({ where: { email: req.body.parentEmail } })
       if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
       else parentId = null
     }
+
+    // Only pick the safe, editable fields — never spread the whole body
+    const {
+      firstName, lastName, dateOfBirth, gender, gradeLevel,
+      parentName, parentEmail, parentPhone, address, status
+    } = req.body
+
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
-      data: { ...req.body, photo, parentId }
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(dateOfBirth !== undefined && { dateOfBirth }),
+        ...(gender !== undefined && { gender }),
+        ...(gradeLevel !== undefined && { gradeLevel }),
+        ...(parentName !== undefined && { parentName }),
+        ...(parentEmail !== undefined && { parentEmail }),
+        ...(parentPhone !== undefined && { parentPhone }),
+        ...(address !== undefined && { address }),
+        ...(status !== undefined && { status }),
+        photo,
+        parentId
+      }
     })
     res.json(student)
   } catch (error) {
