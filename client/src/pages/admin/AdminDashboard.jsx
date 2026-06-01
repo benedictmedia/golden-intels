@@ -257,8 +257,12 @@ export default function AdminDashboard() {
   }
 
   const handleEditStudent = async () => {
-    try {
-      const res = await axios.put(`${API_URL}/api/students/${editStudent.id}`, editStudent)
+  try {
+    const res = await axios.put(
+      `${API_URL}/api/students/${editStudent.id}`,
+      editStudent,
+      { headers: getAuthHeaders() }  
+    )
       setStudents(students.map(s => s.id === editStudent.id ? res.data : s))
       setSelectedStudent(res.data)
       setEditMode(false)
