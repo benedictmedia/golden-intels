@@ -248,13 +248,30 @@ export default function AdminDashboard() {
   }
 
   const handleDeleteStudent = async (id) => {
-    if (!window.confirm('Are you sure you want to remove this learner?')) return
-    try {
-      await axios.delete(`${API_URL}/api/students/${id}`)
-      setStudents(students.filter(s => s.id !== id))
-      if (selectedStudent?.id === id) setSelectedStudent(null)
-    } catch (err) { alert('Failed to delete learner.') }
+  if (!window.confirm('Are you sure you want to remove this learner?')) return
+
+  try {
+    await axios.delete(
+      `${API_URL}/api/students/${id}`,
+      { headers: getAuthHeaders() }
+    )
+
+    setStudents(prev => prev.filter(s => s.id !== id))
+
+    if (selectedStudent?.id === id) {
+      setSelectedStudent(null)
+    }
+
+    alert('Learner deleted successfully.')
+  } catch (err) {
+    console.error(err.response?.data || err)
+
+    alert(
+      err.response?.data?.message ||
+      'Failed to delete learner.'
+    )
   }
+}
 
   const handleEditStudent = async () => {
   try {
