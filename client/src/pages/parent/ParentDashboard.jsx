@@ -229,23 +229,48 @@ export default function ParentDashboard() {
     const remarksText = getRemarksText(result.remarks)
     const allRemarksLines = doc.splitTextToSize(remarksText, 172)
     const clampedRemarksLines = allRemarksLines.slice(0, 2)
-    const remarksHeight = 12
+    const remarksHeight = 14
 
+    // ── Class Teacher's Remarks ──
     doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
     doc.text("Class Teacher's Remarks:", 15, y + 4.5)
     doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
-    doc.text(clampedRemarksLines, 15, y + 9)
-    y += remarksHeight + 4
+    doc.text(clampedRemarksLines, 15, y + 10)
+    y += remarksHeight + 6
 
-    // Inline footer — follows content directly
-    doc.setFillColor(26, 60, 110); doc.rect(0, y, pageWidth, 11, 'F')
+    // ── Headmaster's Signature ──
+    const sigHeight = 22
+    doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
+
+    // Left: Headmaster signature line
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+    doc.text("Headmaster's Signature:", 15, y + 6)
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+    doc.line(15, y + 17, 90, y + 17)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
+    doc.text('Signature & Stamp', 15, y + 21)
+
+    // Right: Date
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+    doc.text('Date:', pageWidth - 80, y + 6)
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+    doc.line(pageWidth - 80, y + 17, pageWidth - 15, y + 17)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
+    doc.text('______ / ______ / __________', pageWidth - 80, y + 21)
+
+    y += sigHeight + 4
+
+    // ── Footer — tight, no gap ──
+    const footerHeight = 14
+    doc.setFillColor(26, 60, 110); doc.rect(0, y, pageWidth, footerHeight, 'F')
     doc.setFillColor(212, 160, 23); doc.rect(0, y, pageWidth, 1.5, 'F')
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(255, 255, 255)
-    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, y + 5.5, { align: 'center' })
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(255, 255, 255)
+    doc.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', pageWidth / 2, y + 6.5, { align: 'center' })
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(212, 160, 23)
-    doc.text('We Nurture for Nature', pageWidth / 2, y + 9.5, { align: 'center' })
+    doc.text('We Nurture for Nature', pageWidth / 2, y + 11.5, { align: 'center' })
     doc.save(`${student.firstName}_${student.lastName}_${result.term}_${result.academicYear}.pdf`)
   }
 
