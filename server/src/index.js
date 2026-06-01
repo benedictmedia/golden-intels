@@ -22,6 +22,23 @@ try {
 }
 
 const prisma = new PrismaClient()
+
+// Wake up Neon DB with retries before accepting traffic
+const waitForDB = async (retries = 10, delay = 3000) => {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      console.log('✅ Database connected')
+      return true
+    } catch (err) {
+      console.warn(`⏳ DB not ready (attempt ${i}/${retries}), retrying in ${delay/1000}s...`)
+      await new Promise(res => setTimeout(res, delay))
+    }
+  }
+  console.warn('⚠️ Could not reach DB after retries — server will start anyway')
+  return false
+}
+
 const app = express()
 const httpServer = createServer(app)
 
@@ -88,10 +105,15 @@ const seedDefaultUsers = async () => {
 
 const PORT = process.env.PORT || 5000
 
-seedDefaultUsers()
-  .catch((error) => {
-    console.warn('⚠️ Seed skipped (DB may be waking up):', error.message)
-  })
-  .finally(() => {
-    httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-  })
+const startServer = async () => {
+  await waitForDB()
+  try {
+    await seedDefaultUsers()
+    console.log('✅ Default users seeded')
+  } catch (err) {
+    console.warn('⚠️ Seed skipped:', err.message)
+  }
+  httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+}
+
+startServer()

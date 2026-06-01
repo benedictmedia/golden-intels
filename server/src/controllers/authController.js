@@ -179,6 +179,9 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body
   try {
+    // Ensure DB is awake before querying
+    await prisma.$queryRaw`SELECT 1`
+
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' })
