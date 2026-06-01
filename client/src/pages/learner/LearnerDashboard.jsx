@@ -337,28 +337,36 @@ export default function LearnerDashboard() {
       <div className="flex-1 overflow-y-auto" style={{ background: '#ffffff' }}>
 
         {/* Top bar */}
-        <div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between" style={{ background: 'rgba(241,245,249,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e2e8f0' }}>
-          <div>
-            <h1 className="text-xl font-bold capitalize" style={{ color: '#1e293b' }}>
-              {navItems.find(n => n.id === activeTab)?.label}
-            </h1>
-            <p className="text-sm" style={{ color: '#64748b' }}>
-              {selectedAcademicYear} · {selectedTerm}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
-              style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
-              {academicYears.map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-            <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
-              style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
-              {terms.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-        </div>
+<div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between" 
+     style={{ background: 'rgba(241,245,249,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e2e8f0' }}>
+  <div>
+    <h1 className="text-xl font-bold capitalize" style={{ color: '#1e293b' }}>
+      {navItems.find(n => n.id === activeTab)?.label}
+    </h1>
+    <p className="text-sm" style={{ color: '#64748b' }}>
+      {selectedAcademicYear} · {selectedTerm}
+    </p>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <NotificationBell onNotificationClick={(notif) => {
+      console.log("Learner opened notification:", notif);
+      // You can open messages tab here if needed
+    }} />
+
+    <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
+      className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+      style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
+      {academicYears.map(y => <option key={y} value={y}>{y}</option>)}
+    </select>
+
+    <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
+      className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+      style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
+      {terms.map(t => <option key={t} value={t}>{t}</option>)}
+    </select>
+  </div>
+</div>
 
         <div className="p-8">
 

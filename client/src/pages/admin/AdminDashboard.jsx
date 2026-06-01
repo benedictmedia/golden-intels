@@ -954,19 +954,23 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
-          <div>
-            <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace(/-/g, ' ')}</h1>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>Welcome back, {user?.name}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="relative" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#0000ff' }}>0</span>
-            </button>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>{user?.name?.charAt(0)}</div>
-          </div>
-        </div>
+<div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between bg-white border-b">
+  <div className="flex items-center gap-4">
+    <h1 className="text-2xl font-bold text-cyan-700">
+      {menuItems.find(m => m.id === activeMenu)?.label || 'Dashboard'}
+    </h1>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <NotificationBell onNotificationClick={(notif) => {
+      console.log("Admin opened notification:", notif);
+    }} />
+
+    <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">
+      {new Date().toLocaleDateString('en-GB', { weekday: 'long', month: 'short', day: 'numeric' })}
+    </button>
+  </div>
+</div>
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">

@@ -936,23 +936,28 @@ export default function TeacherDashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Top Bar */}
-        <div className="px-6 py-4 flex items-center justify-between flex-shrink-0" style={{ background: '#800080' }}>
-          <div>
-            <h1 className="text-lg font-bold text-white capitalize">{menuItems.find(m => m.id === activeMenu)?.label || activeMenu}</h1>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>Welcome, {user?.name}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="relative" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#800080' }}>0</span>
-            </button>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#800080' }}>
-              {user?.name?.charAt(0)}
-            </div>
-          </div>
-        </div>
+       {/* Top Bar */}
+<div className="px-6 py-4 flex items-center justify-between border-b" style={{ background: '#fff' }}>
+  <div>
+    <h1 className="text-2xl font-bold text-[#0f6e56]">{menuItems.find(m => m.id === activeMenu)?.label}</h1>
+  </div>
 
+  <div className="flex items-center gap-4">
+    <NotificationBell onNotificationClick={(notif) => {
+      console.log("Teacher opened notification:", notif);
+    }} />
+
+    <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)} 
+      className="px-4 py-2 border rounded-lg text-sm">
+      {academicYears.map(y => <option key={y} value={y}>{y}</option>)}
+    </select>
+
+    <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)} 
+      className="px-4 py-2 border rounded-lg text-sm">
+      {terms.map(t => <option key={t} value={t}>{t}</option>)}
+    </select>
+  </div>
+</div>
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

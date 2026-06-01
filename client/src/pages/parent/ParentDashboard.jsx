@@ -447,21 +447,29 @@ export default function ParentDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-        <div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
-          <div>
-            <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace('-', ' ')}</h1>
-            <p className="text-sm text-gray-500">Welcome, {user?.name}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="relative" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              <Bell size={22} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center" style={{ background: '#ffff00', color: '#0000ff' }}>0</span>
-            </button>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>
-              {user?.name?.charAt(0)}
-            </div>
-          </div>
-        </div>
+<div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
+  <div>
+    <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace('-', ' ')}</h1>
+    <p className="text-sm text-gray-200">Welcome, {user?.name}</p>
+  </div>
+
+  <div className="flex items-center gap-4">
+    <NotificationBell onNotificationClick={(notif) => {
+      console.log("Parent opened notification:", notif);
+    }} />
+
+    <div className="flex items-center gap-3">
+      <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
+        className="px-4 py-2 rounded-xl text-sm border focus:outline-none bg-white">
+        {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+      </select>
+      <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
+        className="px-4 py-2 rounded-xl text-sm border focus:outline-none bg-white">
+        {terms.map(term => <option key={term} value={term}>{term}</option>)}
+      </select>
+    </div>
+  </div>
+</div>
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6">
