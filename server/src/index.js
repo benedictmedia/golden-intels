@@ -56,6 +56,9 @@ initSocket(httpServer)
 
 app.use(express.json())
 
+const notificationRoutes = require('./routes/notifications');
+app.use('/api/notifications', notificationRoutes);
+
 // Serve uploaded files
 const uploadsPath = path.join(__dirname, '../uploads')
 app.use('/uploads', express.static(uploadsPath))
