@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import AdminMessages from '../../components/messages/AdminMessages'
+import NotificationBell from '../../components/NotificationBell'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },

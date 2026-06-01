@@ -10,7 +10,7 @@ export default function NotificationBell({ onNotificationClick }) {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 20000); // every 20 seconds
+    const interval = setInterval(fetchNotifications, 20000);
     return () => clearInterval(interval);
   }, []);
 

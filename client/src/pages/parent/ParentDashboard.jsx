@@ -9,6 +9,7 @@ import {
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import ParentMessages from '../../components/messages/ParentMessages'
+import NotificationBell from '../../components/NotificationBell'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
