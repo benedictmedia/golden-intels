@@ -234,6 +234,7 @@ const createResult = async (req, res) => {
           where: { email: result.student.parentEmail }
         });
         if (parent) {
+          const { createNotification } = require('./notificationController');
           await createNotification(
             parent.id,
             "New Academic Result",
@@ -246,7 +247,7 @@ const createResult = async (req, res) => {
       return res.status(existingResult ? 200 : 201).json(result)
     }
 
-    // ... (non-teacher case)
+    // Non-teacher case
     const result = await prisma.result.create({
       data: {
         studentId: parseInt(studentId),
@@ -267,6 +268,7 @@ const createResult = async (req, res) => {
         where: { email: result.student.parentEmail }
       });
       if (parent) {
+        const { createNotification } = require('./notificationController');
         await createNotification(
           parent.id,
           "New Academic Result",
@@ -282,102 +284,85 @@ const createResult = async (req, res) => {
   }
 }
 
-// Create result
-const createResult = async (req, res) => {
-  const { studentId, gradeLevel, academicYear, term, scores, remarks, submittedBy } = req.body
+// Update result
+const updateResult = async (req, res) => {
+  const { id } = req.params
+  const { scores, remarks, status } = req.body
 
   try {
+    const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
+    if (!existing) {
+      return res.status(404).json({ message: 'Result not found' })
+    }
+
     if (req.user && req.user.role === 'teacher') {
-      const allowed = await isTeacherAllowedForStudent(req, studentId, gradeLevel)
+      const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
       if (!allowed) {
-        return res.status(403).json({ message: 'Forbidden: You may only submit results for your assigned classes.' })
+        return res.status(403).json({ message: 'Forbidden: You may only update results for your assigned classes.' })
       }
 
-      const payload = await getTeacherResultPayload(req, req.body)
+      const payload = await getTeacherResultPayload(req, { ...req.body, gradeLevel: existing.gradeLevel })
       if (payload.error) {
         return res.status(400).json({ message: payload.error.message })
       }
 
       const teacherAssignments = payload.teacherAssignments
-      const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, gradeLevel)
-      const existingResult = await getResultByScope(studentId, gradeLevel, academicYear, term)
-      const mergedScores = existingResult ? { ...(existingResult.scores || {}), ...payload.scores } : payload.scores
-      const nextRemarks = canEditRemarks ? (remarks || existingResult?.remarks || '') : (existingResult?.remarks || '')
+      const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, existing.gradeLevel)
+      const mergedScores = { ...(existing.scores || {}), ...payload.scores }
+      const nextRemarks = canEditRemarks ? (remarks || existing.remarks || '') : (existing.remarks || '')
 
-      const result = existingResult
-        ? await prisma.result.update({
-            where: { id: existingResult.id },
-            data: {
-              scores: mergedScores,
-              remarks: nextRemarks,
-              submittedBy,
-              status: 'pending'
-            },
-            include: { student: true }
-          })
-        : await prisma.result.create({
-            data: {
-              studentId: parseInt(studentId),
-              gradeLevel,
-              academicYear,
-              term,
-              scores: payload.scores,
-              remarks: nextRemarks,
-              submittedBy,
-              status: 'pending'
-            },
-            include: { student: true }
-          })
+      const result = await prisma.result.update({
+        where: { id: parseInt(id) },
+        data: {
+          scores: mergedScores,
+          remarks: nextRemarks,
+          status: 'pending'
+        },
+        include: { student: true }
+      })
 
-      // === NOTIFY PARENT ===
-      if (result.student?.parentEmail) {
-        const parent = await prisma.user.findUnique({
-          where: { email: result.student.parentEmail }
-        });
-        if (parent) {
-          await createNotification(
-            parent.id,
-            "New Academic Result",
-            `A new result has been posted for ${result.student.firstName} ${result.student.lastName} (${result.term} ${result.academicYear})`,
-            "result"
-          );
-        }
-      }
-
-      return res.status(existingResult ? 200 : 201).json(result)
+      return res.json(result)
     }
 
-    // ... (non-teacher case)
-    const result = await prisma.result.create({
-      data: {
-        studentId: parseInt(studentId),
-        gradeLevel,
-        academicYear,
-        term,
-        scores,
-        remarks,
-        submittedBy,
-        status: 'pending'
-      },
+    const nextScores = scores === undefined ? existing.scores : scores
+    const nextRemarksValue = remarks === undefined ? existing.remarks : remarks
+    const nextStatus = status === undefined ? existing.status : status
+
+    if (nextStatus === 'approved') {
+      const requiredSubjects = await getExpectedSubjectsForClass(existing.gradeLevel)
+      if (!isScoresCompleteForSubjects(nextScores || {}, requiredSubjects)) {
+        const missingSubjects = getMissingSubjects(nextScores || {}, requiredSubjects)
+        const missingMessage = missingSubjects.length
+          ? `Cannot approve until all subject teachers have submitted their scores. Missing: ${missingSubjects.join(', ')}`
+          : 'Cannot approve until all subject teachers have submitted their scores.'
+
+        return res.status(400).json({ message: missingMessage })
+      }
+    }
+
+    const result = await prisma.result.update({
+      where: { id: parseInt(id) },
+      data: { scores: nextScores, remarks: nextRemarksValue, status: nextStatus },
       include: { student: true }
     })
 
-    // === NOTIFY PARENT ===
-    if (result.student?.parentEmail) {
+    // === NOTIFY PARENT WHEN APPROVED ===
+    if (nextStatus === 'approved' && result.student?.parentEmail) {
       const parent = await prisma.user.findUnique({
         where: { email: result.student.parentEmail }
       });
       if (parent) {
+        const { createNotification } = require('./notificationController');
         await createNotification(
           parent.id,
-          "New Academic Result",
-          `A new result has been posted for ${result.student.firstName} ${result.student.lastName} (${result.term} ${result.academicYear})`,
+          "Result Approved",
+          `Your child's result for ${result.term} ${result.academicYear} has been approved.`,
           "result"
         );
       }
     }
 
-    res.status(201).json(result)
+    res.json(result)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
