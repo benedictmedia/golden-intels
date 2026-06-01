@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const { v4: uuidv4 } = require('uuid')
 const prisma = new PrismaClient()
 
-// Get sessions — teachers see their own, parents/learners see sessions for a grade
+// Get sessions
 const getSessions = async (req, res) => {
   const { gradeLevel, status } = req.query
   const user = req.user
@@ -11,7 +11,6 @@ const getSessions = async (req, res) => {
     if (gradeLevel) where.gradeLevel = gradeLevel
     if (status) where.status = status
 
-    // Teachers only see their own sessions
     if (user.role === 'teacher') {
       where.teacherId = user.id
     }
@@ -30,12 +29,14 @@ const getSessions = async (req, res) => {
 const createSession = async (req, res) => {
   const { title, description, gradeLevel, subject, scheduledAt, duration } = req.body
   const user = req.user
+
   if (!title || !gradeLevel || !scheduledAt) {
     return res.status(400).json({ message: 'Title, gradeLevel and scheduledAt are required' })
   }
+
   try {
-    // Room name is a private UUID — not guessable
     const roomName = `golden-intels-${uuidv4().replace(/-/g, '').slice(0, 20)}`
+
     const session = await prisma.videoSession.create({
       data: {
         title,
@@ -50,33 +51,33 @@ const createSession = async (req, res) => {
         status: 'scheduled'
       }
     })
-    res.json(session)
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
-  }
-}
 
-// Notify all students in that grade (or their parents)
     // === NOTIFY PARENTS / LEARNERS ===
-    const { createNotification } = require('./notificationController');
+    const { createNotification } = require('./notificationController')
 
     const studentsInClass = await prisma.student.findMany({
       where: { gradeLevel: gradeLevel },
       include: { parent: true }
-    });
+    })
 
     for (const student of studentsInClass) {
       if (student.parent) {
         await createNotification(
           student.parent.id,
           "New Live Class Scheduled",
-          `${title} for ${gradeLevel} has been scheduled on ${new Date(scheduledAt).toLocaleDateString()}`,
+          `${title} for ${gradeLevel} has been scheduled.`,
           "classroom"
-        );
+        )
       }
     }
 
-// Update session — start, end, or edit
+    res.json(session)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+// Update session
 const updateSession = async (req, res) => {
   const { id } = req.params
   const user = req.user
