@@ -710,11 +710,6 @@ export default function AdminDashboard() {
     y += remarksHeight + 6
 
     // ── Headmaster's Signature ──
-    const sigHeight = 22
-    doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
-
-    // ── Headmaster's Signature ──
     const sigHeight = 28
     doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
