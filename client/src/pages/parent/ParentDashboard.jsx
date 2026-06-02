@@ -242,25 +242,53 @@ export default function ParentDashboard() {
     y += remarksHeight + 6
 
     // ── Headmaster's Signature ──
-    const sigHeight = 22
+    const sigHeight = 28
     doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
 
-    // Left: Headmaster signature line
+    // Label
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
     doc.text("Headmaster's Signature:", 15, y + 6)
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
-    doc.line(15, y + 17, 90, y + 17)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
-    doc.text('Signature & Stamp', 15, y + 21)
 
-    // Right: Date
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text('Date:', pageWidth - 80, y + 6)
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
-    doc.line(pageWidth - 80, y + 17, pageWidth - 15, y + 17)
+    // Try to embed actual signature image
+    const sigImageUrl = result.headmasterSignature
+    if (sigImageUrl) {
+      try {
+        const sigImg = await new Promise((resolve, reject) => {
+          const img = new Image(); img.crossOrigin = 'anonymous'
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width; canvas.height = img.height
+            canvas.getContext('2d').drawImage(img, 0, 0)
+            resolve(canvas.toDataURL('image/png'))
+          }
+          img.onerror = reject
+          img.src = sigImageUrl
+        })
+        doc.addImage(sigImg, 'PNG', 15, y + 8, 50, 14)
+      } catch {
+        // Fallback to blank line if image fails
+        doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+        doc.line(15, y + 20, 90, y + 20)
+      }
+    } else {
+      doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+      doc.line(15, y + 20, 90, y + 20)
+    }
+
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
-    doc.text('______ / ______ / __________', pageWidth - 80, y + 21)
+    doc.text('Headmaster / Principal', 15, y + 26)
+
+    // Right: Approval date
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+    doc.text('Date Approved:', pageWidth - 80, y + 6)
+    const approvalDate = result.approvedAt
+      ? new Date(result.approvedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '___________________'
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
+    doc.text(approvalDate, pageWidth - 80, y + 14)
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+    doc.line(pageWidth - 80, y + 20, pageWidth - 15, y + 20)
 
     y += sigHeight + 4
 

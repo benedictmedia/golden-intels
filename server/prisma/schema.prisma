@@ -58,6 +58,9 @@ model Result {
   remarks      String?
   status       String   @default("pending")
   submittedBy  String
+  headmasterSignature String?
+  approvedAt          DateTime?
+  approvedBy          String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

@@ -340,9 +340,22 @@ const updateResult = async (req, res) => {
       }
     }
 
+    const updateData = {
+      scores: nextScores,
+      remarks: nextRemarksValue,
+      status: nextStatus
+    }
+
+    // When approving, capture signature + timestamp automatically
+    if (nextStatus === 'approved') {
+      updateData.approvedAt = new Date()
+      updateData.approvedBy = req.user?.name || 'Admin'
+      updateData.headmasterSignature = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/goldenintels/signatures/headmaster_signature`
+    }
+
     const result = await prisma.result.update({
       where: { id: parseInt(id) },
-      data: { scores: nextScores, remarks: nextRemarksValue, status: nextStatus },
+      data: updateData,
       include: { student: true }
     })
 

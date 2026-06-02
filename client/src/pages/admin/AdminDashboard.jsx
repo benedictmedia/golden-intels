@@ -5,7 +5,7 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox, FileSignature
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import AdminMessages from '../../components/messages/AdminMessages'
@@ -25,6 +25,7 @@ const menuItems = [
   { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
   { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' },
   { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
+  { icon: <FileSignature size={20} />, label: 'Signature', id: 'signature' },
 ]
 
 const stats = [
@@ -78,6 +79,10 @@ export default function AdminDashboard() {
   const [adminEditResult, setAdminEditResult] = useState(null)
   const [adminEditScores, setAdminEditScores] = useState({})
   const [adminEditRemarks, setAdminEditRemarks] = useState('')
+
+  const [headmasterSigUrl, setHeadmasterSigUrl] = useState('')
+  const [sigUploading, setSigUploading] = useState(false)
+  const [sigSaved, setSigSaved] = useState(false)
 
   // Admissions state
   const [applications, setApplications] = useState([])
@@ -199,6 +204,12 @@ export default function AdminDashboard() {
   }, [activeMenu])
 
   useEffect(() => {
+  axios.get(`${API_URL}/api/signature`, { headers: getAuthHeaders() })
+    .then(res => setHeadmasterSigUrl(res.data.url))
+    .catch(() => {})
+}, [])
+
+  useEffect(() => {
     if (activeMenu === 'accounts') fetchAccounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu, accountTab, accountPage, accountLimit])
@@ -247,6 +258,28 @@ export default function AdminDashboard() {
       alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
     }
   }
+
+  const handleSignatureUpload = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  setSigUploading(true)
+  const reader = new FileReader()
+  reader.onload = async () => {
+    try {
+      const res = await axios.post(`${API_URL}/api/signature/upload`, {
+        imageBase64: reader.result
+      }, { headers: getAuthHeaders() })
+      setHeadmasterSigUrl(res.data.url)
+      setSigSaved(true)
+      setTimeout(() => setSigSaved(false), 3000)
+    } catch {
+      alert('Failed to upload signature.')
+    } finally {
+      setSigUploading(false)
+    }
+  }
+  reader.readAsDataURL(file)
+}
 
   const handleDeleteStudent = async (id) => {
   if (!window.confirm('Are you sure you want to remove this learner?')) return
@@ -681,21 +714,54 @@ export default function AdminDashboard() {
     doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
 
-    // Left: Headmaster signature line
+    // ── Headmaster's Signature ──
+    const sigHeight = 28
+    doc.setFillColor(255, 255, 255); doc.rect(10, y, pageWidth - 20, sigHeight, 'F')
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, sigHeight)
+
+    // Label
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
     doc.text("Headmaster's Signature:", 15, y + 6)
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
-    doc.line(15, y + 17, 90, y + 17)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
-    doc.text('Signature & Stamp', 15, y + 21)
 
-    // Right: Date
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text('Date:', pageWidth - 80, y + 6)
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
-    doc.line(pageWidth - 80, y + 17, pageWidth - 15, y + 17)
+    // Try to embed actual signature image
+    const sigImageUrl = result.headmasterSignature
+    if (sigImageUrl) {
+      try {
+        const sigImg = await new Promise((resolve, reject) => {
+          const img = new Image(); img.crossOrigin = 'anonymous'
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width; canvas.height = img.height
+            canvas.getContext('2d').drawImage(img, 0, 0)
+            resolve(canvas.toDataURL('image/png'))
+          }
+          img.onerror = reject
+          img.src = sigImageUrl
+        })
+        doc.addImage(sigImg, 'PNG', 15, y + 8, 50, 14)
+      } catch {
+        // Fallback to blank line if image fails
+        doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+        doc.line(15, y + 20, 90, y + 20)
+      }
+    } else {
+      doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+      doc.line(15, y + 20, 90, y + 20)
+    }
+
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 100, 100)
-    doc.text('______ / ______ / __________', pageWidth - 80, y + 21)
+    doc.text('Headmaster / Principal', 15, y + 26)
+
+    // Right: Approval date
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
+    doc.text('Date Approved:', pageWidth - 80, y + 6)
+    const approvalDate = result.approvedAt
+      ? new Date(result.approvedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : '___________________'
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
+    doc.text(approvalDate, pageWidth - 80, y + 14)
+    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.3)
+    doc.line(pageWidth - 80, y + 20, pageWidth - 15, y + 20)
 
     y += sigHeight + 4
 
@@ -2378,6 +2444,62 @@ export default function AdminDashboard() {
 
         </div>
       </div>
+
+      {activeMenu === 'signature' && (
+  <div className="max-w-xl">
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Headmaster's Signature</h2>
+      <p className="text-gray-500 text-sm">Upload a scanned signature. It will automatically appear on all approved result PDFs.</p>
+    </div>
+
+    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+      {/* Current signature preview */}
+      <div className="mb-6">
+        <p className="text-sm font-bold mb-3" style={{ color: '#0000ff' }}>Current Signature</p>
+        {headmasterSigUrl ? (
+          <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 flex items-center justify-center" style={{ minHeight: '100px' }}>
+            <img
+              src={`${headmasterSigUrl}?t=${Date.now()}`}
+              alt="Headmaster signature"
+              className="max-h-24 object-contain"
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50 text-center text-gray-400 text-sm">
+            No signature uploaded yet
+          </div>
+        )}
+      </div>
+
+      {/* Upload */}
+      <div>
+        <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Upload New Signature</label>
+        <p className="text-xs text-gray-400 mb-3">Use a white background scanned image (PNG preferred). The signature will be resized automatically.</p>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleSignatureUpload}
+          disabled={sigUploading}
+          className="block w-full text-sm text-gray-600 mb-4"
+        />
+        {sigUploading && <p className="text-sm text-blue-600">Uploading...</p>}
+        {sigSaved && <p className="text-sm text-green-600 font-bold">✓ Signature saved and will appear on all future approved PDFs.</p>}
+      </div>
+
+      {/* Instructions */}
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #0000ff20' }}>
+        <p className="font-bold mb-2" style={{ color: '#0000ff' }}>How it works</p>
+        <ul className="space-y-1 text-gray-600 text-xs">
+          <li>1. Scan the headmaster's signature on white paper</li>
+          <li>2. Upload it here as PNG or JPG</li>
+          <li>3. When you approve a result, the signature + approval date are automatically saved</li>
+          <li>4. Parents see the signed PDF when they download results</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Contact Messages */}
 {activeMenu === 'contact-messages' && (
