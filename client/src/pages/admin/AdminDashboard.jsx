@@ -471,11 +471,23 @@ export default function AdminDashboard() {
   }
 
   const handleApproveResult = async (id) => {
-    try {
-      const res = await axios.put(`${API_URL}/api/results/${id}`, { status: 'approved' }, { headers: getAuthHeaders() })
-      setResults(results.map(r => r.id === id ? res.data : r))
-    } catch (err) { alert('Failed to approve result.') }
+  try {
+    const res = await axios.put(`${API_URL}/api/results/${id}`, 
+      { status: 'approved' }, 
+      { headers: getAuthHeaders() }
+    );
+    
+    // Update local state
+    setResults(results.map(r => r.id === id ? res.data : r));
+    
+    // Show success message
+    alert('Result approved successfully!');
+    
+  } catch (err) {
+    console.error('Approve result error:', err.response?.data || err.message);
+    alert(err.response?.data?.message || 'Failed to approve result. Please try again.');
   }
+};
 
   const handleAdminEditResult = (result) => { setAdminEditResult(result); setAdminEditScores(getNormalizedScores(result.scores || {})); setAdminEditRemarks(result.remarks || '') }
 
