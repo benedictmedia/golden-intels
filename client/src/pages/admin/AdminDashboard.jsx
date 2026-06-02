@@ -2454,7 +2454,7 @@ export default function AdminDashboard() {
         {headmasterSigUrl ? (
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 flex items-center justify-center" style={{ minHeight: '100px' }}>
             <img
-              src={`${headmasterSigUrl}?t=${Date.now()}`}
+              src={`${API_URL}/api/signature/preview?t=${Date.now()}`}
               alt="Headmaster signature"
               className="max-h-24 object-contain"
               onError={e => { e.target.style.display = 'none' }}

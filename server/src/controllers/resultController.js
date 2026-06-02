@@ -350,7 +350,15 @@ const updateResult = async (req, res) => {
     if (nextStatus === 'approved') {
       updateData.approvedAt = new Date()
       updateData.approvedBy = req.user?.name || 'Admin'
-      updateData.headmasterSignature = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/goldenintels/signatures/headmaster_signature`
+      // Fetch the actual stored signature URL from settings
+const { PrismaClient: PrismaClient2 } = require('@prisma/client')
+const prisma2 = new PrismaClient2()
+const sigSetting = await prisma2.setting.findUnique({
+  where: { key: 'headmaster_signature_url' }
+})
+if (sigSetting?.value) {
+  updateData.headmasterSignature = sigSetting.value
+}
     }
 
     const result = await prisma.result.update({
