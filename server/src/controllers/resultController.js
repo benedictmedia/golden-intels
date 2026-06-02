@@ -347,7 +347,7 @@ const updateResult = async (req, res) => {
     })
 
     // === NOTIFY PARENT WHEN APPROVED ===
-    if (nextStatus === 'approved' && result.student?.parentEmail) {
+        if (nextStatus === 'approved' && result.student?.parentEmail) {
       const parent = await prisma.user.findUnique({
         where: { email: result.student.parentEmail }
       });
@@ -356,7 +356,7 @@ const updateResult = async (req, res) => {
         await createNotification(
           parent.id,
           "Result Approved",
-          `Your child's result for ${result.term} ${result.academicYear} has been approved.`,
+          `Your child's result for ${result.term} ${result.academicYear} has been released.`,
           "result"
         );
       }

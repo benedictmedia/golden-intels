@@ -52,22 +52,35 @@ const createSession = async (req, res) => {
       }
     })
 
-    // === NOTIFY PARENTS / LEARNERS ===
-    const { createNotification } = require('./notificationController')
+    // Inside createSession, after creating the session:
+
+    // === NOTIFY PARENTS ===
+    const { createNotification } = require('./notificationController');
 
     const studentsInClass = await prisma.student.findMany({
       where: { gradeLevel: gradeLevel },
       include: { parent: true }
-    })
+    });
 
     for (const student of studentsInClass) {
+      // Notify Parent
       if (student.parent) {
         await createNotification(
           student.parent.id,
           "New Live Class Scheduled",
           `${title} for ${gradeLevel} has been scheduled.`,
           "classroom"
-        )
+        );
+      }
+
+      // Notify Learner (if they have a user account)
+      if (student.learnerUserId) {   // assuming you have this relation
+        await createNotification(
+          student.learnerUserId,
+          "New Live Class Scheduled",
+          `${title} for ${gradeLevel} is now available.`,
+          "classroom"
+        );
       }
     }
 

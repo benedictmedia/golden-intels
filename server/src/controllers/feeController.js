@@ -83,6 +83,23 @@ const createFeePayment = async (req, res) => {
       include: { student: true }
     })
     res.status(201).json(payment)
+
+        // After creating/updating payment
+    if (payment.student?.parentEmail) {
+      const parent = await prisma.user.findUnique({
+        where: { email: payment.student.parentEmail }
+      });
+      if (parent) {
+        const { createNotification } = require('./notificationController');
+        await createNotification(
+          parent.id,
+          "Fee Payment Update",
+          `Payment of GH₵ ${payment.amountPaid} recorded for ${payment.student.firstName} ${payment.student.lastName}`,
+          "fee"
+        );
+      }
+    }
+
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -109,6 +126,23 @@ const updateFeePayment = async (req, res) => {
       include: { student: true }
     })
     res.json(payment)
+
+        // After creating/updating payment
+    if (payment.student?.parentEmail) {
+      const parent = await prisma.user.findUnique({
+        where: { email: payment.student.parentEmail }
+      });
+      if (parent) {
+        const { createNotification } = require('./notificationController');
+        await createNotification(
+          parent.id,
+          "Fee Payment Update",
+          `Payment of GH₵ ${payment.amountPaid} recorded for ${payment.student.firstName} ${payment.student.lastName}`,
+          "fee"
+        );
+      }
+    }
+    
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
