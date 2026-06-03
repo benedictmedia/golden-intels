@@ -5,11 +5,12 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox, FileSignature
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox, FileSignature, Lock
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import AdminMessages from '../../components/messages/AdminMessages'
 import NotificationBell from '../../components/NotificationBell'
+import ChangePasswordModal from '../../components/ChangePasswordModal'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -46,6 +47,7 @@ export default function AdminDashboard() {
   const [contactMessages, setContactMessages] = useState([])
   const [contactLoading, setContactLoading] = useState(false)
   const [viewingContact, setViewingContact] = useState(null)
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   // Create account state
   const initialNewUserState = {
@@ -1018,9 +1020,16 @@ export default function AdminDashboard() {
             </button>
           ))}
         </nav>
-        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+        <div className="p-4 border-t border-purple-900">
+          <button onClick={() => setShowChangePassword(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
+            <Lock size={20} />
+            {sidebarOpen && <span className="text-sm">Change Password</span>}
+          </button>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
-            <LogOut size={20} />{sidebarOpen && <span className="text-sm">Logout</span>}
+            <LogOut size={20} />
+            {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
         </div>
       </div>
@@ -2694,6 +2703,12 @@ export default function AdminDashboard() {
         </div>
       )}
 
+    {showChangePassword && (
+      <ChangePasswordModal
+        onClose={() => setShowChangePassword(false)}
+        accentColor="#800080"
+      />
+    )}
     </div>
   )
 }

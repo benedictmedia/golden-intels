@@ -5,13 +5,14 @@ import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   GraduationCap, LogOut, Menu, X, Bell, MonitorPlay, 
-  User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award
+  User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award, Lock
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName } from '../../utils/subjects'
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 import NotificationBell from '../../components/NotificationBell'
+import ChangePasswordModal from '../../components/ChangePasswordModal'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -39,6 +40,7 @@ export default function TeacherDashboard() {
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('Year 1')
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const [attendance, setAttendance] = useState({})
   const [attendanceDate, setAttendanceDate] = useState(() => {
     const now = new Date()
@@ -954,8 +956,14 @@ export default function TeacherDashboard() {
           ))}
         </nav>
 
-        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
+        <div className="p-4 border-t border-purple-900">
+          <button onClick={() => setShowChangePassword(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
+            <Lock size={20} />
+            {sidebarOpen && <span className="text-sm">Change Password</span>}
+          </button>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
@@ -2067,6 +2075,12 @@ export default function TeacherDashboard() {
 
         </div>
       </div>
+    {showChangePassword && (
+      <ChangePasswordModal
+        onClose={() => setShowChangePassword(false)}
+        accentColor="#0000ff"
+      />
+    )}
     </div>
   )
 }

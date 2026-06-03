@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
-  FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send
+  FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock
 } from 'lucide-react'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
+import ChangePasswordModal from '../../components/ChangePasswordModal'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -42,6 +43,7 @@ export default function ParentDashboard() {
   const [attendanceLoading, setAttendanceLoading] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
   const [assignmentRecords, setAssignmentRecords] = useState([])
+  const [showChangePassword, setShowChangePassword] = useState(false)
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -465,6 +467,12 @@ export default function ParentDashboard() {
         </nav>
 
         <div className="p-4 border-t border-purple-900">
+          <button onClick={() => setShowChangePassword(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
+            <Lock size={20} />
+            {sidebarOpen && <span className="text-sm">Change Password</span>}
+          </button>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <LogOut size={20} />
             {sidebarOpen && <span className="text-sm">Logout</span>}
@@ -1012,6 +1020,12 @@ export default function ParentDashboard() {
         </div>
       )}
 
+    {showChangePassword && (
+      <ChangePasswordModal
+        onClose={() => setShowChangePassword(false)}
+        accentColor="#800080"
+      />
+    )}
     </div>
   )
 }

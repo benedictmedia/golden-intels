@@ -6,10 +6,11 @@ import API_URL from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
-  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle
+  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle, Lock
 } from 'lucide-react'
 import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
+import ChangePasswordModal from '../../components/ChangePasswordModal'
 
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
@@ -37,6 +38,7 @@ export default function LearnerDashboard() {
   const [assignmentAnswers, setAssignmentAnswers] = useState({})
   const [quizStartTimes, setQuizStartTimes] = useState({})
   const [assignmentStartTimes, setAssignmentStartTimes] = useState({})
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const [activeQuizId, setActiveQuizId] = useState(null)
   const [now, setNow] = useState(Date.now())
   const learnerSubmissionKey = `goldenIntelsSubmissions:${user?.email || 'anonymous'}`
@@ -324,12 +326,16 @@ export default function LearnerDashboard() {
         </nav>
 
         {/* Logout */}
-        <div className="p-4">
-          <button onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all"
-            style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>
-            <LogOut size={18} />
-            <span className="text-sm font-medium">Logout</span>
+        <div className="p-4 border-t border-purple-900">
+          <button onClick={() => setShowChangePassword(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
+            <Lock size={20} />
+            {sidebarOpen && <span className="text-sm">Change Password</span>}
+          </button>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
+            <LogOut size={20} />
+            {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
         </div>
       </div>
@@ -802,6 +808,12 @@ export default function LearnerDashboard() {
 
         </div>
       </div>
+    {showChangePassword && (
+      <ChangePasswordModal
+        onClose={() => setShowChangePassword(false)}
+        accentColor="#800080"
+      />
+    )}
     </div>
   )
 }
