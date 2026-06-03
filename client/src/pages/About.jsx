@@ -7,7 +7,7 @@ const values = [
   { title: 'Honesty', description: 'We uphold truth and integrity in everything we do.' },
   { title: 'Responsibility', description: 'We take ownership of our actions and their impact on others.' },
   { title: 'Respect', description: 'We treat every individual with dignity and kindness.' },
-  { title: 'Caring', description: 'We show genuine concern for the wellbeing of our community.' },
+  { title: 'Wellbeing', description: 'We show genuine concern for the wellbeing of our community.' },
 ]
 
 const goals = [
