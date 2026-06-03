@@ -606,14 +606,9 @@ export default function LearnerDashboard() {
   <div className="space-y-8">
     <h3 className="text-2xl font-bold text-[#1e2937]">Assessments by Subject</h3>
 
-    {/* Fallback SUBJECTS if not defined */}
-    {(!SUBJECTS || SUBJECTS.length === 0) && (
-      <div className="text-red-600">Error: SUBJECTS not defined. Please define it at the top of the file.</div>
-    )}
-
-    {(SUBJECTS || []).map(subject => {
-      const subjectAssignments = (learnerAssignments || []).filter(a => a.subject === subject);
-      const subjectQuizzes = (learnerQuizzes || []).filter(q => q.subject === subject);
+    {SUBJECTS.map(subject => {
+      const subjectAssignments = learnerAssignments.filter(a => a.subject === subject);
+      const subjectQuizzes = learnerQuizzes.filter(q => q.subject === subject);
 
       if (subjectAssignments.length === 0 && subjectQuizzes.length === 0) return null;
 
@@ -630,13 +625,13 @@ export default function LearnerDashboard() {
           </div>
 
           <div className="p-6 space-y-8">
-            {/* Assignments */}
+            {/* === ASSIGNMENTS === */}
             {subjectAssignments.length > 0 && (
               <div>
                 <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">ASSIGNMENTS</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subjectAssignments.map(assignment => {
-                    const submission = submissions?.assignments?.[assignment.id];
+                    const submission = submissions.assignments?.[assignment.id];
                     return (
                       <div key={assignment.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <div className="flex justify-between items-start mb-4">
@@ -648,28 +643,24 @@ export default function LearnerDashboard() {
                             {submission ? 'Submitted' : 'Pending'}
                           </div>
                         </div>
-
-                        <p className="text-gray-600 text-sm mb-5 line-clamp-3">{assignment.description || 'No description provided.'}</p>
+                        <p className="text-gray-600 text-sm mb-5">{assignment.description || 'No description provided.'}</p>
 
                         {!submission ? (
                           <div className="space-y-3">
                             <textarea
                               placeholder="Type your assignment response here..."
                               className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-y"
-                              value={submissions?.assignments?.[assignment.id]?.content || ''}
+                              value={submissions.assignments?.[assignment.id]?.content || ''}
                               onChange={(e) => {
-                                const newSubs = {...(submissions || {})};
+                                const newSubs = { ...submissions };
                                 if (!newSubs.assignments) newSubs.assignments = {};
-                                newSubs.assignments[assignment.id] = {
-                                  content: e.target.value,
-                                  submittedAt: new Date().toISOString()
-                                };
+                                newSubs.assignments[assignment.id] = { content: e.target.value, submittedAt: new Date().toISOString() };
                                 setSubmissions(newSubs);
                               }}
                             />
                             <button 
-                              onClick={() => handleSubmitAssignment && handleSubmitAssignment(assignment)}
-                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105"
+                              onClick={() => handleSubmitAssignment(assignment)}
+                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105 transition"
                             >
                               Submit Assignment
                             </button>
@@ -686,13 +677,13 @@ export default function LearnerDashboard() {
               </div>
             )}
 
-            {/* Quizzes */}
+            {/* === QUIZZES === */}
             {subjectQuizzes.length > 0 && (
               <div>
                 <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">QUIZZES</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subjectQuizzes.map(quiz => {
-                    const hasSubmitted = submissions?.quizzes?.[quiz.id];
+                    const hasSubmitted = submissions.quizzes?.[quiz.id];
                     return (
                       <div key={quiz.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <h5 className="font-bold text-lg mb-2">{quiz.title}</h5>
@@ -700,10 +691,8 @@ export default function LearnerDashboard() {
 
                         {!hasSubmitted ? (
                           <button 
-                            onClick={() => {
-                              if (setSelectedQuiz) setSelectedQuiz(quiz);
-                            }}
-                            className="w-full py-3 bg-gradient-to-r from-[#7c3aed] to-[#2563eb] text-white font-bold rounded-xl"
+                            onClick={() => setSelectedQuiz(quiz)}
+                            className="w-full py-3 bg-gradient-to-r from-[#7c3aed] to-[#2563eb] text-white font-bold rounded-xl hover:brightness-105 transition"
                           >
                             Start Quiz
                           </button>
@@ -723,7 +712,7 @@ export default function LearnerDashboard() {
       );
     })}
 
-    {(learnerAssignments || []).length === 0 && (learnerQuizzes || []).length === 0 && (
+    {learnerAssignments.length === 0 && learnerQuizzes.length === 0 && (
       <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
         <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
         <p className="text-gray-400">No assessments available at the moment.</p>
