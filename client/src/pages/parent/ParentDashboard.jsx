@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
@@ -100,22 +101,7 @@ export default function ParentDashboard() {
     const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
 
-    // Load logo as base64
-    const getLogoBase64 = () => new Promise((resolve) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width = img.width
-        canvas.height = img.height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0)
-        resolve(canvas.toDataURL('image/png'))
-      }
-      img.onerror = () => resolve(null)
-      img.src = new URL('../../assets/logo.png', import.meta.url).href
-    })
-    const logoData = await getLogoBase64()
+    const logoData = await loadCircularLogoDataUrl(new URL('../../assets/logo.png', import.meta.url).href)
 
     doc.setFillColor(26, 60, 110)
     doc.rect(0, 0, pageWidth, 45, 'F')

@@ -8,6 +8,7 @@ import {
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox, FileSignature, Lock
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import AdminMessages from '../../components/messages/AdminMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
@@ -551,22 +552,7 @@ export default function AdminDashboard() {
       const scores = getNormalizedScores(result.scores || {})
       const pageWidth = doc.internal.pageSize.getWidth()
 
-      const getLogoBase64 = () => new Promise((resolve) => {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          canvas.width = img.width
-          canvas.height = img.height
-          const ctx = canvas.getContext('2d')
-          ctx.drawImage(img, 0, 0)
-          resolve(canvas.toDataURL('image/png'))
-        }
-        img.onerror = () => resolve(null)
-        img.src = new URL('../../assets/logo.png', import.meta.url).href
-      })
-
-      const logoData = await getLogoBase64()
+      const logoData = await loadCircularLogoDataUrl(new URL('../../assets/logo.png', import.meta.url).href)
 
       doc.setFillColor(26, 60, 110)
       doc.rect(0, 0, pageWidth, 45, 'F')
