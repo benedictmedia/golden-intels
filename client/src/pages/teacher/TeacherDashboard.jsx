@@ -956,7 +956,7 @@ export default function TeacherDashboard() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-purple-900">
+        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
           <button onClick={() => setShowChangePassword(true)}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
             style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>

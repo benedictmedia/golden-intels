@@ -3,14 +3,42 @@ import axios from 'axios'
 import { X, Eye, EyeOff, Lock } from 'lucide-react'
 import API_URL from '../api/config'
 
+// Defined OUTSIDE the component so it never remounts on re-render
+function PasswordField({ label, field, value, onChange, show, onToggle, accentColor }) {
+  return (
+    <div>
+      <label className="block text-sm font-bold mb-2" style={{ color: accentColor }}>{label}</label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={e => onChange(field, e.target.value)}
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none text-gray-700 pr-12"
+          placeholder="••••••••"
+        />
+        <button type="button" onClick={onToggle}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function ChangePasswordModal({ onClose, accentColor = '#0000ff' }) {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
-  const [showCurrent, setShowCurrent] = useState(false)
-  const [showNew, setShowNew] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
+  const [show, setShow] = useState({ currentPassword: false, newPassword: false, confirmPassword: false })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+
+  const handleChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const toggleShow = (field) => {
+    setShow(prev => ({ ...prev, [field]: !prev[field] }))
+  }
 
   const handleSubmit = async () => {
     setError('')
@@ -42,33 +70,10 @@ export default function ChangePasswordModal({ onClose, accentColor = '#0000ff' }
     }
   }
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none text-gray-700 pr-12'
-
-  const PasswordField = ({ label, field, show, setShow }) => (
-    <div>
-      <label className="block text-sm font-bold mb-2" style={{ color: accentColor }}>{label}</label>
-      <div className="relative">
-        <input
-          type={show ? 'text' : 'password'}
-          value={form[field]}
-          onChange={e => setForm(prev => ({ ...prev, [field]: e.target.value }))}
-          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-          className={inputCls}
-          placeholder="••••••••"
-        />
-        <button type="button" onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 rounded-t-2xl"
           style={{ background: accentColor }}>
           <div className="flex items-center gap-3">
@@ -78,7 +83,6 @@ export default function ChangePasswordModal({ onClose, accentColor = '#0000ff' }
           <button onClick={onClose} className="text-white hover:opacity-70"><X size={22} /></button>
         </div>
 
-        {/* Body */}
         <div className="p-6 space-y-4">
           {success ? (
             <div className="text-center py-6">
@@ -91,9 +95,33 @@ export default function ChangePasswordModal({ onClose, accentColor = '#0000ff' }
             </div>
           ) : (
             <>
-              <PasswordField label="Current Password" field="currentPassword" show={showCurrent} setShow={setShowCurrent} />
-              <PasswordField label="New Password" field="newPassword" show={showNew} setShow={setShowNew} />
-              <PasswordField label="Confirm New Password" field="confirmPassword" show={showConfirm} setShow={setShowConfirm} />
+              <PasswordField
+                label="Current Password"
+                field="currentPassword"
+                value={form.currentPassword}
+                onChange={handleChange}
+                show={show.currentPassword}
+                onToggle={() => toggleShow('currentPassword')}
+                accentColor={accentColor}
+              />
+              <PasswordField
+                label="New Password"
+                field="newPassword"
+                value={form.newPassword}
+                onChange={handleChange}
+                show={show.newPassword}
+                onToggle={() => toggleShow('newPassword')}
+                accentColor={accentColor}
+              />
+              <PasswordField
+                label="Confirm New Password"
+                field="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                show={show.confirmPassword}
+                onToggle={() => toggleShow('confirmPassword')}
+                accentColor={accentColor}
+              />
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
@@ -108,7 +136,7 @@ export default function ChangePasswordModal({ onClose, accentColor = '#0000ff' }
                   {loading ? 'Updating...' : 'Change Password'}
                 </button>
                 <button onClick={onClose}
-                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-all">
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl">
                   Cancel
                 </button>
               </div>
