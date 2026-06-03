@@ -757,65 +757,67 @@ export default function ParentDashboard() {
           )}
 
           {/* Assessments */}
-          {activeMenu === 'assessments' && (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Marked Assessments</h2>
-                <p className="text-gray-500 text-sm">Only answered assignments and quizzes that have been marked are shown here.</p>
-              </div>
-              {markedAssessmentRecords.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
-                  No marked assessment submissions are available yet.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {markedAssessmentRecords.map((assignment, index) => (
-                    <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div>
-                          <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
-                            {assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
-                          </span>
-                          <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
-                          <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
-                          <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
-                        </div>
-                        <div className="text-right text-xs text-gray-400">
-                          <p>Submitted: {formatDateTime(assignment.submittedAt)}</p>
-                          <p>Marked: {formatDateTime(assignment.markedAt)}</p>
-                        </div>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                        <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
-                        <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                        <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
-                        <div className="space-y-3">
-                          {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
-                            <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
-                              <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
-                              <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
-                              {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
-                                <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
-                        <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
-                        {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
-                        <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+         {activeMenu === 'assessments' && (
+  <div className="space-y-8">
+    <h2 className="text-2xl font-bold text-[#4a235a]">Marked Assessments by Subject</h2>
 
+    {SUBJECTS.map(subject => {
+      const subjectRecords = markedAssessmentRecords.filter(r => r.subject === subject);
+
+      if (subjectRecords.length === 0) return null;
+
+      return (
+        <div key={subject} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-[#4a235a] text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <BookOpen size={24} />
+              <h4 className="text-xl font-bold">{subject}</h4>
+            </div>
+            <span className="bg-white/20 px-4 py-1 rounded-full text-sm font-medium">
+              {subjectRecords.length} record{subjectRecords.length > 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {subjectRecords.map((record, index) => (
+              <div key={`${record.itemId}-${index}`} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h5 className="font-bold text-lg text-[#4a235a]">{record.title || record.itemTitle}</h5>
+                    <p className="text-sm text-gray-500">
+                      {record.learnerName || record.studentName} • Score: <span className="font-semibold text-emerald-600">{record.score}</span>
+                    </p>
+                  </div>
+                  <div className="text-xs px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full">
+                    Marked
+                  </div>
+                </div>
+
+                <div className="text-sm text-gray-600 border-t pt-4">
+                  {record.feedback || "No additional feedback provided."}
+                </div>
+
+                <button 
+                  onClick={() => handleParentDownloadPDF(record)}
+                  className="mt-4 w-full py-3 text-sm font-bold bg-gradient-to-r from-[#4a235a] to-[#6b21a8] text-white rounded-xl hover:brightness-105 transition"
+                >
+                  Download Result PDF
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+
+    {markedAssessmentRecords.length === 0 && (
+      <div className="bg-white rounded-2xl p-16 text-center border border-gray-100">
+        <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
+        <p className="text-gray-400">No marked assessments available yet.</p>
+      </div>
+    )}
+  </div>
+)}
           {/* Fee Status */}
           {activeMenu === 'fees' && (
             <div>

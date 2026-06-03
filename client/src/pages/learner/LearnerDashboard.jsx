@@ -596,197 +596,130 @@ export default function LearnerDashboard() {
             </div>
           )}
 
-          {/* ════════════════ ASSESSMENTS TAB ════════════════ */}
+          {/* ════════════════ ASSESSMENTS TAB (Subject Folders) ════════════════ */}
           {activeTab === 'assessments' && (
-            <div className="space-y-8">
+  <div className="space-y-8">
+    <h3 className="text-2xl font-bold text-[#1e2937]">Assessments by Subject</h3>
 
-              {/* Assignments */}
-              <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Written Assignments</h3>
-                {learnerAssignments.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
-                    <p style={{ color: '#94a3b8' }}>No assignments for your class yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {learnerAssignments.map(assignment => {
-                      const submission = submissions.assignments?.[assignment.id]
-                      return (
-                        <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
-                          <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
-                            <div>
-                              <h4 className="text-lg font-bold" style={{ color: '#1e293b' }}>{assignment.title}</h4>
-                              <p className="text-sm" style={{ color: '#64748b' }}>{assignment.subject} · {assignment.gradeLevel}</p>
-                              <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{assignment.academicYear || selectedAcademicYear} · {assignment.term || selectedTerm}</p>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm" style={{ color: '#64748b' }}>
-                              <Clock size={14} />
-                              <span>Due {formatDateTime(assignment.dueDate)}</span>
-                            </div>
-                          </div>
-                          <p className="text-sm mb-4 leading-relaxed" style={{ color: '#374151' }}>{assignment.description}</p>
-                          {submission ? (
-                            <div className="space-y-3">
-                              <div className="rounded-xl p-4" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                                <p className="font-bold text-sm mb-1" style={{ color: '#166534' }}>✓ Submitted</p>
-                                <p className="text-sm" style={{ color: '#374151' }}>{submission.answer}</p>
-                                <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
-                              </div>
-                              <button onClick={() => handleDownloadLearnerPdf({ ...submission, type: 'assignment', title: assignment.title, questions: [{ prompt: assignment.description || assignment.title, selected: submission.answer, answer: 'Student response' }] })}
-                                className="text-sm font-bold px-5 py-2.5 rounded-xl transition-all"
-                                style={{ background: '#1e1b4b', color: '#fff' }}>
-                                Download PDF
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              <label className="block text-sm font-bold" style={{ color: '#374151' }}>Your Answer</label>
-                              <textarea
-                                placeholder="Write your assignment answer here..."
-                                value={assignmentAnswers[assignment.id] || ''}
-                                onChange={e => handleAssignmentAnswerChange(assignment.id, e.target.value)}
-                                rows={4}
-                                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 resize-none"
-                                style={{ border: '1px solid #e2e8f0', color: '#374151', focusRingColor: '#7c3aed' }}
-                              />
-                              <button onClick={() => handleSubmitAssignment(assignment)}
-                                className="font-bold px-6 py-2.5 rounded-xl text-sm transition-all"
-                                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff' }}>
-                                Submit Assignment
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
+    {SUBJECTS.map(subject => {
+      const subjectAssignments = learnerAssignments.filter(a => a.subject === subject);
+      const subjectQuizzes = learnerQuizzes.filter(q => q.subject === subject);
 
-              {/* Quizzes */}
-              <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Quizzes</h3>
-                {learnerQuizzes.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
-                    <p style={{ color: '#94a3b8' }}>No quizzes for your class yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {learnerQuizzes.map(quiz => {
-                      const submission = submissions.quizzes?.[quiz.id]
-                      const startedAt = quizStartTimes[quiz.id] ? new Date(quizStartTimes[quiz.id]).getTime() : null
-                      const durationMs = quiz.durationMinutes * 60 * 1000
-                      const elapsed = startedAt ? Math.max(0, now - startedAt) : 0
-                      const timeLeft = startedAt ? Math.max(0, durationMs - elapsed) : null
-                      const expired = (quiz.dueDate && new Date(quiz.dueDate).getTime() <= now) || (startedAt !== null && timeLeft <= 0)
-                      return (
-                        <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
-                          <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
-                            <div>
-                              <h4 className="text-lg font-bold" style={{ color: '#1e293b' }}>{quiz.title}</h4>
-                              <p className="text-sm" style={{ color: '#64748b' }}>{quiz.subject} · {quiz.gradeLevel}</p>
-                              <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{quiz.academicYear || selectedAcademicYear} · {quiz.term || selectedTerm}</p>
-                            </div>
-                            <div className="text-right">
-                              {startedAt && !submission && (
-                                <div className="text-sm font-bold px-3 py-1 rounded-full" style={{ background: expired ? '#fef2f2' : '#fffbeb', color: expired ? '#dc2626' : '#d97706' }}>
-                                  {expired ? 'Time up' : `${Math.floor(timeLeft / 60000)}:${String(Math.floor((timeLeft / 1000) % 60)).padStart(2, '0')} left`}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm mb-4" style={{ color: '#64748b' }}>
-                            Due {formatDateTime(quiz.dueDate)} · {quiz.durationMinutes} mins
-                          </p>
+      if (subjectAssignments.length === 0 && subjectQuizzes.length === 0) return null;
 
-                          {submission ? (
-                            <div className="space-y-4">
-                              <div className="rounded-xl p-4" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                                <p className="font-bold text-sm" style={{ color: '#166534' }}>✓ Quiz submitted — Score: {submission.score} / {quiz.questions.length}</p>
-                                <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
-                              </div>
-                              <div className="space-y-3">
-                                {quiz.questions.map((q, idx) => {
-                                  const selected = submission.answers?.[idx] || 'No answer'
-                                  const needsManual = ['short-answer', 'paragraph'].includes(q.type)
-                                  const isCorrect = !needsManual && String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase()
-                                  return (
-                                    <div key={idx} className="rounded-xl p-4" style={{ background: needsManual ? '#fffbeb' : isCorrect ? '#f0fdf4' : '#fef2f2', border: `1px solid ${needsManual ? '#fde68a' : isCorrect ? '#bbf7d0' : '#fecaca'}` }}>
-                                      <div className="flex items-start justify-between gap-4">
-                                        <p className="font-bold text-sm" style={{ color: '#1e293b' }}>Q{idx + 1}. {q.prompt}</p>
-                                        <span className="text-xs font-bold flex-shrink-0" style={{ color: needsManual ? '#d97706' : isCorrect ? '#166534' : '#dc2626' }}>
-                                          {needsManual ? 'Awaiting mark' : isCorrect ? '✔ Correct' : '✖ Incorrect'}
-                                        </span>
-                                      </div>
-                                      <p className="text-sm mt-2" style={{ color: '#374151' }}>Your answer: {selected}</p>
-                                      {!needsManual && <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Correct: {q.answer}</p>}
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                              <button onClick={() => handleDownloadLearnerPdf({ ...submission, type: 'quiz', title: quiz.title, questions: quiz.questions.map((q, idx) => ({ prompt: q.prompt, selected: submission.answers?.[idx] || 'No answer', answer: q.answer })) })}
-                                className="text-sm font-bold px-5 py-2.5 rounded-xl"
-                                style={{ background: '#1e1b4b', color: '#fff' }}>
-                                Download PDF
-                              </button>
-                            </div>
-                          ) : !activeQuizId || activeQuizId !== quiz.id ? (
-                            <button onClick={() => handleStartQuiz(quiz.id)}
-                              className="font-bold px-6 py-2.5 rounded-xl text-sm"
-                              style={{ background: 'linear-gradient(135deg, #d97706, #b45309)', color: '#fff' }}>
-                              {quizStartTimes[quiz.id] ? 'Continue Quiz' : 'Start Quiz'}
-                            </button>
-                          ) : expired ? (
-                            <div className="rounded-xl p-4" style={{ background: '#fef2f2', border: '1px solid #fecaca' }}>
-                              <p className="text-sm font-bold" style={{ color: '#dc2626' }}>This quiz is now closed.</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {quiz.questions.map((q, idx) => {
-                                const selected = quizAnswers[quiz.id]?.[idx] || ''
-                                const isFillIn = q.type === 'fill-in' || q.type === 'short-answer'
-                                const isParagraph = q.type === 'paragraph'
-                                const isDropdown = q.type === 'dropdown'
-                                return (
-                                  <div key={idx} className="rounded-xl p-4" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                                    <p className="font-bold text-sm mb-3" style={{ color: '#1e293b' }}>Q{idx + 1}. {q.prompt}</p>
-                                    {isParagraph ? (
-                                      <textarea value={selected} onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)} rows={4} placeholder="Write your answer..." className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none resize-none" style={{ border: '1px solid #e2e8f0' }} />
-                                    ) : isFillIn ? (
-                                      <input type="text" value={selected} onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)} placeholder="Type your answer..." className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ border: '1px solid #e2e8f0' }} />
-                                    ) : isDropdown ? (
-                                      <select value={selected} onChange={e => handleQuizAnswer(quiz.id, idx, e.target.value)} className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none bg-white" style={{ border: '1px solid #e2e8f0' }}>
-                                        <option value="">Choose an answer</option>
-                                        {(q.options || []).map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
-                                      </select>
-                                    ) : (
-                                      <div className="space-y-2">
-                                        {(q.options || []).map((opt, oi) => (
-                                          <label key={oi} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all" style={{ background: selected === opt ? '#eff6ff' : '#fff', border: `1px solid ${selected === opt ? '#2563eb' : '#e2e8f0'}` }}>
-                                            <input type="radio" name={`quiz-${quiz.id}-q-${idx}`} value={opt} checked={selected === opt} onChange={() => handleQuizAnswer(quiz.id, idx, opt)} className="h-4 w-4" />
-                                            <span className="text-sm" style={{ color: '#374151' }}>{opt}</span>
-                                          </label>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                              <button onClick={() => handleSubmitQuiz(quiz)}
-                                className="font-bold px-6 py-2.5 rounded-xl text-sm"
-                                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff' }}>
-                                Submit Quiz
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
+      return (
+        <div key={subject} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-[#2563eb] to-[#7c3aed] px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <BookOpen size={24} className="text-white" />
+              <h4 className="text-xl font-bold text-white">{subject}</h4>
             </div>
-          )}
+            <span className="bg-white/20 text-white text-sm font-semibold px-4 py-1 rounded-full">
+              {subjectAssignments.length} Assignment{subjectAssignments.length !== 1 ? 's' : ''} • {subjectQuizzes.length} Quiz{subjectQuizzes.length !== 1 ? 'zes' : ''}
+            </span>
+          </div>
+
+          <div className="p-6 space-y-8">
+            {/* Subject Assignments */}
+            {subjectAssignments.length > 0 && (
+              <div>
+                <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">ASSIGNMENTS</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {subjectAssignments.map(assignment => {
+                    const submission = submissions.assignments?.[assignment.id];
+                    return (
+                      <div key={assignment.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h5 className="font-bold text-lg text-[#1e2937]">{assignment.title}</h5>
+                            <p className="text-sm text-gray-500">{assignment.gradeLevel} • Due: {new Date(assignment.dueDate).toLocaleDateString()}</p>
+                          </div>
+                          <div className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                            {submission ? 'Submitted' : 'Pending'}
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 text-sm mb-5 line-clamp-3">{assignment.description}</p>
+
+                        {!submission ? (
+                          <div className="space-y-3">
+                            <textarea
+                              placeholder="Type your assignment here..."
+                              className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                              value={submissions.assignments?.[assignment.id]?.content || ''}
+                              onChange={(e) => {
+                                // Keep your existing submission handler
+                                const newSubs = {...submissions};
+                                if (!newSubs.assignments) newSubs.assignments = {};
+                                newSubs.assignments[assignment.id] = { content: e.target.value, submittedAt: new Date().toISOString() };
+                                setSubmissions(newSubs);
+                              }}
+                            />
+                            <button 
+                              onClick={() => handleSubmitAssignment(assignment)}
+                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105 transition"
+                            >
+                              Submit Assignment
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-green-50 border border-green-100 rounded-xl text-green-700 text-sm">
+                            ✓ Submitted on {new Date(submission.submittedAt).toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Subject Quizzes */}
+            {subjectQuizzes.length > 0 && (
+              <div>
+                <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">QUIZZES</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {subjectQuizzes.map(quiz => {
+                    const hasSubmitted = submissions.quizzes?.[quiz.id];
+                    return (
+                      <div key={quiz.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                        <h5 className="font-bold text-lg mb-2">{quiz.title}</h5>
+                        <p className="text-sm text-gray-500 mb-4">{quiz.questions?.length || 0} questions</p>
+
+                        {!hasSubmitted ? (
+                          <button 
+                            onClick={() => {
+                              setSelectedQuiz(quiz);
+                              setActiveTab('assessments'); // keep on same tab
+                            }}
+                            className="w-full py-3 bg-gradient-to-r from-[#7c3aed] to-[#2563eb] text-white font-bold rounded-xl"
+                          >
+                            Start Quiz
+                          </button>
+                        ) : (
+                          <div className="p-4 bg-green-50 rounded-xl text-center text-green-700 font-medium">
+                            Quiz Completed
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    })}
+
+    {learnerAssignments.length === 0 && learnerQuizzes.length === 0 && (
+      <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+        <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
+        <p className="text-gray-400">No assessments available at the moment.</p>
+      </div>
+    )}
+  </div>
+)}
 
           {/* ════════════════ GOLDEN CLASSROOM TAB ════════════════ */}
           {activeTab === 'classroom' && (
