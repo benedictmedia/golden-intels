@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BrandLogo from '../components/layout/BrandLogo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -34,9 +35,7 @@ export default function Login() {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center font-bold text-cyan-700 text-xl">G</div>
-          </div>
+          <BrandLogo className="w-20 h-20 mx-auto mb-4 shadow-md" />
           <h1 className="text-2xl font-bold font-serif text-cyan-700">Portal Login</h1>
           <p className="text-gray-500 text-sm mt-1">Golden-Intels International School</p>
         </div>

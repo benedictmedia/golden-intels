@@ -13,6 +13,7 @@ import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, get
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
+import BrandLogo from '../../components/layout/BrandLogo'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -908,7 +909,7 @@ export default function TeacherDashboard() {
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(252, 247, 247, 0.91)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style={{ background: '#ffff00', color: '#0000ff' }}>G</div>
+              <BrandLogo className="w-9 h-9 shadow-sm" />
               <div>
                 <p className="text-xs font-bold text-white">Golden-Intels</p>
                 <p className="text-xs text-cyan-100">Teacher Portal</p>

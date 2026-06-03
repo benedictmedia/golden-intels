@@ -11,6 +11,7 @@ import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, get
 import AdminMessages from '../../components/messages/AdminMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
+import BrandLogo from '../../components/layout/BrandLogo'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -998,7 +999,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm" style={{ background: '#ffff00', color: '#800080' }}>G</div>
+              <BrandLogo className="w-9 h-9 shadow-sm" />
               <div><p className="text-xs font-bold">Golden-Intels</p><p className="text-xs text-cyan-100">Admin Portal</p></div>
             </div>
           )}

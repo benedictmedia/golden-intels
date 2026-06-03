@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
+import BrandLogo from './BrandLogo'
 
 // School colour palette is defined in index.css as CSS variables
 // --color-primary (purple), --color-secondary (blue), --color-accent (yellow)
@@ -26,10 +27,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 min-w-0">
-          {/* Logo Circle */}
-          <div className="w-10 h-10 bg-[var(--color-secondary)] rounded-full flex items-center justify-center font-bold text-white shadow-md">
-            G
-          </div>
+          <BrandLogo className="w-10 h-10 shadow-md" />
           {/* School Name */}
           <div className="leading-tight min-w-0">
             <p className="font-bold text-sm tracking-wide text-white">Golden-Intels</p>

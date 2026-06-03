@@ -11,6 +11,7 @@ import {
 import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
+import BrandLogo from '../../components/layout/BrandLogo'
 
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
@@ -295,9 +296,7 @@ export default function LearnerDashboard() {
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>
-              G
-            </div>
+            <BrandLogo className="w-9 h-9 shadow-sm" />
             <div>
               <p className="text-white font-bold text-sm leading-none">Golden-Intels</p>
               <p className="text-xs leading-none mt-0.5" style={{ color: '#94a3b8' }}>Learner Portal</p>
