@@ -6,7 +6,7 @@ import API_URL from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
-  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle, Lock
+  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle, Lock, FolderOpen
 } from 'lucide-react'
 import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
@@ -21,6 +21,16 @@ const AVATAR_COLORS = [
 ]
 const getAvatarColor = (name = '') =>
   AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
+
+const getSubjectName = (item) => item?.subject || 'General'
+const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item) => {
+  const subject = getSubjectName(item)
+  if (!folders[subject]) folders[subject] = { subject, assignments: 0, quizzes: 0, total: 0 }
+  if (item.folderType === 'quiz') folders[subject].quizzes += 1
+  if (item.folderType === 'assignment') folders[subject].assignments += 1
+  folders[subject].total += 1
+  return folders
+}, {})).sort((a, b) => a.subject.localeCompare(b.subject))
 
 export default function LearnerDashboard() {
   const { user, logout } = useAuth()
@@ -40,6 +50,7 @@ export default function LearnerDashboard() {
   const [assignmentStartTimes, setAssignmentStartTimes] = useState({})
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [activeQuizId, setActiveQuizId] = useState(null)
+  const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
   const [now, setNow] = useState(Date.now())
   const learnerSubmissionKey = `goldenIntelsSubmissions:${user?.email || 'anonymous'}`
 
@@ -152,6 +163,19 @@ export default function LearnerDashboard() {
   const learnerLessons = publishedLessons.filter(isForLearnerClass)
   const learnerAssignments = publishedAssignments.filter(isForLearnerClass)
   const learnerQuizzes = publishedQuizzes.filter(isForLearnerClass)
+  const learnerAssessmentFolders = buildSubjectFolders([
+    ...learnerAssignments.map(item => ({ ...item, folderType: 'assignment' })),
+    ...learnerQuizzes.map(item => ({ ...item, folderType: 'quiz' }))
+  ])
+  const selectedAssessmentSubject = learnerAssessmentFolders.some(folder => folder.subject === activeAssessmentSubject)
+    ? activeAssessmentSubject
+    : learnerAssessmentFolders[0]?.subject || ''
+  const visibleLearnerAssignments = selectedAssessmentSubject
+    ? learnerAssignments.filter(item => getSubjectName(item) === selectedAssessmentSubject)
+    : learnerAssignments
+  const visibleLearnerQuizzes = selectedAssessmentSubject
+    ? learnerQuizzes.filter(item => getSubjectName(item) === selectedAssessmentSubject)
+    : learnerQuizzes
 
   const completedAssignmentCount = learnerAssignments.filter(i => submissions.assignments?.[i.id]).length
   const completedQuizCount = learnerQuizzes.filter(i => submissions.quizzes?.[i.id]).length
@@ -599,17 +623,58 @@ export default function LearnerDashboard() {
           {/* ════════════════ ASSESSMENTS TAB ════════════════ */}
           {activeTab === 'assessments' && (
             <div className="space-y-8">
+              {learnerAssessmentFolders.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Subject Folders</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {learnerAssessmentFolders.map(folder => {
+                      const selected = folder.subject === selectedAssessmentSubject
+                      return (
+                        <button
+                          key={folder.subject}
+                          type="button"
+                          onClick={() => setActiveAssessmentSubject(folder.subject)}
+                          className="text-left bg-white rounded-2xl p-5 shadow-sm transition-all"
+                          style={{
+                            border: selected ? '2px solid #7c3aed' : '1px solid #e2e8f0',
+                            boxShadow: selected ? '0 12px 24px rgba(124,58,237,0.12)' : undefined
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#f5f3ff' : '#eff6ff', color: selected ? '#7c3aed' : '#2563eb' }}>
+                              <FolderOpen size={26} />
+                            </div>
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#f8fafc', color: '#64748b' }}>
+                              {folder.total} item{folder.total === 1 ? '' : 's'}
+                            </span>
+                          </div>
+                          <p className="font-bold text-base mb-2" style={{ color: '#1e293b' }}>{folder.subject}</p>
+                          <p className="text-xs" style={{ color: '#64748b' }}>
+                            {folder.assignments} assignment{folder.assignments === 1 ? '' : 's'} · {folder.quizzes} quiz{folder.quizzes === 1 ? '' : 'zes'}
+                          </p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Assignments */}
               <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Written Assignments</h3>
+                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>
+                  {selectedAssessmentSubject ? `${selectedAssessmentSubject} Written Assignments` : 'Written Assignments'}
+                </h3>
                 {learnerAssignments.length === 0 ? (
                   <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
                     <p style={{ color: '#94a3b8' }}>No assignments for your class yet.</p>
                   </div>
+                ) : visibleLearnerAssignments.length === 0 ? (
+                  <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
+                    <p style={{ color: '#94a3b8' }}>No assignments in this subject folder yet.</p>
+                  </div>
                 ) : (
                   <div className="space-y-4">
-                    {learnerAssignments.map(assignment => {
+                    {visibleLearnerAssignments.map(assignment => {
                       const submission = submissions.assignments?.[assignment.id]
                       return (
                         <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
@@ -665,14 +730,20 @@ export default function LearnerDashboard() {
 
               {/* Quizzes */}
               <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>Quizzes</h3>
+                <h3 className="text-lg font-bold mb-4" style={{ color: '#1e293b' }}>
+                  {selectedAssessmentSubject ? `${selectedAssessmentSubject} Quizzes` : 'Quizzes'}
+                </h3>
                 {learnerQuizzes.length === 0 ? (
                   <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
                     <p style={{ color: '#94a3b8' }}>No quizzes for your class yet.</p>
                   </div>
+                ) : visibleLearnerQuizzes.length === 0 ? (
+                  <div className="bg-white rounded-2xl p-8 text-center shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
+                    <p style={{ color: '#94a3b8' }}>No quizzes in this subject folder yet.</p>
+                  </div>
                 ) : (
                   <div className="space-y-4">
-                    {learnerQuizzes.map(quiz => {
+                    {visibleLearnerQuizzes.map(quiz => {
                       const submission = submissions.quizzes?.[quiz.id]
                       const startedAt = quizStartTimes[quiz.id] ? new Date(quizStartTimes[quiz.id]).getTime() : null
                       const durationMs = quiz.durationMinutes * 60 * 1000

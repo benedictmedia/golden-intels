@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
-  FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock
+  FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock, FolderOpen
 } from 'lucide-react'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
@@ -25,6 +25,16 @@ const menuItems = [
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
+const getSubjectName = (item) => item?.subject || 'General'
+const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item) => {
+  const subject = getSubjectName(item)
+  if (!folders[subject]) folders[subject] = { subject, assignments: 0, quizzes: 0, total: 0 }
+  if (item.type === 'quiz') folders[subject].quizzes += 1
+  if (item.type === 'assignment') folders[subject].assignments += 1
+  folders[subject].total += 1
+  return folders
+}, {})).sort((a, b) => a.subject.localeCompare(b.subject))
+
 export default function ParentDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -44,6 +54,7 @@ export default function ParentDashboard() {
   const [attendanceError, setAttendanceError] = useState('')
   const [assignmentRecords, setAssignmentRecords] = useState([])
   const [showChangePassword, setShowChangePassword] = useState(false)
+  const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -397,6 +408,13 @@ export default function ParentDashboard() {
     matchesAcademicContext(record) &&
     students.some(student => matchesParentChild(record, student))
   )
+  const parentAssessmentFolders = buildSubjectFolders(markedAssessmentRecords)
+  const selectedAssessmentSubject = parentAssessmentFolders.some(folder => folder.subject === activeAssessmentSubject)
+    ? activeAssessmentSubject
+    : parentAssessmentFolders[0]?.subject || ''
+  const visibleMarkedAssessmentRecords = selectedAssessmentSubject
+    ? markedAssessmentRecords.filter(record => getSubjectName(record) === selectedAssessmentSubject)
+    : markedAssessmentRecords
   const contextualApprovedResults = approvedResults.filter(matchesAcademicContext)
   const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
   const contextualFeePayments = feePayments.filter(payment => {
@@ -768,49 +786,85 @@ export default function ParentDashboard() {
                   No marked assessment submissions are available yet.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {markedAssessmentRecords.map((assignment, index) => (
-                    <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div>
-                          <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
-                            {assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
-                          </span>
-                          <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
-                          <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
-                          <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
-                        </div>
-                        <div className="text-right text-xs text-gray-400">
-                          <p>Submitted: {formatDateTime(assignment.submittedAt)}</p>
-                          <p>Marked: {formatDateTime(assignment.markedAt)}</p>
-                        </div>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                        <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
-                        <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                        <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
-                        <div className="space-y-3">
-                          {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
-                            <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
-                              <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
-                              <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
-                              {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
-                                <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
-                              )}
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {parentAssessmentFolders.map(folder => {
+                      const selected = folder.subject === selectedAssessmentSubject
+                      return (
+                        <button
+                          key={folder.subject}
+                          type="button"
+                          onClick={() => setActiveAssessmentSubject(folder.subject)}
+                          className="text-left bg-white rounded-2xl p-5 shadow-sm transition-all border"
+                          style={{
+                            borderColor: selected ? '#800080' : '#e5e7eb',
+                            boxShadow: selected ? '0 12px 24px rgba(128,0,128,0.12)' : undefined
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#faf5ff' : '#eff6ff', color: selected ? '#800080' : '#2563eb' }}>
+                              <FolderOpen size={26} />
                             </div>
-                          ))}
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-50 text-gray-500">
+                              {folder.total} marked
+                            </span>
+                          </div>
+                          <p className="font-bold text-base mb-2 text-[#4a235a]">{folder.subject}</p>
+                          <p className="text-xs text-gray-500">
+                            {folder.assignments} assignment{folder.assignments === 1 ? '' : 's'} | {folder.quizzes} quiz{folder.quizzes === 1 ? '' : 'zes'}
+                          </p>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-bold text-[#4a235a] mb-4">{selectedAssessmentSubject} Folder</h3>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {visibleMarkedAssessmentRecords.map((assignment, index) => (
+                        <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                          <div className="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                              <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
+                                {assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
+                              </span>
+                              <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
+                              <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
+                              <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
+                            </div>
+                            <div className="text-right text-xs text-gray-400">
+                              <p>Submitted: {formatDateTime(assignment.submittedAt)}</p>
+                              <p>Marked: {formatDateTime(assignment.markedAt)}</p>
+                            </div>
+                          </div>
+                          <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                            <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
+                            <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
+                          </div>
+                          <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                            <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
+                            <div className="space-y-3">
+                              {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
+                                <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
+                                  <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
+                                  <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
+                                  {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
+                                    <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
+                            <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
+                            {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
+                            <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
-                        <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
-                        {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
-                        <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               )}
             </div>
