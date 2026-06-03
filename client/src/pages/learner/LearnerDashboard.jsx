@@ -597,13 +597,18 @@ export default function LearnerDashboard() {
           )}
 
           {/* ════════════════ ASSESSMENTS TAB (Subject Folders) ════════════════ */}
-          {activeTab === 'assessments' && (
+  {activeTab === 'assessments' && (
   <div className="space-y-8">
     <h3 className="text-2xl font-bold text-[#1e2937]">Assessments by Subject</h3>
 
-    {SUBJECTS.map(subject => {
-      const subjectAssignments = learnerAssignments.filter(a => a.subject === subject);
-      const subjectQuizzes = learnerQuizzes.filter(q => q.subject === subject);
+    {/* Fallback SUBJECTS if not defined */}
+    {(!SUBJECTS || SUBJECTS.length === 0) && (
+      <div className="text-red-600">Error: SUBJECTS not defined. Please define it at the top of the file.</div>
+    )}
+
+    {(SUBJECTS || []).map(subject => {
+      const subjectAssignments = (learnerAssignments || []).filter(a => a.subject === subject);
+      const subjectQuizzes = (learnerQuizzes || []).filter(q => q.subject === subject);
 
       if (subjectAssignments.length === 0 && subjectQuizzes.length === 0) return null;
 
@@ -620,44 +625,46 @@ export default function LearnerDashboard() {
           </div>
 
           <div className="p-6 space-y-8">
-            {/* Subject Assignments */}
+            {/* Assignments */}
             {subjectAssignments.length > 0 && (
               <div>
                 <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">ASSIGNMENTS</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subjectAssignments.map(assignment => {
-                    const submission = submissions.assignments?.[assignment.id];
+                    const submission = submissions?.assignments?.[assignment.id];
                     return (
-                      <div key={assignment.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                      <div key={assignment.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <div className="flex justify-between items-start mb-4">
                           <div>
                             <h5 className="font-bold text-lg text-[#1e2937]">{assignment.title}</h5>
-                            <p className="text-sm text-gray-500">{assignment.gradeLevel} • Due: {new Date(assignment.dueDate).toLocaleDateString()}</p>
+                            <p className="text-sm text-gray-500">{assignment.gradeLevel} • Due: {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : 'N/A'}</p>
                           </div>
-                          <div className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                          <div className={`text-xs px-3 py-1 rounded-full font-medium ${submission ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                             {submission ? 'Submitted' : 'Pending'}
                           </div>
                         </div>
 
-                        <p className="text-gray-600 text-sm mb-5 line-clamp-3">{assignment.description}</p>
+                        <p className="text-gray-600 text-sm mb-5 line-clamp-3">{assignment.description || 'No description provided.'}</p>
 
                         {!submission ? (
                           <div className="space-y-3">
                             <textarea
-                              placeholder="Type your assignment here..."
-                              className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
-                              value={submissions.assignments?.[assignment.id]?.content || ''}
+                              placeholder="Type your assignment response here..."
+                              className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-y"
+                              value={submissions?.assignments?.[assignment.id]?.content || ''}
                               onChange={(e) => {
-                                // Keep your existing submission handler
-                                const newSubs = {...submissions};
+                                const newSubs = {...(submissions || {})};
                                 if (!newSubs.assignments) newSubs.assignments = {};
-                                newSubs.assignments[assignment.id] = { content: e.target.value, submittedAt: new Date().toISOString() };
+                                newSubs.assignments[assignment.id] = {
+                                  content: e.target.value,
+                                  submittedAt: new Date().toISOString()
+                                };
                                 setSubmissions(newSubs);
                               }}
                             />
                             <button 
-                              onClick={() => handleSubmitAssignment(assignment)}
-                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105 transition"
+                              onClick={() => handleSubmitAssignment && handleSubmitAssignment(assignment)}
+                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105"
                             >
                               Submit Assignment
                             </button>
@@ -674,23 +681,22 @@ export default function LearnerDashboard() {
               </div>
             )}
 
-            {/* Subject Quizzes */}
+            {/* Quizzes */}
             {subjectQuizzes.length > 0 && (
               <div>
                 <p className="uppercase tracking-widest text-xs font-bold text-gray-500 mb-4">QUIZZES</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subjectQuizzes.map(quiz => {
-                    const hasSubmitted = submissions.quizzes?.[quiz.id];
+                    const hasSubmitted = submissions?.quizzes?.[quiz.id];
                     return (
                       <div key={quiz.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <h5 className="font-bold text-lg mb-2">{quiz.title}</h5>
-                        <p className="text-sm text-gray-500 mb-4">{quiz.questions?.length || 0} questions</p>
+                        <p className="text-sm text-gray-500 mb-4">{(quiz.questions || []).length} questions</p>
 
                         {!hasSubmitted ? (
                           <button 
                             onClick={() => {
-                              setSelectedQuiz(quiz);
-                              setActiveTab('assessments'); // keep on same tab
+                              if (setSelectedQuiz) setSelectedQuiz(quiz);
                             }}
                             className="w-full py-3 bg-gradient-to-r from-[#7c3aed] to-[#2563eb] text-white font-bold rounded-xl"
                           >
@@ -712,7 +718,7 @@ export default function LearnerDashboard() {
       );
     })}
 
-    {learnerAssignments.length === 0 && learnerQuizzes.length === 0 && (
+    {(learnerAssignments || []).length === 0 && (learnerQuizzes || []).length === 0 && (
       <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
         <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
         <p className="text-gray-400">No assessments available at the moment.</p>
