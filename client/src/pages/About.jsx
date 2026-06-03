@@ -88,7 +88,7 @@ export default function About() {
             </h3>
 
             <p className="text-blue-100 text-lg leading-relaxed">
-              To deliver a high-quality international education that nurtures curiosity, critical thinking, and academic excellence, empowering learners to become confident, ethical, and globally minded individuals prepared for lifelong learning.
+              Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
             </p>
           </div>
 

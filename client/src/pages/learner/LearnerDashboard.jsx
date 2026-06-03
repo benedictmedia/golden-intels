@@ -12,6 +12,11 @@ import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 
+const SUBJECTS = [
+  'Maths', 'English', 'Science', 'Computing', 'History', 'Geography', 
+  'Ewe', 'French', 'Creative Arts', 'Religious & Moral Education'
+]
+
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
