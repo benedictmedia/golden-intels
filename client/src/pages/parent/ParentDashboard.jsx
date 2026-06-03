@@ -41,7 +41,7 @@ export default function ParentDashboard() {
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
   const [selectedTerm, setSelectedTerm] = useState('Term 1')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [students, setStudents] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
   const [message, setMessage] = useState('')
@@ -446,10 +446,10 @@ export default function ParentDashboard() {
   }, [])
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="portal-shell flex bg-gray-100">
 
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col`} style={{ background: '#800080' }}>
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col`} style={{ background: '#800080' }}>
         <div className="flex items-center justify-between p-4 border-b border-purple-900">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -469,7 +469,7 @@ export default function ParentDashboard() {
           {menuItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveMenu(item.id)}
+              onClick={() => { setActiveMenu(item.id); if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
@@ -499,13 +499,18 @@ export default function ParentDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="portal-main flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-<div className="px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
-  <div>
+<div className="portal-topbar px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
+  <div className="flex items-center gap-3">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-white/15 text-white">
+      <Menu size={20} />
+    </button>
+    <div>
     <h1 className="text-xl font-bold text-white capitalize">{activeMenu.replace('-', ' ')}</h1>
     <p className="text-sm text-gray-200">Welcome, {user?.name}</p>
+    </div>
   </div>
 
   <div className="flex items-center gap-4">
@@ -527,7 +532,7 @@ export default function ParentDashboard() {
 </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="portal-content flex-1 overflow-y-auto p-6">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>

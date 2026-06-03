@@ -42,7 +42,7 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [activeMenu, setActiveMenu] = useState('dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
 
   const [contactMessages, setContactMessages] = useState([])
   const [contactLoading, setContactLoading] = useState(false)
@@ -992,9 +992,9 @@ export default function AdminDashboard() {
   }
 
   return (
-   <div className="flex h-screen bg-gray-100 overflow-hidden">
+   <div className="portal-shell flex bg-gray-100">
       {/* Sidebar */}
-     <div className={`${sidebarOpen ? 'w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#800080' }}>
+     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#800080' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -1008,7 +1008,7 @@ export default function AdminDashboard() {
         </div>
         <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map(item => (
-            <button key={item.id} onClick={() => setActiveMenu(item.id)}
+            <button key={item.id} onClick={() => { setActiveMenu(item.id); if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
@@ -1035,10 +1035,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="portal-main flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-<div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between bg-white border-b">
+<div className="portal-topbar sticky top-0 z-10 px-8 py-4 flex items-center justify-between bg-white border-b">
   <div className="flex items-center gap-4">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-gray-100 text-cyan-700">
+      <Menu size={20} />
+    </button>
     <h1 className="text-2xl font-bold text-cyan-700">
       {menuItems.find(m => m.id === activeMenu)?.label || 'Dashboard'}
     </h1>
@@ -1056,7 +1059,7 @@ export default function AdminDashboard() {
 </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="portal-content flex-1 overflow-y-auto p-6">
 
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (

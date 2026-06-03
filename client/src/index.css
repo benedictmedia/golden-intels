@@ -45,6 +45,121 @@
     transform: translateY(-4px);
     box-shadow: 0 20px 40px rgba(212, 160, 23, 0.2);
   }
+
+  .portal-shell {
+    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .portal-sidebar {
+    z-index: 40;
+  }
+
+  .portal-main {
+    min-width: 0;
+  }
+
+  .portal-topbar {
+    gap: 1rem;
+  }
+
+  .portal-content {
+    min-width: 0;
+  }
+
+  .portal-content table {
+    min-width: 720px;
+  }
+
+  .portal-content :is(.overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  section {
+    scroll-margin-top: 4rem;
+  }
+
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+  }
+
+  .portal-shell {
+    display: block;
+  }
+
+  .portal-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(82vw, 20rem) !important;
+    max-width: 20rem;
+    height: 100dvh;
+    transform: translateX(-105%);
+    box-shadow: 20px 0 40px rgba(15, 23, 42, 0.3);
+  }
+
+  .portal-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .portal-main {
+    height: 100dvh;
+    width: 100%;
+  }
+
+  .portal-topbar {
+    padding: 0.875rem 1rem !important;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .portal-topbar h1 {
+    font-size: 1.125rem !important;
+    line-height: 1.35;
+  }
+
+  .portal-topbar > div:last-child {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .portal-topbar select,
+  .portal-content select,
+  .portal-content input,
+  .portal-content textarea {
+    max-width: 100%;
+  }
+
+  .portal-content {
+    padding: 1rem !important;
+  }
+
+  .portal-content :is(.p-8, .p-6) {
+    padding: 1rem !important;
+  }
+
+  .portal-content .grid.grid-cols-2,
+  .portal-content .grid.grid-cols-3,
+  .portal-content .grid.grid-cols-4 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .portal-content .flex:not(.keep-row) {
+    min-width: 0;
+  }
+
+  .portal-content table {
+    min-width: 680px;
+  }
 }
 
 @keyframes shake {

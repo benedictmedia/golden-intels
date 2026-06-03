@@ -6,7 +6,7 @@ import API_URL from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
-  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle, Lock, FolderOpen
+  ChevronRight, Award, Clock, CheckCircle, MonitorPlay, AlertCircle, Lock, FolderOpen, Menu
 } from 'lucide-react'
 import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
@@ -36,6 +36,7 @@ export default function LearnerDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('profile')
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
   const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [assignments, setAssignments] = useState([])
@@ -286,10 +287,10 @@ export default function LearnerDashboard() {
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0f1729' }}>
+    <div className="portal-shell flex" style={{ background: '#0f1729' }}>
 
       {/* ── Sidebar ── */}
-      <div className="w-64 flex flex-col flex-shrink-0" style={{ background: 'linear-gradient(180deg, #0000ff 0%, #8a2be2 60%, #800080 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open' : ''} w-64 flex flex-col flex-shrink-0 transition-all duration-300`} style={{ background: 'linear-gradient(180deg, #0000ff 0%, #8a2be2 60%, #800080 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
@@ -334,7 +335,7 @@ export default function LearnerDashboard() {
             const Icon = item.icon
             const isActive = activeTab === item.id
             return (
-              <button key={item.id} onClick={() => setActiveTab(item.id)}
+              <button key={item.id} onClick={() => { setActiveTab(item.id); if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false) }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
                 style={{
                   background: isActive ? 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,130,246,0.2))' : 'transparent',
@@ -365,18 +366,23 @@ export default function LearnerDashboard() {
       </div>
 
       {/* ── Main content ── */}
-      <div className="flex-1 overflow-y-auto" style={{ background: '#ffffff' }}>
+      <div className="portal-main flex-1 overflow-y-auto" style={{ background: '#ffffff' }}>
 
         {/* Top bar */}
-<div className="sticky top-0 z-10 px-8 py-4 flex items-center justify-between" 
+<div className="portal-topbar sticky top-0 z-10 px-8 py-4 flex items-center justify-between" 
      style={{ background: 'rgba(241,245,249,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #e2e8f0' }}>
-  <div>
+  <div className="flex items-center gap-3">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-white text-[#1e293b] border border-slate-200">
+      <Menu size={20} />
+    </button>
+    <div>
     <h1 className="text-xl font-bold capitalize" style={{ color: '#1e293b' }}>
       {navItems.find(n => n.id === activeTab)?.label}
     </h1>
     <p className="text-sm" style={{ color: '#64748b' }}>
       {selectedAcademicYear} · {selectedTerm}
     </p>
+    </div>
   </div>
 
   <div className="flex items-center gap-4">
@@ -399,7 +405,7 @@ export default function LearnerDashboard() {
   </div>
 </div>
 
-        <div className="p-8">
+        <div className="portal-content p-8">
 
           {/* ════════════════ PROFILE TAB ════════════════ */}
           {activeTab === 'profile' && (

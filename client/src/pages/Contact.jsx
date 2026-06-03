@@ -59,8 +59,8 @@ export default function Contact() {
                   <h2 className="text-xl font-semibold text-slate-800">Phone</h2>
                   <p className="mt-3 text-slate-600">Call our school office for quick support and admissions help.</p>
                   <div className="mt-4 space-y-2 text-sm text-slate-700">
-                    <p><strong>Main:</strong> <a href="tel:+233200000000" className="text-[#8a2be2] hover:text-violet-700">+233 20 000 0000</a></p>
-                    <p><strong>Admissions:</strong> <a href="tel:+233240000000" className="text-[#8a2be2] hover:text-violet-700">+233 24 000 0000</a></p>
+                    <p><strong>Main:</strong> <a href="tel:+233 59 433 08160" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 08160</a></p>
+                    <p><strong>Admissions:</strong> <a href="tel:+233 59 433 0816" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 0816</a></p>
                   </div>
                 </div>
               </div>
@@ -74,7 +74,7 @@ export default function Contact() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">WhatsApp</h2>
                   <p className="mt-3 text-slate-600">Reach school staff on WhatsApp for fast, informal support.</p>
-                  <p className="mt-4 text-slate-700"><a href="https://wa.me/233240000000" className="text-green-600 hover:text-green-700">+233 24 000 0000</a></p>
+                  <p className="mt-4 text-slate-700"><a href="https://wa.me/233594330816" className="text-green-600 hover:text-green-700">+233 59 433 0816</a></p>
                 </div>
               </div>
             </div>
@@ -100,7 +100,7 @@ export default function Contact() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Location</h2>
                   <p className="mt-3 text-slate-600">Meet us in person for campus tours, admissions interviews, and school events.</p>
-                  <p className="mt-4 text-slate-700">Golden-Intels International School, Accra, Ghana</p>
+                  <p className="mt-4 text-slate-700">Golden-Intels International School,Ho-Volta Region, Ghana</p>
                 </div>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function Contact() {
               {success && (
                 <div className="flex items-center gap-3 bg-green-900/40 border border-green-500 text-green-300 px-4 py-3 rounded-2xl">
                   <CheckCircle size={18} />
-                  <p className="text-sm font-semibold">Message sent! We'll get back to you within one business day.</p>
+                  <p className="text-sm font-semibold">Message sent! We'll get back to you within 24 hours of working days.</p>
                 </div>
               )}
               {error && (

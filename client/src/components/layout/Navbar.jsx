@@ -22,18 +22,18 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-[var(--color-primary)] text-white border-b border-white/30 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-40 bg-[var(--color-primary)] text-white border-b border-white/30 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 min-w-0">
           {/* Logo Circle */}
           <div className="w-10 h-10 bg-[var(--color-secondary)] rounded-full flex items-center justify-center font-bold text-white shadow-md">
             G
           </div>
           {/* School Name */}
-          <div className="leading-tight">
+          <div className="leading-tight min-w-0">
             <p className="font-bold text-sm tracking-wide text-white">Golden-Intels</p>
-            <p className="text-xs text-white">International School</p>
+            <p className="text-xs text-white truncate">International School</p>
           </div>
         </Link>
         {/* Desktop links */}
@@ -54,24 +54,24 @@ export default function Navbar() {
           Portal Login
         </Link>
         {/* Mobile menu button */}
-        <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white">
+        <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white p-2 -mr-2 rounded-lg hover:bg-white/10" aria-label="Toggle navigation menu" aria-expanded={menuOpen}>
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden bg-[var(--color-primary)] border-t border-white/20 px-4 pb-6">
-          <ul className="flex flex-col gap-4 mt-4 text-sm">
+        <div className="lg:hidden bg-[var(--color-primary)] border-t border-white/20 px-4 pb-6 max-h-[calc(100dvh-4rem)] overflow-y-auto">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-sm">
             {navLinks.map((link) => (
               <li key={link.name}>
-                <Link to={link.path} onClick={() => setMenuOpen(false)} className="hover:text-[var(--color-accent)] transition-colors duration-300 block">
+                <Link to={link.path} onClick={() => setMenuOpen(false)} className="hover:text-[var(--color-accent)] hover:bg-white/10 transition-colors duration-300 block rounded-lg px-3 py-3">
                   {link.name}
                 </Link>
               </li>
             ))}
           </ul>
           {/* Mobile Portal Button */}
-          <Link to="/login" className="mt-6 inline-block bg-[var(--color-secondary)] hover:bg-[var(--color-primary)] text-white font-bold text-sm px-5 py-2 rounded-lg transition-all duration-300">
+          <Link to="/login" onClick={() => setMenuOpen(false)} className="mt-4 block text-center bg-[var(--color-secondary)] hover:bg-white/10 text-white font-bold text-sm px-5 py-3 rounded-lg transition-all duration-300">
             Portal Login
           </Link>
         </div>

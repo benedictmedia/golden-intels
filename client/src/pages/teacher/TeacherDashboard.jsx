@@ -36,7 +36,7 @@ export default function TeacherDashboard() {
   const [activeMenu, setActiveMenu] = useState('profile')
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
   const [selectedTerm, setSelectedTerm] = useState('Term 1')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
   const [activeClass, setActiveClass] = useState('Year 1')
@@ -900,10 +900,10 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div className="flex h-screen bg-blue-100 overflow-hidden">
+    <div className="portal-shell flex bg-blue-100">
 
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
         style={{ background: '#0000ff' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(252, 247, 247, 0.91)' }}>
           {sidebarOpen && (
@@ -941,7 +941,7 @@ export default function TeacherDashboard() {
           {menuItems.map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveMenu(item.id)}
+              onClick={() => { setActiveMenu(item.id); if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
             style={{
               background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
@@ -971,11 +971,14 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="portal-main flex-1 flex flex-col overflow-hidden">
 
        {/* Top Bar */}
-<div className="px-6 py-4 flex items-center justify-between border-b" style={{ background: '#fff' }}>
-  <div>
+<div className="portal-topbar px-6 py-4 flex items-center justify-between border-b" style={{ background: '#fff' }}>
+  <div className="flex items-center gap-3">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-blue-50 text-[#0f6e56]">
+      <Menu size={20} />
+    </button>
     <h1 className="text-2xl font-bold text-[#0f6e56]">{menuItems.find(m => m.id === activeMenu)?.label}</h1>
   </div>
 
@@ -996,7 +999,7 @@ export default function TeacherDashboard() {
   </div>
 </div>
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="portal-content flex-1 overflow-y-auto p-6">
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
