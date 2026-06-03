@@ -602,7 +602,7 @@ export default function LearnerDashboard() {
           )}
 
           {/* ════════════════ ASSESSMENTS TAB (Subject Folders) ════════════════ */}
-  {activeTab === 'assessments' && (
+{activeTab === 'assessments' && (
   <div className="space-y-8">
     <h3 className="text-2xl font-bold text-[#1e2937]">Assessments by Subject</h3>
 
@@ -650,13 +650,8 @@ export default function LearnerDashboard() {
                             <textarea
                               placeholder="Type your assignment response here..."
                               className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-y"
-                              value={submissions.assignments?.[assignment.id]?.content || ''}
-                              onChange={(e) => {
-                                const newSubs = { ...submissions };
-                                if (!newSubs.assignments) newSubs.assignments = {};
-                                newSubs.assignments[assignment.id] = { content: e.target.value, submittedAt: new Date().toISOString() };
-                                setSubmissions(newSubs);
-                              }}
+                              value={assignmentAnswers[assignment.id] || ''}
+                              onChange={(e) => handleAssignmentAnswerChange(assignment.id, e.target.value)}
                             />
                             <button 
                               onClick={() => handleSubmitAssignment(assignment)}
@@ -684,21 +679,57 @@ export default function LearnerDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {subjectQuizzes.map(quiz => {
                     const hasSubmitted = submissions.quizzes?.[quiz.id];
+                    const isActive = activeQuizId === quiz.id;
+
                     return (
                       <div key={quiz.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                         <h5 className="font-bold text-lg mb-2">{quiz.title}</h5>
                         <p className="text-sm text-gray-500 mb-4">{(quiz.questions || []).length} questions</p>
 
-                        {!hasSubmitted ? (
+                        {!hasSubmitted && !isActive && (
                           <button 
-                            onClick={() => setSelectedQuiz(quiz)}
+                            onClick={() => handleStartQuiz(quiz.id)}
                             className="w-full py-3 bg-gradient-to-r from-[#7c3aed] to-[#2563eb] text-white font-bold rounded-xl hover:brightness-105 transition"
                           >
                             Start Quiz
                           </button>
-                        ) : (
+                        )}
+
+                        {isActive && (
+                          <div className="mt-4 space-y-6">
+                            {(quiz.questions || []).map((q, idx) => (
+                              <div key={idx} className="border border-gray-200 rounded-xl p-5">
+                                <p className="font-medium mb-3">Q{idx + 1}. {q.prompt}</p>
+                                <div className="space-y-2">
+                                  {(q.options || []).map((opt, oi) => (
+                                    <label key={oi} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all" 
+                                      style={{ background: quizAnswers[quiz.id]?.[idx] === opt ? '#eff6ff' : '#fff', border: `1px solid ${quizAnswers[quiz.id]?.[idx] === opt ? '#2563eb' : '#e2e8f0'}` }}>
+                                      <input 
+                                        type="radio" 
+                                        name={`quiz-${quiz.id}-q-${idx}`} 
+                                        value={opt} 
+                                        checked={quizAnswers[quiz.id]?.[idx] === opt}
+                                        onChange={() => handleQuizAnswer(quiz.id, idx, opt)} 
+                                        className="h-4 w-4" 
+                                      />
+                                      <span className="text-sm" style={{ color: '#374151' }}>{opt}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                            <button 
+                              onClick={() => handleSubmitQuiz(quiz)}
+                              className="w-full py-3 bg-gradient-to-r from-[#2563eb] to-[#7c3aed] text-white font-bold rounded-xl hover:brightness-105"
+                            >
+                              Submit Quiz
+                            </button>
+                          </div>
+                        )}
+
+                        {hasSubmitted && (
                           <div className="p-4 bg-green-50 rounded-xl text-center text-green-700 font-medium">
-                            Quiz Completed
+                            Quiz Completed • Score: {submissions.quizzes[quiz.id]?.score ?? '—'}
                           </div>
                         )}
                       </div>
