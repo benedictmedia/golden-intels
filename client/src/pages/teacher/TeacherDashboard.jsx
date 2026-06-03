@@ -937,7 +937,7 @@ export default function TeacherDashboard() {
           </button>
         </div>
 
-        <nav className="flex-1 py-6">
+        <nav className="flex-1 py-6 overflow-y-auto">
           {menuItems.map(item => (
             <button
               key={item.id}

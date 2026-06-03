@@ -331,11 +331,11 @@ export default function LearnerDashboard() {
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all mb-2"
             style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <Lock size={20} />
-            {sidebarOpen && <span className="text-sm">Change Password</span>}
+            <span className="text-sm">Change Password</span>
           </button>
           <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }}>
             <LogOut size={20} />
-            {sidebarOpen && <span className="text-sm">Logout</span>}
+            <span className="text-sm">Logout</span>
           </button>
         </div>
       </div>
