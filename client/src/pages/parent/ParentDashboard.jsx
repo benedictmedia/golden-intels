@@ -808,7 +808,7 @@ export default function ParentDashboard() {
 
                         {/* Subject Summary */}
                         <div className="flex-1 min-w-[200px]">
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                             {SUBJECTS.map(subject => {
                               const s = getSubjectScore(result.scores || {}, subject)
                               const total = getSubjectTotal(s)

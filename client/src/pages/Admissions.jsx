@@ -123,9 +123,9 @@ export default function Admissions() {
     }
   }
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-sm"
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-sm text-base"
   const labelClass = "block text-sm font-bold text-[#8a2be2] mb-2"
-  const sectionClass = "bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6"
+  const sectionClass = "bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-6"
 
   if (submitted) {
     return (
@@ -193,7 +193,7 @@ export default function Admissions() {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-[#8a2be2] mb-2">Serial Number</label>
                   <input
@@ -201,7 +201,7 @@ export default function Admissions() {
                     value={serialNumber}
                     onChange={e => setSerialNumber(e.target.value)}
                     placeholder="e.g. GI-2026-12345"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-base"
                   />
                 </div>
                 <div>
@@ -211,13 +211,13 @@ export default function Admissions() {
                     value={pin}
                     onChange={e => setPin(e.target.value)}
                     placeholder="Enter your 4-digit PIN"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-base"
                   />
                 </div>
                 <button
                   onClick={handleTokenLogin}
                   disabled={loginLoading}
-                  className="w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                  className="sm:col-span-2 w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {loginLoading ? 'Verifying...' : 'Access Admission Form'}
                 </button>

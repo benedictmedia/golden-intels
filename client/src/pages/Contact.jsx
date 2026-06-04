@@ -46,10 +46,10 @@ export default function Contact() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-[1.05fr_0.95fr]">
           
           {/* Contact Info Cards */}
-          <div className="space-y-6">
+          <div className="space-y-6 md:col-span-2 lg:col-span-1">
             <div className="rounded-[2rem] bg-white p-8 shadow-xl border border-slate-100">
               <div className="flex items-start gap-4">
                 <div className="rounded-3xl bg-[#8a2be2] p-4 text-white shadow-md">
@@ -107,7 +107,7 @@ export default function Contact() {
           </div>
 
           {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="rounded-[2rem] bg-slate-900 p-8 shadow-2xl text-white">
+          <form onSubmit={handleSubmit} className="rounded-[2rem] bg-slate-900 p-6 sm:p-8 shadow-2xl text-white md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-r from-[#8a2be2] to-violet-600 p-5 shadow-lg">
               <div className="rounded-2xl bg-white/10 p-3">
                 <MessageCircle size={24} />

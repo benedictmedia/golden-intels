@@ -45,7 +45,7 @@ export default function Academics() {
             </div>
             
             {/* Approaches */}
-            <div className="grid grid-cols-2 gap-4 mt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
               {approaches.map((item, index) => (
                 <div
                   key={index}
@@ -349,7 +349,7 @@ export default function Academics() {
             <p className="text-blue-100 text-lg leading-relaxed mb-6">
               Golden-Intels offers Oxford International Curriculum (OIC) and Ghana Education Service (GES) programmes. Our focus is on providing quality education through our hybrid curriculum that combines international best practices with local educational standards, ensuring students receive a well-rounded education that prepares them for success in Ghana and on the global stage.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white/10 rounded-xl p-4 text-center">
                 <div className="text-yellow-300 font-bold text-lg mb-1">OIC</div>
                 <div className="text-blue-100 text-sm">

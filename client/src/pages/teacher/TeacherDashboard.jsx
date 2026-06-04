@@ -1094,7 +1094,7 @@ export default function TeacherDashboard() {
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { label: 'Students', value: students.length, color: '#0000ff', bg: '#eff6ff' },
                   { label: 'Lessons', value: teacherLessons.length, color: '#800080', bg: '#fdf4ff' },
