@@ -306,3 +306,12 @@ model Setting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model AcademicContext {
+  id           Int      @id @default(autoincrement())
+  academicYear String
+  term         String
+  setBy        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

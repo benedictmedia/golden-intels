@@ -5,7 +5,9 @@ import axios from 'axios'
 import API_URL from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
-  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, UserCircle, MessageCircle, Inbox, FileSignature, Lock
+  BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
+  Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -29,6 +31,7 @@ const menuItems = [
   { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' },
   { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
   { icon: <FileSignature size={20} />, label: 'Signature', id: 'signature' },
+  { icon: <CalendarDays size={20} />, label: 'Academic Context', id: 'academic-context' },
 ]
 
 const stats = [
@@ -50,6 +53,10 @@ export default function AdminDashboard() {
   const [contactLoading, setContactLoading] = useState(false)
   const [viewingContact, setViewingContact] = useState(null)
   const [showChangePassword, setShowChangePassword] = useState(false)
+
+  const [academicContext, setAcademicContext] = useState({ academicYear: '2025/2026', term: 'Term 1' })
+  const [contextSaving, setContextSaving] = useState(false)
+  const [contextSaved, setContextSaved] = useState(false)
 
   // Create account state
   const initialNewUserState = {
@@ -214,11 +221,31 @@ export default function AdminDashboard() {
 }, [])
 
   useEffect(() => {
+  axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
+    .then(res => setAcademicContext(res.data))
+    .catch(() => {})
+}, [])
+
+  useEffect(() => {
     if (activeMenu === 'accounts') fetchAccounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu, accountTab, accountPage, accountLimit])
 
   const handleLogout = () => { logout(); navigate('/') }
+
+  const handleSaveAcademicContext = async () => {
+  setContextSaving(true)
+  try {
+    const res = await axios.post(`${API_URL}/api/academic-context`, academicContext, { headers: getAuthHeaders() })
+    setAcademicContext(res.data)
+    setContextSaved(true)
+    setTimeout(() => setContextSaved(false), 3000)
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to save context.')
+  } finally {
+    setContextSaving(false)
+  }
+}
 
   const handleNotificationClick = (notification) => {
     const routes = {
@@ -2506,6 +2533,74 @@ export default function AdminDashboard() {
           <li>3. When you approve a result, the signature + approval date are automatically saved</li>
           <li>4. Parents see the signed PDF when they download results</li>
         </ul>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Academic Context */}
+{activeMenu === 'academic-context' && (
+  <div className="max-w-xl">
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Academic Context</h2>
+      <p className="text-gray-500 text-sm">Set the active academic year and term. This automatically applies to all teacher, parent and learner portals — they no longer need to set it manually.</p>
+    </div>
+
+    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Academic Year</label>
+          <select
+            value={academicContext.academicYear}
+            onChange={e => setAcademicContext(prev => ({ ...prev, academicYear: e.target.value }))}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700"
+          >
+            {['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030',
+              '2030/2031','2031/2032','2032/2033','2033/2034','2034/2035'].map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Term</label>
+          <select
+            value={academicContext.term}
+            onChange={e => setAcademicContext(prev => ({ ...prev, term: e.target.value }))}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700"
+          >
+            {['Term 1', 'Term 2', 'Term 3'].map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <button
+        onClick={handleSaveAcademicContext}
+        disabled={contextSaving}
+        className="text-white font-bold px-8 py-3 rounded-xl disabled:opacity-50"
+        style={{ background: '#0000ff' }}
+      >
+        {contextSaving ? 'Saving...' : 'Set as Active Context'}
+      </button>
+
+      {contextSaved && (
+        <p className="text-green-600 font-bold text-sm mt-3">
+          ✓ Active context updated. All portals will use {academicContext.academicYear} — {academicContext.term}.
+        </p>
+      )}
+
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #0000ff20' }}>
+        <p className="font-bold mb-2" style={{ color: '#0000ff' }}>Currently Active</p>
+        <p className="text-gray-700 text-lg font-bold">{academicContext.academicYear} &nbsp;|&nbsp; {academicContext.term}</p>
+        {academicContext.setBy && (
+          <p className="text-xs text-gray-400 mt-1">Last set by {academicContext.setBy}</p>
+        )}
+      </div>
+
+      <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
+        <p className="font-bold text-amber-700 mb-1">Important</p>
+        <p className="text-amber-600 text-xs">Changing the context only affects what is currently shown in portals. All historical data for previous terms remains intact and is never deleted.</p>
       </div>
     </div>
   </div>

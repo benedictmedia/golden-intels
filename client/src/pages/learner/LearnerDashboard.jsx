@@ -57,6 +57,16 @@ export default function LearnerDashboard() {
   const learnerSubmissionKey = `goldenIntelsSubmissions:${user?.email || 'anonymous'}`
 
   useEffect(() => {
+  const token = localStorage.getItem('token')
+  axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(res => {
+      if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
+      if (res.data?.term) setSelectedTerm(res.data.term)
+    })
+    .catch(() => {})
+}, [])
+
+  useEffect(() => {
     const saved = window.localStorage.getItem('goldenIntelsLms')
     if (saved) {
       const parsed = JSON.parse(saved)
@@ -401,17 +411,10 @@ export default function LearnerDashboard() {
   <div className="flex items-center gap-4">
     <NotificationBell onNotificationClick={handleNotificationClick} />
 
-    <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
-      className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
-      style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
-      {academicYears.map(y => <option key={y} value={y}>{y}</option>)}
-    </select>
-
-    <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
-      className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
-      style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
-      {terms.map(t => <option key={t} value={t}>{t}</option>)}
-    </select>
+    <div className="px-3 py-2 rounded-lg text-sm font-bold"
+              style={{ background: 'rgba(255,255,255,0.15)', color: '#1e293b', border: '1px solid #e2e8f0' }}>
+              {selectedAcademicYear} · {selectedTerm}
+            </div>
   </div>
 </div>
 
