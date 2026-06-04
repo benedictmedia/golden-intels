@@ -192,12 +192,6 @@ const respondToFeeUpdate = async (req, res) => {
       'fee-response'
     )
 
-    // Mark alert as seen when parent responds
-    await prisma.feePayment.update({
-      where: { id: parseInt(id) },
-      data: { feePaymentAlertSeen: true }
-    })
-
     res.json({ success: true })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -206,7 +200,7 @@ const respondToFeeUpdate = async (req, res) => {
 
 const getUnseenFeeAlerts = async (req, res) => {
   try {
-    // Only parents can access their own unseen fee alerts
+    // Only parents can access their own unpaid/partial fee alerts
     if (req.user.role !== 'parent') {
       return res.status(403).json({ message: 'Forbidden' })
     }
@@ -218,11 +212,11 @@ const getUnseenFeeAlerts = async (req, res) => {
     })
     const studentIds = children.map(c => c.id)
 
+    // Show alerts for all unpaid/partial fees - will show every login until paid
     const unseenAlerts = await prisma.feePayment.findMany({
       where: {
         studentId: { in: studentIds },
-        status: { in: ['partial', 'unpaid'] },
-        feePaymentAlertSeen: false
+        status: { in: ['partial', 'unpaid'] }
       },
       include: { student: true },
       orderBy: { createdAt: 'desc' }
@@ -234,32 +228,4 @@ const getUnseenFeeAlerts = async (req, res) => {
   }
 }
 
-const acknowledgeAlert = async (req, res) => {
-  const { id } = req.params
-  try {
-    const payment = await prisma.feePayment.findUnique({
-      where: { id: parseInt(id) },
-      include: { student: true }
-    })
-
-    if (!payment) {
-      return res.status(404).json({ message: 'Fee payment not found.' })
-    }
-
-    // Verify parent owns this payment
-    if (req.user.role !== 'parent' || (payment.student?.parentEmail !== req.user.email && payment.student?.parentId !== req.user.id)) {
-      return res.status(403).json({ message: 'Forbidden' })
-    }
-
-    await prisma.feePayment.update({
-      where: { id: parseInt(id) },
-      data: { feePaymentAlertSeen: true }
-    })
-
-    res.json({ success: true })
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
-  }
-}
-
-module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment, getUnseenFeeAlerts, acknowledgeAlert }
+module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment, getUnseenFeeAlerts }

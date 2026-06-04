@@ -4,7 +4,7 @@ const {
   getFeeStructures, upsertFeeStructure,
   getFeePayments, getStudentFeePayments,
   createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment,
-  getUnseenFeeAlerts, acknowledgeAlert
+  getUnseenFeeAlerts
 } = require('../controllers/feeController')
 const protect = require('../middleware/authMiddleware')
 
@@ -16,7 +16,6 @@ router.get('/unseen-alerts', protect, getUnseenFeeAlerts)
 router.post('/payments', protect, createFeePayment)
 router.put('/payments/:id', protect, updateFeePayment)
 router.post('/payments/:id/response', protect, respondToFeeUpdate)
-router.post('/payments/:id/acknowledge-alert', protect, acknowledgeAlert)
 router.delete('/payments/:id', protect, deleteFeePayment)
 
 module.exports = router

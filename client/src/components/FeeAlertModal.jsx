@@ -3,7 +3,7 @@ import { AlertCircle, Send } from 'lucide-react'
 import axios from 'axios'
 import API_URL from '../api/config'
 
-export default function FeeAlertModal({ alerts, onClose, token }) {
+export default function FeeAlertModal({ alerts, onClose, token, onRefresh }) {
   const [respondingId, setRespondingId] = useState(null)
   const [error, setError] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -32,6 +32,10 @@ export default function FeeAlertModal({ alerts, onClose, token }) {
         setCurrentIndex(currentIndex + 1)
         setRespondingId(null)
       } else {
+        // Refresh fee data and close modal
+        if (onRefresh) {
+          await onRefresh()
+        }
         onClose()
       }
     } catch (err) {
@@ -72,6 +76,14 @@ export default function FeeAlertModal({ alerts, onClose, token }) {
             {balanceText}
           </p>
         </div>
+
+        {/* Admin Notes */}
+        {alert.notes && (
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded mb-6">
+            <p className="text-xs font-semibold text-blue-900 mb-1">School Note:</p>
+            <p className="text-sm text-blue-800">{alert.notes}</p>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -135,7 +147,7 @@ export default function FeeAlertModal({ alerts, onClose, token }) {
 
         {/* Disclaimer */}
         <p className="text-xs text-gray-500 text-center mt-6">
-          Your response helps us understand your payment status and keeps your account updated.
+          This alert will reappear on every login until the fee is fully paid.
         </p>
       </div>
     </div>

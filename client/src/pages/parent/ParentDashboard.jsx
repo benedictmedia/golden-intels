@@ -391,6 +391,40 @@ export default function ParentDashboard() {
     }
   }
 
+  const refreshFeePayments = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}` }
+      const res = await axios.get(`${API_URL}/api/fees/payments`, { headers })
+      setFeePayments(res.data)
+    } catch (error) {
+      console.error('Failed to refresh fee payments:', error)
+    }
+  }
+
+  const calculateCumulativeBalance = (payment, allPayments) => {
+    // Find all payments from same student before this one (by date)
+    const studentPayments = allPayments
+      .filter(p => p.studentId === payment.studentId)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    
+    const paymentIndex = studentPayments.findIndex(p => p.id === payment.id)
+    if (paymentIndex === -1) return payment.balance
+    
+    // Sum up all unpaid balances from previous months
+    let cumulativeBalance = 0
+    for (let i = 0; i <= paymentIndex; i++) {
+      const p = studentPayments[i]
+      if (p.status === 'paid') {
+        cumulativeBalance = 0 // Reset if one is paid
+      } else {
+        cumulativeBalance += p.balance
+      }
+    }
+    
+    return cumulativeBalance
+  }
+
   const handleSendMessage = () => {
     if (!message.trim()) return
     setMessages([...messages, {
@@ -938,8 +972,12 @@ export default function ParentDashboard() {
                   <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-red-500 text-white rounded-2xl p-6 shadow-md">
-                  <p className="text-red-100 text-sm mb-1">Total Balance</p>
-                  <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p>
+                  <p className="text-red-100 text-sm mb-1">Total Outstanding</p>
+                  <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => {
+                    if (p.status === 'paid') return acc
+                    // For cumulative: only count the highest month's cumulative balance
+                    return Math.max(acc, calculateCumulativeBalance(p, contextualFeePayments))
+                  }, 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-[#0f6e56] text-white rounded-2xl p-6 shadow-md">
                   <p className="text-green-200 text-sm mb-1">Months Paid</p>
@@ -964,6 +1002,7 @@ export default function ParentDashboard() {
                         <th className="px-6 py-4 text-left">Amount Paid</th>
                         <th className="px-6 py-4 text-left">Balance</th>
                         <th className="px-6 py-4 text-left">Status</th>
+                        <th className="px-6 py-4 text-left">Notes</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -974,7 +1013,7 @@ export default function ParentDashboard() {
                           <td className="px-6 py-4 text-gray-600">{payment.year}</td>
                           <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
                           <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountPaid.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-gray-600">GH₵ {payment.balance.toFixed(2)}</td>
+                          <td className="px-6 py-4 font-semibold text-gray-700">GH₵ {calculateCumulativeBalance(payment, contextualFeePayments).toFixed(2)}</td>
                           <td className="px-6 py-4">
                             <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                               payment.status === 'paid' ? 'bg-green-100 text-green-700' :
@@ -983,6 +1022,15 @@ export default function ParentDashboard() {
                             }`}>
                               {payment.status}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 text-gray-600 max-w-xs">
+                            {payment.notes ? (
+                              <div className="bg-blue-50 rounded px-2 py-1 text-xs border-l-2 border-blue-500">
+                                {payment.notes}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -1139,6 +1187,7 @@ export default function ParentDashboard() {
         alerts={feeAlerts}
         onClose={() => setShowFeeAlertModal(false)}
         token={localStorage.getItem('token')}
+        onRefresh={refreshFeePayments}
       />
     )}
     </div>
