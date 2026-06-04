@@ -201,12 +201,6 @@ export default function Contact() {
           {loading ? 'Sending...' : 'Send Message'}
         </button>
 
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-[#8a2be2] via-violet-600 to-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02]"
-              >
-                Send Message
-              </button>
             </div>
           </form>
         </div>

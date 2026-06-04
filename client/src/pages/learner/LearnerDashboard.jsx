@@ -272,6 +272,20 @@ export default function LearnerDashboard() {
 
   const handleLogout = () => { logout(); navigate('/') }
 
+  const handleNotificationClick = (notification) => {
+    const routes = {
+      classroom: 'classroom',
+      assignment: 'assessments',
+      quiz: 'assessments',
+      assessment: 'assessments',
+      resource: 'resources',
+      lesson: 'resources'
+    }
+    const nextTab = routes[notification?.type] || 'dashboard'
+    setActiveTab(nextTab)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
+  }
+
   const navItems = [
     { id: 'profile', label: 'My Profile', icon: User },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -385,10 +399,7 @@ export default function LearnerDashboard() {
   </div>
 
   <div className="flex items-center gap-4">
-    <NotificationBell onNotificationClick={(notif) => {
-      console.log("Learner opened notification:", notif);
-      // You can open messages tab here if needed
-    }} />
+    <NotificationBell onNotificationClick={handleNotificationClick} />
 
     <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
       className="px-3 py-2 rounded-lg text-sm border focus:outline-none"

@@ -328,6 +328,21 @@ export default function ParentDashboard() {
     navigate('/')
   }
 
+  const handleNotificationClick = (notification) => {
+    const routes = {
+      result: 'grades',
+      fee: 'fees',
+      message: 'messages',
+      classroom: 'children',
+      assessment: 'assessments',
+      assignment: 'assessments',
+      quiz: 'assessments'
+    }
+    const nextMenu = routes[notification?.type] || 'dashboard'
+    setActiveMenu(nextMenu)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
+  }
+
   const handleSendMessage = () => {
     if (!message.trim()) return
     setMessages([...messages, {
@@ -501,9 +516,7 @@ export default function ParentDashboard() {
   </div>
 
   <div className="flex items-center gap-4">
-    <NotificationBell onNotificationClick={(notif) => {
-      console.log("Parent opened notification:", notif);
-    }} />
+    <NotificationBell onNotificationClick={handleNotificationClick} />
 
     <div className="flex items-center gap-3">
       <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}

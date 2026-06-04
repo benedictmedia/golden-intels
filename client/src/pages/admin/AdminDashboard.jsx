@@ -220,6 +220,24 @@ export default function AdminDashboard() {
 
   const handleLogout = () => { logout(); navigate('/') }
 
+  const handleNotificationClick = (notification) => {
+    const routes = {
+      admission: 'admissions',
+      contact: 'contact-messages',
+      message: 'messages',
+      'result-review': 'performance',
+      result: 'performance',
+      fee: 'finance',
+      account: 'accounts',
+      gallery: 'gallery',
+      news: 'news',
+      staff: 'staff'
+    }
+    const nextMenu = routes[notification?.type] || 'dashboard'
+    setActiveMenu(nextMenu)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
+  }
+
   const handlePhotoChange = (e) => {
     const file = e.target.files[0]
     if (file) { setPhotoFile(file); setPhotoPreview(URL.createObjectURL(file)) }
@@ -1035,9 +1053,7 @@ export default function AdminDashboard() {
   </div>
 
   <div className="flex items-center gap-4">
-    <NotificationBell onNotificationClick={(notif) => {
-      console.log("Admin opened notification:", notif);
-    }} />
+    <NotificationBell onNotificationClick={handleNotificationClick} />
 
     <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">
       {new Date().toLocaleDateString('en-GB', { weekday: 'long', month: 'short', day: 'numeric' })}

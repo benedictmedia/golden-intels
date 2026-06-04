@@ -62,8 +62,9 @@ export default function NotificationBell({ onNotificationClick }) {
             notifications.map((notif) => (
               <div
                 key={notif.id}
-                onClick={() => {
-                  markAsRead(notif.id);
+                onClick={async () => {
+                  await markAsRead(notif.id);
+                  setShowPanel(false);
                   if (onNotificationClick) onNotificationClick(notif);
                 }}
                 className={`p-4 border-b hover:bg-gray-50 cursor-pointer transition-colors ${!notif.read ? 'bg-blue-50' : ''}`}

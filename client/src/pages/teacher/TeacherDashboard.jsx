@@ -590,6 +590,24 @@ export default function TeacherDashboard() {
     navigate('/')
   }
 
+  const handleNotificationClick = (notification) => {
+    const routes = {
+      classroom: 'classroom',
+      result: 'gradebook',
+      'result-review': 'gradebook',
+      attendance: 'attendance',
+      assignment: 'lms',
+      quiz: 'lms',
+      submission: 'lms',
+      assessment: 'lms'
+    }
+    const nextMenu = routes[notification?.type] || 'dashboard'
+    setActiveMenu(nextMenu)
+    if (['assignment', 'quiz', 'assessment'].includes(notification?.type)) setLmsView('assessments')
+    if (notification?.type === 'submission') setLmsView('submissions')
+    if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
+  }
+
   const filteredStudents = students.filter(student => matchesClass(student.gradeLevel, activeClass))
   const attendanceStats = filteredStudents.reduce((stats, student) => {
     const status = attendance[student.id] || 'present'
@@ -970,9 +988,7 @@ export default function TeacherDashboard() {
   </div>
 
   <div className="flex items-center gap-4">
-    <NotificationBell onNotificationClick={(notif) => {
-      console.log("Teacher opened notification:", notif);
-    }} />
+    <NotificationBell onNotificationClick={handleNotificationClick} />
 
     <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)} 
       className="px-4 py-2 border rounded-lg text-sm">

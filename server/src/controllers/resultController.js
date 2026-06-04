@@ -7,6 +7,7 @@ const {
   sanitizeTeacherScores,
   validateTeacherScores
 } = require('../utils/resultSubjectHelpers')
+const { createNotificationsForRole } = require('./notificationController')
 
 const prisma = new PrismaClient()
 
@@ -228,21 +229,12 @@ const createResult = async (req, res) => {
             include: { student: true }
           })
 
-      // === NOTIFY PARENT ===
-      if (result.student?.parentEmail) {
-        const parent = await prisma.user.findUnique({
-          where: { email: result.student.parentEmail }
-        });
-        if (parent) {
-          const { createNotification } = require('./notificationController');
-          await createNotification(
-            parent.id,
-            "New Academic Result",
-            `A new result has been posted for ${result.student.firstName} ${result.student.lastName} (${result.term} ${result.academicYear})`,
-            "result"
-          );
-        }
-      }
+      await createNotificationsForRole(
+        'admin',
+        existingResult ? 'Result Updated by Teacher' : 'Result Submitted by Teacher',
+        `${submittedBy || req.user.name} submitted ${result.student?.firstName || 'a learner'} ${result.student?.lastName || ''}'s ${term} ${academicYear} result for review.`,
+        'result-review'
+      )
 
       return res.status(existingResult ? 200 : 201).json(result)
     }

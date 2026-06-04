@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
+const { createNotificationsForRole } = require('./notificationController')
 
 const prisma = new PrismaClient()
 
@@ -147,6 +148,13 @@ const submitApplication = async (req, res) => {
       where: { serialNumber: data.serialNumber },
       data: { used: true, usedAt: new Date() }
     })
+
+    await createNotificationsForRole(
+      'admin',
+      'New Admission Application',
+      `${application.firstName} ${application.lastName} submitted an admission application for ${application.gradeLevel}.`,
+      'admission'
+    )
 
     res.status(201).json(application)
   } catch (error) {

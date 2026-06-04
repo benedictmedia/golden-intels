@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const { createNotificationsForRole } = require('./notificationController')
 
 const submitContact = async (req, res) => {
   const { name, email, phone, subject, message } = req.body
@@ -10,6 +11,12 @@ const submitContact = async (req, res) => {
     const contact = await prisma.contactMessage.create({
       data: { name: name.trim(), email: email.trim(), phone: phone?.trim() || null, subject: subject?.trim() || null, message: message.trim() }
     })
+    await createNotificationsForRole(
+      'admin',
+      'New Contact Message',
+      `${contact.name} sent a contact message${contact.subject ? ` about ${contact.subject}` : ''}.`,
+      'contact'
+    )
     res.status(201).json(contact)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })

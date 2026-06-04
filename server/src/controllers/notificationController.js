@@ -17,6 +17,29 @@ const createNotification = async (userId, title, message, type = "general") => {
   }
 };
 
+const createNotificationsForRole = async (role, title, message, type = "general") => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { role, active: true },
+      select: { id: true }
+    });
+
+    if (!users.length) return [];
+
+    return await prisma.notification.createMany({
+      data: users.map((user) => ({
+        userId: user.id,
+        title: title.trim(),
+        message: message.trim(),
+        type
+      }))
+    });
+  } catch (error) {
+    console.error(`Failed to create ${role} notifications:`, error);
+    return null;
+  }
+};
+
 const getNotifications = async (req, res) => {
   try {
     const notifications = await prisma.notification.findMany({
@@ -42,4 +65,4 @@ const markAsRead = async (req, res) => {
   }
 };
 
-module.exports = { createNotification, getNotifications, markAsRead };
+module.exports = { createNotification, createNotificationsForRole, getNotifications, markAsRead };
