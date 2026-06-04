@@ -121,7 +121,9 @@ const updateFeePayment = async (req, res) => {
         balance,
         status,
         notes,
-        paidAt: paid > 0 ? new Date() : null
+        paidAt: paid > 0 ? new Date() : null,
+        // Reset alert flag when admin updates fee so parent sees it on next login
+        feePaymentAlertSeen: status === 'paid' ? true : false
       },
       include: { student: true }
     })
@@ -190,10 +192,74 @@ const respondToFeeUpdate = async (req, res) => {
       'fee-response'
     )
 
+    // Mark alert as seen when parent responds
+    await prisma.feePayment.update({
+      where: { id: parseInt(id) },
+      data: { feePaymentAlertSeen: true }
+    })
+
     res.json({ success: true })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
 
-module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment }
+const getUnseenFeeAlerts = async (req, res) => {
+  try {
+    // Only parents can access their own unseen fee alerts
+    if (req.user.role !== 'parent') {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    const email = req.user.email
+    const children = await prisma.student.findMany({
+      where: { parentEmail: email },
+      select: { id: true }
+    })
+    const studentIds = children.map(c => c.id)
+
+    const unseenAlerts = await prisma.feePayment.findMany({
+      where: {
+        studentId: { in: studentIds },
+        status: { in: ['partial', 'unpaid'] },
+        feePaymentAlertSeen: false
+      },
+      include: { student: true },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json(unseenAlerts)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+const acknowledgeAlert = async (req, res) => {
+  const { id } = req.params
+  try {
+    const payment = await prisma.feePayment.findUnique({
+      where: { id: parseInt(id) },
+      include: { student: true }
+    })
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Fee payment not found.' })
+    }
+
+    // Verify parent owns this payment
+    if (req.user.role !== 'parent' || (payment.student?.parentEmail !== req.user.email && payment.student?.parentId !== req.user.id)) {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    await prisma.feePayment.update({
+      where: { id: parseInt(id) },
+      data: { feePaymentAlertSeen: true }
+    })
+
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment, getUnseenFeeAlerts, acknowledgeAlert }

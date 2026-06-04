@@ -12,6 +12,7 @@ import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
+import FeeAlertModal from '../../components/FeeAlertModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 
 const menuItems = [
@@ -59,6 +60,8 @@ export default function ParentDashboard() {
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
   const [feePrompt, setFeePrompt] = useState(null)
   const [feePromptSending, setFeePromptSending] = useState(false)
+  const [feeAlerts, setFeeAlerts] = useState([])
+  const [showFeeAlertModal, setShowFeeAlertModal] = useState(false)
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -78,6 +81,16 @@ export default function ParentDashboard() {
 
   axios.get(`${API_URL}/api/fees/payments`, { headers })
     .then(res => setFeePayments(res.data))
+
+  // Fetch unseen fee alerts on login
+  axios.get(`${API_URL}/api/fees/unseen-alerts`, { headers })
+    .then(res => {
+      if (res.data && res.data.length > 0) {
+        setFeeAlerts(res.data)
+        setShowFeeAlertModal(true)
+      }
+    })
+    .catch(err => console.error('Failed to fetch fee alerts:', err))
 }, [])
   const [viewingResult, setViewingResult] = useState(null)
 
@@ -1118,6 +1131,14 @@ export default function ParentDashboard() {
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
         accentColor="#800080"
+      />
+    )}
+
+    {showFeeAlertModal && (
+      <FeeAlertModal
+        alerts={feeAlerts}
+        onClose={() => setShowFeeAlertModal(false)}
+        token={localStorage.getItem('token')}
       />
     )}
     </div>
