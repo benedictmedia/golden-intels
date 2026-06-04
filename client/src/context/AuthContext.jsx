@@ -57,6 +57,9 @@ export function AuthProvider({ children }) {
   }
 
   const logout = () => {
+    Object.keys(sessionStorage)
+      .filter(key => key.startsWith('goldenIntelsFeePromptDismissed:'))
+      .forEach(key => sessionStorage.removeItem(key))
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     delete axios.defaults.headers.common['Authorization']

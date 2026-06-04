@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const { createNotificationsForRole } = require('./notificationController')
+const { sendMail } = require('../utils/mailer')
 
 const prisma = new PrismaClient()
 
@@ -35,6 +36,13 @@ const normalizeGradeLevel = (gradeLevel) => {
   }
   return gradeMap[gradeLevel] || gradeLevel
 }
+
+const getAdmissionApprovalEmails = (application) => Array.from(new Set([
+  application.parentEmail,
+  application.fatherEmail,
+  application.motherEmail,
+  application.emergencyEmail
+].filter(Boolean).map(email => email.trim()).filter(Boolean)))
 
 // Submit admission application
 const submitApplication = async (req, res) => {
@@ -229,6 +237,29 @@ const approveApplication = async (req, res) => {
     const updated = await prisma.admissionApplication.update({
       where: { id: parseInt(id) },
       data: { status: 'approved' }
+    })
+
+    const learnerName = `${application.firstName} ${application.lastName}`.trim()
+    const emailRecipients = getAdmissionApprovalEmails(application)
+    await sendMail({
+      to: emailRecipients,
+      subject: `Admission Approved - ${learnerName}`,
+      text: [
+        `Dear ${application.parentName || 'Parent/Guardian'},`,
+        '',
+        `Congratulations! We are pleased to inform you that ${learnerName} has been admitted into Golden-Intels International School for ${normalizeGradeLevel(application.gradeLevel)}.`,
+        '',
+        'Our admissions team will contact you with the next enrollment steps. You may also reach the school office if you need any assistance.',
+        '',
+        'Warm regards,',
+        'Golden-Intels International School'
+      ].join('\n'),
+      html: `
+        <p>Dear ${application.parentName || 'Parent/Guardian'},</p>
+        <p>Congratulations! We are pleased to inform you that <strong>${learnerName}</strong> has been admitted into <strong>Golden-Intels International School</strong> for <strong>${normalizeGradeLevel(application.gradeLevel)}</strong>.</p>
+        <p>Our admissions team will contact you with the next enrollment steps. You may also reach the school office if you need any assistance.</p>
+        <p>Warm regards,<br />Golden-Intels International School</p>
+      `
     })
 
     res.json({ application: updated, student })

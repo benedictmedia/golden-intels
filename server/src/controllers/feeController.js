@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
+const { createNotification, createNotificationsForRole } = require('./notificationController')
 const prisma = new PrismaClient()
 
 // Fee Structure
@@ -90,7 +91,6 @@ const createFeePayment = async (req, res) => {
         where: { email: payment.student.parentEmail }
       });
       if (parent) {
-        const { createNotification } = require('./notificationController');
         await createNotification(
           parent.id,
           "Fee Payment Update",
@@ -133,7 +133,6 @@ const updateFeePayment = async (req, res) => {
         where: { email: payment.student.parentEmail }
       });
       if (parent) {
-        const { createNotification } = require('./notificationController');
         await createNotification(
           parent.id,
           "Fee Payment Update",
@@ -158,4 +157,43 @@ const deleteFeePayment = async (req, res) => {
   }
 }
 
-module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, deleteFeePayment }
+const respondToFeeUpdate = async (req, res) => {
+  const { id } = req.params
+  const { responseType } = req.body
+  const allowedResponses = ['paid-part-or-full', 'will-soon-pay']
+
+  if (!allowedResponses.includes(responseType)) {
+    return res.status(400).json({ message: 'Invalid fee response.' })
+  }
+
+  try {
+    const payment = await prisma.feePayment.findUnique({
+      where: { id: parseInt(id) },
+      include: { student: true }
+    })
+
+    if (!payment) return res.status(404).json({ message: 'Fee update not found.' })
+
+    if (req.user.role !== 'parent' || (payment.student?.parentEmail !== req.user.email && payment.student?.parentId !== req.user.id)) {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    const learnerName = `${payment.student.firstName} ${payment.student.lastName}`.trim()
+    const actionText = responseType === 'paid-part-or-full'
+      ? 'says they have paid part or all of the outstanding fee'
+      : 'says they will make payment soon'
+
+    await createNotificationsForRole(
+      'admin',
+      'Parent Fee Response',
+      `${req.user.name} ${actionText} for ${learnerName} (${payment.month} ${payment.year}).`,
+      'fee-response'
+    )
+
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+module.exports = { getFeeStructures, upsertFeeStructure, getFeePayments, getStudentFeePayments, createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment }

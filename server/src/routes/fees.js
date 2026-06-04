@@ -3,7 +3,7 @@ const router = express.Router()
 const {
   getFeeStructures, upsertFeeStructure,
   getFeePayments, getStudentFeePayments,
-  createFeePayment, updateFeePayment, deleteFeePayment
+  createFeePayment, updateFeePayment, respondToFeeUpdate, deleteFeePayment
 } = require('../controllers/feeController')
 const protect = require('../middleware/authMiddleware')
 
@@ -13,6 +13,7 @@ router.get('/payments', protect, getFeePayments)
 router.get('/payments/student/:studentId', protect, getStudentFeePayments)
 router.post('/payments', protect, createFeePayment)
 router.put('/payments/:id', protect, updateFeePayment)
+router.post('/payments/:id/response', protect, respondToFeeUpdate)
 router.delete('/payments/:id', protect, deleteFeePayment)
 
 module.exports = router

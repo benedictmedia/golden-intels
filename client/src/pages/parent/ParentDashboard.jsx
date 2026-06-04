@@ -57,6 +57,8 @@ export default function ParentDashboard() {
   const [assignmentRecords, setAssignmentRecords] = useState([])
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
+  const [feePrompt, setFeePrompt] = useState(null)
+  const [feePromptSending, setFeePromptSending] = useState(false)
 
   useEffect(() => {
   const token = localStorage.getItem('token')
@@ -78,6 +80,19 @@ export default function ParentDashboard() {
     .then(res => setFeePayments(res.data))
 }, [])
   const [viewingResult, setViewingResult] = useState(null)
+
+  useEffect(() => {
+    if (!user?.id || feePayments.length === 0) return
+    const latestPayment = [...feePayments].sort((a, b) =>
+      new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+    )[0]
+    if (!latestPayment) return
+
+    const dismissalKey = `goldenIntelsFeePromptDismissed:${user.id}:${latestPayment.id}:${latestPayment.updatedAt || latestPayment.createdAt}:${latestPayment.status}`
+    if (sessionStorage.getItem(dismissalKey)) return
+
+    setFeePrompt({ payment: latestPayment, dismissalKey })
+  }, [feePayments, user?.id])
 
   useEffect(() => {
     if (activeMenu !== 'attendance' || !selectedChild?.id) return
@@ -341,6 +356,26 @@ export default function ParentDashboard() {
     const nextMenu = routes[notification?.type] || 'dashboard'
     setActiveMenu(nextMenu)
     if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
+  }
+
+  const dismissFeePrompt = () => {
+    if (feePrompt?.dismissalKey) sessionStorage.setItem(feePrompt.dismissalKey, 'true')
+    setFeePrompt(null)
+  }
+
+  const handleFeePromptResponse = async (responseType) => {
+    if (!feePrompt?.payment?.id) return
+    setFeePromptSending(true)
+    try {
+      await axios.post(`${API_URL}/api/fees/payments/${feePrompt.payment.id}/response`, { responseType }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+    } catch (error) {
+      console.error('Failed to send fee response:', error)
+    } finally {
+      setFeePromptSending(false)
+      dismissFeePrompt()
+    }
   }
 
   const handleSendMessage = () => {
