@@ -18,6 +18,8 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
 import ParentDashboard from './pages/parent/ParentDashboard'
 import LearnerDashboard from './pages/learner/LearnerDashboard'
+import ScrollToTop from './components/ScrollToTop'
+
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -50,6 +52,7 @@ function App() {
   return (
     <BrowserRouter>
       <AnimatedRoutes />
+      <ScrollToTop />
     </BrowserRouter>
   )
 }
