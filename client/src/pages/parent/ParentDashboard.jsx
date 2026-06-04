@@ -501,12 +501,7 @@ export default function ParentDashboard() {
     : markedAssessmentRecords
   const contextualApprovedResults = approvedResults.filter(matchesAcademicContext)
   const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
-  const contextualFeePayments = feePayments.filter(payment => {
-    const monthValue = payment.month ? `${payment.month} 1, ${payment.year || new Date().getFullYear()}` : payment.createdAt
-    const paymentAcademicYear = payment.academicYear || (payment.year && String(payment.year).includes('/') ? payment.year : getAcademicYearFromDate(monthValue))
-    const paymentTerm = payment.term || getTermFromDate(monthValue)
-    return paymentAcademicYear === selectedAcademicYear && paymentTerm === selectedTerm
-  })
+  const contextualFeePayments = feePayments
   const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
     ...summary,
     [record.status]: (summary[record.status] || 0) + 1
