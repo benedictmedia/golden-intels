@@ -411,10 +411,16 @@ export default function LearnerDashboard() {
   <div className="flex items-center gap-4">
     <NotificationBell onNotificationClick={handleNotificationClick} />
 
-    <div className="px-3 py-2 rounded-lg text-sm font-bold"
-              style={{ background: 'rgba(255,255,255,0.15)', color: '#1e293b', border: '1px solid #e2e8f0' }}>
-              {selectedAcademicYear} · {selectedTerm}
-            </div>
+    <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+              style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
+              {academicYears.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
+              className="px-3 py-2 rounded-lg text-sm border focus:outline-none"
+              style={{ borderColor: '#e2e8f0', color: '#374151', background: '#fff' }}>
+              {terms.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
   </div>
 </div>
 

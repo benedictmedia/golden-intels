@@ -1001,19 +1001,36 @@ useEffect(() => {
   <div className="flex items-center gap-4">
     <NotificationBell onNotificationClick={handleNotificationClick} />
 
-    <div className="px-3 py-2 rounded-lg text-sm font-bold"
+    <select value={selectedAcademicYear} onChange={e => { setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
+              className="px-3 py-2 rounded-lg text-sm focus:outline-none"
               style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
-              {selectedAcademicYear} · {selectedTerm}
-            </div>
+              {academicYears.map(y => <option key={y} value={y} style={{ color: '#000' }}>{y}</option>)}
+            </select>
+            <select value={selectedTerm} onChange={e => { setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
+              className="px-3 py-2 rounded-lg text-sm focus:outline-none"
+              style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
+              {terms.map(t => <option key={t} value={t} style={{ color: '#000' }}>{t}</option>)}
+            </select>
   </div>
 </div>
         {/* Page Content */}
         <div className="portal-content flex-1 overflow-y-auto p-6">
-          <div className="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 mb-6 flex items-center gap-3">
-            <CalendarDays size={16} style={{ color: '#800080' }} />
-            <p className="text-sm font-bold" style={{ color: '#800080' }}>Academic Context:</p>
-            <p className="text-sm font-bold text-gray-700">{selectedAcademicYear} &nbsp;|&nbsp; {selectedTerm}</p>
-            <span className="ml-auto text-xs text-gray-400">Set by admin</span>
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
+              <p className="text-lg font-bold" style={{ color: '#0000ff' }}>{selectedAcademicYear} | {selectedTerm}</p>
+              <p className="text-xs text-gray-400 mt-0.5">Auto-set by admin · change to view previous terms</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select value={selectedAcademicYear} onChange={e => { setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700 bg-white">
+                {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+              </select>
+              <select value={selectedTerm} onChange={e => { setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700 bg-white">
+                {terms.map(term => <option key={term} value={term}>{term}</option>)}
+              </select>
+            </div>
           </div>
 
           {/* Profile */}
