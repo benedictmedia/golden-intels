@@ -82,8 +82,12 @@ const saveAttendance = async (req, res) => {
         date,
         status: r.status,
         gradeLevel,
-        recordedBy
-      }))
+        recordedBy,
+        academicYear: req.body.academicYear || null,
+        term: req.body.term || null
+
+      })),
+      skipDuplicates: true
     })
     res.json({ message: 'Attendance saved', count: created.count })
   } catch (error) {

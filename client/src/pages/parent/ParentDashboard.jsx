@@ -512,6 +512,16 @@ export default function ParentDashboard() {
   const contextualApprovedResults = approvedResults.filter(matchesAcademicContext)
   const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
   const contextualFeePayments = feePayments
+  // Returns true if the student has no outstanding balance for the selected term
+  const isFeeClearedForTerm = (studentId) => {
+    const studentFees = contextualFeePayments.filter(p =>
+      p.student?.id === studentId || p.studentId === studentId
+    )
+    // No fee records yet for this term → give benefit of the doubt (cleared)
+    if (studentFees.length === 0) return true
+    // Any record with balance > 0 → not cleared
+    return !studentFees.some(p => Number(p.balance) > 0)
+  }
   const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
     ...summary,
     [record.status]: (summary[record.status] || 0) + 1
@@ -847,20 +857,33 @@ export default function ParentDashboard() {
                           </div>
                         </div>
 
-                        {/* Buttons */}
+                        {/* Buttons — locked if fees are outstanding for this term */}
                         <div className="flex flex-col gap-2">
-                          <button
-                            onClick={() => setViewingResult(result)}
-                            className="bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
-                          >
-                            View Full Result
-                          </button>
-                          <button
-                            onClick={() => handleParentDownloadPDF(result)}
-                            className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
-                          >
-                            Download PDF
-                          </button>
+                          {isFeeClearedForTerm(result.student?.id) ? (
+                            <>
+                              <button
+                                onClick={() => setViewingResult(result)}
+                                className="bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                              >
+                                View Full Result
+                              </button>
+                              <button
+                                onClick={() => handleParentDownloadPDF(result)}
+                                className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                              >
+                                Download PDF
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex flex-col items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-center">
+                              <Lock size={22} className="text-red-500" />
+                              <p className="text-xs font-bold text-red-600">Results Locked</p>
+                              <p className="text-xs text-red-400 leading-snug">
+                                Outstanding fees for {selectedTerm}.<br />
+                                Please clear fees to access results.
+                              </p>
+                            </div>
+                          )}
                         </div>
 
                       </div>
@@ -1056,7 +1079,7 @@ export default function ParentDashboard() {
         </div>
       </div>
     {/* View Full Result Modal */}
-      {viewingResult && (
+      {viewingResult && isFeeClearedForTerm(viewingResult.student?.id) && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
 

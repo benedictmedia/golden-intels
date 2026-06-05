@@ -4,10 +4,12 @@ import aboutImg from '../assets/about.jpg'
 import oxfordImg from '../assets/oxford.jpg'
 
 const values = [
-  { title: 'Honesty', description: 'We uphold truth and integrity in everything we do.' },
-  { title: 'Responsibility', description: 'We take ownership of our actions and their impact on others.' },
-  { title: 'Respect', description: 'We treat every individual with dignity and kindness.' },
-  { title: 'Wellbeing', description: 'We show genuine concern for the wellbeing of our community.' },
+  { title: 'C - Christ-like Character', description: 'We model godliness, humility, and obedience to God in word and action.' },
+  { title: 'H - Honour', description: 'We respect God, authority, self, and others in all we do.' },
+  { title: 'R - Reverence for God', description: 'We put God first and pursue wisdom that begins with the fear of the Lord. Prov 9:10' },
+  { title: 'I - Integrity', description: 'We choose honesty and moral uprightness even when no one is watching.' },
+  { title: 'S - Scholarship', description: 'We pursue academic excellence and critical thinking as an act of worship.' },
+  { title: 'T - Teamwork & Service', description: 'We serve others locally and globally, using our gifts to impact the world for Christ.' },
 ]
 
 const goals = [
@@ -103,7 +105,7 @@ export default function About() {
             </h3>
 
             <p className="text-purple-100 text-lg leading-relaxed">
-              To nurture confident, responsible individuals who aspire to achieve their full potential.
+               To be a leading Christ-centered international school raising a generation of godly, innovative leaders who excel academically, walk in integrity, and impact nations for God’s glory.
             </p>
           </div>
 
