@@ -831,30 +831,42 @@ export default function ParentDashboard() {
                           </span>
                         </div>
 
-                        {/* Subject Summary */}
+                        {/* Subject Summary — hidden when fees outstanding */}
                         <div className="flex-1 min-w-[200px]">
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {SUBJECTS.map(subject => {
-                              const s = getSubjectScore(result.scores || {}, subject)
-                              const total = getSubjectTotal(s)
-                              const getGrade = (t) => {
-                                if (t >= 90) return 'A+'
-                                if (t >= 80) return 'A'
-                                if (t >= 70) return 'B+'
-                                if (t >= 60) return 'B'
-                                if (t >= 50) return 'C'
-                                if (t >= 40) return 'D'
-                                return 'F'
-                              }
-                              return (
-                                <div key={subject} className="bg-blue-50 rounded-lg p-2 text-center">
-                                  <p className="text-xs font-bold text-[#4a235a]">{subject}</p>
-                                  <p className="text-sm font-bold text-gray-700">{total.toFixed(1)}</p>
-                                  <p className="text-xs text-purple-600 font-bold">{getGrade(total)}</p>
+                          {isFeeClearedForTerm(result.student?.id) ? (
+                            <div className="grid grid-cols-3 gap-2">
+                              {SUBJECTS.map(subject => {
+                                const s = getSubjectScore(result.scores || {}, subject)
+                                const total = getSubjectTotal(s)
+                                const getGrade = (t) => {
+                                  if (t >= 90) return 'A+'
+                                  if (t >= 80) return 'A'
+                                  if (t >= 70) return 'B+'
+                                  if (t >= 60) return 'B'
+                                  if (t >= 50) return 'C'
+                                  if (t >= 40) return 'D'
+                                  return 'F'
+                                }
+                                return (
+                                  <div key={subject} className="bg-blue-50 rounded-lg p-2 text-center">
+                                    <p className="text-xs font-bold text-[#4a235a]">{subject}</p>
+                                    <p className="text-sm font-bold text-gray-700">{total.toFixed(1)}</p>
+                                    <p className="text-xs text-purple-600 font-bold">{getGrade(total)}</p>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                              {SUBJECTS.map(subject => (
+                                <div key={subject} className="bg-gray-100 rounded-lg p-2 text-center border border-dashed border-gray-300">
+                                  <p className="text-xs font-bold text-gray-400">{subject}</p>
+                                  <p className="text-sm font-bold text-gray-300">—</p>
+                                  <p className="text-xs text-gray-300 font-bold">—</p>
                                 </div>
-                              )
-                            })}
-                          </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         {/* Buttons — locked if fees are outstanding for this term */}
