@@ -50,7 +50,12 @@ const getStudentAttendance = async (req, res) => {
       const allowedByClass = classTeacherClasses.includes(normalizeClassName(student?.gradeLevel))
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
-    const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { date: 'desc' } })
+    const { academicYear, term } = req.query
+    const where = { studentId: parseInt(studentId) }
+    if (academicYear) where.academicYear = academicYear
+    if (term) where.term = term
+
+    const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { date: 'desc' } })
     res.json(records)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -71,9 +76,15 @@ const saveAttendance = async (req, res) => {
       }
     }
 
-    // Delete existing records for this date and class
+    // Delete existing records for this date, class, and same term/year only
+    const { academicYear, term } = req.body
     await prisma.attendanceRecord.deleteMany({
-      where: { date, gradeLevel }
+      where: {
+        date,
+        gradeLevel,
+        ...(academicYear ? { academicYear } : {}),
+        ...(term ? { term } : {})
+      }
     })
     // Create new records
     const created = await prisma.attendanceRecord.createMany({
@@ -83,9 +94,8 @@ const saveAttendance = async (req, res) => {
         status: r.status,
         gradeLevel,
         recordedBy,
-        academicYear: req.body.academicYear || null,
-        term: req.body.term || null
-
+        academicYear: academicYear || null,
+        term: term || null
       })),
       skipDuplicates: true
     })
@@ -112,12 +122,18 @@ const getAttendanceSummary = async (req, res) => {
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
 
-    const records = await prisma.attendanceRecord.findMany({ where: { studentId: parseInt(studentId) } })
+    const { academicYear, term } = req.query
+    const where = { studentId: parseInt(studentId) }
+    if (academicYear) where.academicYear = academicYear
+    if (term) where.term = term
+
+    const records = await prisma.attendanceRecord.findMany({ where })
     const total = records.length
     const present = records.filter(r => r.status === 'present').length
     const absent = records.filter(r => r.status === 'absent').length
     const late = records.filter(r => r.status === 'late').length
-    const percentage = total > 0 ? Math.round((present / total) * 100) : 0
+    // Late counts as present for percentage calculation
+    const percentage = total > 0 ? Math.round(((present + late) / total) * 100) : 0
     res.json({ total, present, absent, late, percentage, records })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })

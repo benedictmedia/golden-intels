@@ -123,14 +123,17 @@ export default function ParentDashboard() {
     const headers = { Authorization: `Bearer ${token}` }
     setAttendanceLoading(true)
     setAttendanceError('')
-    axios.get(`${API_URL}/api/attendance/student/${selectedChild.id}`, { headers })
+    axios.get(`${API_URL}/api/attendance/student/${selectedChild.id}`, {
+      headers,
+      params: { academicYear: selectedAcademicYear, term: selectedTerm }
+    })
       .then(res => setAttendanceRecords(res.data))
       .catch(err => {
         console.error('Failed to fetch attendance:', err)
         setAttendanceError('Unable to load attendance records.')
       })
       .finally(() => setAttendanceLoading(false))
-  }, [activeMenu, selectedChild])
+  }, [activeMenu, selectedChild, selectedAcademicYear, selectedTerm])
 
   const handleParentDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
@@ -244,7 +247,10 @@ export default function ParentDashboard() {
     const _attHeaders = { Authorization: `Bearer ${_attToken}` }
     let attendanceSummary = null
     try {
-      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: _attHeaders })
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, {
+        headers: _attHeaders,
+        params: { academicYear: result.academicYear, term: result.term }
+      })
       attendanceSummary = attendanceRes.data
     } catch {}
 
@@ -460,7 +466,7 @@ export default function ParentDashboard() {
     [record.status]: (summary[record.status] || 0) + 1
   }), { present: 0, absent: 0, late: 0 })
   const attendancePercentage = attendanceRecords.length
-    ? Math.round((attendanceSummary.present / attendanceRecords.length) * 100)
+    ? Math.round(((attendanceSummary.present + attendanceSummary.late) / attendanceRecords.length) * 100)
     : 0
   const formatAttendanceStatus = (status) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
   const getAcademicYearFromDate = (value) => {
@@ -527,7 +533,7 @@ export default function ParentDashboard() {
     [record.status]: (summary[record.status] || 0) + 1
   }), { present: 0, absent: 0, late: 0 })
   const contextualAttendancePercentage = contextualAttendanceRecords.length
-    ? Math.round((contextualAttendanceSummary.present / contextualAttendanceRecords.length) * 100)
+    ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
     : 0
 
   useEffect(() => {
@@ -745,9 +751,9 @@ export default function ParentDashboard() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {[
                   ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
-                  ['Present', contextualAttendanceSummary.present, 'bg-[#0f6e56]', 'text-green-100'],
+                  ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#0f6e56]', 'text-green-100'],
                   ['Absent', contextualAttendanceSummary.absent, 'bg-red-500', 'text-red-100'],
-                  ['Late', contextualAttendanceSummary.late, 'bg-blue-500', 'text-cyan-700/80'],
+                  ['Late', contextualAttendanceSummary.late, 'bg-[#0000ff]', 'text-blue-100'],
                 ].map(([label, value, color, textColor]) => (
                   <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                     <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>

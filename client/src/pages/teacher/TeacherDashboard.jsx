@@ -416,7 +416,10 @@ useEffect(() => {
     const _attHeaders = { Authorization: `Bearer ${_attToken}` }
     let attendanceSummary = null
     try {
-      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: _attHeaders })
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, {
+        headers: _attHeaders,
+        params: { academicYear: result.academicYear, term: result.term }
+      })
       attendanceSummary = attendanceRes.data
     } catch {}
 
@@ -643,6 +646,8 @@ useEffect(() => {
         date: attendanceDate,
         gradeLevel: activeClass,
         recordedBy: user?.name || 'Teacher',
+        academicYear: selectedAcademicYear,
+        term: selectedTerm,
         records: classStudents.map(student => ({
           studentId: student.id,
           status: attendance[student.id] || 'present'

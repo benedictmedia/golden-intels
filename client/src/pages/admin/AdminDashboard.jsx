@@ -708,7 +708,10 @@ export default function AdminDashboard() {
     const _attHeaders = getAuthHeaders()
     let attendanceSummary = null
     try {
-      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, { headers: _attHeaders })
+      const attendanceRes = await axios.get(`${API_URL}/api/attendance/summary/${result.studentId}`, {
+        headers: _attHeaders,
+        params: { academicYear: result.academicYear, term: result.term }
+      })
       attendanceSummary = attendanceRes.data
     } catch {}
 
