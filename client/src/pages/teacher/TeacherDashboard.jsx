@@ -924,8 +924,11 @@ useEffect(() => {
     <div className="portal-shell flex bg-blue-100">
 
       {/* Sidebar */}
-      <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
-        style={{ background: '#0000ff' }}>
+      <div className="flex h-screen overflow-hidden" style={{ background: '#f1f5f9' }}>
+  {sidebarOpen && (
+    <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+  )}
+    
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(252, 247, 247, 0.91)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
