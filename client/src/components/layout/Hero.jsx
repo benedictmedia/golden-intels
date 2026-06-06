@@ -8,43 +8,69 @@ import heroBg3 from '../../assets/hero-bg-3.jpg'
 import heroBg4 from '../../assets/hero-bg-4.jpg'
 import heroBg5 from '../../assets/hero-bg-5.jpg'
 
-const heroImages = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5].filter(Boolean) // Remove any missing images
+const heroImages = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5].filter(Boolean)
 
 export default function Hero() {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [nextIndex, setNextIndex] = useState(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  // Auto-change image every 6 seconds
+  // Auto slideshow with fade
   useEffect(() => {
     if (heroImages.length <= 1) return
 
     const interval = setInterval(() => {
-      setCurrentImageIndex(prev => (prev + 1) % heroImages.length)
+      const next = (currentIndex + 1) % heroImages.length
+      
+      setNextIndex(next)
+      setIsTransitioning(true)
+
+      // Complete transition after 800ms
+      setTimeout(() => {
+        setCurrentIndex(next)
+        setNextIndex(null)
+        setIsTransitioning(false)
+      }, 800)
     }, 6000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [currentIndex])
 
-  const currentBg = heroImages[currentImageIndex]
+  const currentBg = heroImages[currentIndex]
+  const nextBg = nextIndex !== null ? heroImages[nextIndex] : null
 
   return (
     <div className="relative text-[#800080] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
       
-      {/* Background Slideshow */}
+      {/* Current Background */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out scale-110"
+        className="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-1000 ease-in-out"
         style={{ 
           backgroundImage: `url(${currentBg})`,
-          opacity: 0.95
+          opacity: isTransitioning ? 0.3 : 1,
+          zIndex: 1
         }}
-      ></div>
+      />
+
+      {/* Next Background (for crossfade) */}
+      {nextBg && (
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-110 transition-opacity duration-1000 ease-in-out"
+          style={{ 
+            backgroundImage: `url(${nextBg})`,
+            opacity: isTransitioning ? 1 : 0,
+            zIndex: 2
+          }}
+        />
+      )}
 
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#2563EB]/45"></div>
+      <div className="absolute inset-0 bg-[#2563EB]/45 z-10"></div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+      <div className="relative z-20 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
 
-        {/* Left Side - Main Content */}
+        {/* Left Side */}
         <div className="text-center md:text-left">
           <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
             Oxford Accredited International School
@@ -93,20 +119,25 @@ export default function Hero() {
             </div>
           </div>
         </div>
-
       </div>
 
-      {/* Optional: Dots indicator */}
+      {/* Slide Indicators */}
       {heroImages.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-          {heroImages.map((_, index) => (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-30">
+          {heroImages.map((_, idx) => (
             <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentImageIndex 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/50 hover:bg-white/70'
+              key={idx}
+              onClick={() => {
+                setNextIndex(idx)
+                setIsTransitioning(true)
+                setTimeout(() => {
+                  setCurrentIndex(idx)
+                  setNextIndex(null)
+                  setIsTransitioning(false)
+                }, 600)
+              }}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/70'
               }`}
             />
           ))}
