@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
+import { compressImage, compressImages } from '../../utils/compressImage'
 import AdminMessages from '../../components/messages/AdminMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
@@ -265,10 +266,14 @@ export default function AdminDashboard() {
     if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
   }
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0]
-    if (file) { setPhotoFile(file); setPhotoPreview(URL.createObjectURL(file)) }
+ const handlePhotoChange = async (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    const compressed = await compressImage(file, { maxWidthPx: 600, maxSizeMB: 0.3 })
+    setPhotoFile(compressed)
+    setPhotoPreview(URL.createObjectURL(compressed))
   }
+}
 
   const handleAddStudent = async () => {
     try {
@@ -855,7 +860,12 @@ export default function AdminDashboard() {
 
   const handleCopy = (text, id) => { navigator.clipboard.writeText(text); setCopiedId(id); setTimeout(() => setCopiedId(null), 2000) }
 
-  const handleGalleryImageChange = (e) => { const files = Array.from(e.target.files); setGalleryImages(files); setGalleryPreviews(files.map(f => URL.createObjectURL(f))) }
+  const handleGalleryImageChange = async (e) => {
+  const raw = Array.from(e.target.files)
+  const compressed = await compressImages(raw, { maxWidthPx: 1280, maxSizeMB: 0.8 })
+  setGalleryImages(compressed)
+  setGalleryPreviews(compressed.map(f => URL.createObjectURL(f)))
+}
 
   const handleAddGalleryItem = async () => {
     if (!galleryForm.title || galleryImages.length === 0) { alert('Please add a title and at least one image.'); return }
@@ -892,7 +902,12 @@ export default function AdminDashboard() {
     } catch (err) { alert('Failed to update gallery item.') }
   }
 
-  const handleNewsImageChange = (e) => { const files = Array.from(e.target.files); setNewsImages(files); setNewsPreviews(files.map(f => URL.createObjectURL(f))) }
+  const handleNewsImageChange = async (e) => {
+  const raw = Array.from(e.target.files)
+  const compressed = await compressImages(raw, { maxWidthPx: 1280, maxSizeMB: 0.8 })
+  setNewsImages(compressed)
+  setNewsPreviews(compressed.map(f => URL.createObjectURL(f)))
+}
 
   const handleAddNews = async () => {
     if (!newsForm.title || !newsForm.content) { alert('Please add a title and content.'); return }
@@ -937,7 +952,14 @@ export default function AdminDashboard() {
     } catch (err) { alert('Failed to delete news item.') }
   }
 
-  const handleStaffPhotoChange = (e) => { const file = e.target.files[0]; if (file) { setStaffPhoto(file); setStaffPhotoPreview(URL.createObjectURL(file)) } }
+  const handleStaffPhotoChange = async (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    const compressed = await compressImage(file, { maxWidthPx: 800, maxSizeMB: 0.5 })
+    setStaffPhoto(compressed)
+    setStaffPhotoPreview(URL.createObjectURL(compressed))
+  }
+}
 
   const handleAddStaff = async () => {
     if (!staffForm.name || !staffForm.role) { alert('Please fill in name and role.'); return }

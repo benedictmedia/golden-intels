@@ -43,7 +43,7 @@ const createAdmissionsStorage = () => new CloudinaryStorage({
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'],
       ...(isDocument ? {} : {
       transformation: [
-        { quality: 'auto:low', fetch_format: 'auto' },
+        { quality: 'auto:good', fetch_format: 'auto' },
         { width: 1920, height: 1080, crop: 'limit' }
       ],
       }),
