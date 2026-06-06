@@ -11,63 +11,66 @@ export default function Hero() {
         style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
 
-      {/* Mission Statement */}
-<div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-5 mb-6 max-w-lg">
-  <div className="flex items-start gap-3">
-    <div className="w-1 min-h-full bg-[#d4a017] rounded-full flex-shrink-0 self-stretch" />
-    <div>
-      <p className="text-[#d4a017] text-xs font-bold uppercase tracking-widest mb-2">
-        Our Mission
-      </p>
-      <p className="text-white text-sm leading-relaxed font-medium">
-        Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
-      </p>
-    </div>
-  </div>
-</div>
-
       {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-[#2563EB]/30"></div>
-      
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
+      <div className="absolute inset-0 bg-[#2563EB]/40"></div>
 
-        {/* Badge */}
-        <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-6 shadow-md">
-          A school Accredited by Oxford University Press
-        </span>
+      {/* Content Container */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
 
-        {/* Heading */}
-        <h1 className="text-4xl md:text-6xl font-bold font-serif leading-tight mb-6">
-          Welcome to <br />
-          <span className="text-[#ffff00]">Golden-Intels</span> <br />
-          International School
-        </h1>
+        {/* Left Side - Main Heading */}
+        <div className="text-center md:text-left">
+          {/* Badge */}
+          <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
+            A school Accredited by Oxford University Press
+          </span>
 
-        {/* Subheading */}
-        <p className="text-lg md:text-xl text-[#ffff00]/200 max-w-2xl mx-auto mb-10">
-          We nurture for nature.
-        </p>
+          {/* Heading */}
+          <h1 className="text-5xl md:text-6xl font-bold font-serif leading-tight mb-6 tracking-tight text-white">
+            Welcome to <br />
+            <span className="text-[#ffff00]">Golden-Intels</span> <br />
+            International School
+          </h1>
 
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          
-          {/* Primary Button */}
-          <Link
-            to="/admissions"
-            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
-          >
-            Apply Now
-          </Link>
+          {/* Subheading */}
+          <p className="text-xl md:text-2xl text-[#ffff00] max-w-lg mx-auto md:mx-0 mb-10 font-light">
+            We nurture for nature.
+          </p>
 
-          {/* Secondary Button */}
-          <Link
-            to="/about"
-            className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
-          >
-            Discover Our Story
-          </Link>
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+            <Link
+              to="/admissions"
+              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              Apply Now
+            </Link>
+
+            <Link
+              to="/about"
+              className="bg-transparent border-2 border-white hover:bg-white hover:text-[#2563EB] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all"
+            >
+              Discover Our Story
+            </Link>
+          </div>
         </div>
+
+        {/* Right Side - Mission Statement */}
+        <div className="flex justify-center md:justify-end">
+          <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl px-8 py-8 max-w-md w-full">
+            <div className="flex items-start gap-4">
+              <div className="w-1.5 min-h-full bg-[#d4a017] rounded-full flex-shrink-0 self-stretch mt-1" />
+              <div className="text-left">
+                <p className="text-[#d4a017] text-xs font-bold uppercase tracking-[2px] mb-3">
+                  OUR MISSION
+                </p>
+                <p className="text-white text-[15.5px] leading-relaxed font-medium">
+                  Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   )

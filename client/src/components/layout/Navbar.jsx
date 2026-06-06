@@ -55,7 +55,7 @@ export default function Navbar() {
 
         {/* Oxford International Curriculum badge */}
           <a
-  href="https://www.oxfordinternational.com"
+  href="https://global.oup.com/education/primary/curricula/oxford-international-curriculum/?region=international"
   target="_blank"
   rel="noopener noreferrer"
   className="flex items-center gap-1.5 ml-2"
@@ -91,7 +91,7 @@ export default function Navbar() {
 
           {/* Oxford International Curriculum badge */}
           <a
-  href="https://www.oxfordinternational.com"
+  href="https://global.oup.com/education/primary/curricula/oxford-international-curriculum/?region=international"
   target="_blank"
   rel="noopener noreferrer"
   className="flex items-center gap-1.5 ml-2"
