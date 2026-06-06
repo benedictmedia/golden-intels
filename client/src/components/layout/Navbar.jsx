@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import BrandLogo from './BrandLogo'
-import oxfordLogo from '../assets/oxford-logo.png'
+import oxfordLogo from "../../assets/oxford-logo.png"
 
 // School colour palette is defined in index.css as CSS variables
 // --color-primary (purple), --color-secondary (blue), --color-accent (yellow)
