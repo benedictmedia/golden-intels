@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom'
 import heroBg1 from '../../assets/hero-bg.jpg'
 import heroBg2 from '../../assets/hero-bg-2.jpg'   
 import heroBg3 from '../../assets/hero-bg-3.jpg'   
-import heroBg3 from '../../assets/hero-bg-4.jpg'
-import heroBg3 from '../../assets/hero-bg-5.jpg'
+import heroBg4 from '../../assets/hero-bg-4.jpg'
+import heroBg5 from '../../assets/hero-bg-5.jpg'
 
 const heroImages = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5].filter(Boolean) // Remove any missing images
 
