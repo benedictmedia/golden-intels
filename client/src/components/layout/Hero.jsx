@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 
 // Add more images here (make sure they are in src/assets/)
 import heroBg1 from '../../assets/hero-bg.jpg'
-import heroBg2 from '../../assets/hero-bg-2.jpg'   // Add this image
-import heroBg3 from '../../assets/hero-bg-3.jpg'   // Add this image (optional)
+import heroBg2 from '../../assets/hero-bg-2.jpg'   
+import heroBg3 from '../../assets/hero-bg-3.jpg'   
+import heroBg3 from '../../assets/hero-bg-4.jpg'
+import heroBg3 from '../../assets/hero-bg-5.jpg'
 
-const heroImages = [heroBg1, heroBg2, heroBg3].filter(Boolean) // Remove any missing images
+const heroImages = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5].filter(Boolean) // Remove any missing images
 
 export default function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
