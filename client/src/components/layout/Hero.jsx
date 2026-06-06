@@ -11,6 +11,21 @@ export default function Hero() {
         style={{ backgroundImage: `url(${heroBg})` }}
       ></div>
 
+      {/* Mission Statement */}
+<div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-5 mb-6 max-w-lg">
+  <div className="flex items-start gap-3">
+    <div className="w-1 min-h-full bg-[#d4a017] rounded-full flex-shrink-0 self-stretch" />
+    <div>
+      <p className="text-[#d4a017] text-xs font-bold uppercase tracking-widest mb-2">
+        Our Mission
+      </p>
+      <p className="text-white text-sm leading-relaxed font-medium">
+        Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
+      </p>
+    </div>
+  </div>
+</div>
+
       {/* Dark overlay for readability */}
       <div className="absolute inset-0 bg-[#2563EB]/30"></div>
       

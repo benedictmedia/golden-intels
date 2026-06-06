@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import BrandLogo from './BrandLogo'
+import oxfordLogo from '../assets/oxford-logo.png'
 
 // School colour palette is defined in index.css as CSS variables
 // --color-primary (purple), --color-secondary (blue), --color-accent (yellow)
@@ -51,6 +52,21 @@ export default function Navbar() {
         >
           Portal Login
         </Link>
+
+        {/* Oxford International Curriculum badge */}
+          <a
+  href="https://www.oxfordinternational.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-1.5 ml-2"
+  title="Oxford International Curriculum Accredited School"
+>
+  <img
+    src={oxfordLogo}
+    alt="Oxford International Curriculum"
+    className="h-9 w-auto object-contain"
+  />
+</a>
         {/* Mobile menu button */}
         <button onClick={() => setMenuOpen(!menuOpen)} className="lg:hidden text-white p-2 -mr-2 rounded-lg hover:bg-white/10" aria-label="Toggle navigation menu" aria-expanded={menuOpen}>
           {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -72,6 +88,21 @@ export default function Navbar() {
           <Link to="/login" onClick={() => setMenuOpen(false)} className="mt-4 block text-center bg-[var(--color-secondary)] hover:bg-white/10 text-white font-bold text-sm px-5 py-3 rounded-lg transition-all duration-300">
             Portal Login
           </Link>
+
+          {/* Oxford International Curriculum badge */}
+          <a
+  href="https://www.oxfordinternational.com"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-1.5 ml-2"
+  title="Oxford International Curriculum Accredited School"
+>
+  <img
+    src={oxfordLogo}
+    alt="Oxford International Curriculum"
+    className="h-9 w-auto object-contain"
+  />
+</a>
         </div>
       )}
     </nav>
