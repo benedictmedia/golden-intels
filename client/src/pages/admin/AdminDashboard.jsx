@@ -1053,6 +1053,7 @@ export default function AdminDashboard() {
      {sidebarOpen && (
        <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
      )}
+     
       {/* Sidebar */}
     <div className={`portal-sidebar fixed md:relative z-40 md:z-auto ${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden md:w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto flex-shrink-0`} style={{ background: '#800080' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
@@ -2507,8 +2508,8 @@ export default function AdminDashboard() {
             </div>
           )}
 
-      {activeMenu === 'signature' && (
-  <div className="max-w-xl">
+          {activeMenu === 'signature' && (
+            <div className="max-w-xl">
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Headmaster's Signature</h2>
       <p className="text-gray-500 text-sm">Upload a scanned signature. It will automatically appear on all approved result PDFs.</p>
@@ -2564,8 +2565,8 @@ export default function AdminDashboard() {
 )}
 
 {/* Academic Context */}
-{activeMenu === 'academic-context' && (
-  <div className="max-w-xl">
+          {activeMenu === 'academic-context' && (
+            <div className="max-w-xl">
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Academic Context</h2>
       <p className="text-gray-500 text-sm">Set the active academic year and term. This automatically applies to all teacher, parent and learner portals — they no longer need to set it manually.</p>
@@ -2632,8 +2633,8 @@ export default function AdminDashboard() {
 )}
 
       {/* Contact Messages */}
-{activeMenu === 'contact-messages' && (
-  <div>
+          {activeMenu === 'contact-messages' && (
+            <div>
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Contact Messages</h2>
       <p className="text-gray-500 text-sm">Messages sent by visitors from the public contact page.</p>
@@ -2722,11 +2723,11 @@ export default function AdminDashboard() {
         </div>
       </div>
     )}
-  </div>
-)}
+            </div>
+          )}
 
-      {/* Messages */}
-      {activeMenu === 'messages' && <AdminMessages />}
+          {/* Messages */}
+          {activeMenu === 'messages' && <AdminMessages />}
 
         </div>
       </div>
