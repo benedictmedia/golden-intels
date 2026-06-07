@@ -51,7 +51,7 @@ export default function NotificationBell({ onNotificationClick }) {
       </button>
 
       {showPanel && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 max-h-[420px] overflow-auto">
+        <div className="notification-panel absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 max-h-[420px] overflow-auto">
           <div className="p-4 border-b bg-white sticky top-0">
             <h3 className="font-bold text-lg">Notifications</h3>
           </div>
