@@ -202,7 +202,7 @@ export default function AdminMessages() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex rounded-2xl overflow-hidden shadow-xl border border-gray-200"
-      style={{ height: 'calc(100dvh - 130px)', minHeight: '400px' }}>
+      style={{ height: 'calc(100vh - 130px)' }}>
 
       {/* ════════════════════════════════ LEFT PANEL ════════════════════════ */}
       <div className="w-80 flex flex-col bg-white border-r border-gray-200 flex-shrink-0">

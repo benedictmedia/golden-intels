@@ -1049,12 +1049,9 @@ export default function AdminDashboard() {
   }
 
   return (
-   <div className="portal-shell flex bg-gray-100 h-screen overflow-hidden">
-     {sidebarOpen && (
-       <div className="fixed inset-0 bg-black/40 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
-     )}
+   <div className="portal-shell flex bg-gray-100">
       {/* Sidebar */}
-    <div className={`portal-sidebar fixed md:relative z-40 md:z-auto ${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden md:w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto flex-shrink-0`} style={{ background: '#800080' }}>
+     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#800080' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -2507,6 +2504,9 @@ export default function AdminDashboard() {
             </div>
           )}
 
+        </div>
+      </div>
+
       {activeMenu === 'signature' && (
   <div className="max-w-xl">
     <div className="mb-6">
@@ -2727,9 +2727,6 @@ export default function AdminDashboard() {
 
       {/* Messages */}
       {activeMenu === 'messages' && <AdminMessages />}
-
-        </div>
-      </div>
 
       {/* Student Detail Modal */}
       {selectedStudent && (
