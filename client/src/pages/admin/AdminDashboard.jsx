@@ -2508,7 +2508,7 @@ export default function AdminDashboard() {
       </div>
 
       {activeMenu === 'signature' && (
-  <div className="max-w-xl">
+        <div className="orphan-tab max-w-xl">
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Headmaster's Signature</h2>
       <p className="text-gray-500 text-sm">Upload a scanned signature. It will automatically appear on all approved result PDFs.</p>
@@ -2565,7 +2565,7 @@ export default function AdminDashboard() {
 
 {/* Academic Context */}
 {activeMenu === 'academic-context' && (
-  <div className="max-w-xl">
+  <div className="orphan-tab max-w-xl">
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Academic Context</h2>
       <p className="text-gray-500 text-sm">Set the active academic year and term. This automatically applies to all teacher, parent and learner portals — they no longer need to set it manually.</p>
@@ -2633,7 +2633,7 @@ export default function AdminDashboard() {
 
       {/* Contact Messages */}
 {activeMenu === 'contact-messages' && (
-  <div>
+  <div className="orphan-tab">
     <div className="mb-6">
       <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Contact Messages</h2>
       <p className="text-gray-500 text-sm">Messages sent by visitors from the public contact page.</p>
@@ -2726,7 +2726,11 @@ export default function AdminDashboard() {
 )}
 
       {/* Messages */}
-      {activeMenu === 'messages' && <AdminMessages />}
+     {activeMenu === 'messages' && (
+        <div className="orphan-tab-messages">
+          <AdminMessages />
+        </div>
+      )}
 
       {/* Student Detail Modal */}
       {selectedStudent && (

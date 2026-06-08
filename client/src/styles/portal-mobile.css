@@ -113,3 +113,53 @@
     overflow-y: auto;
   }
 }
+
+/* ── Fix for tabs rendered outside portal-content but inside portal-main ── */
+@media (max-width: 767px) {
+
+  /* These four tabs sit directly inside portal-main, not portal-content.
+     Give them their own scroll container and padding */
+  .portal-main > div[class*="max-w-xl"],
+  .portal-main > div > div[class*="max-w-xl"] {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100dvh - 120px);
+    padding: 1rem;
+  }
+
+  /* Contact messages tab - the outer div has no class, target by position */
+  .portal-main > div:not([class]) {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100dvh - 120px);
+    padding: 1rem;
+  }
+}
+
+/* ── Orphaned tabs (outside portal-content, inside portal-main) ── */
+@media (max-width: 767px) {
+
+  .orphan-tab {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100dvh - 120px);
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .orphan-tab-messages {
+    height: calc(100dvh - 120px);
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* AdminMessages inner panel inside orphan wrapper */
+  .orphan-tab-messages > div {
+    flex: 1;
+    height: 100% !important;
+    min-height: unset !important;
+  }
+}
