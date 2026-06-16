@@ -406,7 +406,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-[#8a2be2] rounded-full flex items-center justify-center font-bold text-white mb-4">
                 3
               </div>
