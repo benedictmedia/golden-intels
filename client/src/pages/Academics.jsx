@@ -168,11 +168,11 @@ export default function Academics() {
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
             {/* Expanding Every Year */}
-            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Expanding Every Year
               </h3>
-              <p className="text-slate-600 text-lg leading-relaxed">
+              <p className="text-white text-lg leading-relaxed">
                 Golden-Intels is actively growing and expanding its facilities and programs. We are committed to excellence.
               </p>
             </div>
@@ -181,7 +181,7 @@ export default function Academics() {
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Future Expansion Plans
               </h3>
-              <p className="text-slate-300 text-lg leading-relaxed">
+              <p className="text-white text-lg leading-relaxed">
                 As we grow, we are planning to introduce additional enhanced facilities and Lower and Upper Secondary levels for higher students.
               </p>
             </div>
@@ -212,11 +212,11 @@ export default function Academics() {
               </ul>
             </div>
             {/* Current Offerings */}
-            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Current Offerings
               </h3>
-              <p className="text-slate-600 text-lg leading-relaxed">
+              <p className="text-white text-lg leading-relaxed">
                 Currently serving students from Creche, Early Years through Reception to Primary with our hybrid OIC and GES curriculum, with plans to expand progressively to Lower and Upper Secondary education.
               </p>
             </div>
@@ -253,21 +253,21 @@ export default function Academics() {
               <div className="space-y-5">
                 <div className="bg-white/10 rounded-xl p-4">
                   <h4 className="font-bold text-yellow-300 mb-1">BECE</h4>
-                  <p className="text-blue-100 text-sm">
+                  <p className="text-white text-sm">
                     Basic Education Certificate Examination
                   </p>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-white text-sm mt-1">
                     Taken at the end of Junior High School (Grade 9)
                   </p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-4">
                   <h4 className="font-bold text-yellow-300 mb-1">SHS</h4>
-                  <p className="text-blue-100 text-sm">Senior High School</p>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-white text-sm">Senior High School</p>
+                  <p className="text-white text-sm mt-1">
                     Three-year program following BECE qualification
                   </p>
                 </div>
-                <p className="text-blue-100 text-sm leading-relaxed">
+                <p className="text-white text-sm leading-relaxed">
                   Students following the GES pathway progress through Ghana's national education system.
                 </p>
               </div>
@@ -284,24 +284,24 @@ export default function Academics() {
               <div className="space-y-5">
                 <div className="bg-white/10 rounded-xl p-4">
                   <h4 className="font-bold text-white mb-1">International GCSE</h4>
-                  <p className="text-green-100 text-sm">
+                  <p className="text-white text-sm">
                     Comprehensive qualification at Grade 10-11
                   </p>
                 </div>
                 <div className="bg-white/10 rounded-xl p-4">
                   <h4 className="font-bold text-white mb-1">A-Level & OxfordAQA</h4>
-                  <p className="text-green-100 text-sm">
+                  <p className="text-white text-sm">
                     Advanced qualifications through Grade 12-13
                   </p>
                 </div>
-                <p className="text-green-100 text-sm leading-relaxed">
+                <p className="text-white text-sm leading-relaxed">
                   Students can continue to Grade 13 for advanced international qualifications.
                 </p>
               </div>
             </div>
 
             {/* Flexible Progression */}
-            <div className="bg-[#8a2be2] border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <span className="inline-block bg-slate-800 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Flexible
               </span>
@@ -309,7 +309,7 @@ export default function Academics() {
                 Flexible Progression
               </h3>
               <div className="space-y-5">
-                <p className="text-slate-600 text-lg leading-relaxed">
+                <p className="text-white text-lg leading-relaxed">
                   Our hybrid curriculum allows learners to transition between pathways based on their academic goals and aspirations.
                 </p>
                 <div className="bg-slate-100 rounded-xl p-4">
@@ -407,25 +407,25 @@ export default function Academics() {
             </div>
 
             <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
-              <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-white mb-4">
+              <div className="w-10 h-10 bg-[#8a2be2] rounded-full flex items-center justify-center font-bold text-white mb-4">
                 3
               </div>
               <h4 className="text-xl font-bold mb-3">
                 Technology Integration
               </h4>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-white leading-relaxed">
                 Modern tools and digital resources enhance learning experiences and prepare students for the digital age.
               </p>
             </div>
 
-            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 4
               </div>
               <h4 className="text-xl font-bold mb-3">
                 Personalized Support
               </h4>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-white leading-relaxed">
                 Individual attention and tailored instruction ensure every student receives the support they need to excel.
               </p>
             </div>
@@ -466,14 +466,14 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 8
               </div>
               <h4 className="text-xl font-bold mb-3">
                 Assessment for Learning
               </h4>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-white leading-relaxed">
                 Continuous feedback and varied assessment methods guide student progress and inform instruction.
               </p>
             </div>

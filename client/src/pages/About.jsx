@@ -76,61 +76,72 @@ export default function About() {
         </div>
       </section>
 
-      {/* Our Educational Programs Section */}
-<section className="educational-programs py-5 bg-light">
-    <div className="container">
-        <div className="row align-items-center">
-            
-             {/* Left Side: Text Content */}
-            <div className="col-lg-7">
-                <h2 className="mb-4 text-primary">Our Educational Programs</h2>
-                <p className="lead mb-4">
-                    We offer a comprehensive, progressive learning pathway designed to support children from infancy through adolescence:
-                </p>
-                
-                <ul className="list-unstyled">
-                    <li className="mb-4">
-                        <h5 className="fw-bold text-dark">Early Childhood Education</h5>
-                        <ul className="list-unstyled ms-4">
-                            <li>• Creche (Babies)</li>
-                            <li>• Pre-Nursery</li>
-                            <li>• Early Years Foundation Stage: Nursery 1, Nursery 2, Reception (Kindergarten) 1 & 2</li>
-                        </ul>
-                    </li>
-                    
-                    <li className="mb-4">
-                        <h5 className="fw-bold text-dark">Primary Education</h5>
-                        <p className="ms-4">Grades 1 to 6 – A forward-thinking, futuristic curriculum that builds strong foundational skills while nurturing curiosity and creativity.</p>
-                    </li>
-                    
-                    <li className="mb-4">
-                        <h5 className="fw-bold text-dark">Secondary Education</h5>
-                        <ul className="list-unstyled ms-4">
-                            <li>• Lower Secondary (Grades 7 to 9)</li>
-                            <li>• Upper Secondary (Grades 10 to 12)</li>
-                        </ul>
-                    </li>
-                </ul>
-                
-                <p className="mt-4">
-                    <strong>Our programs emphasize academic excellence, character development, and practical life skills.</strong> 
-                    We continue to thrive as an institution while investing in the growth of every baby and young star entrusted to our care.
-                </p>
-            </div>
-            
-             {/* Right Side: Picture (replace src with your image) */}
-            <div className="col-lg-5 text-center">
-                <img
-                src={educationalprogramsImg} 
-                     alt="Our Educational Programs - Children learning in a nurturing environment" 
-                     className="img-fluid rounded shadow"
-                     style={{ maxHeight: '420px', objectFit: 'cover' }}
-                />
-                <p className="text-muted small mt-2">A vibrant learning environment where every child thrives</p>
-            </div>
-            
+{/* Our Educational Programs Section */}
+<section className="py-20 bg-white">
+  <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
+
+    {/* Left: Text Content */}
+    <div className="flex-1">
+      <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+        Our Educational Programs
+      </span>
+
+      <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2] mb-6">
+        A Complete Learning Pathway
+      </h2>
+
+      <p className="text-gray-700 text-lg leading-relaxed mb-6">
+        We offer a comprehensive, progressive learning pathway designed to support children from infancy through adolescence:
+      </p>
+
+      <div className="space-y-5 text-gray-700 text-lg leading-relaxed">
+
+        <div>
+          <h5 className="font-bold text-[#0654f9] mb-1">Early Childhood Education</h5>
+          <ul className="ml-4 space-y-1 text-gray-600">
+            <li>• Creche (Babies)</li>
+            <li>• Pre-Nursery</li>
+            <li>• Early Years Foundation Stage: Nursery 1, Nursery 2, Reception (Kindergarten) 1 & 2</li>
+          </ul>
         </div>
+
+        <div>
+          <h5 className="font-bold text-[#0654f9] mb-1">Primary Education</h5>
+          <p className="ml-4 text-gray-600">
+            Grades 1 to 6 – A forward-thinking, futuristic curriculum that builds strong foundational skills while nurturing curiosity and creativity.
+          </p>
+        </div>
+
+        <div>
+          <h5 className="font-bold text-[#0654f9] mb-1">Secondary Education</h5>
+          <ul className="ml-4 space-y-1 text-gray-600">
+            <li>• Lower Secondary (Grades 7 to 9)</li>
+            <li>• Upper Secondary (Grades 10 to 12)</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <p className="mt-6 text-gray-700 text-lg leading-relaxed">
+        <strong>Our programs emphasize academic excellence, character development, and practical life skills.</strong> We continue to thrive as an institution while investing in the growth of every baby and young star entrusted to our care.
+      </p>
     </div>
+
+    {/* Right: Photo */}
+    <div className="flex-1">
+      <img
+        src={educationalprogramsImg}
+        alt="Our Educational Programs - Children learning in a nurturing environment"
+        className="w-full h-[420px] object-cover rounded-2xl shadow-xl"
+        loading="lazy"
+        decoding="async"
+      />
+      <p className="text-center text-gray-500 text-sm mt-3">
+        A vibrant learning environment where every child thrives
+      </p>
+    </div>
+
+  </div>
 </section>
 
       {/* Mission and Vision */}
