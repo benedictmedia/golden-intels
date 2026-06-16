@@ -40,7 +40,7 @@ export default function Footer() {
             </a>
 
             <a
-              href="https://twitter.com/Goldenintels"
+              href="https://twitter.com/goldenintels"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 bg-[#1E293B] hover:bg-[#1DA1F2] rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
