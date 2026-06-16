@@ -113,7 +113,7 @@ export default function Hero() {
                   OUR MISSION
                 </p>
                 <p className="text-white text-[15.5px] leading-relaxed font-medium">
-                  Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
+                  Raising Godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-centred character for a life of purpose.
                 </p>
               </div>
             </div>

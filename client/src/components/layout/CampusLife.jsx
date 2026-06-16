@@ -45,7 +45,7 @@ export default function CampusLife() {
 
           {/* Description */}
           <p className="text-[#E5E7EB] text-lg leading-relaxed mb-8">
-            Beyond academics, our British Curriculum helps students thrive in computer skills, STEM, arts, physical education and sports together with well-being, and Global Skills Projects. We believe our British Curriculum develops well-rounded learners prepared for every aspect of life.
+            Beyond academics, our Oxford International Curriculum based on the British Curriculum and GES Curriculum help students thrive in computer skills, STEM, arts, physical education and sports together with well-being, and Global Skills Projects. We believe our Oxford International GES Curriculum develops well-rounded learners prepared for every aspect of life.
           </p>
 
           {/* Activities */}

@@ -2,20 +2,21 @@ import { Heart, Eye, Target, CheckCircle } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import aboutImg from '../assets/about.jpg'
 import oxfordImg from '../assets/oxford.jpg'
+import educationalprogramsImg from '../assets/educational-programs.jpg'
 
 const values = [
-  { title: 'C - Christ-like Character', description: 'We model godliness, humility, and obedience to God in word and action.' },
-  { title: 'H - Honour', description: 'We respect God, authority, self, and others in all we do.' },
-  { title: 'R - Reverence for God', description: 'We put God first and pursue wisdom that begins with the fear of the Lord. Prov 9:10' },
-  { title: 'I - Integrity', description: 'We choose honesty and moral uprightness even when no one is watching.' },
-  { title: 'S - Scholarship', description: 'We pursue academic excellence and critical thinking as an act of worship.' },
-  { title: 'T - Teamwork & Service', description: 'We serve others locally and globally, using our gifts to impact the world for Christ.' },
+  { title: 'C - Character', description: 'We model humility, Godliness, and obedience in word and action.' },
+  { title: 'H - Honesty', description: 'We respect authority, self, and others in all we do.' },
+  { title: 'R - Respect', description: 'We respect everyone first and pursue wisdom that begins with the fear of the Lord.' },
+  { title: 'I - Integrity', description: 'We choose moral uprightness even when no one is watching.' },
+  { title: 'S - Sincerity', description: 'We are truthful and genuine in our intentions and actions.' },
+  { title: 'T - Teamwork & Service', description: 'We work together to help our environment by serving others locally and globally, using our gifts to impact the world for the greater good.' },
 ]
 
 const goals = [
   'Provide a safe, inclusive and stimulating learning environment.',
-  'Achieve outstanding academic results across all year groups.',
-  'Develop students who are confident communicators and critical thinkers.',
+  'Achieve outstanding academic results across all levels.',
+  'Develop learners who are confident communicators and critical thinkers.',
   'Foster a culture of innovation, creativity and lifelong learning.',
   'Build strong partnerships between school, families and the community.',
 ]
@@ -48,15 +49,15 @@ export default function About() {
 
             <div className="text-gray-700 text-lg leading-relaxed space-y-5">
               <p>
-                Founded as Goldenintels Educare in 2017, Golden-Intels International School is the first British school in the Volta Region of Ghana to be accredited by Oxford University Press.
+                Founded as Goldenintels Educare in 2017 as a small care centre, Golden-Intels International School is the first Oxford International Curriculum based school in the Volta Region of Ghana to be accredited by Oxford University Press.
               </p>
 
               <p>
-                Our British Curriculum develops confident, creative, and globally minded learners through academic excellence and holistic development.
+                Our Oxford International Curriculum, based on British Curriculum develops confident, creative, and globally minded learners through academic excellence and holistic development.
               </p>
 
               <p>
-                From a small care center to a thriving learning community, we continue to provide a British Curriculum education that prepares students for university and life in an ever-changing world.
+                At Golden-Intels, we are driven by a deep commitment to humanitarian assistance, providing quality education and compassionate care to unique, brilliant, and vulnerable children. We specialize in welcoming children who have been turned away by formal educational institutions. Our doors are open to the poor and needy, as well as those with unique needs, offering them a nurturing environment where they receive personalized training, academic instruction, and holistic support. Through dedicated care and innovative teaching approaches, we help transform challenges into opportunities for growth and success.
               </p>
             </div>
           </div>
@@ -75,6 +76,63 @@ export default function About() {
         </div>
       </section>
 
+      {/* Our Educational Programs Section */}
+<section className="educational-programs py-5 bg-light">
+    <div className="container">
+        <div className="row align-items-center">
+            
+             {/* Left Side: Text Content */}
+            <div className="col-lg-7">
+                <h2 className="mb-4 text-primary">Our Educational Programs</h2>
+                <p className="lead mb-4">
+                    We offer a comprehensive, progressive learning pathway designed to support children from infancy through adolescence:
+                </p>
+                
+                <ul className="list-unstyled">
+                    <li className="mb-4">
+                        <h5 className="fw-bold text-dark">Early Childhood Education</h5>
+                        <ul className="list-unstyled ms-4">
+                            <li>• Creche (Babies)</li>
+                            <li>• Pre-Nursery</li>
+                            <li>• Early Years Foundation Stage: Nursery 1, Nursery 2, Reception (Kindergarten) 1 & 2</li>
+                        </ul>
+                    </li>
+                    
+                    <li className="mb-4">
+                        <h5 className="fw-bold text-dark">Primary Education</h5>
+                        <p className="ms-4">Grades 1 to 6 – A forward-thinking, futuristic curriculum that builds strong foundational skills while nurturing curiosity and creativity.</p>
+                    </li>
+                    
+                    <li className="mb-4">
+                        <h5 className="fw-bold text-dark">Secondary Education</h5>
+                        <ul className="list-unstyled ms-4">
+                            <li>• Lower Secondary (Grades 7 to 9)</li>
+                            <li>• Upper Secondary (Grades 10 to 12)</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <p className="mt-4">
+                    <strong>Our programs emphasize academic excellence, character development, and practical life skills.</strong> 
+                    We continue to thrive as an institution while investing in the growth of every baby and young star entrusted to our care.
+                </p>
+            </div>
+            
+             {/* Right Side: Picture (replace src with your image) */}
+            <div className="col-lg-5 text-center">
+                <img
+                src={educationalprogramsImg} 
+                     alt="Our Educational Programs - Children learning in a nurturing environment" 
+                     className="img-fluid rounded shadow"
+                     style={{ maxHeight: '420px', objectFit: 'cover' }}
+                />
+                <p className="text-muted small mt-2">A vibrant learning environment where every child thrives</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
       {/* Mission and Vision */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -90,7 +148,7 @@ export default function About() {
             </h3>
 
             <p className="text-blue-100 text-lg leading-relaxed">
-              Raising godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-like character for a life of purpose.
+              Raising Godly, globally minded scholars through international local education that builds academic excellence through critical thinking and Christ-centred character for a life of purpose.
             </p>
           </div>
 
@@ -105,7 +163,7 @@ export default function About() {
             </h3>
 
             <p className="text-purple-100 text-lg leading-relaxed">
-               To be a leading Christ-centered international school raising a generation of godly, innovative leaders who excel academically, walk in integrity, and impact nations for God’s glory.
+               To be a leading Christ-centred international school, raising a generation of Godly and innovative leaders who excel academically, walk in integrity, and impact nations for the greater good of all.
             </p>
           </div>
 

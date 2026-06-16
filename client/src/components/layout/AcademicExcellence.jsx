@@ -34,12 +34,12 @@ export default function AcademicExcellence() {
 
           {/* Heading */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#2563EB] mb-6 leading-tight">
-           A British Curriculum Built for the Future
+           A Hybrid Curriculum Built for the Future
           </h2>
 
           {/* Description */}
           <p className="text-[#374151] text-lg leading-relaxed mb-8">
-            Our British Curriculum - from Oxford University Press combines strong academics with innovative teaching methods. From Early Years through Primary education, our British Curriculum fosters critical thinking, creativity, innovation, and a love for learning.
+            Our hybrid curriculum consisting of Oxford International Curriculum - from Oxford University Press, and our local curriculum - from Ghana Education Service combine strong academics with innovative teaching methods. From Creche to Early Years through Primary education, our Hybrid Curriculum fosters critical thinking, creativity, innovation, and a love for learning.
           </p>
 
           {/* Highlights */}

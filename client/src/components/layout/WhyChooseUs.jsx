@@ -3,8 +3,8 @@ import { Award, Globe, Users, BookOpen, Shield, Star } from 'lucide-react'
 const reasons = [
   {
     icon: <Award size={32} />,
-    title: 'British Curriculum',
-    description: 'Our curriculum meets the highest international standards recognized by Oxford University Press.',
+    title: 'Oxford International Curriculum',
+    description: 'Our Oxford International Curriculum, based on British Curriculum, meets the highest international standards recognized by Oxford University Press.',
   },
   {
     icon: <Globe size={32} />,
@@ -18,7 +18,7 @@ const reasons = [
   },
   {
     icon: <BookOpen size={32} />,
-    title: 'British Curriculum',
+    title: 'Oxford International & Ghana Education Service Curriculum',
     description: 'A balanced mix of academics, arts, sports, and character development.',
   },
   {

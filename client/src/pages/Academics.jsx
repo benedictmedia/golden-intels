@@ -17,7 +17,7 @@ export default function Academics() {
       <PageHero
         badge="Academics"
         title="Academics"
-        subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster lifelong learning."
+        subtitle="A comprehensive hybrid curriculum designed to inspire excellence and foster life-long learning."
         image={academicsImg}
       />
 
@@ -34,7 +34,7 @@ export default function Academics() {
             </h2>
             <div className="text-slate-600 text-lg leading-relaxed space-y-5">
               <p>
-                At Golden-Intels, we offer a unique hybrid curriculum that combines the best of international and local education standards. Our approach integrates Oxford International Curriculum (OIC) subjects with Ghana Education Service (GES) subjects for lower and upper primary learners, while Early Years and Reception learners are given pure Oxford and Montessori education, laying a good educational foundation.
+                At Golden-Intels, we offer a unique hybrid curriculum that combines the best of international and local education standards. Our approach integrates Oxford International Curriculum (OIC) subjects with Ghana Education Service (GES) subjects for lower and upper primary learners, while Creche, Early Years, and Reception learners are given pure Oxford and Montessori education, laying a good educational foundation.
               </p>
               <p>
                 We emphasize project-based learning, play-based learning, place-based learning and inquiry-based learning, encouraging students to ask questions, explore ideas, and develop solutions. Our approach nurtures intellectual curiosity while building strong foundational knowledge across all disciplines.
@@ -80,10 +80,10 @@ export default function Academics() {
               Curriculum Structure
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
-              Grade Levels & Curriculum Structure
+              Levels & Curriculum Structure
             </h2>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              We serve students from Early Years through Reception to Primary with a balanced blend of international and local curricula.
+              We serve students from Creche, Early Years through Reception to Primary with a balanced blend of international and local curricula.
             </p>
           </div>
 
@@ -168,7 +168,7 @@ export default function Academics() {
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
             {/* Expanding Every Year */}
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Expanding Every Year
               </h3>
@@ -177,7 +177,7 @@ export default function Academics() {
               </p>
             </div>
             {/* Future Expansion Plans */}
-            <div className="bg-slate-800 text-white rounded-2xl p-10 shadow-xl">
+            <div className="bg-green-600 text-white rounded-2xl p-10 shadow-xl">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Future Expansion Plans
               </h3>
@@ -212,12 +212,12 @@ export default function Academics() {
               </ul>
             </div>
             {/* Current Offerings */}
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Current Offerings
               </h3>
               <p className="text-slate-600 text-lg leading-relaxed">
-                Currently serving students from Early Years through Reception to Primary with our hybrid OIC and GES curriculum, with plans to expand progressively to Lower and Upper Secondary education.
+                Currently serving students from Creche, Early Years through Reception to Primary with our hybrid OIC and GES curriculum, with plans to expand progressively to Lower and Upper Secondary education.
               </p>
             </div>
           </div>
@@ -301,7 +301,7 @@ export default function Academics() {
             </div>
 
             {/* Flexible Progression */}
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#8a2be2] border-slate-200 text-slate-800 rounded-2xl p-10 shadow-lg">
               <span className="inline-block bg-slate-800 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Flexible
               </span>
@@ -310,7 +310,7 @@ export default function Academics() {
               </h3>
               <div className="space-y-5">
                 <p className="text-slate-600 text-lg leading-relaxed">
-                  Our hybrid curriculum allows students to transition between pathways based on their academic goals and aspirations.
+                  Our hybrid curriculum allows learners to transition between pathways based on their academic goals and aspirations.
                 </p>
                 <div className="bg-slate-100 rounded-xl p-4">
                   <h4 className="font-bold text-amber-700 mb-1">Grade 1 - Grade 9</h4>
@@ -418,7 +418,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 4
               </div>
@@ -466,7 +466,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-white border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#8a2be2] border border-slate-200 text-slate-800 rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 8
               </div>
@@ -479,7 +479,7 @@ export default function Academics() {
             </div>
 
             {/* Empty card to balance the grid */}
-            <div className="bg-slate-800 text-white rounded-2xl p-8 shadow-xl flex items-center justify-center">
+            <div className="bg-[#8a2be2] text-white rounded-2xl p-8 shadow-xl flex items-center justify-center">
               <p className="text-slate-300 text-center text-lg font-serif italic">
                 "Education is not the filling of a pail, but the lighting of a fire."
               </p>

@@ -59,7 +59,7 @@ export default function Contact() {
                   <h2 className="text-xl font-semibold text-slate-800">Phone</h2>
                   <p className="mt-3 text-slate-600">Call our school office for quick support and admissions help.</p>
                   <div className="mt-4 space-y-2 text-sm text-slate-700">
-                    <p><strong>Main:</strong> <a href="tel:+233 59 433 08160" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 08160</a></p>
+                    <p><strong>Main:</strong> <a href="tel:+233 59 433 0816" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 0816</a></p>
                     <p><strong>Admissions:</strong> <a href="tel:+233 59 433 0816" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 0816</a></p>
                   </div>
                 </div>
@@ -87,7 +87,7 @@ export default function Contact() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Email</h2>
                   <p className="mt-3 text-slate-600">Send documents, questions, or admissions requests to our official inbox.</p>
-                  <p className="mt-4 text-slate-700"><a href="mailto:info@goldenintels.com" className="text-[#8a2be2] hover:text-violet-700">info@goldenintels.com</a></p>
+                  <p className="mt-4 text-slate-700"><a href="mailto:info@goldenintels.edu.gh" className="text-[#8a2be2] hover:text-violet-700">info@goldenintels.edu.gh</a></p>
                 </div>
               </div>
             </div>
@@ -100,7 +100,8 @@ export default function Contact() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Location</h2>
                   <p className="mt-3 text-slate-600">Meet us in person for campus tours, admissions interviews, and school events.</p>
-                  <p className="mt-4 text-slate-700">Golden-Intels International School,Ho-Volta Region, Ghana</p>
+                  <p className="mt-4 text-slate-700">New Housing, directly opposite the Voltic Depot, <br />
+                    Ho-Volta Region, Ghana</p>
                 </div>
               </div>
             </div>
