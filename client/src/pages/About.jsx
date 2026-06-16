@@ -2,7 +2,7 @@ import { Heart, Eye, Target, CheckCircle } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import aboutImg from '../assets/about.jpg'
 import oxfordImg from '../assets/oxford.jpg'
-import educationalprogramsImg from '../assets/educational-programs.jpg'
+import educationalprogramsImg from '../assets/educationalprograms.jpg'
 
 const values = [
   { title: 'C - Character', description: 'We model humility, Godliness, and obedience in word and action.' },
