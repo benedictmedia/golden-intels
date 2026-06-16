@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Youtube } from 'lucide-react'
+import { Mail, Phone, MapPin, Facebook, X, Linkedin, Youtube } from 'lucide-react'
 import BrandLogo from './BrandLogo'
 
 export default function Footer() {
@@ -43,10 +43,10 @@ export default function Footer() {
               href="https://twitter.com/goldenintels"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 bg-[#1E293B] hover:bg-[#1DA1F2] rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
-              title="Twitter / X"
+              className="w-9 h-9 bg-[#1E293B] hover:bg-black rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
+              title="X (Twitter)"
             >
-              <Twitter size={18} />
+              <X size={18} />
             </a>
 
             <a
