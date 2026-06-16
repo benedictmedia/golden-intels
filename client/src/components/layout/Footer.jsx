@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin, Facebook, X, Linkedin, Youtube } from 'lucide-react'
+import { Mail, Phone, MapPin } from "lucide-react";
+import { FaFacebook, FaLinkedin, FaYoutube, FaXTwitter } from "react-icons/fa6";
 import BrandLogo from './BrandLogo'
 
 export default function Footer() {
@@ -36,17 +37,17 @@ export default function Footer() {
               className="w-9 h-9 bg-[#1E293B] hover:bg-[#1877F2] rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
               title="Facebook"
             >
-              <Facebook size={18} />
+              <FaFacebook size={18} />
             </a>
 
             <a
-              href="https://twitter.com/goldenintels"
+              href="https://twitter.com/Goldenintels"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 bg-[#1E293B] hover:bg-black rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
               title="X (Twitter)"
             >
-              <X size={18} />
+              <FaXTwitter size={18} />
             </a>
 
             <a
@@ -56,7 +57,7 @@ export default function Footer() {
               className="w-9 h-9 bg-[#1E293B] hover:bg-[#0A66C2] rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
               title="LinkedIn"
             >
-              <Linkedin size={18} />
+              <FaLinkedin size={18} />
             </a>
 
             <a
@@ -66,7 +67,7 @@ export default function Footer() {
               className="w-9 h-9 bg-[#1E293B] hover:bg-[#FF0000] rounded-full flex items-center justify-center transition-all duration-300 text-white hover:scale-110"
               title="YouTube"
             >
-              <Youtube size={18} />
+              <FaYoutube size={18} />
             </a>
           </div>
         </div>
