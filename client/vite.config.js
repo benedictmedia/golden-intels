@@ -4,7 +4,7 @@ import viteImagemin from 'vite-plugin-imagemin'
 
 export default defineConfig({
   plugins: [
-    react(),
+    react(), 
     viteImagemin({
       gifsicle: { optimizationLevel: 7 },
       optipng: { optimizationLevel: 7 },
