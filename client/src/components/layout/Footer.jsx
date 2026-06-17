@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 import { FaFacebook, FaLinkedin, FaYoutube, FaXTwitter } from "react-icons/fa6";
 import BrandLogo from './BrandLogo'
 
@@ -124,13 +124,21 @@ export default function Footer() {
           <h4 className="font-bold text-[#F4B400] mb-4">Contact Us</h4>
           <ul className="space-y-4 text-sm">
             <li className="flex items-start gap-3">
-              <MapPin size={16} className="text-[#2563EB] mt-0.5 shrink-0" />
-              <span className="text-slate-300">
-                Golden-Intels International School, <br />
-                New Housing, directly opposite the Voltic Depot, <br />
-                Ho-Volta Region, Ghana
-              </span>
-            </li>
+  <span className="text-xs text-[#2563EB] mt-1 block">Get Directions →</span>
+  <MapPin size={16} className="text-[#2563EB] mt-0.5 shrink-0" />
+  <a
+    href="https://www.google.com/maps/search/?api=1&query=VH-0011-1156%2C+Ho%2C+Volta+Region%2C+Ghana"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-slate-300 hover:text-[#F4B400] hover:underline transition-colors duration-300 flex items-start gap-1 group"
+  >
+    Golden-Intels International School, <br />
+    New Housing, directly opposite the Voltic Depot, <br />
+    Ho-Volta Region, Ghana <br />
+    <span className="text-xs text-[#2563EB] group-hover:underline">(VH-0011-1156)</span>
+    <ExternalLink size={14} className="mt-0.5 opacity-70 group-hover:opacity-100" />
+  </a>
+</li>
 
             <li className="flex items-center gap-3">
               <Phone size={16} className="text-[#2563EB] shrink-0" />

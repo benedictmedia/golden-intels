@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, MessageCircle, MessageSquare, Phone, MapPin, CheckCircle } from 'lucide-react'
+import { Mail, MessageCircle, MessageSquare, Phone, MapPin, CheckCircle, ExternalLink } from 'lucide-react'
 import axios from 'axios'
 import API_URL from '../api/config'
 
@@ -93,18 +93,33 @@ export default function Contact() {
             </div>
 
             <div className="rounded-[2rem] bg-white p-8 shadow-xl border border-slate-100">
-              <div className="flex items-start gap-4">
-                <div className="rounded-3xl bg-green-600 p-4 text-white shadow-md">
-                  <MapPin size={24} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-800">Location</h2>
-                  <p className="mt-3 text-slate-600">Meet us in person for campus tours, admissions interviews, and school events.</p>
-                  <p className="mt-4 text-slate-700">New Housing, directly opposite the Voltic Depot, <br />
-                    Ho-Volta Region, Ghana</p>
-                </div>
-              </div>
-            </div>
+  <div className="flex items-start gap-4">
+    <div className="rounded-3xl bg-green-600 p-4 text-white shadow-md">
+      <MapPin size={24} />
+    </div>
+    <div>
+      <h2 className="text-xl font-semibold text-slate-800">Location</h2>
+      <p className="mt-3 text-slate-600">Meet us in person for campus tours, admissions interviews, and school events.</p>
+      
+      <a
+        href="https://www.google.com/maps/search/?api=1&query=VH-0011-1156%2C+Ho%2C+Volta+Region%2C+Ghana"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 block text-slate-700 hover:text-[#8a2be2] transition-colors group"
+      >
+        <p>
+          Golden-Intels International School<br />
+          New Housing, directly opposite the Voltic Depot<br />
+          Ho-Volta Region, Ghana
+        </p>
+        <p className="mt-2 text-sm flex items-center gap-1.5 text-[#8a2be2] group-hover:underline">
+          Digital Address: VH-0011-1156
+          <ExternalLink size={16} className="opacity-70 group-hover:opacity-100" />
+        </p>
+      </a>
+    </div>
+  </div>
+</div>
           </div>
 
           {/* Contact Form */}
