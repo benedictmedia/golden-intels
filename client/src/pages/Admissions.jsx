@@ -688,7 +688,7 @@ export default function Admissions() {
                 <div>
                   <h4 className="font-bold text-slate-800 mb-1">Read, Sign and Save</h4>
                   <p className="text-sm text-gray-600">
-                    Carefully read all the school policies. Sign the consent section by taking a clear picture of your signature and resizing it into the signature field in the document. Save the signed document.
+                    Carefully read all the school policies. Sign the consent section by taking a clear picture of your signature and resizing it into the signature field in the document. Save the signed document as a <strong>PDF file</strong>.
                   </p>
                 </div>
               </div>
@@ -704,10 +704,20 @@ export default function Admissions() {
                   </p>
                   <input
                     type="file"
-                    accept=".docx,.pdf,.jpg,.png"
-                    onChange={e => setSignedBooklet(e.target.files[0])}
+                    accept="application/pdf,.pdf"
+                    onChange={e => {
+                      const file = e.target.files[0]
+                      if (file && file.type !== 'application/pdf') {
+                        alert('Please upload your signed admission booklet as a PDF file. Word documents and images are not accepted for this field.')
+                        e.target.value = ''
+                        setSignedBooklet(null)
+                        return
+                      }
+                      setSignedBooklet(file)
+                    }}
                     className="text-sm text-gray-600"
                   />
+                  <p className="text-xs text-gray-400 mt-1">Accepted format: PDF only</p>
                   {signedBooklet && (
                     <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
                       <CheckCircle size={14} />

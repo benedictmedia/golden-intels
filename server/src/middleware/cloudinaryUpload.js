@@ -28,28 +28,38 @@ const createStorage = (folder, options = {}) => new CloudinaryStorage({
   },
 })
 
+// Field-level validation: signedBooklet must be PDF; all other admission
+// uploads (photo, NHIS, Ghana card) must be images.
+const ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
+
+const admissionsFileFilter = (req, file, cb) => {
+  if (file.fieldname === 'signedBooklet') {
+    if (file.mimetype === 'application/pdf') return cb(null, true)
+    return cb(new Error('PDF_ONLY'))
+  }
+  if (ALLOWED_IMAGE_MIMES.includes(file.mimetype)) return cb(null, true)
+  return cb(new Error('IMAGE_ONLY'))
+}
+
 const createAdmissionsStorage = () => new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const isDocument = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword'
-    ].includes(file.mimetype)
-
+    const isPdf = file.mimetype === 'application/pdf'
     const ext = file.originalname.split('.').pop().toLowerCase()
     const publicId = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
 
     return {
       folder: 'goldenintels/admissions',
       public_id: publicId,
-      resource_type: isDocument ? 'raw' : 'image',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'],
-      ...(isDocument ? {} : {
-      transformation: [
-        { quality: 'auto:good', fetch_format: 'auto' },
-        { width: 1920, height: 1080, crop: 'limit' }
-      ],
+      // Always 'image' resource_type — Cloudinary serves PDFs reliably this way.
+      // 'raw' resource delivery is blocked by default on newer Cloudinary accounts.
+      resource_type: 'image',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+      ...(isPdf ? {} : {
+        transformation: [
+          { quality: 'auto:good', fetch_format: 'auto' },
+          { width: 1920, height: 1080, crop: 'limit' }
+        ],
       }),
     }
   },
@@ -59,6 +69,10 @@ const uploadStudentPhoto = multer({ storage: createStorage('students'), limits: 
 const uploadGallery = multer({ storage: createStorage('gallery'), limits: { fileSize: 10 * 1024 * 1024 } })
 const uploadNews = multer({ storage: createStorage('news'), limits: { fileSize: 10 * 1024 * 1024 } })
 const uploadStaff = multer({ storage: createStorage('staff'), limits: { fileSize: 10 * 1024 * 1024 } })
-const uploadAdmissions = multer({ storage: createAdmissionsStorage(), limits: { fileSize: 25 * 1024 * 1024 } })
+const uploadAdmissions = multer({
+  storage: createAdmissionsStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: admissionsFileFilter
+})
 
 module.exports = { cloudinary, uploadStudentPhoto, uploadGallery, uploadNews, uploadStaff, uploadAdmissions }

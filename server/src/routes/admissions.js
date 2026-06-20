@@ -49,6 +49,17 @@ router.post('/', (req, res, next) => {
   uploadFields(req, res, (err) => {
     if (err) {
       console.error('Admission upload error:', err)
+      if (err.message === 'PDF_ONLY') {
+        return res.status(400).json({
+          message: 'Your signed admission booklet must be a PDF file. Word documents (.doc, .docx) and images are not accepted for this field. Please save or export your signed booklet as a PDF and upload again.'
+        })
+      }
+      if (err.message === 'IMAGE_ONLY') {
+        return res.status(400).json({ message: 'Please upload a valid image file (JPG, PNG, or WEBP) for this document.' })
+      }
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'One of your files is too large. Please upload files under 25MB.' })
+      }
       return res.status(500).json({ message: `Upload error: ${err.message}`, error: err.message })
     }
     next()
