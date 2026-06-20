@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const { createNotificationsForRole } = require('./notificationController')
 const { sendMail } = require('../utils/mailer')
 
+const path = require('path')
 const prisma = new PrismaClient()
 
 // Generate student ID

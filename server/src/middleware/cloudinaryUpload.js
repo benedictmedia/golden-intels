@@ -45,16 +45,13 @@ const createAdmissionsStorage = () => new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const isPdf = file.mimetype === 'application/pdf'
-    const ext = file.originalname.split('.').pop().toLowerCase()
-    const publicId = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
+   const publicId = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
 
-    return {
-      folder: 'goldenintels/admissions',
-      public_id: publicId,
-      // Always 'image' resource_type — Cloudinary serves PDFs reliably this way.
-      // 'raw' resource delivery is blocked by default on newer Cloudinary accounts.
-      resource_type: 'image',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+return {
+  folder: 'goldenintels/admissions',
+  public_id: publicId,
+  resource_type: 'image',
+  allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
       ...(isPdf ? {} : {
         transformation: [
           { quality: 'auto:good', fetch_format: 'auto' },
