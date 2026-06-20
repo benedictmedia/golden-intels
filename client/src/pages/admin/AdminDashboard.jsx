@@ -1237,7 +1237,14 @@ export default function AdminDashboard() {
                         {viewingApplication.signedBooklet && (
                           <div className="mt-4 bg-blue-50 rounded-lg p-4">
                             <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
-                            <button onClick={() => window.open(viewingApplication.signedBooklet, '_blank')} className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download Signed Booklet</button>
+                            <a
+                              href={viewingApplication.signedBooklet.includes('/upload/')
+                                ? viewingApplication.signedBooklet.replace('/upload/', '/upload/fl_attachment/')
+                                : viewingApplication.signedBooklet}
+                              className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                            >
+                              Download Signed Booklet
+                            </a>
                           </div>
                         )}
                       </div>

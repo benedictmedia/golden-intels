@@ -1,6 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, AlignmentType, ImageRun, BorderStyle, Table, TableRow, TableCell, WidthType, ShadingType } from 'docx'
 import { saveAs } from 'file-saver'
-
+import logoUrl from '../assets/logo.png'
 const loadImageAsBuffer = async (url) => {
   const res = await fetch(url)
   const blob = await res.blob()
@@ -45,7 +45,7 @@ export const generateAdmissionBooklet = async (formData = {}, photoFile = null, 
   let ghanaFrontBuffer = null
   let ghanaBackBuffer = null
 
-  try { logoBuffer = await loadImageAsBuffer('/src/assets/logo.png') } catch (e) {}
+  try { logoBuffer = await loadImageAsBuffer(logoUrl) } catch (e) {}
 
   const fileToBuffer = async (file) => {
     if (!file) return null

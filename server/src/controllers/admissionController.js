@@ -23,16 +23,18 @@ const getFileUrl = (req, file) => {
 
 const normalizeGradeLevel = (gradeLevel) => {
   const gradeMap = {
-    'Nursery 1': 'Nursery',
-    'Nursery 2': 'Nursery',
-    'Kindergarten 1': 'Reception',
-    'Kindergarten 2': 'Reception',
-    'Grade 1': 'Year 1',
-    'Grade 2': 'Year 2',
-    'Grade 3': 'Year 3',
-    'Grade 4': 'Year 4',
-    'Grade 5': 'Year 5',
-    'Grade 6': 'Year 6',
+    'Creche': 'Creche',
+    'Pre-Nursery': 'Pre-Nursery',
+    'Nursery 1': 'Nursery 1',
+    'Nursery 2': 'Nursery 2',
+    'Kindergarten 1': 'Reception 1',
+    'Kindergarten 2': 'Reception 2',
+    'Grade 1': 'Grade 1',
+    'Grade 2': 'Grade 2',
+    'Grade 3': 'Grade 3',
+    'Grade 4': 'Grade 4',
+    'Grade 5': 'Grade 5',
+    'Grade 6': 'Grade 6',
   }
   return gradeMap[gradeLevel] || gradeLevel
 }
@@ -249,7 +251,7 @@ const approveApplication = async (req, res) => {
         '',
         `Congratulations! We are pleased to inform you that ${learnerName} has been admitted into Golden-Intels International School for ${normalizeGradeLevel(application.gradeLevel)}.`,
         '',
-        'Our admissions team will contact you with the next enrollment steps. You may also reach the school office if you need any assistance.',
+        'Our admissions team will contact you with the next enrolment steps. You may also reach the school office if you need any assistance.',
         '',
         'Warm regards,',
         'Golden-Intels International School'
@@ -257,7 +259,7 @@ const approveApplication = async (req, res) => {
       html: `
         <p>Dear ${application.parentName || 'Parent/Guardian'},</p>
         <p>Congratulations! We are pleased to inform you that <strong>${learnerName}</strong> has been admitted into <strong>Golden-Intels International School</strong> for <strong>${normalizeGradeLevel(application.gradeLevel)}</strong>.</p>
-        <p>Our admissions team will contact you with the next enrollment steps. You may also reach the school office if you need any assistance.</p>
+        <p>Our admissions team will contact you with the next enrolment steps. You may also reach the school office if you need any assistance.</p>
         <p>Warm regards,<br />Golden-Intels International School</p>
       `
     })

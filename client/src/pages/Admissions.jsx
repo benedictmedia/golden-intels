@@ -9,7 +9,7 @@ const steps = [
   { icon: <FileText size={28} />, step: 'Step 1', title: 'Submit Application', description: 'Complete and submit the online application form with required documents' },
   { icon: <Calendar size={28} />, step: 'Step 2', title: 'Schedule Assessment', description: 'Arrange a date for student assessment and family interview' },
   { icon: <Users size={28} />, step: 'Step 3', title: 'Campus Visit', description: 'Tour our facilities and meet with faculty and current students' },
-  { icon: <CheckCircle size={28} />, step: 'Step 4', title: 'Enrollment', description: 'Receive admission decision and complete enrollment process' },
+  { icon: <CheckCircle size={28} />, step: 'Step 4', title: 'Enrollment', description: 'Receive admission decision and complete enrolment process' },
 ]
 
 const requirements = [
@@ -384,10 +384,10 @@ export default function Admissions() {
                 <input type="date" name="dateOfAdmission" value={formData.dateOfAdmission} onChange={handleChange} className={inputClass} />
               </div>
               <div>
-                <label className={labelClass}>Grade Level Applying For <span className="text-red-500">*</span></label>
+                <label className={labelClass}>Level Applying For <span className="text-red-500">*</span></label>
                 <select name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} className={inputClass}>
-                  <option value="">Select grade level</option>
-                  {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => (
+                  <option value="">Select level</option>
+                  {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
@@ -518,13 +518,17 @@ export default function Admissions() {
             <h3 className="text-xl font-bold font-serif text-slate-800 mb-6 pb-2 border-b border-gray-100">Significant Data</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className={labelClass}>Youngster Lives With</label>
+                <label className={labelClass}>Youngster/Learner Lives With</label>
                 <select name="livesWith" value={formData.livesWith} onChange={handleChange} className={inputClass}>
-                  <option value="">Select who the youngster lives with</option>
+                  <option value="">Select who the youngster/learner lives with</option>
                   <option value="Both Parents">Both Parents</option>
                   <option value="Mother">Mother</option>
                   <option value="Father">Father</option>
-                  <option value="Guardian">Guardian</option>
+                  <option value="Siblings(s)">Sibling(s)</option>
+                  <option value="Grandparent(s)">Grandparent(s)</option>
+                  <option value="Uncle">Uncle</option>
+                  <option value="Aunt">Aunt</option>
+                  <option value="Relatives">Relatives</option>
                 </select>
               </div>
               <div>
