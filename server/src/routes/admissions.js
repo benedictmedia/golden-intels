@@ -60,4 +60,31 @@ router.put('/:id/approve', protect, approveApplication)
 router.put('/:id/reject', protect, rejectApplication)
 router.delete('/:id', protect, deleteApplication)
 
+const axios = require('axios')
+
+router.get('/download-booklet/:id', protect, async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client')
+    const prisma = new PrismaClient()
+    const application = await prisma.admissionApplication.findUnique({
+      where: { id: parseInt(req.params.id) }
+    })
+    if (!application?.signedBooklet) {
+      return res.status(404).json({ message: 'No booklet found' })
+    }
+
+    const url = application.signedBooklet
+    const response = await axios.get(url, { responseType: 'arraybuffer' })
+    const contentType = response.headers['content-type'] || 'application/octet-stream'
+    const ext = url.split('.').pop().split('?')[0] || 'pdf'
+    const filename = `${application.firstName}_${application.lastName}_Booklet.${ext}`
+
+    res.set('Content-Type', contentType)
+    res.set('Content-Disposition', `attachment; filename="${filename}"`)
+    res.send(response.data)
+  } catch (error) {
+    res.status(500).json({ message: 'Download failed', error: error.message })
+  }
+})
+
 module.exports = router

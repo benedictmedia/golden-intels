@@ -1243,15 +1243,22 @@ export default function AdminDashboard() {
                                 : viewingApplication.signedBooklet}
                               className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                             >
-                              <button
+<button
   onClick={() => {
-    let url = viewingApplication.signedBooklet
-    // If URL has no extension, try appending .pdf for Cloudinary raw files
-    if (url && !url.split('/').pop().includes('.')) {
-      // Force Cloudinary to serve with attachment header and correct type
-      url = url.replace('/raw/upload/', '/raw/upload/fl_attachment:booklet.pdf/')
-    }
-    window.open(url, '_blank')
+    const token = localStorage.getItem('token')
+    const url = `${API_URL}/api/admissions/download-booklet/${viewingApplication.id}`
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.blob())
+      .then(blob => {
+        const ext = viewingApplication.signedBooklet?.split('.').pop()?.split('?')[0] || 'pdf'
+        const filename = `${viewingApplication.firstName}_${viewingApplication.lastName}_Booklet.${ext}`
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(a.href)
+      })
+      .catch(() => alert('Failed to download booklet. Please try again.'))
   }}
   className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
 >

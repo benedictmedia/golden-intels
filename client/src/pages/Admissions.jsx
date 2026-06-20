@@ -9,7 +9,7 @@ const steps = [
   { icon: <FileText size={28} />, step: 'Step 1', title: 'Submit Application', description: 'Complete and submit the online application form with required documents' },
   { icon: <Calendar size={28} />, step: 'Step 2', title: 'Schedule Assessment', description: 'Arrange a date for student assessment and family interview' },
   { icon: <Users size={28} />, step: 'Step 3', title: 'Campus Visit', description: 'Tour our facilities and meet with faculty and current students' },
-  { icon: <CheckCircle size={28} />, step: 'Step 4', title: 'Enrollment', description: 'Receive admission decision and complete enrolment process' },
+  { icon: <CheckCircle size={28} />, step: 'Step 4', title: 'Enrolment', description: 'Receive admission decision and complete enrolment process' },
 ]
 
 const requirements = [
@@ -227,7 +227,7 @@ export default function Admissions() {
                 <p className="text-sm text-gray-500">
                   <strong className="text-[#8a2be2]">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
                 </p>
-                <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.com</p>
+                <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.edu.gh</p>
               </div>
             </div>
           </div>
@@ -300,7 +300,7 @@ export default function Admissions() {
                 <p className="text-green-100 text-sm">Scheduled within 1 week of application submission</p>
               </div>
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-yellow-300 font-bold mb-1">Enrollment Confirmation</h4>
+                <h4 className="text-yellow-300 font-bold mb-1">Enrolment Confirmation</h4>
                 <p className="text-green-100 text-sm">Within 1 week of assessment completion</p>
               </div>
             </div>
