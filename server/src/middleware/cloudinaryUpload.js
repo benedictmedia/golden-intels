@@ -37,8 +37,12 @@ const createAdmissionsStorage = () => new CloudinaryStorage({
       'application/msword'
     ].includes(file.mimetype)
 
+    const ext = file.originalname.split('.').pop().toLowerCase()
+    const publicId = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`
+
     return {
       folder: 'goldenintels/admissions',
+      public_id: publicId,
       resource_type: isDocument ? 'raw' : 'image',
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx'],
       ...(isDocument ? {} : {

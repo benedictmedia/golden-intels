@@ -42,7 +42,7 @@ const stats = [
   { label: 'Staff Members', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
 ]
 
-const classes = ['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+const classes = ['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -1243,7 +1243,20 @@ export default function AdminDashboard() {
                                 : viewingApplication.signedBooklet}
                               className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                             >
-                              Download Signed Booklet
+                              <button
+  onClick={() => {
+    let url = viewingApplication.signedBooklet
+    // If URL has no extension, try appending .pdf for Cloudinary raw files
+    if (url && !url.split('/').pop().includes('.')) {
+      // Force Cloudinary to serve with attachment header and correct type
+      url = url.replace('/raw/upload/', '/raw/upload/fl_attachment:booklet.pdf/')
+    }
+    window.open(url, '_blank')
+  }}
+  className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+>
+  Download Signed Booklet
+</button>
                             </a>
                           </div>
                         )}
@@ -1283,7 +1296,7 @@ export default function AdminDashboard() {
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
                     <h3 className="text-lg font-bold text-cyan-700 mb-4">Set Monthly Fees by Class</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6'].map(grade => (
+                      {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-cyan-700 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
@@ -1310,7 +1323,7 @@ export default function AdminDashboard() {
                     <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    {['All', 'Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6'].map(cls => (
+                    {['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(cls => (
                       <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
@@ -1604,7 +1617,7 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
                       <select value={newStudent.gradeLevel} onChange={e => setNewStudent({ ...newStudent, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select grade</option>
-                        {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                        {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
                   </div>
@@ -1755,7 +1768,7 @@ export default function AdminDashboard() {
                         <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
                         <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select grade</option>
-                          {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                          {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
                         </select>
                       </div>
                       <div>
@@ -2795,7 +2808,7 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-1">Grade Level</label>
                       <select value={editStudent.gradeLevel} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                        {['Nursery','Reception','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                        {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
                     <div>

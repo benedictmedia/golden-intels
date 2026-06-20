@@ -52,7 +52,7 @@ useEffect(() => {
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
-  const [activeClass, setActiveClass] = useState('Year 1')
+  const [activeClass, setActiveClass] = useState('Grade 1')
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [attendance, setAttendance] = useState({})
   const [attendanceDate, setAttendanceDate] = useState(() => {
@@ -67,7 +67,7 @@ useEffect(() => {
   const [attendanceSaved, setAttendanceSaved] = useState(false)
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
-  const [gradebookClass, setGradebookClass] = useState('Year 1')
+  const [gradebookClass, setGradebookClass] = useState('Grade 1')
   const [gradebookYear, setGradebookYear] = useState('2025/2026')
   const [gradebookTerm, setGradebookTerm] = useState('Term 1')
   const [gradebookStudent, setGradebookStudent] = useState('')
@@ -85,7 +85,7 @@ useEffect(() => {
   const avatarColor = getAvatarColor(displayName)
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
-  const classes = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+  const classes = ['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6']
   const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
   const canonicalizeClass = (value) => {
     const normalizedValue = normalizeClassKey(value)
@@ -540,13 +540,13 @@ useEffect(() => {
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
-  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Year 1' })
+  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Grade 1' })
   const [lessons, setLessons] = useState([])
   const [showAddLesson, setShowAddLesson] = useState(false)
-  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
+  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: 'Grade 1', content: '' })
   const [quizzes, setQuizzes] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
-  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Grade 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
@@ -701,9 +701,9 @@ useEffect(() => {
   const resetLmsForm = () => {
     setEditingLmsItem(null)
     setLmsItemView(null)
-    setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Year 1' })
-    setNewLesson({ title: '', subject: '', gradeLevel: 'Year 1', content: '' })
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'Year 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+    setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Grade 1' })
+    setNewLesson({ title: '', subject: '', gradeLevel: 'Grade 1', content: '' })
+    setNewQuiz({ title: '', subject: '', gradeLevel: 'Grade 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   }
 
   const handleViewLmsItem = (item, type) => {
