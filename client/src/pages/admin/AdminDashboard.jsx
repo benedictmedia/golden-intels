@@ -1235,38 +1235,35 @@ export default function AdminDashboard() {
                           ))}
                         </div>
                         {viewingApplication.signedBooklet && (
-                          <div className="mt-4 bg-blue-50 rounded-lg p-4">
-                            <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
-                            <a
-                              href={viewingApplication.signedBooklet.includes('/upload/')
-                                ? viewingApplication.signedBooklet.replace('/upload/', '/upload/fl_attachment/')
-                                : viewingApplication.signedBooklet}
-                              className="inline-block bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-                            >
-<button
-  onClick={() => {
-    const token = localStorage.getItem('token')
-    const url = `${API_URL}/api/admissions/download-booklet/${viewingApplication.id}`
-    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.blob())
-      .then(blob => {
-        const ext = viewingApplication.signedBooklet?.split('.').pop()?.split('?')[0] || 'pdf'
-        const filename = `${viewingApplication.firstName}_${viewingApplication.lastName}_Booklet.${ext}`
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(blob)
-        a.download = filename
-        a.click()
-        URL.revokeObjectURL(a.href)
-      })
-      .catch(() => alert('Failed to download booklet. Please try again.'))
-  }}
-  className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
->
-  Download Signed Booklet
-</button>
-                            </a>
-                          </div>
-                        )}
+  <div className="mt-4 bg-blue-50 rounded-lg p-4">
+    <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
+    <button
+      onClick={() => {
+        const token = localStorage.getItem('token')
+        const url = `${API_URL}/api/admissions/download-booklet/${viewingApplication.id}`
+        fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+          .then(res => {
+            if (!res.ok) throw new Error('Download failed')
+            return res.blob()
+          })
+          .then(blob => {
+            const filename = `${viewingApplication.firstName}_${viewingApplication.lastName}_Booklet.pdf`
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(a.href)
+          })
+          .catch(() => alert('Failed to download booklet. Please try again.'))
+      }}
+      className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+    >
+      Download Signed Booklet
+    </button>
+  </div>
+)}
                       </div>
                       <div className="flex gap-3 flex-wrap">
                         {viewingApplication.status === 'pending' && (
