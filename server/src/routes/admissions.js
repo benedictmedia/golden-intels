@@ -77,27 +77,44 @@ router.delete('/:id', protect, deleteApplication)
 // ✅ Specific routes FIRST
 router.get('/download-booklet/:id', protect, async (req, res) => {
   try {
+    const { PrismaClient } = require('@prisma/client')
+    const prisma = new PrismaClient()
+
     const application = await prisma.admissionApplication.findUnique({
       where: { id: parseInt(req.params.id) }
     })
+
     if (!application?.signedBooklet) {
       return res.status(404).json({ message: 'No booklet found' })
     }
 
+    // Extract the public_id from the stored Cloudinary URL
+    // URL format: https://res.cloudinary.com/<cloud>/image/upload/v<version>/<public_id>
     const url = application.signedBooklet
-    const response = await axios.get(url, { responseType: 'arraybuffer' })
-    const filename = `${application.firstName}_${application.lastName}_Booklet.pdf`
+    const match = url.match(/\/image\/upload\/(?:v\d+\/)?(.+)$/)
+    if (!match) {
+      return res.status(400).json({ message: 'Could not parse Cloudinary URL' })
+    }
 
-    res.set('Content-Type', 'application/pdf')
-    res.set('Content-Disposition', `attachment; filename="${filename}"`)
-    res.send(response.data)
+    // Strip file extension from public_id for Cloudinary API
+    const publicId = match[1].replace(/\.[^/.]+$/, '')
+
+    const { cloudinary } = require('../middleware/cloudinaryUpload')
+
+    // Generate a signed URL valid for 60 seconds — forces download
+    const signedUrl = cloudinary.utils.private_download_url(publicId, 'pdf', {
+      resource_type: 'image',
+      expires_at: Math.floor(Date.now() / 1000) + 60,
+      attachment: `${application.firstName}_${application.lastName}_Booklet`,
+    })
+
+    // Redirect the admin's browser directly to the signed Cloudinary URL
+    res.redirect(signedUrl)
+
   } catch (error) {
-    console.error('Booklet download error:', error)
+    console.error('[BOOKLET] Error:', error.message)
     res.status(500).json({ message: 'Download failed', error: error.message })
   }
 })
-
-// ✅ Generic :id route AFTER
-router.get('/:id', protect, getApplication)
 
 module.exports = router
