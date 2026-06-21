@@ -1,5 +1,8 @@
 const express = require('express')
 const router = express.Router()
+const axios = require('axios')
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 const {
   submitApplication,
   getApplications,
@@ -71,12 +74,9 @@ router.put('/:id/approve', protect, approveApplication)
 router.put('/:id/reject', protect, rejectApplication)
 router.delete('/:id', protect, deleteApplication)
 
-const axios = require('axios')
-
+// ✅ Specific routes FIRST
 router.get('/download-booklet/:id', protect, async (req, res) => {
   try {
-    const { PrismaClient } = require('@prisma/client')
-    const prisma = new PrismaClient()
     const application = await prisma.admissionApplication.findUnique({
       where: { id: parseInt(req.params.id) }
     })
@@ -86,16 +86,18 @@ router.get('/download-booklet/:id', protect, async (req, res) => {
 
     const url = application.signedBooklet
     const response = await axios.get(url, { responseType: 'arraybuffer' })
-    const contentType = response.headers['content-type'] || 'application/octet-stream'
-    const ext = url.split('.').pop().split('?')[0] || 'pdf'
-    const filename = `${application.firstName}_${application.lastName}_Booklet.${ext}`
+    const filename = `${application.firstName}_${application.lastName}_Booklet.pdf`
 
-    res.set('Content-Type', contentType)
+    res.set('Content-Type', 'application/pdf')
     res.set('Content-Disposition', `attachment; filename="${filename}"`)
     res.send(response.data)
   } catch (error) {
+    console.error('Booklet download error:', error)
     res.status(500).json({ message: 'Download failed', error: error.message })
   }
 })
+
+// ✅ Generic :id route AFTER
+router.get('/:id', protect, getApplication)
 
 module.exports = router
