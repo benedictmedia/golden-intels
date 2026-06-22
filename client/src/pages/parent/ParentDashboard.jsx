@@ -211,7 +211,7 @@ export default function ParentDashboard() {
     y += 8
 
     let grandTotal = 0
-    const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 70) return 'B+'; if (t >= 60) return 'B'; if (t >= 50) return 'C'; if (t >= 40) return 'D'; return 'F' }
+    const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 75) return 'B+'; if (t >= 70) return 'B'; if (t >= 65) return 'C+'; if (t >= 60) return 'C'; if (t >= 55) return 'D+'; if (t >= 50) return 'D'; return 'E' }
     const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
 
     SUBJECTS.forEach((subject, index) => {
@@ -847,11 +847,13 @@ export default function ParentDashboard() {
                                 const getGrade = (t) => {
                                   if (t >= 90) return 'A+'
                                   if (t >= 80) return 'A'
-                                  if (t >= 70) return 'B+'
-                                  if (t >= 60) return 'B'
-                                  if (t >= 50) return 'C'
-                                  if (t >= 40) return 'D'
-                                  return 'F'
+                                  if (t >= 75) return 'B+'
+                                  if (t >= 70) return 'B'
+                                  if (t >= 65) return 'C+'
+                                  if (t >= 60) return 'C'
+                                  if (t >= 55) return 'D+'
+                                  if (t >= 50) return 'D'
+                                  return 'E'
                                 }
                                 return (
                                   <div key={subject} className="bg-blue-50 rounded-lg p-2 text-center">
@@ -1163,11 +1165,13 @@ export default function ParentDashboard() {
                       const getGrade = (t) => {
                         if (t >= 90) return 'A+'
                         if (t >= 80) return 'A'
-                        if (t >= 70) return 'B+'
-                        if (t >= 60) return 'B'
-                        if (t >= 50) return 'C'
-                        if (t >= 40) return 'D'
-                        return 'F'
+                        if (t >= 75) return 'B+'
+                        if (t >= 70) return 'B'
+                        if (t >= 65) return 'C+'
+                        if (t >= 60) return 'C'
+                        if (t >= 55) return 'D+'
+                        if (t >= 50) return 'D'
+                        return 'E'
                       }
                       const getGradeColor = (t) => {
                         if (t >= 80) return 'text-green-600'

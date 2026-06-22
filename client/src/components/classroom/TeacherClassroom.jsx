@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import API_URL from '../../api/config'
 
-const CLASSES = ['Nursery', 'Reception', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6']
+const CLASSES = ['Creche (Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6']
 const SUBJECTS = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS', 'General']
 const JITSI_DOMAIN = 'meet.jit.si'
 
@@ -59,7 +59,7 @@ export default function TeacherClassroom() {
   const pollRef = useRef(null)
 
   const [form, setForm] = useState({
-    title: '', description: '', gradeLevel: 'Year 1', subject: 'General',
+    title: '', description: '', gradeLevel: 'Grade 1', subject: 'General',
     date: '', time: '', duration: 60
   })
 
@@ -149,7 +149,7 @@ export default function TeacherClassroom() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const resetForm = () => setForm({
-    title: '', description: '', gradeLevel: 'Year 1', subject: 'General',
+    title: '', description: '', gradeLevel: 'Grade 1', subject: 'General',
     date: '', time: '', duration: 60
   })
 
