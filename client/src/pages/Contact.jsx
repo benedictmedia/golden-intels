@@ -102,7 +102,7 @@ export default function Contact() {
       <p className="mt-3 text-slate-600">Meet us in person for campus tours, admissions interviews, and school events.</p>
       
       <a
-        href="https://www.google.com/maps/search/?api=1&query=VH-0011-1156%2C+Ho%2C+Volta+Region%2C+Ghana"
+        href="https://www.google.com/maps/search/?api=1&query=JF8G+32Q%2C+Ho%2C+Volta+Region%2C+Ghana"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-4 block text-slate-700 hover:text-[#8a2be2] transition-colors group"
@@ -113,7 +113,7 @@ export default function Contact() {
           Ho-Volta Region, Ghana
         </p>
         <p className="mt-2 text-sm flex items-center gap-1.5 text-[#8a2be2] group-hover:underline">
-          Digital Address: VH-0011-1156
+          Digital Address: JF8G+32Q
           <ExternalLink size={16} className="opacity-70 group-hover:opacity-100" />
         </p>
       </a>
