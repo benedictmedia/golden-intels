@@ -234,9 +234,89 @@ export default function AdminDashboard() {
 
   const handleLogout = () => { logout(); navigate('/') }
 
+  // Class progression order for auto-promotion
+  const CLASS_PROGRESSION = [
+    'Creche(Babies)',
+    'Nursery 1',
+    'Nursery 2',
+    'Reception 1',
+    'Reception 2',
+    'Grade 1',
+    'Grade 2',
+    'Grade 3',
+    'Grade 4',
+    'Grade 5',
+    'Grade 6',
+  ]
+
+  const getNextClass = (currentClass) => {
+    const idx = CLASS_PROGRESSION.indexOf(currentClass)
+    if (idx === -1 || idx === CLASS_PROGRESSION.length - 1) return null // unknown or final class
+    return CLASS_PROGRESSION[idx + 1]
+  }
+
+  const isNewAcademicYear = (prevYear, nextYear) => {
+    if (!prevYear || !nextYear) return false
+    // Compare only the start year (e.g. "2025" from "2025/2026")
+    const prevStart = prevYear.split('/')[0]
+    const nextStart = nextYear.split('/')[0]
+    return nextStart !== prevStart
+  }
+
   const handleSaveAcademicContext = async () => {
   setContextSaving(true)
   try {
+    const yearChanging = isNewAcademicYear(academicContext.academicYear, academicContext.academicYear)
+    // Fetch the currently saved context to compare against what admin is setting
+    const currentRes = await axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
+    const savedYear = currentRes.data?.academicYear
+
+    const shouldPromote = isNewAcademicYear(savedYear, academicContext.academicYear)
+
+    if (shouldPromote) {
+      const confirmed = window.confirm(
+        `You are advancing the academic year from ${savedYear} to ${academicContext.academicYear}.\n\n` +
+        `This will automatically promote ALL active learners to their next class level.\n\n` +
+        `For example, a learner in Nursery 1 will move to Nursery 2, and so on.\n\n` +
+        `Learners in Grade 6 (the final class) will NOT be promoted.\n\n` +
+        `Do you want to proceed?`
+      )
+      if (!confirmed) {
+        setContextSaving(false)
+        return
+      }
+
+      // Fetch all students and promote each
+      const studentsRes = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
+      const allStudents = studentsRes.data || []
+      const activeStudents = allStudents.filter(s => s.status === 'active' || !s.status)
+
+      let promotedCount = 0
+      let skippedCount = 0
+
+      await Promise.all(
+        activeStudents.map(async (student) => {
+          const nextClass = getNextClass(student.gradeLevel)
+          if (!nextClass) {
+            skippedCount++
+            return
+          }
+          try {
+            await axios.put(`${API_URL}/api/students/${student.id}`, { gradeLevel: nextClass }, { headers: getAuthHeaders() })
+            promotedCount++
+          } catch (e) {
+            console.error(`Failed to promote student ${student.id}:`, e)
+          }
+        })
+      )
+
+      // Refresh local students list
+      const refreshed = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
+      setStudents(refreshed.data)
+
+      alert(`✅ Promotion complete!\n${promotedCount} learner(s) promoted to their next class.\n${skippedCount} learner(s) in Grade 6 were not promoted (final class).`)
+    }
+
     const res = await axios.post(`${API_URL}/api/academic-context`, academicContext, { headers: getAuthHeaders() })
     setAcademicContext(res.data)
     setContextSaved(true)
@@ -2650,6 +2730,7 @@ export default function AdminDashboard() {
       <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
         <p className="font-bold text-amber-700 mb-1">Important</p>
         <p className="text-amber-600 text-xs">Changing the context only affects what is currently shown in portals. All historical data for previous terms remains intact and is never deleted.</p>
+        <p className="text-amber-600 text-xs mt-2">⬆️ <strong>Auto-Promotion:</strong> When you advance to a new academic year (e.g. 2025/2026 → 2026/2027), the system will automatically promote all active learners to their next class. You will be asked to confirm before this happens.</p>
       </div>
     </div>
   </div>
@@ -2779,7 +2860,7 @@ export default function AdminDashboard() {
               {!editMode ? (
                 <div>
                   <div className="space-y-3 mb-6">
-                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
+                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
                       <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
                         <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
                         <span className="text-sm text-gray-600">{item[1] || '—'}</span>
