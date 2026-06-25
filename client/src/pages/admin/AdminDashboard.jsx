@@ -255,78 +255,107 @@ export default function AdminDashboard() {
     return CLASS_PROGRESSION[idx + 1]
   }
 
-  const isNewAcademicYear = (prevYear, nextYear) => {
-    if (!prevYear || !nextYear) return false
-    // Compare only the start year (e.g. "2025" from "2025/2026")
-    const prevStart = prevYear.split('/')[0]
-    const nextStart = nextYear.split('/')[0]
-    return nextStart !== prevStart
-  }
+  // Add this helper near getNextClass
+const getPrevClass = (currentClass) => {
+  const idx = CLASS_PROGRESSION.indexOf(currentClass);
+  if (idx <= 0) return null; // first class or unknown
+  return CLASS_PROGRESSION[idx - 1];
+};
 
-  const handleSaveAcademicContext = async () => {
-  setContextSaving(true)
+// Update isNewAcademicYear to also detect direction
+const compareAcademicYears = (prevYear, nextYear) => {
+  if (!prevYear || !nextYear) return { isChange: false, direction: 0 };
+  const prevStart = parseInt(prevYear.split('/')[0]);
+  const nextStart = parseInt(nextYear.split('/')[0]);
+  if (prevStart === nextStart) return { isChange: false, direction: 0 };
+  return { 
+    isChange: true, 
+    direction: nextStart > prevStart ? 1 : -1 
+  };
+};
+
+const handleSaveAcademicContext = async () => {
+  setContextSaving(true);
   try {
-    const yearChanging = isNewAcademicYear(academicContext.academicYear, academicContext.academicYear)
-    // Fetch the currently saved context to compare against what admin is setting
-    const currentRes = await axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
-    const savedYear = currentRes.data?.academicYear
+    const currentRes = await axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() });
+    const savedContext = currentRes.data || {};
+    const savedYear = savedContext.academicYear;
 
-    const shouldPromote = isNewAcademicYear(savedYear, academicContext.academicYear)
+    const comparison = compareAcademicYears(savedYear, academicContext.academicYear);
+    
+    let action = 'maintain'; // default
 
-    if (shouldPromote) {
+    if (comparison.isChange) {
+      const directionText = comparison.direction > 0 ? 'advancing' : 'moving backwards';
+      const options = comparison.direction > 0 
+        ? ['Promote learners forward', 'Maintain current classes']
+        : ['Demote learners backward', 'Maintain current classes'];
+
+      const choice = window.prompt(
+        `You are ${directionText} from ${savedYear} to ${academicContext.academicYear}.\n\n` +
+        `Choose an option:\n` +
+        `1. ${options[0]}\n` +
+        `2. ${options[1]}\n\n` +
+        `Enter 1 or 2:`,
+        '2'
+      );
+
+      if (choice === '1') {
+        action = comparison.direction > 0 ? 'promote' : 'demote';
+      } else if (choice !== '2') {
+        setContextSaving(false);
+        return; // cancelled
+      }
+    }
+
+    // Handle class level change if needed
+    if (action !== 'maintain') {
       const confirmed = window.confirm(
-        `You are advancing the academic year from ${savedYear} to ${academicContext.academicYear}.\n\n` +
-        `This will automatically promote ALL active learners to their next class level.\n\n` +
-        `For example, a learner in Nursery 1 will move to Nursery 2, and so on.\n\n` +
-        `Learners in Grade 6 (the final class) will NOT be promoted.\n\n` +
-        `Do you want to proceed?`
-      )
+        `This will ${action} ALL active learners.\n\nProceed?`
+      );
       if (!confirmed) {
-        setContextSaving(false)
-        return
+        setContextSaving(false);
+        return;
       }
 
-      // Fetch all students and promote each
-      const studentsRes = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
-      const allStudents = studentsRes.data || []
-      const activeStudents = allStudents.filter(s => s.status === 'active' || !s.status)
-
-      let promotedCount = 0
-      let skippedCount = 0
+      const studentsRes = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() });
+      const activeStudents = (studentsRes.data || []).filter(s => s.status === 'active' || !s.status);
 
       await Promise.all(
         activeStudents.map(async (student) => {
-          const nextClass = getNextClass(student.gradeLevel)
-          if (!nextClass) {
-            skippedCount++
-            return
+          let newGrade = student.gradeLevel;
+          if (action === 'promote') {
+            newGrade = getNextClass(student.gradeLevel) || student.gradeLevel;
+          } else if (action === 'demote') {
+            newGrade = getPrevClass(student.gradeLevel) || student.gradeLevel;
           }
-          try {
-            await axios.put(`${API_URL}/api/students/${student.id}`, { gradeLevel: nextClass }, { headers: getAuthHeaders() })
-            promotedCount++
-          } catch (e) {
-            console.error(`Failed to promote student ${student.id}:`, e)
+          if (newGrade !== student.gradeLevel) {
+            try {
+              await axios.put(`${API_URL}/api/students/${student.id}`, { gradeLevel: newGrade }, { headers: getAuthHeaders() });
+            } catch (e) {
+              console.error(`Failed for ${student.id}`, e);
+            }
           }
         })
-      )
+      );
 
-      // Refresh local students list
-      const refreshed = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
-      setStudents(refreshed.data)
-
-      alert(`✅ Promotion complete!\n${promotedCount} learner(s) promoted to their next class.\n${skippedCount} learner(s) in Grade 6 were not promoted (final class).`)
+      // Refresh students
+      const refreshed = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() });
+      setStudents(refreshed.data);
+      alert(`✅ Class adjustment complete!`);
     }
 
-    const res = await axios.post(`${API_URL}/api/academic-context`, academicContext, { headers: getAuthHeaders() })
-    setAcademicContext(res.data)
-    setContextSaved(true)
-    setTimeout(() => setContextSaved(false), 3000)
+    // Save context
+    const res = await axios.post(`${API_URL}/api/academic-context`, academicContext, { headers: getAuthHeaders() });
+    setAcademicContext(res.data);
+    setContextSaved(true);
+    setTimeout(() => setContextSaved(false), 3000);
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to save context.')
+    alert(err.response?.data?.message || 'Failed to save context.');
   } finally {
-    setContextSaving(false)
+    setContextSaving(false);
   }
-}
+};
 
   const handleNotificationClick = (notification) => {
     const routes = {
@@ -569,12 +598,19 @@ export default function AdminDashboard() {
   }
 
   const handleDeleteUser = async (id, email) => {
-    if (!window.confirm(`Delete deactivated account ${email}? This will remove related data.`)) return
-    try {
-      await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
-      fetchAccounts()
-    } catch (err) { alert('Failed to delete user account.') }
+  if (!window.confirm(`Delete deactivated account ${email}? This will remove related data including messages.`)) return
+  try {
+    await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
+    fetchAccounts()
+    // Optional: Refresh messages if on that tab
+    if (activeMenu === 'messages' || activeMenu === 'contact-messages') {
+      window.location.reload() // simple refresh for now
+    }
+    alert('Account and related data (including messages) deleted.')
+  } catch (err) { 
+    alert('Failed to delete user account.') 
   }
+}
 
   const handleParentAccountSelect = (email) => {
     const parent = parentAccounts.find(p => p.email === email)
@@ -1659,6 +1695,18 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Password</label>
                       <input type="password" value={newStudent.learnerPassword} onChange={e => setNewStudent({ ...newStudent, learnerPassword: e.target.value })} placeholder="Create learner dashboard password" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
+
+                    <div>
+  <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Email (for Portal Login)</label>
+  <input 
+    type="email" 
+    value={newStudent.learnerEmail} 
+    onChange={e => setNewStudent({ ...newStudent, learnerEmail: e.target.value })} 
+    placeholder="learner@example.com" 
+    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" 
+  />
+  <p className="text-xs text-gray-400 mt-1">This allows the learner to log into their portal.</p>
+</div>
                     <div>
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
                       <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
@@ -2860,12 +2908,21 @@ export default function AdminDashboard() {
               {!editMode ? (
                 <div>
                   <div className="space-y-3 mb-6">
-                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
+                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
                       <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
                         <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
                         <span className="text-sm text-gray-600">{item[1] || '—'}</span>
                       </div>
                     ))}
+                    <div>
+  <label className="block text-sm font-bold text-cyan-700 mb-1">Learner Email (Portal Login)</label>
+  <input 
+    type="email" 
+    value={editStudent.email || editStudent.learnerEmail || ''} 
+    onChange={e => setEditStudent({ ...editStudent, email: e.target.value, learnerEmail: e.target.value })} 
+    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" 
+  />
+</div>
                   </div>
                   <div className="flex gap-3">
                     <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
