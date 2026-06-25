@@ -2886,114 +2886,141 @@ const handleSaveAcademicContext = async () => {
       )}
 
       {/* Student Detail Modal */}
-      {selectedStudent && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
-              <h2 className="text-xl font-bold font-serif">Learner Profile</h2>
-              <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="hover:text-cyan-600 transition-colors"><X size={24} /></button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center gap-6 mb-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
-                  {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                    <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-cyan-700">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
-                  <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
-                  <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
-                </div>
-              </div>
-              {!editMode ? (
-                <div>
-                  <div className="space-y-3 mb-6">
-                    {[['Date of Birth', selectedStudent.dateOfBirth], ['Gender', selectedStudent.gender], ['Grade Level', selectedStudent.gradeLevel], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'], ['Parent Name', selectedStudent.parentName], ['Parent Email', selectedStudent.parentEmail], ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'], ['Parent Phone', selectedStudent.parentPhone], ['Address', selectedStudent.address], ['Status', selectedStudent.status], ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]].map((item, index) => (
-                      <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
-                        <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
-                        <span className="text-sm text-gray-600">{item[1] || '—'}</span>
-                      </div>
-                    ))}
-                    <div>
-  <label className="block text-sm font-bold text-cyan-700 mb-1">Learner Email (Portal Login)</label>
-  <input 
-    type="email" 
-    value={editStudent.email || editStudent.learnerEmail || ''} 
-    onChange={e => setEditStudent({ ...editStudent, email: e.target.value, learnerEmail: e.target.value })} 
-    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" 
-  />
-</div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
-                    <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="grid grid-cols-1 gap-4 mb-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><label className="block text-sm font-bold text-cyan-700 mb-1">First Name</label><input type="text" value={editStudent.firstName} onChange={e => setEditStudent({ ...editStudent, firstName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                      <div><label className="block text-sm font-bold text-cyan-700 mb-1">Last Name</label><input type="text" value={editStudent.lastName} onChange={e => setEditStudent({ ...editStudent, lastName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><label className="block text-sm font-bold text-cyan-700 mb-1">Date of Birth</label><input type="date" value={editStudent.dateOfBirth} onChange={e => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                      <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-1">Gender</label>
-                        <select value={editStudent.gender} onChange={e => setEditStudent({ ...editStudent, gender: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                          <option value="">Select gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-1">Grade Level</label>
-                      <select value={editStudent.gradeLevel} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                        {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-1">Existing Parent Account</label>
-                      <select value={editStudent.parentEmail || ''} onChange={e => {
-                        const parent = parentAccounts.find(p => p.email === e.target.value)
-                        setEditStudent(prev => ({
-                          ...prev,
-                          parentEmail: e.target.value,
-                          parentName: parent ? parent.name : prev.parentName
-                        }))
-                      }} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                        <option value="">Select existing parent or use manual info</option>
-                        {parentAccounts.map(parent => (
-                          <option key={parent.id} value={parent.email}>{parent.name} — {parent.email}</option>
-                        ))}
-                      </select>
-                      <p className="text-xs text-gray-400 mt-1">Linking an existing parent account improves reporting and access.</p>
-                    </div>
-                    <div><label className="block text-sm font-bold text-cyan-700 mb-1">Parent Name</label><input type="text" value={editStudent.parentName} onChange={e => setEditStudent({ ...editStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                    <div><label className="block text-sm font-bold text-cyan-700 mb-1">Parent Email</label><input type="email" value={editStudent.parentEmail} onChange={e => setEditStudent({ ...editStudent, parentEmail: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                    <div><label className="block text-sm font-bold text-cyan-700 mb-1">Parent Phone</label><input type="text" value={editStudent.parentPhone} onChange={e => setEditStudent({ ...editStudent, parentPhone: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                    <div><label className="block text-sm font-bold text-cyan-700 mb-1">Address</label><input type="text" value={editStudent.address} onChange={e => setEditStudent({ ...editStudent, address: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" /></div>
-                    <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-1">Status</label>
-                      <select value={editStudent.status} onChange={e => setEditStudent({ ...editStudent, status: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="graduated">Graduated</option>
-                        <option value="transferred">Transferred</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button onClick={handleEditStudent} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
-                    <button onClick={() => setEditMode(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
+{selectedStudent && (
+  <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+        <h2 className="text-xl font-bold font-serif">Learner Profile</h2>
+        <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="hover:text-cyan-600 transition-colors"><X size={24} /></button>
+      </div>
+      <div className="p-6">
+        <div className="flex items-center gap-6 mb-6">
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
+            {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
+              <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-cyan-700">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+            <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
+            <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
           </div>
         </div>
-      )}
+
+        {!editMode ? (
+          <div>
+            <div className="space-y-3 mb-6">
+              {[
+                ['Date of Birth', selectedStudent.dateOfBirth],
+                ['Gender', selectedStudent.gender],
+                ['Grade Level', selectedStudent.gradeLevel],
+                ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'],
+                ['Parent Name', selectedStudent.parentName],
+                ['Parent Email', selectedStudent.parentEmail],
+                ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'],
+                ['Parent Phone', selectedStudent.parentPhone],
+                ['Address', selectedStudent.address],
+                ['Status', selectedStudent.status],
+                ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]
+              ].map((item, index) => (
+                <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
+                  <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
+                  <span className="text-sm text-gray-600">{item[1] || '—'}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
+              <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="grid grid-cols-1 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-cyan-700 mb-1">First Name</label>
+                  <input type="text" value={editStudent.firstName || ''} onChange={e => setEditStudent({ ...editStudent, firstName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-cyan-700 mb-1">Last Name</label>
+                  <input type="text" value={editStudent.lastName || ''} onChange={e => setEditStudent({ ...editStudent, lastName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-cyan-700 mb-1">Date of Birth</label>
+                  <input type="date" value={editStudent.dateOfBirth || ''} onChange={e => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-cyan-700 mb-1">Gender</label>
+                  <select value={editStudent.gender || ''} onChange={e => setEditStudent({ ...editStudent, gender: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Grade Level</label>
+                <select value={editStudent.gradeLevel || ''} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
+                  {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+
+              {/* Learner Email Field - Fixed */}
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Learner Email (Portal Login)</label>
+                <input 
+                  type="email" 
+                  value={editStudent.email || editStudent.learnerEmail || ''} 
+                  onChange={e => setEditStudent({ ...editStudent, email: e.target.value, learnerEmail: e.target.value })} 
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Name</label>
+                <input type="text" value={editStudent.parentName || ''} onChange={e => setEditStudent({ ...editStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Email</label>
+                <input type="email" value={editStudent.parentEmail || ''} onChange={e => setEditStudent({ ...editStudent, parentEmail: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Phone</label>
+                <input type="text" value={editStudent.parentPhone || ''} onChange={e => setEditStudent({ ...editStudent, parentPhone: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Address</label>
+                <input type="text" value={editStudent.address || ''} onChange={e => setEditStudent({ ...editStudent, address: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-cyan-700 mb-1">Status</label>
+                <select value={editStudent.status || 'active'} onChange={e => setEditStudent({ ...editStudent, status: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="graduated">Graduated</option>
+                  <option value="transferred">Transferred</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={handleEditStudent} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
+              <button onClick={() => setEditMode(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
     {showChangePassword && (
       <ChangePasswordModal
