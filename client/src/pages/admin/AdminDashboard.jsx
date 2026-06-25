@@ -175,8 +175,13 @@ export default function AdminDashboard() {
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
 
   useEffect(() => {
-    if (activeMenu === 'learners' || activeMenu === 'create-account') {
-      axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
+  if (activeMenu === 'learners' || activeMenu === 'create-account') {
+    axios.get(`${API_URL}/api/students`)
+      .then(res => {
+        console.log("Students loaded:", res.data)   // ← For debugging
+        setStudents(res.data)
+      })
+      .catch(err => console.error(err))
       axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params: { role: 'parent' } }).then(res => setParentAccounts(res.data.users || []))
     }
     if (activeMenu === 'performance') {
@@ -385,42 +390,52 @@ const handleSaveAcademicContext = async () => {
 }
 
   const handleAddStudent = async () => {
-    try {
-      const learnerEmail = newStudent.learnerEmail?.trim()
-      const learnerPassword = newStudent.learnerPassword?.trim()
+  try {
+    const learnerEmail = newStudent.learnerEmail?.trim()
+    const learnerPassword = newStudent.learnerPassword?.trim()
 
-      if ((learnerEmail || learnerPassword) && (!learnerEmail || !learnerPassword)) {
-        alert('Please enter both a learner email and password to create a dashboard account.')
-        return
-      }
-
-      const formData = new FormData()
-      Object.entries(newStudent).forEach(([key, value]) => {
-        if (key === 'learnerEmail' || key === 'learnerPassword') return
-        formData.append(key, value)
-      })
-
-      if (learnerEmail) {
-        formData.append('email', learnerEmail)
-        formData.append('password', learnerPassword)
-      }
-
-      if (photoFile) formData.append('photo', photoFile)
-
-      const res = await axios.post(`${API_URL}/api/students`, formData, { headers: getAuthHeaders() })
-      setStudents([res.data, ...students])
-      setShowAddStudent(false)
-      setPhotoFile(null)
-      setPhotoPreview(null)
-      setNewStudent({
-        firstName: '', lastName: '', dateOfBirth: '', gender: '',
-        gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
-        learnerEmail: '', learnerPassword: ''
-      })
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
+    if ((learnerEmail || learnerPassword) && (!learnerEmail || !learnerPassword)) {
+      alert('Please enter both a learner email and password to create a dashboard account.')
+      return
     }
+
+    const formData = new FormData()
+    
+    // Send all fields properly
+    Object.entries(newStudent).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        if (key === 'learnerEmail') {
+          formData.append('email', value)           // ← Important
+        } else if (key === 'learnerPassword') {
+          formData.append('password', value)
+        } else {
+          formData.append(key, value)
+        }
+      }
+    })
+
+    if (photoFile) formData.append('photo', photoFile)
+
+    const res = await axios.post(`${API_URL}/api/students`, formData, { 
+      headers: getAuthHeaders() 
+    })
+
+    setStudents([res.data, ...students])
+    setShowAddStudent(false)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setNewStudent({
+      firstName: '', lastName: '', dateOfBirth: '', gender: '',
+      gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+      learnerEmail: '', learnerPassword: ''
+    })
+
+    alert('Learner added successfully!')
+  } catch (err) {
+    console.error(err.response?.data)
+    alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
   }
+}
 
   const handleSignatureUpload = async (e) => {
   const file = e.target.files[0]
@@ -472,16 +487,28 @@ const handleSaveAcademicContext = async () => {
 
   const handleEditStudent = async () => {
   try {
+    const updateData = { ...editStudent }
+
+    // Ensure email is properly included
+    if (editStudent.email || editStudent.learnerEmail) {
+      updateData.email = editStudent.email || editStudent.learnerEmail
+    }
+
     const res = await axios.put(
       `${API_URL}/api/students/${editStudent.id}`,
-      editStudent,
+      updateData,
       { headers: getAuthHeaders() }  
     )
-      setStudents(students.map(s => s.id === editStudent.id ? res.data : s))
-      setSelectedStudent(res.data)
-      setEditMode(false)
-    } catch (err) { alert('Failed to update learner details.') }
+
+    setStudents(students.map(s => s.id === editStudent.id ? res.data : s))
+    setSelectedStudent(res.data)
+    setEditMode(false)
+    alert('Learner details updated successfully!')
+  } catch (err) {
+    console.error(err.response?.data)
+    alert(err.response?.data?.message || 'Failed to update learner details.')
   }
+}
 
   const toggleSelection = (field, value) => {
     setNewUser(prev => {
