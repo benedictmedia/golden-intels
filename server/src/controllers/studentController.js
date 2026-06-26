@@ -2,9 +2,6 @@ const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const Student = require('../models/Student');
-const User = require('../models/User');   // for user creation logic
-
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
   let studentId
@@ -19,7 +16,6 @@ const generateStudentId = async () => {
     const existing = await prisma.student.findUnique({ where: { studentId } })
     if (!existing) isUnique = true
   }
-  
   return studentId
 }
 
@@ -41,11 +37,12 @@ const getStudents = async (req, res) => {
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
       const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
-      const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
+      const students = await prisma.student.findMany({ 
+        orderBy: order, 
+        include: { parent: { select: { id: true, name: true, email: true } } } 
+      })
 
-      if (!staff) {
-        return res.json([])
-      }
+      if (!staff) return res.json([])
 
       const teacherClasses = Array.from(new Set([
         ...(staff.classes || []),
@@ -59,10 +56,14 @@ const getStudents = async (req, res) => {
       return res.json(filteredStudents)
     }
 
-    const students = await prisma.student.findMany({ orderBy: order, include: { parent: { select: { id: true, name: true, email: true } } } })
+    const students = await prisma.student.findMany({ 
+      orderBy: order, 
+      include: { parent: { select: { id: true, name: true, email: true } } } 
+    })
     res.json(students)
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error(error)
+    res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -71,38 +72,47 @@ const createStudent = async (req, res) => {
     const {
       firstName, lastName, dateOfBirth, gender, gradeLevel,
       parentName, parentEmail, parentPhone, address,
-      email, learnerEmail, password   // ← Accept both possible field names
+      email, learnerEmail, password
     } = req.body;
 
     const finalEmail = email || learnerEmail;
 
-    const student = await Student.create({
-      firstName,
-      lastName,
-      dateOfBirth,
-      gender,
-      gradeLevel,
-      parentName,
-      parentEmail,
-      parentPhone,
-      address,
-      email: finalEmail,                    // ← This is the key fix
-      photo: req.file ? (req.file.secure_url || req.file.path) : null,
-      status: 'active'
+    const student = await prisma.student.create({
+      data: {
+        firstName,
+        lastName,
+        dateOfBirth,
+        gender,
+        gradeLevel,
+        parentName,
+        parentEmail,
+        parentPhone,
+        address,
+        email: finalEmail,                    // ← Key fix
+        photo: req.file ? req.file.path || req.file.secure_url : null,
+        status: 'active',
+        studentId: await generateStudentId()
+      }
     });
 
     // Create learner user account if email + password provided
     if (finalEmail && password) {
-      const user = await User.create({
-        name: `${firstName} ${lastName}`,
-        email: finalEmail,
-        password,
-        role: 'learner',
-        studentId: student._id || student.id
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await prisma.user.create({
+        data: {
+          name: `${firstName} ${lastName}`,
+          email: finalEmail,
+          password: hashedPassword,
+          role: 'learner',
+          studentId: student.id
+        }
       });
-      // Optional: link back to student
-      student.learnerUserId = user._id || user.id;
-      await student.save();
+
+      // Link user back to student
+      await prisma.student.update({
+        where: { id: student.id },
+        data: { learnerUserId: user.id }
+      });
     }
 
     res.status(201).json(student);
@@ -115,29 +125,21 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // Normalize email field from frontend
     const updateData = { ...req.body };
+
     if (req.body.email || req.body.learnerEmail) {
       updateData.email = req.body.email || req.body.learnerEmail;
     }
 
-    const student = await Student.findByIdAndUpdate(
-      id, 
-      updateData, 
-      { new: true, runValidators: true }
-    );
-
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
+    const student = await prisma.student.update({
+      where: { id: parseInt(id) },
+      data: updateData
+    });
 
     res.json(student);
   } catch (error) {
     console.error("Update Student Error:", error);
-    res.status(400).json({ 
-      message: error.message || 'Failed to update student' 
-    });
+    res.status(400).json({ message: error.message || 'Failed to update student' });
   }
 };
 
@@ -145,13 +147,11 @@ const deleteStudent = async (req, res) => {
   const { id } = req.params
   const studentId = parseInt(id)
   try {
-    // Delete all related records first to avoid foreign key constraint errors
     await prisma.result.deleteMany({ where: { studentId } })
     await prisma.attendanceRecord.deleteMany({ where: { studentId } })
     await prisma.feePayment.deleteMany({ where: { studentId } })
     await prisma.message.deleteMany({ where: { conversationUserId: studentId } })
 
-    // Now safe to delete the student
     await prisma.student.delete({ where: { id: studentId } })
 
     res.json({ message: 'Student deleted successfully' })
@@ -166,20 +166,14 @@ const getMyProfile = async (req, res) => {
     const userId = req.user.id
     const userEmail = req.user.email
 
-    // Try by learnerUserId first (most reliable)
     let student = await prisma.student.findFirst({
       where: { learnerUserId: userId },
       include: { parent: { select: { id: true, name: true, email: true } } }
     })
 
-    // Fallback: match by email for older records created before learnerUserId existed
     if (!student) {
       student = await prisma.student.findFirst({
-        where: {
-          OR: [
-            { parentEmail: userEmail },
-          ]
-        },
+        where: { OR: [{ parentEmail: userEmail }] },
         include: { parent: { select: { id: true, name: true, email: true } } }
       })
     }
