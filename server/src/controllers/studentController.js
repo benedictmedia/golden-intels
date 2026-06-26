@@ -88,26 +88,12 @@ const createStudent = async (req, res) => {
         parentEmail,
         parentPhone,
         address,
-        email: finalEmail,           // ← This should now work after schema update
+        email: finalEmail,
         photo: req.file ? (req.file.path || req.file.secure_url) : null,
         status: 'active',
         studentId: await generateStudentId()
       }
     });
-
-    // Create learner account if email + password provided
-    if (finalEmail && password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await prisma.user.create({
-        data: {
-          name: `${firstName} ${lastName}`,
-          email: finalEmail,
-          password: hashedPassword,
-          role: 'learner',
-          // Remove studentId if it causes error — link via learnerUserId instead
-        }
-      });
-    }
 
     res.status(201).json(student);
   } catch (error) {
@@ -120,17 +106,17 @@ const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // Remove id and other sensitive fields from update data
-    const { id: _, studentId: __, createdAt: ___, updatedAt: ____, ...updateData } = req.body;
+    // Remove protected fields that Prisma doesn't allow in update
+    const { id: _, studentId: __, createdAt: ___, updatedAt: ____, ...safeData } = req.body;
 
-    // Normalize email field
+    // Handle email
     if (req.body.email || req.body.learnerEmail) {
-      updateData.email = req.body.email || req.body.learnerEmail;
+      safeData.email = req.body.email || req.body.learnerEmail;
     }
 
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
-      data: updateData
+      data: safeData
     });
 
     res.json(student);
