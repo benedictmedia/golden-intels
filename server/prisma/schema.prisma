@@ -29,6 +29,7 @@ model Student {
   dateOfBirth String?
   gender      String
   gradeLevel  String
+  email       String?            @unique
   learnerUserId Int?
   parentId    Int?
   parent      User?              @relation("ParentStudents", fields: [parentId], references: [id])
