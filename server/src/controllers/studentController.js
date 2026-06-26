@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
+const Student = require('../models/Student');
+const User = require('../models/User');   // for user creation logic
+
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
   let studentId
@@ -112,16 +115,16 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Normalize email field from frontend
     const updateData = { ...req.body };
-
-    // Normalize email field
     if (req.body.email || req.body.learnerEmail) {
       updateData.email = req.body.email || req.body.learnerEmail;
     }
 
     const student = await Student.findByIdAndUpdate(
-      id,
-      updateData,
+      id, 
+      updateData, 
       { new: true, runValidators: true }
     );
 
@@ -132,7 +135,9 @@ const updateStudent = async (req, res) => {
     res.json(student);
   } catch (error) {
     console.error("Update Student Error:", error);
-    res.status(400).json({ message: error.message || 'Failed to update student' });
+    res.status(400).json({ 
+      message: error.message || 'Failed to update student' 
+    });
   }
 };
 
