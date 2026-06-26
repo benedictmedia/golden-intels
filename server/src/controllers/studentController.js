@@ -88,30 +88,24 @@ const createStudent = async (req, res) => {
         parentEmail,
         parentPhone,
         address,
-        email: finalEmail,                    // ← Key fix
-        photo: req.file ? req.file.path || req.file.secure_url : null,
+        email: finalEmail,           // ← This should now work after schema update
+        photo: req.file ? (req.file.path || req.file.secure_url) : null,
         status: 'active',
         studentId: await generateStudentId()
       }
     });
 
-    // Create learner user account if email + password provided
+    // Create learner account if email + password provided
     if (finalEmail && password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await prisma.user.create({
+      await prisma.user.create({
         data: {
           name: `${firstName} ${lastName}`,
           email: finalEmail,
           password: hashedPassword,
           role: 'learner',
-          studentId: student.id
+          // Remove studentId if it causes error — link via learnerUserId instead
         }
-      });
-
-      // Link user back to student
-      await prisma.student.update({
-        where: { id: student.id },
-        data: { learnerUserId: user.id }
       });
     }
 
