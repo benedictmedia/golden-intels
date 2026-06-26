@@ -104,27 +104,55 @@ const createStudent = async (req, res) => {
 
 const updateStudent = async (req, res) => {
   try {
-    const { id } = req.params;
-    
-    // Remove protected fields that Prisma doesn't allow in update
-    const { id: _, studentId: __, createdAt: ___, updatedAt: ____, ...safeData } = req.body;
+    const { id } = req.params
 
-    // Handle email
-    if (req.body.email || req.body.learnerEmail) {
-      safeData.email = req.body.email || req.body.learnerEmail;
+    // Whitelist only the fields admin is allowed to update — never spread the whole body
+    const {
+      firstName, lastName, dateOfBirth, gender, gradeLevel,
+      parentName, parentEmail, parentPhone, address, status,
+      email, learnerEmail
+    } = req.body
+
+    const data = {}
+    if (firstName !== undefined)   data.firstName   = firstName
+    if (lastName !== undefined)    data.lastName    = lastName
+    if (dateOfBirth !== undefined) data.dateOfBirth = dateOfBirth
+    if (gender !== undefined)      data.gender      = gender
+    if (gradeLevel !== undefined)  data.gradeLevel  = gradeLevel
+    if (parentName !== undefined)  data.parentName  = parentName
+    if (parentEmail !== undefined) data.parentEmail = parentEmail
+    if (parentPhone !== undefined) data.parentPhone = parentPhone
+    if (address !== undefined)     data.address     = address
+    if (status !== undefined)      data.status      = status
+
+    // email field: accept either key from frontend
+    const finalEmail = email || learnerEmail
+    if (finalEmail !== undefined)  data.email       = finalEmail
+
+    // If parentEmail changed, try to re-link to the parent's user account
+    if (parentEmail) {
+      const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
+      if (parentUser && parentUser.role === 'parent') {
+        data.parentId = parentUser.id
+      }
+    }
+
+    // Handle photo if a new file was uploaded
+    if (req.file) {
+      data.photo = req.file.path || req.file.secure_url
     }
 
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
-      data: safeData
-    });
+      data
+    })
 
-    res.json(student);
+    res.json(student)
   } catch (error) {
-    console.error("Update Student Error:", error);
-    res.status(400).json({ message: error.message || 'Failed to update student' });
+    console.error('Update Student Error:', error)
+    res.status(400).json({ message: error.message || 'Failed to update student' })
   }
-};
+}
 
 const deleteStudent = async (req, res) => {
   const { id } = req.params
@@ -146,17 +174,19 @@ const deleteStudent = async (req, res) => {
 
 const getMyProfile = async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId  = req.user.id
     const userEmail = req.user.email
 
+    // 1. Most reliable — look up by the learner's linked user account ID
     let student = await prisma.student.findFirst({
       where: { learnerUserId: userId },
       include: { parent: { select: { id: true, name: true, email: true } } }
     })
 
+    // 2. Fallback for older records — match by the student's own email field
     if (!student) {
       student = await prisma.student.findFirst({
-        where: { OR: [{ parentEmail: userEmail }] },
+        where: { email: userEmail },
         include: { parent: { select: { id: true, name: true, email: true } } }
       })
     }
