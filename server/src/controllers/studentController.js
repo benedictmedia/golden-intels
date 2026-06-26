@@ -119,8 +119,11 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = { ...req.body };
+    
+    // Remove id and other sensitive fields from update data
+    const { id: _, studentId: __, createdAt: ___, updatedAt: ____, ...updateData } = req.body;
 
+    // Normalize email field
     if (req.body.email || req.body.learnerEmail) {
       updateData.email = req.body.email || req.body.learnerEmail;
     }
