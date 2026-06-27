@@ -4,18 +4,32 @@ const prisma = new PrismaClient()
 
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
+
+  // Count only students enrolled in the current year
+  // We identify them by their studentId prefix GI{year}
+  const countThisYear = await prisma.student.count({
+    where: {
+      studentId: {
+        startsWith: `GI${year}`
+      }
+    }
+  })
+
+  let nextNumber = countThisYear + 1
   let studentId
   let isUnique = false
-  
+
+  // Safety loop: if the sequential number is somehow taken, increment until free
   while (!isUnique) {
-    const count = await prisma.student.count()
-    const random = Math.floor(Math.random() * 1000)
-    const number = String(count + 1 + random).padStart(4, '0')
-    studentId = `GI-${year}-${number}`
-    
+    studentId = `GI${year}${String(nextNumber).padStart(4, '0')}`
     const existing = await prisma.student.findUnique({ where: { studentId } })
-    if (!existing) isUnique = true
+    if (!existing) {
+      isUnique = true
+    } else {
+      nextNumber++
+    }
   }
+
   return studentId
 }
 
