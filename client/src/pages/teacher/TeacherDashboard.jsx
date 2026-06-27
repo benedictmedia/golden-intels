@@ -540,13 +540,13 @@ useEffect(() => {
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
-  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: defaultClass })
+  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: '' })
   const [lessons, setLessons] = useState([])
   const [showAddLesson, setShowAddLesson] = useState(false)
-  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: defaultClass, content: '' })
+  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: '', content: '' })
   const [quizzes, setQuizzes] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
-  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: defaultClass, dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: '', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
@@ -598,6 +598,14 @@ useEffect(() => {
       .catch(err => console.error('Failed to fetch students:', err))
   }
 }, [activeMenu])
+
+useEffect(() => {
+  if (!teacherClassOptions.length) return
+  const defaultClass = teacherClassOptions[0]
+  setNewAssignment(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
+  setNewLesson(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
+  setNewQuiz(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
+}, [teacherClassOptions.length])
 
   const handleLogout = () => {
     logout()
@@ -699,12 +707,13 @@ useEffect(() => {
   }
 
   const resetLmsForm = () => {
-    setEditingLmsItem(null)
-    setLmsItemView(null)
-    setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Grade 1' })
-    setNewLesson({ title: '', subject: '', gradeLevel: 'defaultClass', content: '' })
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'defaultClass', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
-  }
+  const defaultClass = teacherClassOptions[0] || ''
+  setEditingLmsItem(null)
+  setLmsItemView(null)
+  setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: defaultClass })
+  setNewLesson({ title: '', subject: '', gradeLevel: defaultClass, content: '' })
+  setNewQuiz({ title: '', subject: '', gradeLevel: defaultClass, dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+}
 
   const handleViewLmsItem = (item, type) => {
     setShowAddAssignment(false)
