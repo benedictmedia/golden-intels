@@ -114,7 +114,8 @@ const createStudent = async (req, res) => {
             name: [firstName, lastName].filter(Boolean).join(' ') || finalEmail,
             email: finalEmail,
             password: hashed,
-            role: 'learner'
+            role: 'learner',
+            active: true
           }
         })
         learnerUserId = learnerUser.id
@@ -231,7 +232,8 @@ const createLearnerLogin = async (req, res) => {
           name: `${student.firstName} ${student.lastName}`.trim(),
           email,
           password: hashed,
-          role: 'learner'
+          role: 'learner',
+          active: true
         }
       })
       return await tx.student.update({

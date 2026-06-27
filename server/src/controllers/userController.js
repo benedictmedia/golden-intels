@@ -147,7 +147,7 @@ const deactivateUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { email } = req.body
   try {
-    const user = await prisma.user.update({ where: { email }, data: { active: false } })
+    const user = await prisma.user.update({ where: { email }, data: { active: true } })
     // create audit
     await prisma.accountAudit.create({ data: { userId: user.id, action: 'deactivate', performedBy: req.user.email, details: { email } } })
     res.json({ message: 'User deactivated', email })
