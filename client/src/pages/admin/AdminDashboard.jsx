@@ -59,6 +59,10 @@ export default function AdminDashboard() {
   const [contextSaving, setContextSaving] = useState(false)
   const [contextSaved, setContextSaved] = useState(false)
 
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [learnerLoginForm, setLearnerLoginForm] = useState({ email: '', password: '' })
+  const [loginCreating, setLoginCreating] = useState(false)
+
   // Create account state
   const initialNewUserState = {
     name: '', email: '', password: '', role: 'teacher',
@@ -2957,6 +2961,18 @@ const handleSaveAcademicContext = async () => {
             </div>
             <div className="flex gap-3">
               <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
+              {/* Show button only if student has no login yet */}
+            {!selectedStudent.learnerUserId && (
+              <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <p className="text-xs text-amber-700 font-bold mb-2">⚠️ This learner has no portal login yet.</p>
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-[#1a3c6e] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              Set Login Credentials
+            </button>
+        </div>
+      )}
               <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
             </div>
           </div>
@@ -2996,7 +3012,7 @@ const handleSaveAcademicContext = async () => {
                 </select>
               </div>
 
-              {/* Learner Email Field - Fixed */}
+              {/* Learner Email Field */}
               <div>
                 <label className="block text-sm font-bold text-cyan-700 mb-1">Learner Email (Portal Login)</label>
                 <input 
@@ -3042,9 +3058,83 @@ const handleSaveAcademicContext = async () => {
               <button onClick={handleEditStudent} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
               <button onClick={() => setEditMode(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
             </div>
+            
           </div>
+          
         )}
       </div>
+
+      {showLoginModal && (
+  <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+    <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
+      <h3 className="font-bold text-[#1a3c6e] text-lg mb-1">Set Learner Login</h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Create a portal login for <strong>{selectedStudent.firstName} {selectedStudent.lastName}</strong>.
+      </p>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm font-bold text-[#1a3c6e] mb-1">Email Address</label>
+          <input
+            type="email"
+            value={learnerLoginForm.email}
+            onChange={e => setLearnerLoginForm(f => ({ ...f, email: e.target.value }))}
+            placeholder="learner@email.com"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1a3c6e] text-gray-700 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-bold text-[#1a3c6e] mb-1">Password</label>
+          <input
+            type="password"
+            value={learnerLoginForm.password}
+            onChange={e => setLearnerLoginForm(f => ({ ...f, password: e.target.value }))}
+            placeholder="Set a password"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1a3c6e] text-gray-700 text-sm"
+          />
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={async () => {
+              if (!learnerLoginForm.email || !learnerLoginForm.password) {
+                alert('Please enter both email and password.')
+                return
+              }
+              setLoginCreating(true)
+              try {
+                await axios.post(
+                  `${API_URL}/api/students/${selectedStudent.id}/create-login`,
+                  learnerLoginForm,
+                  { headers: getAuthHeaders() }
+                )
+                alert(`Login created! ${selectedStudent.firstName} can now log in with ${learnerLoginForm.email}`)
+                setShowLoginModal(false)
+                setLearnerLoginForm({ email: '', password: '' })
+                // Refresh student list
+                const res = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
+                setStudents(res.data)
+                setSelectedStudent(prev => ({ ...prev, learnerUserId: 1 })) // mark as having login
+              } catch (err) {
+                alert(err.response?.data?.message || 'Failed to create login.')
+              } finally {
+                setLoginCreating(false)
+              }
+            }}
+            disabled={loginCreating}
+            className="flex-1 bg-[#1a3c6e] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50"
+          >
+            {loginCreating ? 'Creating…' : 'Create Login'}
+          </button>
+          <button
+            onClick={() => { setShowLoginModal(false); setLearnerLoginForm({ email: '', password: '' }) }}
+            className="flex-1 bg-gray-100 text-gray-700 font-bold py-2.5 rounded-xl text-sm"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   </div>
 )}

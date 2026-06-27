@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent } = require('../controllers/studentController')
+const { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin } = require('../controllers/studentController')
 const protect = require('../middleware/authMiddleware')
 
 let uploadStudentPhoto
@@ -27,5 +27,6 @@ router.post('/', protect, uploadStudentPhoto.single('photo'), createStudent)
 router.get('/me', protect, getMyProfile)
 router.put('/:id', protect, updateStudent)
 router.delete('/:id', protect, deleteStudent)
+router.post('/:id/create-login', protect, createLearnerLogin)
 
 module.exports = router

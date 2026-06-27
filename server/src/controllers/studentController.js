@@ -73,34 +73,80 @@ const createStudent = async (req, res) => {
       firstName, lastName, dateOfBirth, gender, gradeLevel,
       parentName, parentEmail, parentPhone, address,
       email, learnerEmail, password
-    } = req.body;
+    } = req.body
 
-    const finalEmail = email || learnerEmail;
+    const finalEmail = (email || learnerEmail || '').trim() || null
+    const finalPassword = (password || '').trim() || null
 
-    const student = await prisma.student.create({
-      data: {
-        firstName,
-        lastName,
-        dateOfBirth,
-        gender,
-        gradeLevel,
-        parentName,
-        parentEmail,
-        parentPhone,
-        address,
-        email: finalEmail,
-        photo: req.file ? (req.file.path || req.file.secure_url) : null,
-        status: 'active',
-        studentId: await generateStudentId()
+    // Both email AND password required together if either is provided
+    if ((finalEmail || finalPassword) && !(finalEmail && finalPassword)) {
+      return res.status(400).json({
+        message: 'Both learner email and password are required to create a dashboard account.'
+      })
+    }
+
+    // Prevent duplicate User email
+    if (finalEmail) {
+      const existing = await prisma.user.findUnique({ where: { email: finalEmail } })
+      if (existing) {
+        return res.status(400).json({ message: `A user with email "${finalEmail}" already exists.` })
       }
-    });
+    }
 
-    res.status(201).json(student);
+    const studentId = await generateStudentId()
+    const photo = req.file ? (req.file.path || req.file.secure_url) : null
+
+    // Link to existing parent account if parentEmail matches a parent user
+    let parentId = null
+    if (parentEmail) {
+      const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
+      if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
+    }
+
+    const student = await prisma.$transaction(async (tx) => {
+      let learnerUserId = null
+
+      // Create a User account for the learner if credentials were provided
+      if (finalEmail && finalPassword) {
+        const hashed = await bcrypt.hash(finalPassword, 10)
+        const learnerUser = await tx.user.create({
+          data: {
+            name: [firstName, lastName].filter(Boolean).join(' ') || finalEmail,
+            email: finalEmail,
+            password: hashed,
+            role: 'learner'
+          }
+        })
+        learnerUserId = learnerUser.id
+      }
+
+      return await tx.student.create({
+        data: {
+          studentId,
+          firstName,
+          lastName,
+          dateOfBirth:  dateOfBirth  || null,
+          gender,
+          gradeLevel,
+          parentId,
+          parentName,
+          parentEmail:  parentEmail  || null,
+          parentPhone:  parentPhone  || null,
+          address:      address      || null,
+          email:        finalEmail,
+          learnerUserId,
+          photo,
+          status: 'active'
+        }
+      })
+    })
+
+    res.status(201).json(student)
   } catch (error) {
-    console.error("Create Student Error:", error);
-    res.status(400).json({ message: error.message || 'Failed to create student' });
+    console.error('Create Student Error:', error)
+    res.status(400).json({ message: error.message || 'Failed to create student' })
   }
-};
+}
 
 const updateStudent = async (req, res) => {
   try {
@@ -151,6 +197,53 @@ const updateStudent = async (req, res) => {
   } catch (error) {
     console.error('Update Student Error:', error)
     res.status(400).json({ message: error.message || 'Failed to update student' })
+  }
+}
+
+// Creates/links a login account for an existing student who has none
+const createLearnerLogin = async (req, res) => {
+  const { id } = req.params
+  const { email, password } = req.body
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' })
+  }
+
+  try {
+    const student = await prisma.student.findUnique({ where: { id: parseInt(id) } })
+    if (!student) return res.status(404).json({ message: 'Student not found.' })
+
+    if (student.learnerUserId) {
+      return res.status(400).json({ message: 'This student already has a login account.' })
+    }
+
+    // Check no other user owns this email
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (existing) {
+      return res.status(400).json({ message: `The email "${email}" is already used by another account.` })
+    }
+
+    const hashed = await bcrypt.hash(password, 10)
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const learnerUser = await tx.user.create({
+        data: {
+          name: `${student.firstName} ${student.lastName}`.trim(),
+          email,
+          password: hashed,
+          role: 'learner'
+        }
+      })
+      return await tx.student.update({
+        where: { id: parseInt(id) },
+        data: { email, learnerUserId: learnerUser.id }
+      })
+    })
+
+    res.json({ message: 'Login created and linked successfully.', student: updated })
+  } catch (error) {
+    console.error('Create learner login error:', error)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
 
