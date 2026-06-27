@@ -52,7 +52,7 @@ useEffect(() => {
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
-  const [activeClass, setActiveClass] = useState('Grade 1')
+  const [activeClass, setActiveClass] = useState('')
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [attendance, setAttendance] = useState({})
   const [attendanceDate, setAttendanceDate] = useState(() => {
@@ -67,7 +67,7 @@ useEffect(() => {
   const [attendanceSaved, setAttendanceSaved] = useState(false)
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
-  const [gradebookClass, setGradebookClass] = useState('Grade 1')
+  const [gradebookClass, setGradebookClass] = useState('')
   const [gradebookYear, setGradebookYear] = useState('2025/2026')
   const [gradebookTerm, setGradebookTerm] = useState('Term 1')
   const [gradebookStudent, setGradebookStudent] = useState('')
@@ -540,13 +540,13 @@ useEffect(() => {
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
-  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Grade 1' })
+  const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: defaultClass })
   const [lessons, setLessons] = useState([])
   const [showAddLesson, setShowAddLesson] = useState(false)
-  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: 'Grade 1', content: '' })
+  const [newLesson, setNewLesson] = useState({ title: '', subject: '', gradeLevel: defaultClass, content: '' })
   const [quizzes, setQuizzes] = useState([])
   const [showAddQuiz, setShowAddQuiz] = useState(false)
-  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: 'Grade 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+  const [newQuiz, setNewQuiz] = useState({ title: '', subject: '', gradeLevel: defaultClass, dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   const [lmsView, setLmsView] = useState('resources')
   const [lmsItemView, setLmsItemView] = useState(null)
   const [editingLmsItem, setEditingLmsItem] = useState(null)
@@ -567,11 +567,11 @@ useEffect(() => {
   }, [])
 
   useEffect(() => {
-    if (!classOptions.length) return
-    if (!classOptions.some(cls => matchesClass(activeClass, cls))) {
-      setActiveClass(classOptions[0])
-    }
-  }, [classOptions, activeClass])
+  if (!classOptions.length) return
+  if (!activeClass || !classOptions.some(cls => matchesClass(activeClass, cls))) {
+    setActiveClass(classOptions[0])
+  }
+}, [classOptions])
 
   useEffect(() => {
     if (!classOptions.length) return
@@ -702,8 +702,8 @@ useEffect(() => {
     setEditingLmsItem(null)
     setLmsItemView(null)
     setNewAssignment({ title: '', subject: '', dueDate: '', dueTime: '', description: '', gradeLevel: 'Grade 1' })
-    setNewLesson({ title: '', subject: '', gradeLevel: 'Grade 1', content: '' })
-    setNewQuiz({ title: '', subject: '', gradeLevel: 'Grade 1', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
+    setNewLesson({ title: '', subject: '', gradeLevel: 'defaultClass', content: '' })
+    setNewQuiz({ title: '', subject: '', gradeLevel: 'defaultClass', dueDate: '', dueTime: '', durationMinutes: 30, questions: [{ prompt: '', type: 'multiple-choice', options: ['', '', '', ''], answer: '' }], published: false })
   }
 
   const handleViewLmsItem = (item, type) => {
@@ -1123,7 +1123,7 @@ useEffect(() => {
                   { label: 'My Students', value: students.length, color: 'bg-[#0f6e56]', textColor: 'text-green-200' },
                   { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
                   { label: 'Lessons', value: teacherLessons.length, color: 'bg-[#4a235a]', textColor: 'text-purple-200' },
-                  { label: 'Classes', value: '1', color: 'bg-blue-500', textColor: 'text-cyan-700/80' },
+                  { label: 'Classes', value: teacherClassOptions.length, color: 'bg-blue-500', textColor: 'text-cyan-700/80' }
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -1153,7 +1153,7 @@ useEffect(() => {
                   >
                     {cls}
                     <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                      {students.filter(s => s.gradeLevel === cls).length}
+                      {students.filter(s => matchesClass(s.gradeLevel, cls)).length}
                     </span>
                   </button>
                 ))}
