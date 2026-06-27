@@ -294,4 +294,4 @@ const getMyProfile = async (req, res) => {
   }
 }
 
-module.exports = { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent }
+module.exports = { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin }

@@ -29,4 +29,4 @@ router.put('/:id', protect, updateStudent)
 router.delete('/:id', protect, deleteStudent)
 router.post('/:id/create-login', protect, createLearnerLogin)
 
-module.exports = { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin }
+module.exports = router
