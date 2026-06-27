@@ -613,30 +613,30 @@ const handleSaveAcademicContext = async () => {
     } finally { setAccountLoading(false) }
   }
 
-  const handleDeactivateUser = async (email) => {
-    if (!window.confirm(`Deactivate ${email}?`)) return
-    try {
-      await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
-      fetchAccounts()
-    } catch (err) { alert('Failed to deactivate user') }
-  }
+const handleDeactivateUser = async (email) => {
+  if (!window.confirm(`Deactivate ${email}?`)) return
+  try {
+    await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
+    // Optimistic update — flip active flag immediately
+    setUsers(prev => prev.map(u => u.email === email ? { ...u, active: false } : u))
+  } catch (err) { alert('Failed to deactivate user') }
+}
 
-  const handleReactivateUser = async (email) => {
-    try {
-      await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
-      fetchAccounts()
-    } catch (err) { alert('Failed to reactivate user') }
-  }
+const handleReactivateUser = async (email) => {
+  try {
+    await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
+    // Optimistic update — flip active flag immediately
+    setUsers(prev => prev.map(u => u.email === email ? { ...u, active: true } : u))
+  } catch (err) { alert('Failed to reactivate user') }
+}
 
-  const handleDeleteUser = async (id, email) => {
+const handleDeleteUser = async (id, email) => {
   if (!window.confirm(`Delete deactivated account ${email}? This will remove related data including messages.`)) return
   try {
     await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
-    fetchAccounts()
-    // Optional: Refresh messages if on that tab
-    if (activeMenu === 'messages' || activeMenu === 'contact-messages') {
-      window.location.reload() // simple refresh for now
-    }
+    // Optimistic update — remove from list immediately
+    setUsers(prev => prev.filter(u => u.id !== id))
+    setAccountTotal(prev => Math.max(0, prev - 1))
     alert('Account and related data (including messages) deleted.')
   } catch (err) { 
     alert('Failed to delete user account.') 
