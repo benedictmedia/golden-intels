@@ -601,7 +601,6 @@ const handleSaveAcademicContext = async () => {
       if (accountTab === 'teachers') params.role = 'teacher'
       const res = await axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params })
       setUsers(res.data.users || [])
-      console.log('Users active field sample:', (res.data.users || []).slice(0, 3).map(u => ({ id: u.id, email: u.email, active: u.active, activeType: typeof u.active })))
       setAccountTotal(res.data.total || 0)
       const [studentsRes, staffRes] = await Promise.all([
         axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
