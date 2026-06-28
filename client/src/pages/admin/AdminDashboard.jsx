@@ -601,6 +601,7 @@ const handleSaveAcademicContext = async () => {
       if (accountTab === 'teachers') params.role = 'teacher'
       const res = await axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params })
       setUsers(res.data.users || [])
+      console.log('Users active field sample:', (res.data.users || []).slice(0, 3).map(u => ({ id: u.id, email: u.email, active: u.active, activeType: typeof u.active })))
       setAccountTotal(res.data.total || 0)
       const [studentsRes, staffRes] = await Promise.all([
         axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
@@ -2022,7 +2023,7 @@ const handleDeleteUser = async (id, email) => {
                             </div>
                             <div className="flex items-center gap-2">
                               <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
-                              {u.active === false ? (
+                              {!u.active ? (
                                 <>
                                   <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
                                   <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
@@ -2092,11 +2093,12 @@ const handleDeleteUser = async (id, email) => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
-                                {u.active === false ? (
+                                {!u.active ? (
                                   <>
                                     <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
                                     <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
                                   </>
+                                  
                                 ) : (
                                   <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
                                 )}
