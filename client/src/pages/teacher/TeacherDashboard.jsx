@@ -85,7 +85,7 @@ useEffect(() => {
   const avatarColor = getAvatarColor(displayName)
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
-  const classes = ['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+  const classes = ['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
   const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
   const canonicalizeClass = (value) => {
     const normalizedValue = normalizeClassKey(value)
