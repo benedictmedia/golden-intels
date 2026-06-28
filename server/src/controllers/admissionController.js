@@ -36,6 +36,12 @@ const normalizeGradeLevel = (gradeLevel) => {
     'Grade 4': 'Grade 4',
     'Grade 5': 'Grade 5',
     'Grade 6': 'Grade 6',
+    'Grade 7': 'Grade 7',
+    'Grade 8': 'Grade 8',
+    'Grade 9': 'Grade 9',
+    'Grade 10': 'Grade 10',
+    'Grade 11': 'Grade 11',
+    'Grade 12': 'Grade 12'
   }
   return gradeMap[gradeLevel] || gradeLevel
 }

@@ -42,7 +42,7 @@ const stats = [
   { label: 'Staff Members', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
 ]
 
-const classes = ['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6']
+const classes = ['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -256,6 +256,12 @@ export default function AdminDashboard() {
     'Grade 4',
     'Grade 5',
     'Grade 6',
+    'Grade 7',
+    'Grade 8',
+    'Grade 9',
+    'Grade 10',
+    'Grade 11',
+    'Grade 12'
   ]
 
   const getNextClass = (currentClass) => {
@@ -1447,7 +1453,7 @@ const handleDeleteUser = async (id, email) => {
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
                     <h3 className="text-lg font-bold text-cyan-700 mb-4">Set Monthly Fees by Class</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(grade => (
+                      {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-cyan-700 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
@@ -1474,7 +1480,7 @@ const handleDeleteUser = async (id, email) => {
                     <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    {['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(cls => (
+                    {['All', 'Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(cls => (
                       <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
@@ -1780,7 +1786,7 @@ const handleDeleteUser = async (id, email) => {
                       <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
                       <select value={newStudent.gradeLevel} onChange={e => setNewStudent({ ...newStudent, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select grade</option>
-                        {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                        {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
                   </div>
@@ -1931,7 +1937,7 @@ const handleDeleteUser = async (id, email) => {
                         <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
                         <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select grade</option>
-                          {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                          {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                         </select>
                       </div>
                       <div>
@@ -3009,7 +3015,7 @@ const handleDeleteUser = async (id, email) => {
               <div>
                 <label className="block text-sm font-bold text-cyan-700 mb-1">Grade Level</label>
                 <select value={editStudent.gradeLevel || ''} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                  {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => <option key={g} value={g}>{g}</option>)}
+                  {['Creche(Babies)', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </div>
 
