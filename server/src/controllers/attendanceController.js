@@ -130,11 +130,13 @@ const getAttendanceSummary = async (req, res) => {
     const records = await prisma.attendanceRecord.findMany({ where })
     const total = records.length
     const present = records.filter(r => r.status === 'present').length
-    const absent = records.filter(r => r.status === 'absent').length
+    const absentOnPermission = records.filter(r => r.status === 'absent_permission').length
+    const absentWithoutPermission = records.filter(r => r.status === 'absent_without_permission' || r.status === 'absent').length
+    const absent = absentOnPermission + absentWithoutPermission
     const late = records.filter(r => r.status === 'late').length
     // Late counts as present for percentage calculation
     const percentage = total > 0 ? Math.round(((present + late) / total) * 100) : 0
-    res.json({ total, present, absent, late, percentage, records })
+    res.json({ total, present, absent, absentOnPermission, absentWithoutPermission, late, percentage, records })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

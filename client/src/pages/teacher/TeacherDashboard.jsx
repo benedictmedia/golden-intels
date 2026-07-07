@@ -65,6 +65,11 @@ useEffect(() => {
   const [attendanceSaving, setAttendanceSaving] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
   const [attendanceSaved, setAttendanceSaved] = useState(false)
+  const [manualExercises, setManualExercises] = useState([])
+  const [showAddManualExercise, setShowAddManualExercise] = useState(false)
+  const [manualExercise, setManualExercise] = useState({ title: '', subject: '', gradeLevel: '', studentId: '', workStatus: 'completed', score: '', maxScore: '100', feedback: '' })
+  const [manualExerciseSaved, setManualExerciseSaved] = useState(false)
+  const [manualExerciseError, setManualExerciseError] = useState('')
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
   const [gradebookClass, setGradebookClass] = useState('')
@@ -564,7 +569,19 @@ useEffect(() => {
     if (savedSubmissions) {
       setSubmissionRecords(JSON.parse(savedSubmissions))
     }
+    const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
+    if (savedManualExercises) {
+      try {
+        setManualExercises(JSON.parse(savedManualExercises))
+      } catch {
+        setManualExercises([])
+      }
+    }
   }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem('goldenIntelsManualExercises', JSON.stringify(manualExercises))
+  }, [manualExercises])
 
   useEffect(() => {
   if (!classOptions.length) return
@@ -605,12 +622,8 @@ useEffect(() => {
   setNewAssignment(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
   setNewLesson(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
   setNewQuiz(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
+  setManualExercise(prev => prev.gradeLevel ? prev : { ...prev, gradeLevel: defaultClass })
 }, [teacherClassOptions.length])
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
 
   const handleNotificationClick = (notification) => {
     const routes = {
@@ -634,13 +647,61 @@ useEffect(() => {
   const attendanceStats = filteredStudents.reduce((stats, student) => {
     const status = attendance[student.id] || 'present'
     return { ...stats, [status]: (stats[status] || 0) + 1 }
-  }, { present: 0, absent: 0, late: 0 })
+  }, { present: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
   const attendanceCompletion = filteredStudents.length
     ? Math.round((Object.keys(attendance).filter(id => filteredStudents.some(s => s.id.toString() === id.toString())).length / filteredStudents.length) * 100)
     : 0
 
   const handleAttendance = (studentId, status) => {
     setAttendance({ ...attendance, [studentId]: status })
+  }
+
+  const handleAddManualExercise = () => {
+    if (!manualExercise.title || !manualExercise.subject || !manualExercise.gradeLevel || !manualExercise.studentId) {
+      setManualExerciseError('Please complete the title, subject, class, and learner fields before saving.')
+      return
+    }
+
+    const selectedStudent = students.find(student => String(student.id) === String(manualExercise.studentId))
+    const normalizedScore = manualExercise.workStatus === 'completed' && manualExercise.score !== ''
+      ? Number(manualExercise.score)
+      : null
+
+    const record = {
+      id: Date.now(),
+      type: 'manual-exercise',
+      teacherEmail,
+      teacherName,
+      academicYear: selectedAcademicYear,
+      term: selectedTerm,
+      studentId: Number(manualExercise.studentId),
+      learnerName: selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : 'Learner',
+      gradeLevel: manualExercise.gradeLevel,
+      subject: manualExercise.subject,
+      title: manualExercise.title,
+      workStatus: manualExercise.workStatus,
+      score: normalizedScore,
+      maxScore: manualExercise.maxScore ? Number(manualExercise.maxScore) : 100,
+      feedback: manualExercise.feedback,
+      createdAt: new Date().toISOString(),
+      markedAt: new Date().toISOString(),
+      markedBy: user?.name || 'Teacher'
+    }
+
+    setManualExercises(prev => [record, ...prev])
+    setManualExerciseSaved(true)
+    setManualExerciseError('')
+    setTimeout(() => setManualExerciseSaved(false), 3000)
+    setManualExercise({
+      title: '',
+      subject: '',
+      gradeLevel: manualExercise.gradeLevel,
+      studentId: '',
+      workStatus: 'completed',
+      score: '',
+      maxScore: '100',
+      feedback: ''
+    })
   }
 
   const saveAttendance = async () => {
@@ -780,6 +841,7 @@ useEffect(() => {
   const teacherAssignments = assignments.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
   const teacherLessons = lessons.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
   const teacherQuizzes = quizzes.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
+  const teacherManualExercises = manualExercises.filter(item => item.teacherEmail === teacherEmail && matchesAcademicContext(item))
   const teacherSubmissionRecords = submissionRecords.filter(record => record.teacherEmail === teacherEmail && matchesAcademicContext(record))
   const getResponsesForItem = (item, type) => teacherSubmissionRecords.filter(record => record.type === type && String(record.itemId) === String(item.id))
 
@@ -1817,6 +1879,7 @@ useEffect(() => {
                   <div className="flex flex-wrap gap-3 mb-6">
                     <button onClick={() => setShowAddAssignment(true)} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Assignment</button>
                     <button onClick={() => setShowAddQuiz(true)} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Quiz</button>
+                    <button onClick={() => setShowAddManualExercise(true)} className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Manual Exercise</button>
                   </div>
 
                   {showAddAssignment && (
@@ -1863,6 +1926,106 @@ useEffect(() => {
                       </div>
                     </div>
                   )}
+
+                  {showAddManualExercise && (
+                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
+                      <h3 className="text-xl font-bold text-[#0f6e56] mb-6">Record a Manual Exercise</h3>
+                      {manualExerciseSaved && (
+                        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                          Manual exercise recorded and shared with parents.
+                        </div>
+                      )}
+                      {manualExerciseError && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                          {manualExerciseError}
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Exercise Title</label>
+                          <input type="text" value={manualExercise.title} onChange={e => setManualExercise({ ...manualExercise, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Subject</label>
+                          <select value={manualExercise.subject} onChange={e => setManualExercise({ ...manualExercise, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                            <option value="">Choose subject</option>
+                            {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Class</label>
+                          <select value={manualExercise.gradeLevel} onChange={e => setManualExercise({ ...manualExercise, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                            {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Learner</label>
+                          <select value={manualExercise.studentId} onChange={e => setManualExercise({ ...manualExercise, studentId: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                            <option value="">Select learner</option>
+                            {students.filter(student => matchesClass(student.gradeLevel, manualExercise.gradeLevel)).map(student => (
+                              <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Work Status</label>
+                          <select value={manualExercise.workStatus} onChange={e => setManualExercise({ ...manualExercise, workStatus: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700">
+                            <option value="completed">Completed</option>
+                            <option value="not-done">Not done</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Score</label>
+                          <input type="number" min="0" max="100" value={manualExercise.score} onChange={e => setManualExercise({ ...manualExercise, score: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" placeholder={manualExercise.workStatus === 'not-done' ? 'Not needed' : 'e.g. 85'} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Max Score</label>
+                          <input type="number" min="1" value={manualExercise.maxScore} onChange={e => setManualExercise({ ...manualExercise, maxScore: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-bold text-[#0f6e56] mb-2">Teacher Feedback</label>
+                          <textarea value={manualExercise.feedback} onChange={e => setManualExercise({ ...manualExercise, feedback: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0f6e56] text-gray-700" placeholder="Add a professional note for the parent and learner." />
+                        </div>
+                      </div>
+                      <div className="flex gap-4 mt-6">
+                        <button onClick={handleAddManualExercise} className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Manual Exercise</button>
+                        <button onClick={() => setShowAddManualExercise(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+                    <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold text-[#0f6e56]">Recorded Manual Exercises</h3>
+                        <p className="text-sm text-gray-500">These entries are shared with the parent portal for progress tracking.</p>
+                      </div>
+                      <span className="bg-blue-50 text-[#0f6e56] text-sm font-bold px-3 py-1 rounded-full">
+                        {teacherManualExercises.length} recorded
+                      </span>
+                    </div>
+                    {teacherManualExercises.length === 0 ? (
+                      <div className="text-center text-gray-400 py-4">No manual exercises recorded yet.</div>
+                    ) : (
+                      <div className="space-y-3">
+                        {teacherManualExercises.map(item => (
+                          <div key={item.id} className="border border-gray-100 rounded-2xl p-4 bg-slate-50">
+                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                              <div>
+                                <p className="font-bold text-[#0f6e56]">{item.title}</p>
+                                <p className="text-sm text-gray-500">{item.subject} · {item.gradeLevel} · {item.learnerName}</p>
+                              </div>
+                              <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.workStatus === 'not-done' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                {item.workStatus === 'not-done' ? 'Not done' : 'Completed'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-3">{item.feedback || 'No feedback recorded yet.'}</p>
+                            <p className="text-sm text-gray-600 mt-2">Score: {item.score != null ? `${item.score}/${item.maxScore}` : 'Not entered'}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {teacherAssignments.length === 0 ? (

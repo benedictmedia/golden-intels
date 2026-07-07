@@ -56,6 +56,7 @@ export default function ParentDashboard() {
   const [attendanceLoading, setAttendanceLoading] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
   const [assignmentRecords, setAssignmentRecords] = useState([])
+  const [manualExerciseRecords, setManualExerciseRecords] = useState([])
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
   const [feePrompt, setFeePrompt] = useState(null)
@@ -468,7 +469,21 @@ export default function ParentDashboard() {
   const attendancePercentage = attendanceRecords.length
     ? Math.round(((attendanceSummary.present + attendanceSummary.late) / attendanceRecords.length) * 100)
     : 0
-  const formatAttendanceStatus = (status) => status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
+  const formatAttendanceStatus = (status) => {
+    switch (status) {
+      case 'absent_permission':
+        return 'Absent (on permission)'
+      case 'absent_without_permission':
+      case 'absent':
+        return 'Absent (without permission)'
+      case 'late':
+        return 'Late'
+      case 'present':
+        return 'Present'
+      default:
+        return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Pending'
+    }
+  }
   const getAcademicYearFromDate = (value) => {
     const date = new Date(value)
     if (isNaN(date.getTime())) return selectedAcademicYear
@@ -502,12 +517,19 @@ export default function ParentDashboard() {
     return getStudentFullName(student) && String(record.learnerName || '').trim().toLowerCase() === getStudentFullName(student)
   }
 
-  const markedAssessmentRecords = assignmentRecords.filter(record =>
-    ['assignment', 'quiz'].includes(record.type) &&
-    (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
-    matchesAcademicContext(record) &&
-    students.some(student => matchesParentChild(record, student))
-  )
+  const markedAssessmentRecords = [
+    ...assignmentRecords.filter(record =>
+      ['assignment', 'quiz'].includes(record.type) &&
+      (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
+      matchesAcademicContext(record) &&
+      students.some(student => matchesParentChild(record, student))
+    ),
+    ...manualExerciseRecords.filter(record =>
+      record.type === 'manual-exercise' &&
+      matchesAcademicContext(record) &&
+      students.some(student => matchesParentChild(record, student))
+    )
+  ]
   const parentAssessmentFolders = buildSubjectFolders(markedAssessmentRecords)
   const selectedAssessmentSubject = parentAssessmentFolders.some(folder => folder.subject === activeAssessmentSubject)
     ? activeAssessmentSubject
@@ -531,7 +553,7 @@ export default function ParentDashboard() {
   const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
     ...summary,
     [record.status]: (summary[record.status] || 0) + 1
-  }), { present: 0, absent: 0, late: 0 })
+  }), { present: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
   const contextualAttendancePercentage = contextualAttendanceRecords.length
     ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
     : 0
@@ -543,6 +565,12 @@ export default function ParentDashboard() {
         setAssignmentRecords(saved ? JSON.parse(saved) : [])
       } catch {
         setAssignmentRecords([])
+      }
+      try {
+        const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
+        setManualExerciseRecords(savedManualExercises ? JSON.parse(savedManualExercises) : [])
+      } catch {
+        setManualExerciseRecords([])
       }
     }
     loadAssignmentRecords()
@@ -748,11 +776,12 @@ export default function ParentDashboard() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
                 {[
                   ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
                   ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#0f6e56]', 'text-green-100'],
-                  ['Absent', contextualAttendanceSummary.absent, 'bg-red-500', 'text-red-100'],
+                  ['Absent (on permission)', contextualAttendanceSummary.absent_permission, 'bg-amber-500', 'text-amber-100'],
+                  ['Absent (without permission)', contextualAttendanceSummary.absent_without_permission, 'bg-red-500', 'text-red-100'],
                   ['Late', contextualAttendanceSummary.late, 'bg-[#0000ff]', 'text-blue-100'],
                 ].map(([label, value, color, textColor]) => (
                   <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
@@ -793,7 +822,8 @@ export default function ParentDashboard() {
                         <td className="px-6 py-4">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                             record.status === 'present' ? 'bg-green-100 text-green-700' :
-                            record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                            record.status === 'absent_permission' ? 'bg-amber-100 text-amber-700' :
+                            record.status === 'absent_without_permission' || record.status === 'absent' ? 'bg-red-100 text-red-700' :
                             'bg-blue-100 text-cyan-700'
                           }`}>
                             {formatAttendanceStatus(record.status)}
@@ -918,8 +948,8 @@ export default function ParentDashboard() {
           {activeMenu === 'assessments' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Marked Assessments</h2>
-                <p className="text-gray-500 text-sm">Only answered assignments and quizzes that have been marked are shown here.</p>
+                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Progress Updates</h2>
+                <p className="text-gray-500 text-sm">Marked assignments and quizzes, plus manual exercise entries recorded by teachers, are shown here.</p>
               </div>
               {markedAssessmentRecords.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
@@ -966,7 +996,7 @@ export default function ParentDashboard() {
                           <div className="flex items-start justify-between gap-4 mb-4">
                             <div>
                               <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
-                                {assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
+                                {assignment.type === 'manual-exercise' ? 'Manual exercise' : assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
                               </span>
                               <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
                               <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
@@ -981,26 +1011,37 @@ export default function ParentDashboard() {
                             <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
                             <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
                           </div>
-                          <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                            <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
-                            <div className="space-y-3">
-                              {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
-                                <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
-                                  <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
-                                  <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
-                                  {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
-                                    <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
-                                  )}
-                                </div>
-                              ))}
+                          {assignment.type === 'manual-exercise' ? (
+                            <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                              <p className="text-xs font-bold text-[#4a235a] mb-1">Exercise Details</p>
+                              <p className="text-sm text-gray-700">Work status: {assignment.workStatus === 'not-done' ? 'Not done' : 'Completed'}</p>
+                              <p className="text-sm text-gray-700 mt-1">Score: {assignment.score != null ? `${assignment.score}/${assignment.maxScore}` : 'Not entered'}</p>
+                              {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
                             </div>
-                          </div>
-                          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                            <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
-                            <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
-                            {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
-                            <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
-                          </div>
+                          ) : (
+                            <>
+                              <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                                <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
+                                <div className="space-y-3">
+                                  {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
+                                    <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
+                                      <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
+                                      <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
+                                      {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
+                                        <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                                <p className="text-xs font-bold text-green-700 mb-1">Teacher Mark</p>
+                                <p className="text-sm text-gray-700">Score: {assignment.score || 'Marked'}{assignment.totalQuestions ? ` / ${assignment.totalQuestions}` : ''}</p>
+                                {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
+                                <p className="text-xs text-gray-500 mt-2">Marked by {assignment.markedBy || 'Teacher'}</p>
+                              </div>
+                            </>
+                          )}
                         </div>
                       ))}
                     </div>
