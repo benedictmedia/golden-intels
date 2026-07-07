@@ -295,6 +295,11 @@ export default function TeacherDashboard() {
   }
 }
 
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
   const handleDownloadPDF = async (result) => {
     const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
