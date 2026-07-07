@@ -651,8 +651,14 @@ useEffect(() => {
   const filteredStudents = students.filter(student => matchesClass(student.gradeLevel, activeClass))
   const attendanceStats = filteredStudents.reduce((stats, student) => {
     const status = attendance[student.id] || 'present'
-    return { ...stats, [status]: (stats[status] || 0) + 1 }
-  }, { present: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
+    return {
+      ...stats,
+      [status]: (stats[status] || 0) + 1,
+      absent: status === 'absent' || status === 'absent_permission' || status === 'absent_without_permission'
+        ? (stats.absent || 0) + 1
+        : stats.absent || 0
+    }
+  }, { present: 0, absent: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
   const attendanceCompletion = filteredStudents.length
     ? Math.round((Object.keys(attendance).filter(id => filteredStudents.some(s => s.id.toString() === id.toString())).length / filteredStudents.length) * 100)
     : 0
@@ -1300,10 +1306,11 @@ useEffect(() => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 {[
                   ['Present', attendanceStats.present, 'bg-[#0f6e56]', 'text-green-100'],
-                  ['Absent', attendanceStats.absent, 'bg-red-500', 'text-red-100'],
+                  ['Absent (on permission)', attendanceStats.absent_permission, 'bg-amber-500', 'text-amber-100'],
+                  ['Absent (without permission)', attendanceStats.absent_without_permission, 'bg-red-500', 'text-red-100'],
                   ['Late', attendanceStats.late, 'bg-blue-500', 'text-cyan-700/80'],
                   ['Marked', `${attendanceCompletion}%`, 'bg-blue-600', 'text-blue-100'],
                 ].map(([label, value, color, textColor]) => (
@@ -1368,17 +1375,18 @@ useEffect(() => {
                             <p className="text-xs text-gray-400">{student.studentId}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="inline-flex bg-blue-100 rounded-xl p-1">
+                            <div className="inline-flex bg-blue-100 rounded-xl p-1 flex-wrap gap-1">
                               {[
                                 ['present', 'Present', 'bg-[#0f6e56] text-white'],
-                                ['absent', 'Absent', 'bg-red-500 text-white'],
                                 ['late', 'Late', 'bg-blue-500 text-cyan-700'],
+                                ['absent_permission', 'Absent (on permission)', 'bg-amber-500 text-white'],
+                                ['absent_without_permission', 'Absent (without permission)', 'bg-red-500 text-white'],
                               ].map(([status, label, activeClassName]) => (
                                 <button
                                   key={status}
                                   type="button"
                                   onClick={() => handleAttendance(student.id, status)}
-                                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                  className={`px-3 py-2 rounded-lg text-[10px] font-bold transition-colors ${
                                     (attendance[student.id] || 'present') === status ? activeClassName : 'text-gray-500 hover:text-[#0f6e56]'
                                   }`}
                                 >

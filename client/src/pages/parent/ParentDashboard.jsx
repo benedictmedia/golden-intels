@@ -74,6 +74,18 @@ export default function ParentDashboard() {
     .catch(() => {})
 }, [])
 
+  const fetchParentApprovedResults = async () => {
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    try {
+      const res = await axios.get(`${API_URL}/api/results`, { headers })
+      const approved = res.data.filter(r => r.status === 'approved')
+      setApprovedResults(approved)
+    } catch (err) {
+      console.error('Failed to fetch results:', err)
+    }
+  }
+
   useEffect(() => {
   const token = localStorage.getItem('token')
   const headers = { Authorization: `Bearer ${token}` }
@@ -84,11 +96,7 @@ export default function ParentDashboard() {
       if (res.data.length > 0) setSelectedChild(res.data[0])
     })
 
-  axios.get(`${API_URL}/api/results`, { headers })
-    .then(res => {
-      const approved = res.data.filter(r => r.status === 'approved')
-      setApprovedResults(approved)
-    })
+  fetchParentApprovedResults()
 
   axios.get(`${API_URL}/api/fees/payments`, { headers })
     .then(res => setFeePayments(res.data))
@@ -103,6 +111,11 @@ export default function ParentDashboard() {
     })
     .catch(err => console.error('Failed to fetch fee alerts:', err))
 }, [])
+
+  useEffect(() => {
+    if (activeMenu !== 'grades') return
+    fetchParentApprovedResults()
+  }, [activeMenu, selectedChild?.id, selectedAcademicYear, selectedTerm])
   const [viewingResult, setViewingResult] = useState(null)
 
   useEffect(() => {
@@ -469,7 +482,7 @@ export default function ParentDashboard() {
   const attendanceSummary = attendanceRecords.reduce((summary, record) => ({
     ...summary,
     [record.status]: (summary[record.status] || 0) + 1
-  }), { present: 0, absent: 0, late: 0 })
+  }), { present: 0, absent: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
   const attendancePercentage = attendanceRecords.length
     ? Math.round(((attendanceSummary.present + attendanceSummary.late) / attendanceRecords.length) * 100)
     : 0
@@ -517,7 +530,8 @@ export default function ParentDashboard() {
   const getStudentFullName = (student) => `${student?.firstName || ''} ${student?.lastName || ''}`.trim().toLowerCase()
   const matchesParentChild = (record, student) => {
     if (!student) return false
-    if (record.studentId && student.studentId && record.studentId === student.studentId) return true
+    if (record.studentId != null && student.id != null && Number(record.studentId) === Number(student.id)) return true
+    if (record.studentId && student.studentId && String(record.studentId).trim() === String(student.studentId).trim()) return true
     return getStudentFullName(student) && String(record.learnerName || '').trim().toLowerCase() === getStudentFullName(student)
   }
 

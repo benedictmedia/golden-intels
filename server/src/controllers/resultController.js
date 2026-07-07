@@ -308,7 +308,7 @@ const updateResult = async (req, res) => {
         data: {
           scores: mergedScores,
           remarks: nextRemarks,
-          status: 'pending'
+          status: existing.status === 'approved' ? 'approved' : 'pending'
         },
         include: { student: true }
       })
