@@ -19,7 +19,7 @@ const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
   { icon: <Users size={20} />, label: 'My Children', id: 'children' },
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
-  { icon: <BookOpen size={20} />, label: 'Grades', id: 'grades' },
+  { icon: <BookOpen size={20} />, label: 'Statements of results', id: 'grades' },
   { icon: <FileText size={20} />, label: 'Assessments', id: 'assessments' },
   { icon: <DollarSign size={20} />, label: 'Fee Status', id: 'fees' },
   { icon: <MessageSquare size={20} />, label: 'Messages', id: 'messages' },
@@ -142,6 +142,9 @@ export default function ParentDashboard() {
     const student = result.student
     const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
+    const resultMetrics = calculateResultMetrics(result)
+    const studentResults = approvedResults.filter(r => matchesParentChild(r, student))
+    const cumulativeGpa = studentResults.length ? getCumulativeGpa(studentResults) : 0
 
     const logoData = await loadCircularLogoDataUrl(new URL('../../assets/logo.png', import.meta.url).href)
 
@@ -206,9 +209,11 @@ export default function ParentDashboard() {
     // Subjects table header — compact 8mm rows
     doc.setFillColor(26, 60, 110); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-    doc.text('Subject', 15, y + 5.5); doc.text('Class(10)', 65, y + 5.5)
-    doc.text('CAT1(20)', 92, y + 5.5); doc.text('CAT2(20)', 119, y + 5.5)
-    doc.text('Exam(50)', 146, y + 5.5); doc.text('Total', 170, y + 5.5); doc.text('Grade', 186, y + 5.5)
+    doc.text('Subject', 15, y + 5.5)
+    doc.text('Credit', 80, y + 5.5, { align: 'center' })
+    doc.text('Score', 108, y + 5.5, { align: 'center' })
+    doc.text('Grade', 145, y + 5.5, { align: 'center' })
+    doc.text('Grade Points', 190, y + 5.5, { align: 'center' })
     y += 8
 
     let grandTotal = 0
@@ -217,12 +222,10 @@ export default function ParentDashboard() {
 
     SUBJECTS.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
-      const classScore = parseFloat(s.classScore) || 0
-      const cat1 = parseFloat(s.cat1) || 0
-      const cat2 = parseFloat(s.cat2) || 0
-      const exam = parseFloat(s.exam) || 0
-      const wExam = (exam / 100) * 50
       const total = getSubjectTotal(s)
+      const credit = getSubjectCredit(s)
+      const grade = getGrade(total)
+      const gradePoints = (credit * getGradePointValue(total)).toFixed(2)
       grandTotal += total
 
       if (index % 2 === 0) { doc.setFillColor(245, 248, 255) } else { doc.setFillColor(255, 255, 255) }
@@ -230,17 +233,18 @@ export default function ParentDashboard() {
       doc.setDrawColor(220, 225, 235); doc.setLineWidth(0.2); doc.rect(10, y, pageWidth - 20, 8)
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 60, 110); doc.text(subject, 15, y + 5.5)
       doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
-      doc.text(classScore.toString(), 72, y + 5.5); doc.text(cat1.toString(), 99, y + 5.5)
-      doc.text(cat2.toString(), 126, y + 5.5); doc.text(wExam.toFixed(2), 150, y + 5.5); doc.text(total.toFixed(2), 170, y + 5.5)
-      const gradeColor = getGradeColor(total); doc.setFont('helvetica', 'bold'); doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
-      doc.text(total > 0 ? getGrade(total) : '-', 188, y + 5.5)
+      doc.text(String(credit), 78, y + 5.5, { align: 'center' })
+      doc.text(total.toFixed(2), 108, y + 5.5, { align: 'center' })
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 60, 110); doc.text(grade, 145, y + 5.5, { align: 'center' })
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50); doc.text(gradePoints, 190, y + 5.5, { align: 'center' })
       y += 8
     })
 
     // Grand total row
     doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 5.5)
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 145, y + 5.5)
+    doc.text(`Term GPA: ${resultMetrics.termGpa.toFixed(2)}`, pageWidth - 60, y + 5.5, { align: 'right' })
     y += 10
 
     // Attendance summary — compact single line
@@ -537,7 +541,12 @@ export default function ParentDashboard() {
   const visibleMarkedAssessmentRecords = selectedAssessmentSubject
     ? markedAssessmentRecords.filter(record => getSubjectName(record) === selectedAssessmentSubject)
     : markedAssessmentRecords
-  const contextualApprovedResults = approvedResults.filter(matchesAcademicContext)
+  const studentApprovedResults = selectedChild
+    ? approvedResults.filter(result => matchesParentChild(result, selectedChild))
+    : []
+  const contextualApprovedResults = studentApprovedResults.filter(matchesAcademicContext)
+  const contextualTermResult = contextualApprovedResults[0] || null
+  const contextualTermGpa = contextualTermResult ? calculateResultMetrics(contextualTermResult).termGpa : 0
   const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
   const contextualFeePayments = feePayments
   // Returns true if the student has no outstanding balance for the selected term
@@ -557,6 +566,92 @@ export default function ParentDashboard() {
   const contextualAttendancePercentage = contextualAttendanceRecords.length
     ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
     : 0
+
+  const getGradeLetter = (score) => {
+    if (score >= 90) return 'A+'
+    if (score >= 80) return 'A'
+    if (score >= 75) return 'B+'
+    if (score >= 70) return 'B'
+    if (score >= 65) return 'C+'
+    if (score >= 60) return 'C'
+    if (score >= 55) return 'D+'
+    if (score >= 50) return 'D'
+    return 'E'
+  }
+
+  const getGradePointValue = (score) => {
+    if (score >= 90) return 4.0
+    if (score >= 80) return 4.0
+    if (score >= 75) return 3.5
+    if (score >= 70) return 3.0
+    if (score >= 65) return 2.5
+    if (score >= 60) return 2.0
+    if (score >= 55) return 1.5
+    if (score >= 50) return 1.0
+    return 0.0
+  }
+
+  const getSubjectCredit = (scoreEntry = {}) => {
+    if (scoreEntry.credit != null) return Number(scoreEntry.credit)
+    if (scoreEntry.credits != null) return Number(scoreEntry.credits)
+    return 3
+  }
+
+  const getSubjectGradePoint = (scoreEntry = {}) => {
+    const total = getSubjectTotal(scoreEntry)
+    const credit = getSubjectCredit(scoreEntry)
+    return credit * getGradePointValue(total)
+  }
+
+  const calculateResultMetrics = (result) => {
+    const scores = getNormalizedScores(result.scores || {})
+    let totalCredits = 0
+    let totalPoints = 0
+
+    Object.values(scores).forEach(scoreEntry => {
+      const credit = getSubjectCredit(scoreEntry)
+      totalCredits += credit
+      totalPoints += getSubjectGradePoint(scoreEntry)
+    })
+
+    const termGpa = totalCredits > 0 ? totalPoints / totalCredits : 0
+    return {
+      totalCredits,
+      totalPoints,
+      termGpa,
+      gradePointAverage: termGpa
+    }
+  }
+
+  const getStudentApprovedResults = selectedChild
+    ? approvedResults.filter(result => matchesParentChild(result, selectedChild))
+    : []
+
+  const getCumulativeGpa = (results) => {
+    let credits = 0
+    let points = 0
+
+    results.forEach(result => {
+      const scores = getNormalizedScores(result.scores || {})
+      Object.values(scores).forEach(scoreEntry => {
+        const credit = getSubjectCredit(scoreEntry)
+        credits += credit
+        points += getSubjectGradePoint(scoreEntry)
+      })
+    })
+
+    return credits > 0 ? points / credits : 0
+  }
+
+  const studentCumulativeGpa = getCumulativeGpa(getStudentApprovedResults)
+
+  const sortedStudentResults = [...getStudentApprovedResults].sort((a, b) => {
+    if (a.academicYear !== b.academicYear) return b.academicYear.localeCompare(a.academicYear)
+    const termOrder = { 'Term 1': 1, 'Term 2': 2, 'Term 3': 3 }
+    return (termOrder[b.term] || 0) - (termOrder[a.term] || 0)
+  })
+
+  const selectedChildResults = selectedChild ? sortedStudentResults : []
 
   useEffect(() => {
     const loadAssignmentRecords = () => {
@@ -691,8 +786,8 @@ export default function ParentDashboard() {
                 {[
 { label: 'My Children', value: students.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
 { label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-{ label: 'Avg Grade', value: 'A', color: 'bg-[#800080]', textColor: 'text-purple-200' },
-{ label: 'Messages', value: messages.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
+{ label: 'Term GPA', value: contextualTermResult ? contextualTermGpa.toFixed(2) : 'N/A', color: 'bg-[#800080]', textColor: 'text-purple-200' },
+{ label: 'Cumulative CGPA', value: studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -853,11 +948,13 @@ export default function ParentDashboard() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {contextualApprovedResults.map(result => (
-                    <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                      <div className="flex items-start justify-between flex-wrap gap-4">
+                  {contextualApprovedResults.map(result => {
+                    const metrics = calculateResultMetrics(result)
+                    return (
+                      <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex flex-col gap-6">
 
-                        {/* Info */}
+                          {/* Info */}
                         <div>
                           <h3 className="font-bold text-[#4a235a] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
                           <p className="text-sm text-gray-500">{result.student?.studentId} | {result.gradeLevel}</p>
@@ -867,63 +964,82 @@ export default function ParentDashboard() {
                           </span>
                         </div>
 
-                        {/* Subject Summary — hidden when fees outstanding */}
-                        <div className="flex-1 min-w-[200px]">
+                        <div className="grid gap-4">
                           {isFeeClearedForTerm(result.student?.id) ? (
-                            <div className="grid grid-cols-3 gap-2">
-                              {SUBJECTS.map(subject => {
-                                const s = getSubjectScore(result.scores || {}, subject)
-                                const total = getSubjectTotal(s)
-                                const getGrade = (t) => {
-                                  if (t >= 90) return 'A+'
-                                  if (t >= 80) return 'A'
-                                  if (t >= 75) return 'B+'
-                                  if (t >= 70) return 'B'
-                                  if (t >= 65) return 'C+'
-                                  if (t >= 60) return 'C'
-                                  if (t >= 55) return 'D+'
-                                  if (t >= 50) return 'D'
-                                  return 'E'
-                                }
-                                return (
-                                  <div key={subject} className="bg-blue-50 rounded-lg p-2 text-center">
-                                    <p className="text-xs font-bold text-[#4a235a]">{subject}</p>
-                                    <p className="text-sm font-bold text-gray-700">{total.toFixed(1)}</p>
-                                    <p className="text-xs text-purple-600 font-bold">{getGrade(total)}</p>
-                                  </div>
-                                )
-                              })}
+                            <div className="overflow-x-auto rounded-2xl border border-gray-100">
+                              <table className="w-full text-sm">
+                                <thead className="bg-[#4a235a] text-white">
+                                  <tr>
+                                    <th className="px-4 py-3 text-left">Subject</th>
+                                    <th className="px-4 py-3 text-center">Credit</th>
+                                    <th className="px-4 py-3 text-center">Score</th>
+                                    <th className="px-4 py-3 text-center">Grade</th>
+                                    <th className="px-4 py-3 text-center">Grade Points</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {SUBJECTS.map((subject, subjectIndex) => {
+                                    const scoreEntry = getSubjectScore(result.scores || {}, subject)
+                                    const total = getSubjectTotal(scoreEntry)
+                                    const credit = getSubjectCredit(scoreEntry)
+                                    const grade = getGradeLetter(total)
+                                    const gradePoints = (credit * getGradePointValue(total)).toFixed(2)
+                                    return (
+                                      <tr key={subject} className={subjectIndex % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                                        <td className="px-4 py-3 font-bold text-[#4a235a]">{subject}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{credit}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{total.toFixed(2)}</td>
+                                        <td className="px-4 py-3 text-center font-bold text-[#4a235a]">{grade}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{gradePoints}</td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           ) : (
-                            <div className="grid grid-cols-3 gap-2">
-                              {SUBJECTS.map(subject => (
-                                <div key={subject} className="bg-gray-100 rounded-lg p-2 text-center border border-dashed border-gray-300">
-                                  <p className="text-xs font-bold text-gray-400">{subject}</p>
-                                  <p className="text-sm font-bold text-gray-300">—</p>
-                                  <p className="text-xs text-gray-300 font-bold">—</p>
-                                </div>
-                              ))}
+                            <div className="flex flex-col items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-center">
+                              <Lock size={22} className="text-red-500" />
+                              <p className="text-xs font-bold text-red-600">Results Locked</p>
+                              <p className="text-xs text-red-400 leading-snug">
+                                Outstanding fees for {selectedTerm}.<br />
+                                Please clear fees to access results.
+                              </p>
                             </div>
                           )}
                         </div>
 
                         {/* Buttons — locked if fees are outstanding for this term */}
                         <div className="flex flex-col gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="bg-blue-50 rounded-2xl p-4">
+                              <p className="text-xs text-gray-500 uppercase">Total Credits</p>
+                              <p className="text-xl font-bold text-[#4a235a]">{metrics.totalCredits}</p>
+                            </div>
+                            <div className="bg-blue-50 rounded-2xl p-4">
+                              <p className="text-xs text-gray-500 uppercase">Term GPA</p>
+                              <p className="text-xl font-bold text-[#4a235a]">{metrics.termGpa.toFixed(2)}</p>
+                            </div>
+                            <div className="bg-blue-50 rounded-2xl p-4">
+                              <p className="text-xs text-gray-500 uppercase">Cumulative CGPA</p>
+                              <p className="text-xl font-bold text-[#4a235a]">{studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A'}</p>
+                            </div>
+                          </div>
                           {isFeeClearedForTerm(result.student?.id) ? (
-                            <>
+                            <div className="flex flex-col lg:flex-row gap-3 mt-4">
                               <button
                                 onClick={() => setViewingResult(result)}
-                                className="bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                                className="flex-1 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
                               >
                                 View Full Result
                               </button>
                               <button
                                 onClick={() => handleParentDownloadPDF(result)}
-                                className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                                className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
                               >
                                 Download PDF
                               </button>
-                            </>
+                            </div>
                           ) : (
                             <div className="flex flex-col items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-center">
                               <Lock size={22} className="text-red-500" />
@@ -938,7 +1054,7 @@ export default function ParentDashboard() {
 
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>
@@ -1192,6 +1308,8 @@ export default function ParentDashboard() {
                       <th className="px-4 py-3 text-center">Exam(50)</th>
                       <th className="px-4 py-3 text-center">Total</th>
                       <th className="px-4 py-3 text-center">Grade</th>
+                      <th className="px-4 py-3 text-center">Credit</th>
+                      <th className="px-4 py-3 text-center">Grade Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1203,6 +1321,8 @@ export default function ParentDashboard() {
                       const exam = parseFloat(s.exam) || 0
                       const wExam = (exam / 100) * 50
                       const total = getSubjectTotal(s)
+                      const credits = getSubjectCredit(s)
+                      const gradePoints = (credits * getGradePointValue(total)).toFixed(2)
                       const getGrade = (t) => {
                         if (t >= 90) return 'A+'
                         if (t >= 80) return 'A'
@@ -1229,19 +1349,30 @@ export default function ParentDashboard() {
                           <td className="px-4 py-3 text-center text-gray-600">{wExam.toFixed(2)}</td>
                           <td className="px-4 py-3 text-center font-bold text-gray-700">{total.toFixed(2)}</td>
                           <td className={`px-4 py-3 text-center font-bold ${getGradeColor(total)}`}>{getGrade(total)}</td>
+                          <td className="px-4 py-3 text-center text-gray-600">{credits}</td>
+                          <td className="px-4 py-3 text-center text-gray-600">{gradePoints}</td>
                         </tr>
                       )
                     })}
                     {/* Grand Total Row */}
                     <tr className="bg-blue-500">
-                      <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
-                      <td className="px-4 py-3 text-center font-bold text-cyan-700">
-                        {calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / 1100
-                      </td>
+                      <td colSpan="7" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
+                      <td className="px-4 py-3 text-center font-bold text-cyan-700">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / 1100</td>
                       <td className="px-4 py-3"></td>
                     </tr>
                   </tbody>
                 </table>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 uppercase">Term GPA</p>
+                  <p className="text-lg font-bold text-[#0f6e56]">{calculateResultMetrics(viewingResult).termGpa.toFixed(2)}</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 uppercase">Cumulative CGPA</p>
+                  <p className="text-lg font-bold text-[#0f6e56]">{studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A'}</p>
+                </div>
               </div>
 
               {/* Remarks */}

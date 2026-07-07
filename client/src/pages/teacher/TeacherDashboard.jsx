@@ -38,17 +38,6 @@ export default function TeacherDashboard() {
   const [activeMenu, setActiveMenu] = useState('profile')
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
   const [selectedTerm, setSelectedTerm] = useState('Term 1')
-  // Fetch active academic context from admin on mount
-useEffect(() => {
-  const token = localStorage.getItem('token')
-  axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(res => {
-      if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
-      if (res.data?.term) { setSelectedTerm(res.data.term); setGradebookTerm(res.data.term) }
-      if (res.data?.academicYear) setGradebookYear(res.data.academicYear)
-    })
-    .catch(() => {})
-}, [])
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
@@ -85,6 +74,17 @@ useEffect(() => {
   const [gradebookLoading, setGradebookLoading] = useState(false)
   const [gradebookError, setGradebookError] = useState('')
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
+        if (res.data?.term) { setSelectedTerm(res.data.term); setGradebookTerm(res.data.term) }
+        if (res.data?.academicYear) setGradebookYear(res.data.academicYear)
+      })
+      .catch(() => {})
+  }, [])
 
   const displayName = (profileUser || user)?.name || user?.name || 'Teacher'
   const avatarColor = getAvatarColor(displayName)
