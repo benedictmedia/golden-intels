@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getUsers, updateUser, deactivateUser, reactivateUser, deleteUser, getAccountAudits } = require('../controllers/userController')
+const { getUsers, updateUser, resetUserPassword, deactivateUser, reactivateUser, deleteUser, getAccountAudits } = require('../controllers/userController')
 const protect = require('../middleware/authMiddleware')
 const { uploadStaff } = require('../middleware/cloudinaryUpload')
 
@@ -11,6 +11,7 @@ router.post('/deactivate', protect, deactivateUser)     // ← must be before /:
 router.post('/reactivate', protect, reactivateUser)     // ← must be before /:id
 
 // ✅ Wildcard /:id routes LAST
+router.post('/:id/reset-password', protect, resetUserPassword)
 router.put('/:id', protect, uploadStaff.single('photo'), updateUser)
 router.delete('/:id', protect, deleteUser)
 

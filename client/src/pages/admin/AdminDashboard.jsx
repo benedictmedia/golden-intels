@@ -650,6 +650,22 @@ const handleDeleteUser = async (id, email) => {
   }
 }
 
+const handleAdminPasswordReset = async (id, email) => {
+  const password = window.prompt(`Enter a temporary password for ${email}. It must be at least 6 characters.`)
+  if (!password) return
+  if (password.length < 6) {
+    alert('Temporary password must be at least 6 characters.')
+    return
+  }
+
+  try {
+    await axios.post(`${API_URL}/api/users/${id}/reset-password`, { password }, { headers: getAuthHeaders() })
+    alert('Temporary password set. The user can log in with it and should change it after login.')
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to reset password.')
+  }
+}
+
   const handleParentAccountSelect = (email) => {
     const parent = parentAccounts.find(p => p.email === email)
     setNewStudent(prev => ({
@@ -1988,7 +2004,7 @@ const handleDeleteUser = async (id, email) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Accounts</h2>
-                  <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. You can view, edit or deactivate accounts.</p>
+                  <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. Passwords are protected, but admins can set temporary passwords when needed.</p>
                 </div>
                 <div className="space-x-2">
                   <button onClick={() => { setAccountTab('parents'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='parents'?'bg-blue-600 text-white':'bg-white border'}`}>Parents</button>
@@ -2029,6 +2045,7 @@ const handleDeleteUser = async (id, email) => {
                             </div>
                             <div className="flex items-center gap-2">
                               <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                              <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
                               {!u.active ? (
                                 <>
                                   <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
@@ -2066,6 +2083,18 @@ const handleDeleteUser = async (id, email) => {
                             <div className="flex items-center gap-2">
                               <button onClick={() => setSelectedStudent(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
                               <button onClick={() => { setEditStudent(s); setEditMode(true) }} className="px-3 py-2 bg-yellow-400 text-white rounded">Edit</button>
+                              <button
+                                onClick={() => {
+                                  if (!s.learnerUserId) {
+                                    alert('This learner does not have a linked portal login yet. Open View and create login credentials first.')
+                                    return
+                                  }
+                                  handleAdminPasswordReset(s.learnerUserId, s.email || s.learnerEmail || `${s.firstName} ${s.lastName}`)
+                                }}
+                                className="px-3 py-2 bg-cyan-700 text-white rounded"
+                              >
+                                Reset Password
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -2099,6 +2128,7 @@ const handleDeleteUser = async (id, email) => {
                               </div>
                               <div className="flex items-center gap-2">
                                 <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
+                                <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
                                 {!u.active ? (
                                   <>
                                     <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
@@ -2145,6 +2175,18 @@ const handleDeleteUser = async (id, email) => {
                           <option value="teacher">Teacher</option>
                           <option value="admin">Admin</option>
                         </select>
+                      </div>
+
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <p className="text-sm text-amber-800 mb-3">
+                          Passwords cannot be viewed after they are saved. Set a temporary password if this user cannot log in.
+                        </p>
+                        <button
+                          onClick={() => handleAdminPasswordReset(editingUser.id, editingUser.email)}
+                          className="px-4 py-2 bg-cyan-700 text-white rounded-lg text-sm font-bold"
+                        >
+                          Set Temporary Password
+                        </button>
                       </div>
 
                       {editingUser.role === 'teacher' && (

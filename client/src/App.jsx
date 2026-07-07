@@ -14,6 +14,7 @@ import NewsEvents from './pages/NewsEvents'
 import Staff from './pages/Staff'
 import Contact from './pages/Contact'
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
 import ParentDashboard from './pages/parent/ParentDashboard'
@@ -38,6 +39,7 @@ function AnimatedRoutes() {
           <Route path="/staff" element={<PageTransition><Navbar /><Staff /><Footer /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Navbar /><Contact /><Footer /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/reset-password/:token" element={<PageTransition><ResetPassword /></PageTransition>} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/parent" element={<ParentDashboard />} />

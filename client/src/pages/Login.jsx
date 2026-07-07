@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/layout/BrandLogo'
+import API_URL from '../api/config'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [forgotMode, setForgotMode] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -22,8 +26,23 @@ export default function Login() {
       else if (user.role === 'parent') navigate('/parent')
       else if (user.role === 'learner') navigate('/learner')
       else navigate('/')
-    } catch (err) {
+    } catch {
       setError('Invalid email or password. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault()
+    setError('')
+    setMessage('')
+    setLoading(true)
+    try {
+      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email })
+      setMessage(res.data.message || 'If that email is registered, a password reset link has been sent.')
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not request password reset. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -47,8 +66,14 @@ export default function Login() {
           </div>
         )}
 
+        {message && (
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm">
+            {message}
+          </div>
+        )}
+
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={forgotMode ? handleForgotPassword : handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-bold text-cyan-700 mb-2">Email Address</label>
             <input
@@ -59,24 +84,38 @@ export default function Login() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
             />
           </div>
-          <div>
-            <label className="block text-sm font-bold text-cyan-700 mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
-            />
-          </div>
+          {!forgotMode && (
+            <div>
+              <label className="block text-sm font-bold text-cyan-700 mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
+              />
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? (forgotMode ? 'Sending...' : 'Logging in...') : (forgotMode ? 'Send Reset Link' : 'Login')}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={() => {
+            setForgotMode(prev => !prev)
+            setError('')
+            setMessage('')
+          }}
+          className="w-full text-center text-sm font-semibold text-blue-600 hover:text-blue-800 mt-4"
+        >
+          {forgotMode ? 'Back to login' : 'Forgot password?'}
+        </button>
 
         {/* Roles info */}
         <div className="mt-8 bg-blue-50 rounded-xl p-4">

@@ -1,4 +1,6 @@
 const prisma = require('../config/prismaClient')
+const bcrypt = require('bcryptjs')
+const { sendMail } = require('../utils/mailer')
 
 const ensureAdmin = (req, res) => {
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
@@ -37,7 +39,21 @@ const getUsers = async (req, res) => {
 
     const [total, users] = await Promise.all([
       prisma.user.count({ where }),
-      prisma.user.findMany({ where, orderBy: { createdAt: 'desc' }, skip: (pageNum - 1) * pageSize, take: pageSize })
+      prisma.user.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (pageNum - 1) * pageSize,
+        take: pageSize,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          active: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      })
     ])
 
     const usersWithTeacherInfo = await Promise.all(users.map(async (user) => {
@@ -143,6 +159,48 @@ const updateUser = async (req, res) => {
   }
 }
 
+const resetUserPassword = async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
+  const { id } = req.params
+  const { password } = req.body
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ message: 'Temporary password must be at least 6 characters.' })
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+
+    const hashed = await bcrypt.hash(password, 10)
+    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } })
+    await prisma.accountAudit.create({
+      data: {
+        userId: user.id,
+        action: 'password_reset_by_admin',
+        performedBy: req.user.email,
+        details: { email: user.email, role: user.role }
+      }
+    })
+
+    await sendMail({
+      to: user.email,
+      subject: 'Your Golden-Intels portal password was reset',
+      text: `An administrator reset your portal password. Your temporary password is: ${password}\n\nPlease log in and change it as soon as possible.`,
+      html: `
+        <p>Hello ${user.name},</p>
+        <p>An administrator reset your portal password.</p>
+        <p><strong>Temporary password:</strong> ${password}</p>
+        <p>Please log in and change it as soon as possible.</p>
+      `
+    })
+
+    res.json({ message: 'Temporary password set successfully.' })
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 const deactivateUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { email } = req.body
@@ -218,4 +276,4 @@ const getAccountAudits = async (req, res) => {
   }
 }
 
-module.exports = { getUsers, updateUser, deactivateUser, reactivateUser, deleteUser, getAccountAudits }
+module.exports = { getUsers, updateUser, resetUserPassword, deactivateUser, reactivateUser, deleteUser, getAccountAudits }
