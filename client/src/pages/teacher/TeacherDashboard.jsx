@@ -229,7 +229,7 @@ export default function TeacherDashboard() {
 
     const payloadScores = getEditableSubjectScores()
     if (!Object.keys(payloadScores).length) {
-      alert('You do not have any assigned subjects for this class. Please contact admin to update your assignments.')
+      alert('You do not have any assigned subjects for this class. Please contact admin to update your assignments. Thank you.')
       return
     }
 
