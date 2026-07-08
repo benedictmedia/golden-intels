@@ -543,7 +543,6 @@ export default function ParentDashboard() {
       students.some(student => matchesParentChild(record, student))
     ),
     ...manualExerciseRecords.filter(record =>
-      record.type === 'manual-exercise' &&
       matchesAcademicContext(record) &&
       students.some(student => matchesParentChild(record, student))
     )
@@ -668,24 +667,39 @@ export default function ParentDashboard() {
   const selectedChildResults = selectedChild ? sortedStudentResults : []
 
   useEffect(() => {
-    const loadAssignmentRecords = () => {
+    const loadAssignmentRecords = async () => {
       try {
         const saved = window.localStorage.getItem('goldenIntelsSubmissionRecords')
         setAssignmentRecords(saved ? JSON.parse(saved) : [])
       } catch {
         setAssignmentRecords([])
       }
+
+      // Try fetching manual exercises from API for the selected child
       try {
-        const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
-        setManualExerciseRecords(savedManualExercises ? JSON.parse(savedManualExercises) : [])
-      } catch {
-        setManualExerciseRecords([])
+        if (selectedChild && selectedChild.id) {
+          const token = localStorage.getItem('token')
+          const headers = { Authorization: `Bearer ${token}` }
+          const res = await axios.get(`${API_URL}/api/manual-exercises`, { headers, params: { studentId: selectedChild.id } })
+          setManualExerciseRecords((res.data || []).map(r => ({ ...r, type: 'manual-exercise' })))
+        } else {
+          setManualExerciseRecords([])
+        }
+      } catch (err) {
+        // Fallback to localStorage if API fails
+        try {
+          const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
+          setManualExerciseRecords(savedManualExercises ? JSON.parse(savedManualExercises) : [])
+        } catch {
+          setManualExerciseRecords([])
+        }
       }
     }
     loadAssignmentRecords()
+    // Keep storage listener for backwards compatibility
     window.addEventListener('storage', loadAssignmentRecords)
     return () => window.removeEventListener('storage', loadAssignmentRecords)
-  }, [])
+  }, [selectedChild])
 
   return (
     <div className="portal-shell flex bg-gray-100">

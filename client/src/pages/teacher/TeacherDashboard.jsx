@@ -563,30 +563,38 @@ export default function TeacherDashboard() {
   const [submissionRecords, setSubmissionRecords] = useState([])
 
   useEffect(() => {
-    const saved = window.localStorage.getItem('goldenIntelsLms')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      setAssignments(parsed.assignments || [])
-      setLessons(parsed.lessons || [])
-      setQuizzes(parsed.quizzes || [])
-    }
-    const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissionRecords')
-    if (savedSubmissions) {
-      setSubmissionRecords(JSON.parse(savedSubmissions))
-    }
-    const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
-    if (savedManualExercises) {
+    const fetchSaved = async () => {
       try {
-        setManualExercises(JSON.parse(savedManualExercises))
-      } catch {
-        setManualExercises([])
+        const saved = window.localStorage.getItem('goldenIntelsLms')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          setAssignments(parsed.assignments || [])
+          setLessons(parsed.lessons || [])
+          setQuizzes(parsed.quizzes || [])
+        }
+        const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissionRecords')
+        if (savedSubmissions) {
+          setSubmissionRecords(JSON.parse(savedSubmissions))
+        }
+        // Fetch manual exercises from API instead of localStorage
+        const token = localStorage.getItem('token')
+        const headers = { Authorization: `Bearer ${token}` }
+        const res = await axios.get(`${API_URL}/api/manual-exercises`, { headers })
+        setManualExercises((res.data || []).map(r => ({ ...r, type: 'manual-exercise' })))
+      } catch (err) {
+        // fallback to localStorage when API fails
+        const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
+        if (savedManualExercises) {
+          try {
+            setManualExercises(JSON.parse(savedManualExercises))
+          } catch {
+            setManualExercises([])
+          }
+        }
       }
     }
+    fetchSaved()
   }, [])
-
-  useEffect(() => {
-    window.localStorage.setItem('goldenIntelsManualExercises', JSON.stringify(manualExercises))
-  }, [manualExercises])
 
   useEffect(() => {
   if (!classOptions.length) return
@@ -667,7 +675,7 @@ useEffect(() => {
     setAttendance({ ...attendance, [studentId]: status })
   }
 
-  const handleAddManualExercise = () => {
+  const handleAddManualExercise = async () => {
     if (!manualExercise.title || !manualExercise.subject || !manualExercise.gradeLevel || !manualExercise.studentId) {
       setManualExerciseError('Please complete the title, subject, class, and learner fields before saving.')
       return
@@ -678,11 +686,7 @@ useEffect(() => {
       ? Number(manualExercise.score)
       : null
 
-    const record = {
-      id: Date.now(),
-      type: 'manual-exercise',
-      teacherEmail,
-      teacherName,
+    const payload = {
       academicYear: selectedAcademicYear,
       term: selectedTerm,
       studentId: Number(manualExercise.studentId),
@@ -693,26 +697,31 @@ useEffect(() => {
       workStatus: manualExercise.workStatus,
       score: normalizedScore,
       maxScore: manualExercise.maxScore ? Number(manualExercise.maxScore) : 100,
-      feedback: manualExercise.feedback,
-      createdAt: new Date().toISOString(),
-      markedAt: new Date().toISOString(),
-      markedBy: user?.name || 'Teacher'
+      feedback: manualExercise.feedback
     }
 
-    setManualExercises(prev => [record, ...prev])
-    setManualExerciseSaved(true)
-    setManualExerciseError('')
-    setTimeout(() => setManualExerciseSaved(false), 3000)
-    setManualExercise({
-      title: '',
-      subject: '',
-      gradeLevel: manualExercise.gradeLevel,
-      studentId: '',
-      workStatus: 'completed',
-      score: '',
-      maxScore: '100',
-      feedback: ''
-    })
+    try {
+      const token = localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}` }
+      const res = await axios.post(`${API_URL}/api/manual-exercises`, payload, { headers })
+      setManualExercises(prev => [res.data, ...prev])
+      setManualExerciseSaved(true)
+      setManualExerciseError('')
+      setTimeout(() => setManualExerciseSaved(false), 3000)
+      setManualExercise({
+        title: '',
+        subject: '',
+        gradeLevel: manualExercise.gradeLevel,
+        studentId: '',
+        workStatus: 'completed',
+        score: '',
+        maxScore: '100',
+        feedback: ''
+      })
+    } catch (err) {
+      console.error('Failed to save manual exercise:', err)
+      setManualExerciseError('Failed to save manual exercise. Please try again.')
+    }
   }
 
   const saveAttendance = async () => {

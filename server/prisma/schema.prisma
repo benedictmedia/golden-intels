@@ -8,17 +8,17 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  name          String
-  email         String         @unique
-  password      String
-  role          String         @default("parent")
-  active        Boolean        @default(true)
-  accountAudits AccountAudit[]
-  students      Student[]      @relation("ParentStudents")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  notifications Notification[]
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  email               String               @unique
+  password            String
+  role                String               @default("parent")
+  active              Boolean              @default(true)
+  accountAudits       AccountAudit[]
+  students            Student[]            @relation("ParentStudents")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  notifications       Notification[]
   passwordResetTokens PasswordResetToken[]
 }
 
@@ -36,48 +36,49 @@ model PasswordResetToken {
 }
 
 model Student {
-  id          Int                @id @default(autoincrement())
-  studentId   String             @unique
-  firstName   String
-  lastName    String
-  dateOfBirth String?
-  gender      String
-  gradeLevel  String
-  email       String?            @unique
-  learnerUserId Int?
-  parentId    Int?
-  parent      User?              @relation("ParentStudents", fields: [parentId], references: [id])
-  parentName  String
-  parentEmail String?
-  parentPhone String?
-  address     String?
-  photo       String?
-  status      String?            @default("active")
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  results     Result[]
-  feePayments FeePayment[]
-  attendance  AttendanceRecord[]
+  id              Int                @id @default(autoincrement())
+  studentId       String             @unique
+  firstName       String
+  lastName        String
+  dateOfBirth     String?
+  gender          String
+  gradeLevel      String
+  email           String?            @unique
+  learnerUserId   Int?
+  parentId        Int?
+  parent          User?              @relation("ParentStudents", fields: [parentId], references: [id])
+  parentName      String
+  parentEmail     String?
+  parentPhone     String?
+  address         String?
+  photo           String?
+  status          String?            @default("active")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  results         Result[]
+  feePayments     FeePayment[]
+  attendance      AttendanceRecord[]
+  manualExercises ManualExercise[]
 
   @@map("Student")
 }
 
 model Result {
-  id           Int      @id @default(autoincrement())
-  studentId    Int
-  student      Student  @relation(fields: [studentId], references: [id])
-  gradeLevel   String
-  academicYear String
-  term         String
-  scores       Json
-  remarks      String?
-  status       String   @default("pending")
-  submittedBy  String
+  id                  Int       @id @default(autoincrement())
+  studentId           Int
+  student             Student   @relation(fields: [studentId], references: [id])
+  gradeLevel          String
+  academicYear        String
+  term                String
+  scores              Json
+  remarks             String?
+  status              String    @default("pending")
+  submittedBy         String
   headmasterSignature String?
   approvedAt          DateTime?
   approvedBy          String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model AdmissionToken {
@@ -221,20 +222,20 @@ model FeeStructure {
 }
 
 model FeePayment {
-  id                      Int       @id @default(autoincrement())
-  studentId               Int
-  student                 Student   @relation(fields: [studentId], references: [id])
-  month                   String
-  year                    String
-  amountDue               Float
-  amountPaid              Float     @default(0)
-  balance                 Float
-  status                  String    @default("unpaid")
-  paidAt                  DateTime?
-  notes                   String?
-  feePaymentAlertSeen     Boolean   @default(false)
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  studentId           Int
+  student             Student   @relation(fields: [studentId], references: [id])
+  month               String
+  year                String
+  amountDue           Float
+  amountPaid          Float     @default(0)
+  balance             Float
+  status              String    @default("unpaid")
+  paidAt              DateTime?
+  notes               String?
+  feePaymentAlertSeen Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }
 
 model AttendanceRecord {
@@ -301,16 +302,16 @@ model ContactMessage {
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  userId      Int
-  title       String
-  message     String
-  type        String   @default("general") // e.g. "message", "result", "classroom", "fee"
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    Int
+  title     String
+  message   String
+  type      String   @default("general") // e.g. "message", "result", "classroom", "fee"
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([read])
@@ -329,6 +330,28 @@ model AcademicContext {
   academicYear String
   term         String
   setBy        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ManualExercise {
+  id           Int      @id @default(autoincrement())
+  teacherName  String
+  teacherEmail String
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id])
+  learnerName  String
+  gradeLevel   String
+  subject      String
+  title        String
+  workStatus   String   @default("completed") // 'completed' | 'not-done'
+  score        Float?
+  maxScore     Float?   @default(100)
+  feedback     String?
+  academicYear String?
+  term         String?
+  markedAt     DateTime @default(now())
+  markedBy     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
