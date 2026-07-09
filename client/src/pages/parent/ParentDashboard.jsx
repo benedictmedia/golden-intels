@@ -140,9 +140,6 @@ export default function ParentDashboard() {
     const student = result.student
     const scores = getNormalizedScores(result.scores || {})
     const pageWidth = doc.internal.pageSize.getWidth()
-    const resultMetrics = calculateResultMetrics(result)
-    const studentResults = approvedResults.filter(r => matchesParentChild(r, student))
-    const cumulativeGpa = studentResults.length ? getCumulativeGpa(studentResults) : 0
 
     const logoData = await loadCircularLogoDataUrl(new URL('../../assets/logo.png', import.meta.url).href)
 
@@ -207,11 +204,9 @@ export default function ParentDashboard() {
     // Subjects table header — compact 8mm rows
     doc.setFillColor(26, 60, 110); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255)
-    doc.text('Subject', 15, y + 5.5)
-    doc.text('Credit', 80, y + 5.5, { align: 'center' })
-    doc.text('Score', 108, y + 5.5, { align: 'center' })
-    doc.text('Grade', 145, y + 5.5, { align: 'center' })
-    doc.text('Grade Points', 190, y + 5.5, { align: 'center' })
+    doc.text('Subject', 15, y + 5.5); doc.text('Class(10)', 65, y + 5.5)
+    doc.text('CAT1(20)', 92, y + 5.5); doc.text('CAT2(20)', 119, y + 5.5)
+    doc.text('Exam(50)', 146, y + 5.5); doc.text('Total', 170, y + 5.5); doc.text('Grade', 186, y + 5.5)
     y += 8
 
     let grandTotal = 0
@@ -220,10 +215,12 @@ export default function ParentDashboard() {
 
     SUBJECTS.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
+      const classScore = parseFloat(s.classScore) || 0
+      const cat1 = parseFloat(s.cat1) || 0
+      const cat2 = parseFloat(s.cat2) || 0
+      const exam = parseFloat(s.exam) || 0
+      const wExam = (exam / 100) * 50
       const total = getSubjectTotal(s)
-      const credit = getSubjectCredit(s)
-      const grade = getGrade(total)
-      const gradePoints = (credit * getGradePointValue(total)).toFixed(2)
       grandTotal += total
 
       if (index % 2 === 0) { doc.setFillColor(245, 248, 255) } else { doc.setFillColor(255, 255, 255) }
@@ -231,18 +228,17 @@ export default function ParentDashboard() {
       doc.setDrawColor(220, 225, 235); doc.setLineWidth(0.2); doc.rect(10, y, pageWidth - 20, 8)
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 60, 110); doc.text(subject, 15, y + 5.5)
       doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50)
-      doc.text(String(credit), 78, y + 5.5, { align: 'center' })
-      doc.text(total.toFixed(2), 108, y + 5.5, { align: 'center' })
-      doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 60, 110); doc.text(grade, 145, y + 5.5, { align: 'center' })
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(50, 50, 50); doc.text(gradePoints, 190, y + 5.5, { align: 'center' })
+      doc.text(classScore.toString(), 72, y + 5.5); doc.text(cat1.toString(), 99, y + 5.5)
+      doc.text(cat2.toString(), 126, y + 5.5); doc.text(wExam.toFixed(2), 150, y + 5.5); doc.text(total.toFixed(2), 170, y + 5.5)
+      const gradeColor = getGradeColor(total); doc.setFont('helvetica', 'bold'); doc.setTextColor(gradeColor[0], gradeColor[1], gradeColor[2])
+      doc.text(total > 0 ? getGrade(total) : '-', 188, y + 5.5)
       y += 8
     })
 
     // Grand total row
     doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 145, y + 5.5)
-    doc.text(`Term GPA: ${resultMetrics.termGpa.toFixed(2)}`, pageWidth - 60, y + 5.5, { align: 'right' })
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / ${SUBJECTS.length * 100}`, 155, y + 5.5)
     y += 10
 
     // Attendance summary — compact single line
@@ -782,8 +778,8 @@ export default function ParentDashboard() {
                 {[
 { label: 'My Children', value: students.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
 { label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-{ label: 'Term GPA', value: contextualTermResult ? contextualTermGpa.toFixed(2) : 'N/A', color: 'bg-[#800080]', textColor: 'text-purple-200' },
-{ label: 'Cumulative CGPA', value: studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
+{ label: 'Approved Results', value: studentApprovedResults.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
+{ label: 'Attendance Rate', value: `${contextualAttendancePercentage}%`, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -963,7 +959,6 @@ export default function ParentDashboard() {
               ) : (
                 <div className="space-y-4">
                   {contextualApprovedResults.map(result => {
-                    const metrics = calculateResultMetrics(result)
                     return (
                       <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div className="flex flex-col gap-6">
@@ -985,29 +980,40 @@ export default function ParentDashboard() {
                                 <thead className="bg-[#4a235a] text-white">
                                   <tr>
                                     <th className="px-4 py-3 text-left">Subject</th>
-                                    <th className="px-4 py-3 text-center">Credit</th>
-                                    <th className="px-4 py-3 text-center">Score</th>
+                                    <th className="px-4 py-3 text-center">Class(10)</th>
+                                    <th className="px-4 py-3 text-center">CAT1(20)</th>
+                                    <th className="px-4 py-3 text-center">CAT2(20)</th>
+                                    <th className="px-4 py-3 text-center">Exam(50)</th>
+                                    <th className="px-4 py-3 text-center">Total</th>
                                     <th className="px-4 py-3 text-center">Grade</th>
-                                    <th className="px-4 py-3 text-center">Grade Points</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {SUBJECTS.map((subject, subjectIndex) => {
                                     const scoreEntry = getSubjectScore(result.scores || {}, subject)
+                                    const classScore = parseFloat(scoreEntry.classScore) || 0
+                                    const cat1 = parseFloat(scoreEntry.cat1) || 0
+                                    const cat2 = parseFloat(scoreEntry.cat2) || 0
+                                    const exam = parseFloat(scoreEntry.exam) || 0
+                                    const wExam = (exam / 100) * 50
                                     const total = getSubjectTotal(scoreEntry)
-                                    const credit = getSubjectCredit(scoreEntry)
                                     const grade = getGradeLetter(total)
-                                    const gradePoints = (credit * getGradePointValue(total)).toFixed(2)
                                     return (
                                       <tr key={subject} className={subjectIndex % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                                         <td className="px-4 py-3 font-bold text-[#4a235a]">{subject}</td>
-                                        <td className="px-4 py-3 text-center text-gray-600">{credit}</td>
-                                        <td className="px-4 py-3 text-center text-gray-600">{total.toFixed(2)}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{classScore}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{cat1}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{cat2}</td>
+                                        <td className="px-4 py-3 text-center text-gray-600">{wExam.toFixed(2)}</td>
+                                        <td className="px-4 py-3 text-center font-bold text-gray-700">{total.toFixed(2)}</td>
                                         <td className="px-4 py-3 text-center font-bold text-[#4a235a]">{grade}</td>
-                                        <td className="px-4 py-3 text-center text-gray-600">{gradePoints}</td>
                                       </tr>
                                     )
                                   })}
+                                  <tr className="bg-[#4a235a]/10 font-bold">
+                                    <td colSpan="5" className="px-4 py-3 text-[#4a235a]">Grand Total</td>
+                                    <td colSpan="2" className="px-4 py-3 text-center text-[#4a235a]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
+                                  </tr>
                                 </tbody>
                               </table>
                             </div>
@@ -1025,18 +1031,14 @@ export default function ParentDashboard() {
 
                         {/* Buttons — locked if fees are outstanding for this term */}
                         <div className="flex flex-col gap-2">
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="bg-blue-50 rounded-2xl p-4">
-                              <p className="text-xs text-gray-500 uppercase">Total Credits</p>
-                              <p className="text-xl font-bold text-[#4a235a]">{metrics.totalCredits}</p>
+                              <p className="text-xs text-gray-500 uppercase">Grand Total</p>
+                              <p className="text-xl font-bold text-[#4a235a]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</p>
                             </div>
                             <div className="bg-blue-50 rounded-2xl p-4">
-                              <p className="text-xs text-gray-500 uppercase">Term GPA</p>
-                              <p className="text-xl font-bold text-[#4a235a]">{metrics.termGpa.toFixed(2)}</p>
-                            </div>
-                            <div className="bg-blue-50 rounded-2xl p-4">
-                              <p className="text-xs text-gray-500 uppercase">Cumulative CGPA</p>
-                              <p className="text-xl font-bold text-[#4a235a]">{studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A'}</p>
+                              <p className="text-xs text-gray-500 uppercase">Class</p>
+                              <p className="text-xl font-bold text-[#4a235a]">{result.gradeLevel}</p>
                             </div>
                           </div>
                           {isFeeClearedForTerm(result.student?.id) ? (
@@ -1362,8 +1364,6 @@ export default function ParentDashboard() {
                       <th className="px-4 py-3 text-center">Exam(50)</th>
                       <th className="px-4 py-3 text-center">Total</th>
                       <th className="px-4 py-3 text-center">Grade</th>
-                      <th className="px-4 py-3 text-center">Credit</th>
-                      <th className="px-4 py-3 text-center">Grade Points</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1375,8 +1375,6 @@ export default function ParentDashboard() {
                       const exam = parseFloat(s.exam) || 0
                       const wExam = (exam / 100) * 50
                       const total = getSubjectTotal(s)
-                      const credits = getSubjectCredit(s)
-                      const gradePoints = (credits * getGradePointValue(total)).toFixed(2)
                       const getGrade = (t) => {
                         if (t >= 90) return 'A+'
                         if (t >= 80) return 'A'
@@ -1403,30 +1401,23 @@ export default function ParentDashboard() {
                           <td className="px-4 py-3 text-center text-gray-600">{wExam.toFixed(2)}</td>
                           <td className="px-4 py-3 text-center font-bold text-gray-700">{total.toFixed(2)}</td>
                           <td className={`px-4 py-3 text-center font-bold ${getGradeColor(total)}`}>{getGrade(total)}</td>
-                          <td className="px-4 py-3 text-center text-gray-600">{credits}</td>
-                          <td className="px-4 py-3 text-center text-gray-600">{gradePoints}</td>
                         </tr>
                       )
                     })}
                     {/* Grand Total Row */}
                     <tr className="bg-blue-500">
-                      <td colSpan="7" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
-                      <td className="px-4 py-3 text-center font-bold text-cyan-700">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / 1100</td>
-                      <td className="px-4 py-3"></td>
+                      <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
+                      <td colSpan="2" className="px-4 py-3 text-center font-bold text-cyan-700">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-blue-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 uppercase">Term GPA</p>
-                  <p className="text-lg font-bold text-[#0f6e56]">{calculateResultMetrics(viewingResult).termGpa.toFixed(2)}</p>
-                </div>
-                <div className="bg-blue-50 rounded-xl p-4">
-                  <p className="text-xs text-gray-500 uppercase">Cumulative CGPA</p>
-                  <p className="text-lg font-bold text-[#0f6e56]">{studentApprovedResults.length ? studentCumulativeGpa.toFixed(2) : 'N/A'}</p>
-                </div>
+              <div className="bg-blue-50 rounded-xl p-4 mb-6">
+                <p className="text-xs text-gray-500 uppercase mb-1">Attendance</p>
+                <p className="text-sm font-bold text-[#0f6e56]">
+                  Total: {contextualAttendanceRecords.length}  Present: {contextualAttendanceSummary.present}  Absent: {contextualAttendanceSummary.absent_permission + contextualAttendanceSummary.absent_without_permission}  Late: {contextualAttendanceSummary.late}  Rate: {contextualAttendancePercentage}%
+                </p>
               </div>
 
               {/* Remarks */}

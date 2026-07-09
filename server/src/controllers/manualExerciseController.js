@@ -57,7 +57,7 @@ const getManualExercises = async (req, res) => {
 
       if (studentId) {
         // Single child requested — withhold entirely if fees are outstanding.
-        const cleared = await isStudentFeeCleared(studentId)
+        const cleared = await isStudentFeeCleared(Number(studentId))
         if (!cleared) return res.json([])
         where.studentId = Number(studentId)
       } else {
