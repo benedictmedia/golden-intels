@@ -13,20 +13,37 @@ const createManualExercise = async (req, res) => {
       const teacherName = req.user.name || payload.teacherName || 'Teacher'
       const teacherEmail = req.user.email || payload.teacherEmail || ''
 
-      const student = await prisma.student.findUnique({ where: { id: Number(payload.studentId) } })
+      // Normalize and validate student identifier. Client may send either numeric `id` or string `studentId`.
+      const rawStudentId = payload.studentId
+      let student = null
+      let studentPk = null
+
+      if (rawStudentId == null) return res.status(400).json({ message: 'Missing studentId' })
+
+      const parsedId = Number(rawStudentId)
+      if (Number.isFinite(parsedId) && !Number.isNaN(parsedId)) {
+        student = await prisma.student.findUnique({ where: { id: parsedId } })
+      }
+
+      // Fallback: try lookup by unique `studentId` string field
+      if (!student) {
+        student = await prisma.student.findUnique({ where: { studentId: String(rawStudentId) } })
+      }
+
       if (!student) return res.status(404).json({ message: 'Student not found' })
+      studentPk = student.id
 
       const created = await prisma.manualExercise.create({ data: {
         teacherName,
         teacherEmail,
-        studentId: Number(payload.studentId),
+        studentId: studentPk,
         learnerName: payload.learnerName || `${student.firstName} ${student.lastName}`,
         gradeLevel: payload.gradeLevel || student.gradeLevel || '',
         subject: payload.subject,
         title: payload.title,
         workStatus: payload.workStatus || 'completed',
-        score: payload.score != null ? Number(payload.score) : null,
-        maxScore: payload.maxScore != null ? Number(payload.maxScore) : 100,
+        score: payload.score != null ? (payload.score === '' ? null : Number(payload.score)) : null,
+        maxScore: payload.maxScore != null && payload.maxScore !== '' ? Number(payload.maxScore) : 100,
         feedback: payload.feedback || '',
         academicYear: payload.academicYear || null,
         term: payload.term || null,
