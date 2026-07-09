@@ -59,8 +59,6 @@ export default function ParentDashboard() {
   const [manualExerciseRecords, setManualExerciseRecords] = useState([])
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
-  const [feePrompt, setFeePrompt] = useState(null)
-  const [feePromptSending, setFeePromptSending] = useState(false)
   const [feeAlerts, setFeeAlerts] = useState([])
   const [showFeeAlertModal, setShowFeeAlertModal] = useState(false)
 
@@ -117,19 +115,6 @@ export default function ParentDashboard() {
     fetchParentApprovedResults()
   }, [activeMenu, selectedChild?.id, selectedAcademicYear, selectedTerm])
   const [viewingResult, setViewingResult] = useState(null)
-
-  useEffect(() => {
-    if (!user?.id || feePayments.length === 0) return
-    const latestPayment = [...feePayments].sort((a, b) =>
-      new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
-    )[0]
-    if (!latestPayment) return
-
-    const dismissalKey = `goldenIntelsFeePromptDismissed:${user.id}:${latestPayment.id}:${latestPayment.updatedAt || latestPayment.createdAt}:${latestPayment.status}`
-    if (sessionStorage.getItem(dismissalKey)) return
-
-    setFeePrompt({ payment: latestPayment, dismissalKey })
-  }, [feePayments, user?.id])
 
   useEffect(() => {
     if (activeMenu !== 'attendance' || !selectedChild?.id) return
@@ -405,26 +390,6 @@ export default function ParentDashboard() {
     if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
   }
 
-  const dismissFeePrompt = () => {
-    if (feePrompt?.dismissalKey) sessionStorage.setItem(feePrompt.dismissalKey, 'true')
-    setFeePrompt(null)
-  }
-
-  const handleFeePromptResponse = async (responseType) => {
-    if (!feePrompt?.payment?.id) return
-    setFeePromptSending(true)
-    try {
-      await axios.post(`${API_URL}/api/fees/payments/${feePrompt.payment.id}/response`, { responseType }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
-    } catch (error) {
-      console.error('Failed to send fee response:', error)
-    } finally {
-      setFeePromptSending(false)
-      dismissFeePrompt()
-    }
-  }
-
   const refreshFeePayments = async () => {
     try {
       const token = localStorage.getItem('token')
@@ -540,11 +505,11 @@ export default function ParentDashboard() {
       ['assignment', 'quiz'].includes(record.type) &&
       (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
       matchesAcademicContext(record) &&
-      students.some(student => matchesParentChild(record, student))
+      matchesParentChild(record, selectedChild)
     ),
     ...manualExerciseRecords.filter(record =>
       matchesAcademicContext(record) &&
-      students.some(student => matchesParentChild(record, student))
+      matchesParentChild(record, selectedChild)
     )
   ]
   const parentAssessmentFolders = buildSubjectFolders(markedAssessmentRecords)
@@ -579,6 +544,9 @@ export default function ParentDashboard() {
   const contextualAttendancePercentage = contextualAttendanceRecords.length
     ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
     : 0
+  // Whether the currently selected child has fully cleared fees for the selected term.
+  // Used to lock attendance, results, and marked-assignment views per child.
+  const selectedChildFeeCleared = selectedChild ? isFeeClearedForTerm(selectedChild.id) : true
 
   const getGradeLetter = (score) => {
     if (score >= 90) return 'A+'
@@ -899,66 +867,84 @@ export default function ParentDashboard() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
-                {[
-                  ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
-                  ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#0f6e56]', 'text-green-100'],
-                  ['Absent (on permission)', contextualAttendanceSummary.absent_permission, 'bg-amber-500', 'text-amber-100'],
-                  ['Absent (without permission)', contextualAttendanceSummary.absent_without_permission, 'bg-red-500', 'text-red-100'],
-                  ['Late', contextualAttendanceSummary.late, 'bg-[#0000ff]', 'text-blue-100'],
-                ].map(([label, value, color, textColor]) => (
-                  <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
-                    <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
-                    <p className="text-3xl font-bold mt-1">{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {attendanceError && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
-                  {attendanceError}
+              {!selectedChildFeeCleared ? (
+                <div className="bg-red-50 border border-red-200 rounded-2xl px-6 py-10 flex flex-col items-center gap-3 text-center">
+                  <Lock size={28} className="text-red-500" />
+                  <p className="text-sm font-bold text-red-600">Attendance Locked</p>
+                  <p className="text-xs text-red-400 leading-snug max-w-sm">
+                    {selectedChild?.firstName} has outstanding fees for {selectedTerm}. Please clear the balance to view attendance records.
+                  </p>
+                  <button
+                    onClick={() => setActiveMenu('fees')}
+                    className="mt-2 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                  >
+                    View Fee Status
+                  </button>
                 </div>
-              )}
-
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-[#4a235a] text-white">
-                    <tr>
-                      <th className="px-6 py-4 text-left">Date</th>
-                      <th className="px-6 py-4 text-left">Status</th>
-                      <th className="px-6 py-4 text-left">Class</th>
-                      <th className="px-6 py-4 text-left">Recorded By</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceLoading ? (
-                      <tr>
-                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
-                      </tr>
-                    ) : contextualAttendanceRecords.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No attendance records available yet.</td>
-                      </tr>
-                    ) : contextualAttendanceRecords.map((record, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                        <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                            record.status === 'present' ? 'bg-green-100 text-green-700' :
-                            record.status === 'absent_permission' ? 'bg-amber-100 text-amber-700' :
-                            record.status === 'absent_without_permission' || record.status === 'absent' ? 'bg-red-100 text-red-700' :
-                            'bg-blue-100 text-cyan-700'
-                          }`}>
-                            {formatAttendanceStatus(record.status)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600">{record.gradeLevel}</td>
-                        <td className="px-6 py-4 text-gray-500">{record.recordedBy}</td>
-                      </tr>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+                    {[
+                      ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
+                      ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#0f6e56]', 'text-green-100'],
+                      ['Absent (on permission)', contextualAttendanceSummary.absent_permission, 'bg-amber-500', 'text-amber-100'],
+                      ['Absent (without permission)', contextualAttendanceSummary.absent_without_permission, 'bg-red-500', 'text-red-100'],
+                      ['Late', contextualAttendanceSummary.late, 'bg-[#0000ff]', 'text-blue-100'],
+                    ].map(([label, value, color, textColor]) => (
+                      <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
+                        <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
+                        <p className="text-3xl font-bold mt-1">{value}</p>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  {attendanceError && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+                      {attendanceError}
+                    </div>
+                  )}
+
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-[#4a235a] text-white">
+                        <tr>
+                          <th className="px-6 py-4 text-left">Date</th>
+                          <th className="px-6 py-4 text-left">Status</th>
+                          <th className="px-6 py-4 text-left">Class</th>
+                          <th className="px-6 py-4 text-left">Recorded By</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attendanceLoading ? (
+                          <tr>
+                            <td colSpan="4" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
+                          </tr>
+                        ) : contextualAttendanceRecords.length === 0 ? (
+                          <tr>
+                            <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No attendance records available yet.</td>
+                          </tr>
+                        ) : contextualAttendanceRecords.map((record, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                            <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
+                            <td className="px-6 py-4">
+                              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                                record.status === 'present' ? 'bg-green-100 text-green-700' :
+                                record.status === 'absent_permission' ? 'bg-amber-100 text-amber-700' :
+                                record.status === 'absent_without_permission' || record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                                'bg-blue-100 text-cyan-700'
+                              }`}>
+                                {formatAttendanceStatus(record.status)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600">{record.gradeLevel}</td>
+                            <td className="px-6 py-4 text-gray-500">{record.recordedBy}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -1091,11 +1077,38 @@ export default function ParentDashboard() {
           {/* Assessments */}
           {activeMenu === 'assessments' && (
             <div>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Progress Updates</h2>
-                <p className="text-gray-500 text-sm">Marked assignments and quizzes, plus manual exercise entries recorded by teachers, are shown here.</p>
+              <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Progress Updates</h2>
+                  <p className="text-gray-500 text-sm">Marked assignments and quizzes, plus manual exercise entries recorded by teachers, are shown here.</p>
+                </div>
+                {students.length > 0 && (
+                  <select
+                    value={selectedChild?.id || ''}
+                    onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                  >
+                    {students.map(student => (
+                      <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
+                    ))}
+                  </select>
+                )}
               </div>
-              {markedAssessmentRecords.length === 0 ? (
+              {!selectedChildFeeCleared ? (
+                <div className="bg-red-50 border border-red-200 rounded-2xl px-6 py-10 flex flex-col items-center gap-3 text-center">
+                  <Lock size={28} className="text-red-500" />
+                  <p className="text-sm font-bold text-red-600">Marked Assignments Locked</p>
+                  <p className="text-xs text-red-400 leading-snug max-w-sm">
+                    {selectedChild?.firstName} has outstanding fees for {selectedTerm}. Please clear the balance to view marked assignments and quizzes.
+                  </p>
+                  <button
+                    onClick={() => setActiveMenu('fees')}
+                    className="mt-2 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                  >
+                    View Fee Status
+                  </button>
+                </div>
+              ) : markedAssessmentRecords.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
                   No marked assessment submissions are available yet.
                 </div>
@@ -1241,6 +1254,7 @@ export default function ParentDashboard() {
                         <th className="px-6 py-4 text-left">Balance</th>
                         <th className="px-6 py-4 text-left">Status</th>
                         <th className="px-6 py-4 text-left">Notes</th>
+                        <th className="px-6 py-4 text-left">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1268,6 +1282,18 @@ export default function ParentDashboard() {
                               </div>
                             ) : (
                               <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            {payment.status !== 'paid' ? (
+                              <button
+                                onClick={() => navigate('/parent/pay-fees', { state: { alert: payment } })}
+                                className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                              >
+                                Pay Now
+                              </button>
+                            ) : (
+                              <span className="text-gray-300 text-xs">—</span>
                             )}
                           </td>
                         </tr>
@@ -1440,9 +1466,10 @@ export default function ParentDashboard() {
     {showFeeAlertModal && (
       <FeeAlertModal
         alerts={feeAlerts}
-        onClose={() => setShowFeeAlertModal(false)}
-        token={localStorage.getItem('token')}
-        onRefresh={refreshFeePayments}
+        onPayNow={(alert) => {
+          setShowFeeAlertModal(false)
+          navigate('/parent/pay-fees', { state: { alert } })
+        }}
       />
     )}
     </div>

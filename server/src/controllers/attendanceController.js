@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const { isStudentFeeCleared } = require('../utils/feeStatus')
 
 const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
@@ -13,8 +14,11 @@ const getAttendance = async (req, res) => {
     // If parent, restrict to their children
     if (req.user && req.user.role === 'parent') {
       const children = await prisma.student.findMany({ where: { parentEmail: req.user.email }, select: { id: true } })
-      const ids = children.map(c => c.id)
-      where.studentId = { in: ids }
+      const clearedIds = []
+      for (const child of children) {
+        if (await isStudentFeeCleared(child.id)) clearedIds.push(child.id)
+      }
+      where.studentId = { in: clearedIds }
       const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
       return res.json(records)
     }
@@ -42,6 +46,9 @@ const getStudentAttendance = async (req, res) => {
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+      // Fees outstanding for this child: withhold attendance records entirely.
+      const cleared = await isStudentFeeCleared(studentId)
+      if (!cleared) return res.json([])
     }
     if (req.user && req.user.role === 'teacher') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
@@ -112,6 +119,8 @@ const getAttendanceSummary = async (req, res) => {
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
       if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+      const cleared = await isStudentFeeCleared(studentId)
+      if (!cleared) return res.json({ total: 0, present: 0, absent: 0, absentOnPermission: 0, absentWithoutPermission: 0, late: 0, percentage: 0, records: [], feeLocked: true })
     }
 
     if (req.user && req.user.role === 'teacher') {

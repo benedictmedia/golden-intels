@@ -8,6 +8,7 @@ const {
   validateTeacherScores
 } = require('../utils/resultSubjectHelpers')
 const { createNotificationsForRole } = require('./notificationController')
+const { isStudentFeeCleared } = require('../utils/feeStatus')
 
 const prisma = new PrismaClient()
 
@@ -117,6 +118,26 @@ const getTeacherResultPayload = async (req, body) => {
 
 const filterApprovedResults = (results = []) => results.filter((result) => result.status === 'approved')
 
+// Withholds the actual scores for any result belonging to a student with an
+// outstanding fee balance. The result record (and its "approved" status)
+// still comes through so the parent knows a result exists, but the scores
+// payload itself is stripped so it never reaches the browser.
+const redactLockedResults = async (results = []) => {
+  const clearedCache = new Map()
+  const checkCleared = async (studentId) => {
+    if (!clearedCache.has(studentId)) {
+      clearedCache.set(studentId, await isStudentFeeCleared(studentId))
+    }
+    return clearedCache.get(studentId)
+  }
+
+  return Promise.all(results.map(async (result) => {
+    const cleared = await checkCleared(result.studentId)
+    if (cleared) return { ...result, feeLocked: false }
+    return { ...result, scores: {}, remarks: '', headmasterSignature: null, feeLocked: true }
+  }))
+}
+
 // Get all results
 const getResults = async (req, res) => {
   try {
@@ -125,7 +146,8 @@ const getResults = async (req, res) => {
       const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
       const ids = children.map((child) => child.id)
       const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
-      return res.json(filterApprovedResults(results))
+      const approved = filterApprovedResults(results)
+      return res.json(await redactLockedResults(approved))
     }
 
     if (req.user && req.user.role === 'teacher') {
@@ -174,7 +196,7 @@ const getResultsByStudent = async (req, res) => {
 
     const results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
     if (req.user && req.user.role === 'parent') {
-      return res.json(filterApprovedResults(results))
+      return res.json(await redactLockedResults(filterApprovedResults(results)))
     }
     res.json(results)
   } catch (error) {

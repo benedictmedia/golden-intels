@@ -18,6 +18,7 @@ import ResetPassword from './pages/ResetPassword'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import TeacherDashboard from './pages/teacher/TeacherDashboard'
 import ParentDashboard from './pages/parent/ParentDashboard'
+import FeePayment from './pages/parent/FeePayment'
 import LearnerDashboard from './pages/learner/LearnerDashboard'
 import ScrollToTop from './components/ScrollToTop'
 
@@ -43,6 +44,7 @@ function AnimatedRoutes() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/teacher" element={<TeacherDashboard />} />
           <Route path="/parent" element={<ParentDashboard />} />
+          <Route path="/parent/pay-fees" element={<FeePayment />} />
           <Route path="/learner" element={<LearnerDashboard />} />
         </Routes>
       </AnimatePresence>

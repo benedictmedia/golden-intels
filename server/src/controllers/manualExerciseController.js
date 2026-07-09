@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
+const { isStudentFeeCleared } = require('../utils/feeStatus')
 
 const createManualExercise = async (req, res) => {
   try {
@@ -53,7 +54,20 @@ const getManualExercises = async (req, res) => {
       const children = await prisma.student.findMany({ where: { parentEmail: req.user.email }, select: { id: true } })
       const ids = children.map(c => c.id)
       if (studentId && !ids.includes(Number(studentId))) return res.status(403).json({ message: 'Forbidden' })
-      where.studentId = { in: ids }
+
+      if (studentId) {
+        // Single child requested — withhold entirely if fees are outstanding.
+        const cleared = await isStudentFeeCleared(studentId)
+        if (!cleared) return res.json([])
+        where.studentId = Number(studentId)
+      } else {
+        // No specific child requested — only include children whose fees are cleared.
+        const clearedIds = []
+        for (const id of ids) {
+          if (await isStudentFeeCleared(id)) clearedIds.push(id)
+        }
+        where.studentId = { in: clearedIds }
+      }
     }
 
     // If teacher, allow but limit to their own created records optionally

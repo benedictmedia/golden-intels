@@ -162,7 +162,7 @@ const deleteFeePayment = async (req, res) => {
 const respondToFeeUpdate = async (req, res) => {
   const { id } = req.params
   const { responseType } = req.body
-  const allowedResponses = ['paid-part-or-full', 'will-soon-pay']
+  const allowedResponses = ['paid-part-or-full']
 
   if (!allowedResponses.includes(responseType)) {
     return res.status(400).json({ message: 'Invalid fee response.' })
