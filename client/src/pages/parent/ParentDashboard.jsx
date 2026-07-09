@@ -500,66 +500,6 @@ export default function ParentDashboard() {
     return getStudentFullName(student) && String(record.learnerName || '').trim().toLowerCase() === getStudentFullName(student)
   }
 
-  const markedAssessmentRecords = [
-    ...assignmentRecords.filter(record =>
-      ['assignment', 'quiz'].includes(record.type) &&
-      (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
-      matchesAcademicContext(record) &&
-      matchesParentChild(record, selectedChild)
-    ),
-    ...manualExerciseRecords.filter(record =>
-      matchesAcademicContext(record) &&
-      matchesParentChild(record, selectedChild)
-    )
-  ]
-  const parentAssessmentFolders = buildSubjectFolders(markedAssessmentRecords)
-  const selectedAssessmentSubject = parentAssessmentFolders.some(folder => folder.subject === activeAssessmentSubject)
-    ? activeAssessmentSubject
-    : parentAssessmentFolders[0]?.subject || ''
-  const visibleMarkedAssessmentRecords = selectedAssessmentSubject
-    ? markedAssessmentRecords.filter(record => getSubjectName(record) === selectedAssessmentSubject)
-    : markedAssessmentRecords
-  const studentApprovedResults = selectedChild
-    ? approvedResults.filter(result => matchesParentChild(result, selectedChild))
-    : []
-  const contextualApprovedResults = studentApprovedResults.filter(matchesAcademicContext)
-  const contextualTermResult = contextualApprovedResults[0] || null
-  const contextualTermGpa = contextualTermResult ? calculateResultMetrics(contextualTermResult).termGpa : 0
-  const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
-  const contextualFeePayments = feePayments
-  // Returns true if the student has no outstanding balance for the selected term
-  const isFeeClearedForTerm = (studentId) => {
-    const studentFees = contextualFeePayments.filter(p =>
-      p.student?.id === studentId || p.studentId === studentId
-    )
-    // No fee records yet for this term → give benefit of the doubt (cleared)
-    if (studentFees.length === 0) return true
-    // Any record with balance > 0 → not cleared
-    return !studentFees.some(p => Number(p.balance) > 0)
-  }
-  const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
-    ...summary,
-    [record.status]: (summary[record.status] || 0) + 1
-  }), { present: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
-  const contextualAttendancePercentage = contextualAttendanceRecords.length
-    ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
-    : 0
-  // Whether the currently selected child has fully cleared fees for the selected term.
-  // Used to lock attendance, results, and marked-assignment views per child.
-  const selectedChildFeeCleared = selectedChild ? isFeeClearedForTerm(selectedChild.id) : true
-
-  const getGradeLetter = (score) => {
-    if (score >= 90) return 'A+'
-    if (score >= 80) return 'A'
-    if (score >= 75) return 'B+'
-    if (score >= 70) return 'B'
-    if (score >= 65) return 'C+'
-    if (score >= 60) return 'C'
-    if (score >= 55) return 'D+'
-    if (score >= 50) return 'D'
-    return 'E'
-  }
-
   const getGradePointValue = (score) => {
     if (score >= 90) return 4.0
     if (score >= 80) return 4.0
@@ -625,6 +565,66 @@ export default function ParentDashboard() {
   }
 
   const studentCumulativeGpa = getCumulativeGpa(getStudentApprovedResults)
+
+  const markedAssessmentRecords = [
+    ...assignmentRecords.filter(record =>
+      ['assignment', 'quiz'].includes(record.type) &&
+      (record.marked || (record.type === 'quiz' && record.score != null && !record.requiresManualMark && record.marked !== false)) &&
+      matchesAcademicContext(record) &&
+      matchesParentChild(record, selectedChild)
+    ),
+    ...manualExerciseRecords.filter(record =>
+      matchesAcademicContext(record) &&
+      matchesParentChild(record, selectedChild)
+    )
+  ]
+  const parentAssessmentFolders = buildSubjectFolders(markedAssessmentRecords)
+  const selectedAssessmentSubject = parentAssessmentFolders.some(folder => folder.subject === activeAssessmentSubject)
+    ? activeAssessmentSubject
+    : parentAssessmentFolders[0]?.subject || ''
+  const visibleMarkedAssessmentRecords = selectedAssessmentSubject
+    ? markedAssessmentRecords.filter(record => getSubjectName(record) === selectedAssessmentSubject)
+    : markedAssessmentRecords
+  const studentApprovedResults = selectedChild
+    ? approvedResults.filter(result => matchesParentChild(result, selectedChild))
+    : []
+  const contextualApprovedResults = studentApprovedResults.filter(matchesAcademicContext)
+  const contextualTermResult = contextualApprovedResults[0] || null
+  const contextualTermGpa = contextualTermResult ? calculateResultMetrics(contextualTermResult).termGpa : 0
+  const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
+  const contextualFeePayments = feePayments
+  // Returns true if the student has no outstanding balance for the selected term
+  const isFeeClearedForTerm = (studentId) => {
+    const studentFees = contextualFeePayments.filter(p =>
+      p.student?.id === studentId || p.studentId === studentId
+    )
+    // No fee records yet for this term → give benefit of the doubt (cleared)
+    if (studentFees.length === 0) return true
+    // Any record with balance > 0 → not cleared
+    return !studentFees.some(p => Number(p.balance) > 0)
+  }
+  const contextualAttendanceSummary = contextualAttendanceRecords.reduce((summary, record) => ({
+    ...summary,
+    [record.status]: (summary[record.status] || 0) + 1
+  }), { present: 0, absent_permission: 0, absent_without_permission: 0, late: 0 })
+  const contextualAttendancePercentage = contextualAttendanceRecords.length
+    ? Math.round(((contextualAttendanceSummary.present + contextualAttendanceSummary.late) / contextualAttendanceRecords.length) * 100)
+    : 0
+  // Whether the currently selected child has fully cleared fees for the selected term.
+  // Used to lock attendance, results, and marked-assignment views per child.
+  const selectedChildFeeCleared = selectedChild ? isFeeClearedForTerm(selectedChild.id) : true
+
+  const getGradeLetter = (score) => {
+    if (score >= 90) return 'A+'
+    if (score >= 80) return 'A'
+    if (score >= 75) return 'B+'
+    if (score >= 70) return 'B'
+    if (score >= 65) return 'C+'
+    if (score >= 60) return 'C'
+    if (score >= 55) return 'D+'
+    if (score >= 50) return 'D'
+    return 'E'
+  }
 
   const sortedStudentResults = [...getStudentApprovedResults].sort((a, b) => {
     if (a.academicYear !== b.academicYear) return b.academicYear.localeCompare(a.academicYear)

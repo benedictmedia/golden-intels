@@ -31,7 +31,7 @@ export default function FeeAlertModal({ alerts, onPayNow }) {
         {/* Message */}
         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded mb-6">
           <p className="text-gray-700 leading-relaxed">
-            Hello! The fee for <span className="font-semibold">{studentName}</span> ({monthYear}) is still outstanding. Kindly complete payment to keep viewing this child's results, attendance, and marked assignments. We nurture for nature!
+            Hello! The fee for <span className="font-semibold">{studentName}</span> ({monthYear}) is still outstanding. Kindly complete payment as soon as possible. We nurture for nature!
           </p>
           <p className="text-sm text-gray-600 mt-3 font-medium">
             {balanceText}
