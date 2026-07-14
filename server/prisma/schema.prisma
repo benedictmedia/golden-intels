@@ -53,6 +53,85 @@ model Student {
   address         String?
   photo           String?
   status          String?            @default("active")
+
+  // Where this learner record originated from
+  source          String             @default("manual") // 'manual' | 'admission'
+
+  // Link back to the admission application this learner was approved from (if any)
+  admissionApplicationId Int?                 @unique
+  admissionApplication   AdmissionApplication? @relation(fields: [admissionApplicationId], references: [id])
+
+  // --- Extended admission-form details (fillable/editable regardless of source) ---
+  age                   String?
+  monthOfBirth          String?
+  placeOfBirth          String?
+  height                String?
+  weight                String?
+  hometown              String?
+  motherTongue          String?
+  religion              String?
+  dateOfAdmission       String?
+  previousSchool        String?
+
+  parentOccupation      String?
+  secondaryContactName  String?
+  secondaryContactPhone String?
+
+  fatherName            String?
+  fatherAddress         String?
+  fatherNationality     String?
+  fatherMaritalStatus   String?
+  fatherPhone           String?
+  fatherHouseNumber     String?
+  fatherReligion        String?
+  fatherOccupation      String?
+  fatherPlaceOfWork     String?
+  fatherEducation       String?
+  fatherEmail           String?
+
+  motherName            String?
+  motherAddress         String?
+  motherNationality     String?
+  motherMaritalStatus   String?
+  motherPhone           String?
+  motherHouseNumber     String?
+  motherReligion        String?
+  motherOccupation      String?
+  motherPlaceOfWork     String?
+  motherEducation       String?
+  motherEmail           String?
+
+  livesWith             String?
+  olderChildren         String?
+  youngerChildren       String?
+
+  language1             String?
+  language2             String?
+  language3             String?
+  language4             String?
+
+  medicalConditions     String?
+  allergies             String?
+  specialNeeds          String?
+  doctorName            String?
+  doctorPhone           String?
+  hospitalName          String?
+  hospitalPhone         String?
+
+  emergencyName         String?
+  emergencyRelationship String?
+  emergencyPhone        String?
+  emergencyEmail        String?
+  emergencyAddress      String?
+  emergencyWhatsapp     String?
+
+  // Uploaded documents (editable by admin at any time)
+  nhisFront             String?
+  nhisBack              String?
+  ghanaFront            String?
+  ghanaBack             String?
+  signedBooklet         String?
+
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   results         Result[]
@@ -166,6 +245,8 @@ model AdmissionApplication {
   status                String   @default("pending")
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
+  student               Student?
 }
 
 model GalleryItem {

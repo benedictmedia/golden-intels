@@ -18,6 +18,14 @@ const PAYMENT_DETAILS = {
     accountNumber: '5011440001106',
     branch: 'Ho-Main Branch',
   },
+
+  bank: {
+    bankName: 'CAL BANK',
+    accountName: 'Goldenintels Educare',
+    accountNumber: '1400007415232',
+    branch: 'Ho Branch',
+  },
+
 }
 
 function CopyRow({ label, value }) {

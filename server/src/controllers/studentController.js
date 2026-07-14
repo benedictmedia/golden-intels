@@ -2,6 +2,71 @@ const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
+// Every "admission form" field that lives on Student in addition to the core
+// fields (firstName, lastName, dateOfBirth, gender, gradeLevel, parentName,
+// parentEmail, parentPhone, address, status, email). These are optional on
+// Student, so a manually-added learner can be created with just the core
+// fields and have the rest filled in later from the Edit screen.
+const EXTENDED_PROFILE_FIELDS = [
+  'age', 'monthOfBirth', 'placeOfBirth', 'height', 'weight', 'hometown',
+  'motherTongue', 'religion', 'dateOfAdmission', 'previousSchool',
+  'parentOccupation', 'secondaryContactName', 'secondaryContactPhone',
+  'fatherName', 'fatherAddress', 'fatherNationality', 'fatherMaritalStatus',
+  'fatherPhone', 'fatherHouseNumber', 'fatherReligion', 'fatherOccupation',
+  'fatherPlaceOfWork', 'fatherEducation', 'fatherEmail',
+  'motherName', 'motherAddress', 'motherNationality', 'motherMaritalStatus',
+  'motherPhone', 'motherHouseNumber', 'motherReligion', 'motherOccupation',
+  'motherPlaceOfWork', 'motherEducation', 'motherEmail',
+  'livesWith', 'olderChildren', 'youngerChildren',
+  'language1', 'language2', 'language3', 'language4',
+  'medicalConditions', 'allergies', 'specialNeeds',
+  'doctorName', 'doctorPhone', 'hospitalName', 'hospitalPhone',
+  'emergencyName', 'emergencyRelationship', 'emergencyPhone',
+  'emergencyEmail', 'emergencyAddress', 'emergencyWhatsapp',
+]
+
+// Document/photo fields that come in as uploaded files (multer .fields()).
+// Key = form field name, value = Student column name (same for all of these).
+const DOCUMENT_FIELDS = ['photo', 'nhisFront', 'nhisBack', 'ghanaFront', 'ghanaBack', 'signedBooklet']
+
+// Pulls only the extended-profile keys that were actually sent in the body,
+// so a partial edit never clobbers fields the admin didn't touch.
+const pickExtendedFields = (body) => {
+  const data = {}
+  for (const field of EXTENDED_PROFILE_FIELDS) {
+    if (body[field] !== undefined) data[field] = body[field] === '' ? null : body[field]
+  }
+  return data
+}
+
+// Resolves an uploaded file (Cloudinary or local disk) to a storable URL,
+// same convention used for admission uploads.
+const getFileUrl = (req, file) => {
+  if (!file) return null
+  if (file.path?.startsWith('http')) return file.path
+  if (file.secure_url) return file.secure_url
+  if (file.url) return file.url
+  if (file.path) return `${req.protocol}://${req.get('host')}/${file.path.replace(/\\/g, '/')}`
+  return null
+}
+
+// req.files can be either an array (upload.single) or an object keyed by
+// fieldname (upload.fields([...])) depending on which multer method the
+// route uses. This normalizes both into { fieldname: url }.
+const extractDocumentUrls = (req) => {
+  const urls = {}
+  if (!req.files) {
+    // Single-file upload (legacy `upload.single('photo')`) lands on req.file
+    if (req.file) urls.photo = getFileUrl(req, req.file)
+    return urls
+  }
+  for (const field of DOCUMENT_FIELDS) {
+    const fileArr = req.files[field]
+    if (fileArr && fileArr[0]) urls[field] = getFileUrl(req, fileArr[0])
+  }
+  return urls
+}
+
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
 
@@ -108,7 +173,8 @@ const createStudent = async (req, res) => {
     }
 
     const studentId = await generateStudentId()
-    const photo = req.file ? (req.file.path || req.file.secure_url) : null
+    const documentUrls = extractDocumentUrls(req)
+    const extendedData = pickExtendedFields(req.body)
 
     // Link to existing parent account if parentEmail matches a parent user
     let parentId = null
@@ -150,8 +216,15 @@ const createStudent = async (req, res) => {
           address:      address      || null,
           email:        finalEmail,
           learnerUserId,
-          photo,
-          status: 'active'
+          photo: documentUrls.photo || null,
+          nhisFront: documentUrls.nhisFront || null,
+          nhisBack: documentUrls.nhisBack || null,
+          ghanaFront: documentUrls.ghanaFront || null,
+          ghanaBack: documentUrls.ghanaBack || null,
+          signedBooklet: documentUrls.signedBooklet || null,
+          status: 'active',
+          source: 'manual',
+          ...extendedData
         }
       })
     })
@@ -188,7 +261,12 @@ const updateStudent = async (req, res) => {
 
     // email field: accept either key from frontend
     const finalEmail = email || learnerEmail
-    if (finalEmail !== undefined)  data.email       = finalEmail
+    if (finalEmail !== undefined)  data.email       = finalEmail || null
+
+    // Every extended admission-form field (father/mother details, medical
+    // info, emergency contact, etc.) is editable here too — only fields
+    // actually present in the request body are touched.
+    Object.assign(data, pickExtendedFields(req.body))
 
     // If parentEmail changed, try to re-link to the parent's user account
     if (parentEmail) {
@@ -198,10 +276,10 @@ const updateStudent = async (req, res) => {
       }
     }
 
-    // Handle photo if a new file was uploaded
-    if (req.file) {
-      data.photo = req.file.path || req.file.secure_url
-    }
+    // Handle any re-uploaded documents/photo — admin can replace any of them,
+    // including the passport photo, at any time.
+    const documentUrls = extractDocumentUrls(req)
+    Object.assign(data, documentUrls)
 
     const student = await prisma.student.update({
       where: { id: parseInt(id) },
@@ -212,6 +290,41 @@ const updateStudent = async (req, res) => {
   } catch (error) {
     console.error('Update Student Error:', error)
     res.status(400).json({ message: error.message || 'Failed to update student' })
+  }
+}
+
+// Get a single learner's full profile (every admission-form field) plus
+// their approved results, for the Learner Profile screen.
+const getStudent = async (req, res) => {
+  const { id } = req.params
+  try {
+    const student = await prisma.student.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        parent: { select: { id: true, name: true, email: true } },
+        results: {
+          where: { status: 'approved' },
+          orderBy: [{ academicYear: 'desc' }, { term: 'desc' }]
+        }
+      }
+    })
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' })
+    }
+
+    // Role-based access: parents/learners may only view their own child/self
+    if (req.user && req.user.role === 'parent') {
+      const isOwnChild = student.parentEmail === req.user.email || student.parentId === req.user.id
+      if (!isOwnChild) return res.status(403).json({ message: 'Forbidden' })
+    }
+    if (req.user && req.user.role === 'learner' && student.learnerUserId !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    res.json(student)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
 
@@ -310,4 +423,4 @@ const getMyProfile = async (req, res) => {
   }
 }
 
-module.exports = { getStudents, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin }
+module.exports = { getStudents, getStudent, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin }

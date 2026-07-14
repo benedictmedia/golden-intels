@@ -83,6 +83,11 @@ export default function AdminDashboard() {
   const [photoPreview, setPhotoPreview] = useState(null)
   const [editMode, setEditMode] = useState(false)
   const [editStudent, setEditStudent] = useState(null)
+  const [learnerProfileLoading, setLearnerProfileLoading] = useState(false)
+  // Newly-picked replacement files for the learner's photo/documents while editing,
+  // keyed by field name (photo, nhisFront, nhisBack, ghanaFront, ghanaBack, signedBooklet).
+  const [learnerDocFiles, setLearnerDocFiles] = useState({})
+  const [learnerDocPreviews, setLearnerDocPreviews] = useState({})
   const [newStudent, setNewStudent] = useState({
     firstName: '', lastName: '', dateOfBirth: '', gender: '',
     gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
@@ -496,24 +501,79 @@ const handleSaveAcademicContext = async () => {
   }
 }
 
+  // Loads the learner's complete profile (every admission-form field, plus
+  // their approved results) so the profile modal always shows everything
+  // about them — whether they came from an approved admission application
+  // or were added manually. Pass openEdit=true to jump straight into the
+  // edit form (e.g. from the "Edit" button in Accounts > Learners).
+  const openLearnerProfile = async (studentOrId, openEdit = false) => {
+    const id = typeof studentOrId === 'object' ? studentOrId.id : studentOrId
+    setLearnerProfileLoading(true)
+    setLearnerDocFiles({})
+    setLearnerDocPreviews({})
+    try {
+      const res = await axios.get(`${API_URL}/api/students/${id}`, { headers: getAuthHeaders() })
+      setSelectedStudent(res.data)
+      if (openEdit) {
+        setEditStudent({ ...res.data })
+        setEditMode(true)
+      } else {
+        setEditMode(false)
+      }
+    } catch (err) {
+      console.error(err.response?.data || err)
+      // Fall back to whatever summary data we already had, so the modal
+      // still opens even if the detail fetch fails.
+      const fallback = typeof studentOrId === 'object' ? studentOrId : students.find(s => s.id === id)
+      if (fallback) {
+        setSelectedStudent(fallback)
+        if (openEdit) { setEditStudent({ ...fallback }); setEditMode(true) }
+      }
+      alert(err.response?.data?.message || 'Could not load the full learner profile — showing summary data instead.')
+    } finally {
+      setLearnerProfileLoading(false)
+    }
+  }
+
+  const handleLearnerDocChange = (field, file) => {
+    if (!file) return
+    setLearnerDocFiles(prev => ({ ...prev, [field]: file }))
+    setLearnerDocPreviews(prev => ({ ...prev, [field]: URL.createObjectURL(file) }))
+  }
+
   const handleEditStudent = async () => {
   try {
-    const updateData = { ...editStudent }
+    const formData = new FormData()
+
+    Object.entries(editStudent || {}).forEach(([key, value]) => {
+      // Skip nested/relational objects (parent, results) and internal ids —
+      // only send plain editable fields.
+      if (['parent', 'results', 'id', 'createdAt', 'updatedAt', 'admissionApplication'].includes(key)) return
+      if (value === null || value === undefined) return
+      formData.append(key, value)
+    })
 
     // Ensure email is properly included
     if (editStudent.email || editStudent.learnerEmail) {
-      updateData.email = editStudent.email || editStudent.learnerEmail
+      formData.set('email', editStudent.email || editStudent.learnerEmail)
     }
+
+    // Attach any newly-picked photo/document replacements
+    Object.entries(learnerDocFiles).forEach(([field, file]) => {
+      formData.set(field, file)
+    })
 
     const res = await axios.put(
       `${API_URL}/api/students/${editStudent.id}`,
-      updateData,
-      { headers: getAuthHeaders() }  
+      formData,
+      { headers: getAuthHeaders() }
     )
 
-    setStudents(students.map(s => s.id === editStudent.id ? res.data : s))
-    setSelectedStudent(res.data)
+    setStudents(students.map(s => s.id === editStudent.id ? { ...s, ...res.data } : s))
+    setSelectedStudent(prev => ({ ...prev, ...res.data }))
     setEditMode(false)
+    setLearnerDocFiles({})
+    setLearnerDocPreviews({})
     alert('Learner details updated successfully!')
   } catch (err) {
     console.error(err.response?.data)
@@ -1856,7 +1916,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           <td className="px-6 py-4"><span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span></td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setSelectedStudent(student)} className="bg-blue-600 hover:bg-blue-400 text-white p-2 rounded-lg transition-colors"><Eye size={16} /></button>
+                              <button onClick={() => openLearnerProfile(student)} className="bg-blue-600 hover:bg-blue-400 text-white p-2 rounded-lg transition-colors"><Eye size={16} /></button>
                               <button onClick={() => handleDeleteStudent(student.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                             </div>
                           </td>
@@ -2081,8 +2141,8 @@ const handleAdminPasswordReset = async (id, email) => {
                               <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <button onClick={() => setSelectedStudent(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
-                              <button onClick={() => { setEditStudent(s); setEditMode(true) }} className="px-3 py-2 bg-yellow-400 text-white rounded">Edit</button>
+                              <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
+                              <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-yellow-400 text-white rounded">Edit</button>
                               <button
                                 onClick={() => {
                                   if (!s.learnerUserId) {
@@ -2969,148 +3029,267 @@ const handleAdminPasswordReset = async (id, email) => {
       {/* Student Detail Modal */}
 {selectedStudent && (
   <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
         <h2 className="text-xl font-bold font-serif">Learner Profile</h2>
-        <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="hover:text-cyan-600 transition-colors"><X size={24} /></button>
+        <button onClick={() => { setSelectedStudent(null); setEditMode(false); setLearnerDocFiles({}); setLearnerDocPreviews({}) }} className="hover:text-cyan-600 transition-colors"><X size={24} /></button>
       </div>
       <div className="p-6">
+        {learnerProfileLoading && (
+          <div className="text-center text-sm text-gray-400 mb-4">Loading full profile…</div>
+        )}
         <div className="flex items-center gap-6 mb-6">
-          <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
-            {selectedStudent.photo ? <img src={selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600 shrink-0">
+            {(learnerDocPreviews.photo || selectedStudent.photo) ? <img src={learnerDocPreviews.photo || selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
               <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
           </div>
           <div>
             <h3 className="text-xl font-bold text-cyan-700">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
             <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
             <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
+            <span className="inline-block bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full mt-1">
+              {selectedStudent.source === 'admission' ? 'From admission application' : 'Added manually'}
+            </span>
           </div>
         </div>
 
         {!editMode ? (
           <div>
-            <div className="space-y-3 mb-6">
-              {[
-                ['Date of Birth', selectedStudent.dateOfBirth],
-                ['Gender', selectedStudent.gender],
-                ['Grade Level', selectedStudent.gradeLevel],
-                ['Learner Email', selectedStudent.email || selectedStudent.learnerEmail || '—'],
-                ['Parent Name', selectedStudent.parentName],
-                ['Parent Email', selectedStudent.parentEmail],
+            {[
+              { title: "Learner's Data", fields: [
+                ['Date of Birth', selectedStudent.dateOfBirth], ['Age', selectedStudent.age], ['Gender', selectedStudent.gender],
+                ['Month of Birth', selectedStudent.monthOfBirth], ['Place of Birth', selectedStudent.placeOfBirth],
+                ['Grade Level', selectedStudent.gradeLevel], ['Previous School', selectedStudent.previousSchool],
+                ['Height', selectedStudent.height], ['Weight', selectedStudent.weight],
+                ['Hometown', selectedStudent.hometown], ['Mother Tongue', selectedStudent.motherTongue], ['Religion', selectedStudent.religion],
+                ['Date of Admission', selectedStudent.dateOfAdmission], ['Learner Email', selectedStudent.email || '—'],
+                ['Languages Spoken', [selectedStudent.language1, selectedStudent.language2, selectedStudent.language3, selectedStudent.language4].filter(Boolean).join(', ')],
+                ['Lives With', selectedStudent.livesWith], ['Older Children', selectedStudent.olderChildren], ['Younger Children', selectedStudent.youngerChildren],
+              ] },
+              { title: 'Parent / Guardian', fields: [
+                ['Parent Name', selectedStudent.parentName], ['Parent Occupation', selectedStudent.parentOccupation],
+                ['Parent Email', selectedStudent.parentEmail], ['Parent Phone', selectedStudent.parentPhone],
                 ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'],
-                ['Parent Phone', selectedStudent.parentPhone],
                 ['Address', selectedStudent.address],
-                ['Status', selectedStudent.status],
-                ['Enrolled On', new Date(selectedStudent.createdAt).toLocaleDateString()]
-              ].map((item, index) => (
-                <div key={index} className="flex items-start gap-4 bg-blue-50 rounded-xl px-4 py-3">
-                  <span className="text-sm font-bold text-cyan-700 w-32 shrink-0">{item[0]}</span>
-                  <span className="text-sm text-gray-600">{item[1] || '—'}</span>
+                ['Secondary Contact Name', selectedStudent.secondaryContactName], ['Secondary Contact Phone', selectedStudent.secondaryContactPhone],
+              ] },
+              { title: "Father's Details", fields: [
+                ['Name', selectedStudent.fatherName], ['Address', selectedStudent.fatherAddress], ['Nationality', selectedStudent.fatherNationality],
+                ['Marital Status', selectedStudent.fatherMaritalStatus], ['Phone', selectedStudent.fatherPhone], ['House Number', selectedStudent.fatherHouseNumber],
+                ['Religion', selectedStudent.fatherReligion], ['Occupation', selectedStudent.fatherOccupation], ['Place of Work', selectedStudent.fatherPlaceOfWork],
+                ['Education', selectedStudent.fatherEducation], ['Email', selectedStudent.fatherEmail],
+              ] },
+              { title: "Mother's Details", fields: [
+                ['Name', selectedStudent.motherName], ['Address', selectedStudent.motherAddress], ['Nationality', selectedStudent.motherNationality],
+                ['Marital Status', selectedStudent.motherMaritalStatus], ['Phone', selectedStudent.motherPhone], ['House Number', selectedStudent.motherHouseNumber],
+                ['Religion', selectedStudent.motherReligion], ['Occupation', selectedStudent.motherOccupation], ['Place of Work', selectedStudent.motherPlaceOfWork],
+                ['Education', selectedStudent.motherEducation], ['Email', selectedStudent.motherEmail],
+              ] },
+              { title: 'Medical Information', fields: [
+                ['Medical Conditions', selectedStudent.medicalConditions], ['Allergies', selectedStudent.allergies], ['Special Needs', selectedStudent.specialNeeds],
+                ['Doctor Name', selectedStudent.doctorName], ['Doctor Phone', selectedStudent.doctorPhone],
+                ['Hospital Name', selectedStudent.hospitalName], ['Hospital Phone', selectedStudent.hospitalPhone],
+              ] },
+              { title: 'Emergency Contact', fields: [
+                ['Name', selectedStudent.emergencyName], ['Relationship', selectedStudent.emergencyRelationship],
+                ['Phone', selectedStudent.emergencyPhone], ['Email', selectedStudent.emergencyEmail],
+                ['Address', selectedStudent.emergencyAddress], ['WhatsApp', selectedStudent.emergencyWhatsapp],
+              ] },
+              { title: 'Enrollment', fields: [
+                ['Status', selectedStudent.status], ['Enrolled On', selectedStudent.createdAt ? new Date(selectedStudent.createdAt).toLocaleDateString() : '—'],
+              ] },
+            ].map((section, si) => (
+              <div key={si} className="mb-6">
+                <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">{section.title}</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {section.fields.map(([label, value], fi) => (
+                    <div key={fi} className="bg-blue-50 rounded-lg px-3 py-2">
+                      <p className="text-xs font-bold text-cyan-700">{label}</p>
+                      <p className="text-sm text-gray-600">{value || '—'}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            ))}
+
+            <div className="mb-6">
+              <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">Uploaded Documents</h4>
+              <div className="grid grid-cols-2 gap-4">
+                {[['NHIS Card - Front', selectedStudent.nhisFront], ['NHIS Card - Back', selectedStudent.nhisBack], ['Ghana Card - Front', selectedStudent.ghanaFront], ['Ghana Card - Back', selectedStudent.ghanaBack]].map((doc, di) => (
+                  <div key={di} className="bg-blue-50 rounded-lg p-3">
+                    <p className="text-xs font-bold text-cyan-700 mb-2">{doc[0]}</p>
+                    {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" loading="lazy" decoding="async" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
+                  </div>
+                ))}
+              </div>
+              {selectedStudent.signedBooklet && (
+                <div className="mt-4 bg-blue-50 rounded-lg p-4">
+                  <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
+                  <a href={selectedStudent.signedBooklet} target="_blank" rel="noreferrer" className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+                    View Signed Booklet
+                  </a>
+                </div>
+              )}
             </div>
-            <div className="flex gap-3">
-              <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
-              {/* Show button only if student has no login yet */}
+
+            <div className="mb-6">
+              <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">Approved Results</h4>
+              {(selectedStudent.results && selectedStudent.results.length > 0) ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm bg-blue-50 rounded-lg overflow-hidden">
+                    <thead className="bg-blue-100 text-cyan-700">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Academic Year</th>
+                        <th className="px-3 py-2 text-left">Term</th>
+                        <th className="px-3 py-2 text-left">Remarks</th>
+                        <th className="px-3 py-2 text-left">Approved On</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedStudent.results.map(r => (
+                        <tr key={r.id} className="border-t border-blue-100">
+                          <td className="px-3 py-2 text-gray-700">{r.academicYear}</td>
+                          <td className="px-3 py-2 text-gray-700">{r.term}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.remarks || '—'}</td>
+                          <td className="px-3 py-2 text-gray-500">{r.approvedAt ? new Date(r.approvedAt).toLocaleDateString() : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 italic bg-blue-50 rounded-lg px-4 py-3">No approved results yet for this learner.</p>
+              )}
+            </div>
+
             {!selectedStudent.learnerUserId && (
               <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <p className="text-xs text-amber-700 font-bold mb-2">⚠️ This learner has no portal login yet.</p>
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-[#1a3c6e] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-            >
-              Set Login Credentials
-            </button>
-        </div>
-      )}
+                <p className="text-xs text-amber-700 font-bold mb-2">⚠️ This learner has no portal login yet.</p>
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="bg-[#1a3c6e] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                >
+                  Set Login Credentials
+                </button>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
               <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
             </div>
           </div>
         ) : (
           <div>
-            <div className="grid grid-cols-1 gap-4 mb-6">
+            {/* Photo + document re-uploads — every file is replaceable */}
+            <div className="mb-6">
+              <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">Photo & Documents</h4>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-cyan-700 mb-1">First Name</label>
-                  <input type="text" value={editStudent.firstName || ''} onChange={e => setEditStudent({ ...editStudent, firstName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-cyan-700 mb-1">Last Name</label>
-                  <input type="text" value={editStudent.lastName || ''} onChange={e => setEditStudent({ ...editStudent, lastName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-cyan-700 mb-1">Date of Birth</label>
-                  <input type="date" value={editStudent.dateOfBirth || ''} onChange={e => setEditStudent({ ...editStudent, dateOfBirth: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-cyan-700 mb-1">Gender</label>
-                  <select value={editStudent.gender || ''} onChange={e => setEditStudent({ ...editStudent, gender: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                    <option value="">Select gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Grade Level</label>
-                <select value={editStudent.gradeLevel || ''} onChange={e => setEditStudent({ ...editStudent, gradeLevel: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                  {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
-                </select>
-              </div>
-
-              {/* Learner Email Field */}
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Learner Email (Portal Login)</label>
-                <input 
-                  type="email" 
-                  value={editStudent.email || editStudent.learnerEmail || ''} 
-                  onChange={e => setEditStudent({ ...editStudent, email: e.target.value, learnerEmail: e.target.value })} 
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Name</label>
-                <input type="text" value={editStudent.parentName || ''} onChange={e => setEditStudent({ ...editStudent, parentName: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Email</label>
-                <input type="email" value={editStudent.parentEmail || ''} onChange={e => setEditStudent({ ...editStudent, parentEmail: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Parent Phone</label>
-                <input type="text" value={editStudent.parentPhone || ''} onChange={e => setEditStudent({ ...editStudent, parentPhone: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Address</label>
-                <input type="text" value={editStudent.address || ''} onChange={e => setEditStudent({ ...editStudent, address: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-cyan-700 mb-1">Status</label>
-                <select value={editStudent.status || 'active'} onChange={e => setEditStudent({ ...editStudent, status: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm">
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="graduated">Graduated</option>
-                  <option value="transferred">Transferred</option>
-                </select>
+                {[
+                  ['photo', 'Passport Photo'],
+                  ['nhisFront', 'NHIS Card - Front'],
+                  ['nhisBack', 'NHIS Card - Back'],
+                  ['ghanaFront', 'Ghana Card - Front'],
+                  ['ghanaBack', 'Ghana Card - Back'],
+                  ['signedBooklet', 'Signed Booklet (PDF)'],
+                ].map(([field, label]) => (
+                  <div key={field} className="bg-blue-50 rounded-lg p-3">
+                    <p className="text-xs font-bold text-cyan-700 mb-2">{label}</p>
+                    {field !== 'signedBooklet' && (learnerDocPreviews[field] || editStudent[field]) && (
+                      <img src={learnerDocPreviews[field] || editStudent[field]} alt={label} className="w-full h-20 object-cover rounded-lg mb-2" loading="lazy" decoding="async" />
+                    )}
+                    {field === 'signedBooklet' && editStudent.signedBooklet && !learnerDocFiles.signedBooklet && (
+                      <p className="text-xs text-gray-500 mb-2">Current file on record</p>
+                    )}
+                    <input
+                      type="file"
+                      accept={field === 'signedBooklet' ? 'application/pdf' : 'image/*'}
+                      onChange={e => handleLearnerDocChange(field, e.target.files[0])}
+                      className="w-full text-xs text-gray-600"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
+
+            {[
+              { title: "Learner's Data", fields: [
+                ['firstName', 'First Name', 'text'], ['lastName', 'Last Name', 'text'],
+                ['dateOfBirth', 'Date of Birth', 'date'], ['age', 'Age', 'text'], ['monthOfBirth', 'Month of Birth', 'text'],
+                ['gender', 'Gender', 'select', ['Male', 'Female']], ['placeOfBirth', 'Place of Birth', 'text'],
+                ['gradeLevel', 'Grade Level', 'select', ['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']],
+                ['previousSchool', 'Previous School', 'text'], ['height', 'Height', 'text'], ['weight', 'Weight', 'text'],
+                ['hometown', 'Hometown', 'text'], ['motherTongue', 'Mother Tongue', 'text'], ['religion', 'Religion', 'text'],
+                ['dateOfAdmission', 'Date of Admission', 'date'],
+                ['email', 'Learner Email (Portal Login)', 'email'],
+                ['language1', 'Language 1', 'text'], ['language2', 'Language 2', 'text'], ['language3', 'Language 3', 'text'], ['language4', 'Language 4', 'text'],
+                ['livesWith', 'Lives With', 'text'], ['olderChildren', 'Older Children', 'text'], ['youngerChildren', 'Younger Children', 'text'],
+              ] },
+              { title: 'Parent / Guardian', fields: [
+                ['parentName', 'Parent Name', 'text'], ['parentOccupation', 'Parent Occupation', 'text'],
+                ['parentEmail', 'Parent Email', 'email'], ['parentPhone', 'Parent Phone', 'text'], ['address', 'Address', 'text'],
+                ['secondaryContactName', 'Secondary Contact Name', 'text'], ['secondaryContactPhone', 'Secondary Contact Phone', 'text'],
+              ] },
+              { title: "Father's Details", fields: [
+                ['fatherName', 'Name', 'text'], ['fatherAddress', 'Address', 'text'], ['fatherNationality', 'Nationality', 'text'],
+                ['fatherMaritalStatus', 'Marital Status', 'text'], ['fatherPhone', 'Phone', 'text'], ['fatherHouseNumber', 'House Number', 'text'],
+                ['fatherReligion', 'Religion', 'text'], ['fatherOccupation', 'Occupation', 'text'], ['fatherPlaceOfWork', 'Place of Work', 'text'],
+                ['fatherEducation', 'Education', 'text'], ['fatherEmail', 'Email', 'email'],
+              ] },
+              { title: "Mother's Details", fields: [
+                ['motherName', 'Name', 'text'], ['motherAddress', 'Address', 'text'], ['motherNationality', 'Nationality', 'text'],
+                ['motherMaritalStatus', 'Marital Status', 'text'], ['motherPhone', 'Phone', 'text'], ['motherHouseNumber', 'House Number', 'text'],
+                ['motherReligion', 'Religion', 'text'], ['motherOccupation', 'Occupation', 'text'], ['motherPlaceOfWork', 'Place of Work', 'text'],
+                ['motherEducation', 'Education', 'text'], ['motherEmail', 'Email', 'email'],
+              ] },
+              { title: 'Medical Information', fields: [
+                ['medicalConditions', 'Medical Conditions', 'text'], ['allergies', 'Allergies', 'text'], ['specialNeeds', 'Special Needs', 'text'],
+                ['doctorName', 'Doctor Name', 'text'], ['doctorPhone', 'Doctor Phone', 'text'],
+                ['hospitalName', 'Hospital Name', 'text'], ['hospitalPhone', 'Hospital Phone', 'text'],
+              ] },
+              { title: 'Emergency Contact', fields: [
+                ['emergencyName', 'Name', 'text'], ['emergencyRelationship', 'Relationship', 'text'],
+                ['emergencyPhone', 'Phone', 'text'], ['emergencyEmail', 'Email', 'email'],
+                ['emergencyAddress', 'Address', 'text'], ['emergencyWhatsapp', 'WhatsApp', 'text'],
+              ] },
+              { title: 'Enrollment', fields: [
+                ['status', 'Status', 'select', ['active', 'inactive', 'graduated', 'transferred']],
+              ] },
+            ].map((section, si) => (
+              <div key={si} className="mb-6">
+                <h4 className="font-bold text-white bg-blue-600 px-4 py-2 rounded-lg mb-3">{section.title}</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  {section.fields.map(([key, label, type, options]) => (
+                    <div key={key}>
+                      <label className="block text-sm font-bold text-cyan-700 mb-1">{label}</label>
+                      {type === 'select' ? (
+                        <select
+                          value={editStudent[key] || ''}
+                          onChange={e => setEditStudent({ ...editStudent, [key]: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm"
+                        >
+                          <option value="">Select {label.toLowerCase()}</option>
+                          {options.map(o => <option key={o} value={o}>{o}</option>)}
+                        </select>
+                      ) : (
+                        <input
+                          type={type}
+                          value={editStudent[key] || ''}
+                          onChange={e => setEditStudent({ ...editStudent, [key]: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
 
             <div className="flex gap-3">
               <button onClick={handleEditStudent} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
-              <button onClick={() => setEditMode(false)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
+              <button onClick={() => { setEditMode(false); setLearnerDocFiles({}); setLearnerDocPreviews({}) }} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
             </div>
-            
           </div>
-          
         )}
       </div>
 

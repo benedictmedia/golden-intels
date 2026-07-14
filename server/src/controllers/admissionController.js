@@ -224,7 +224,9 @@ const approveApplication = async (req, res) => {
     // Generate student ID
     const studentId = await generateStudentId()
 
-    // Create student from application
+    // Create student from application — copy over EVERY field captured on the
+    // admission form so the learner's full profile is available immediately,
+    // not just the handful of summary fields.
     const student = await prisma.student.create({
       data: {
         studentId,
@@ -239,6 +241,77 @@ const approveApplication = async (req, res) => {
         address: application.emergencyAddress || '',
         photo: application.photo,
         status: 'active',
+        source: 'admission',
+        admissionApplicationId: application.id,
+
+        age: application.age,
+        monthOfBirth: application.monthOfBirth,
+        placeOfBirth: application.placeOfBirth,
+        height: application.height,
+        weight: application.weight,
+        hometown: application.hometown,
+        motherTongue: application.motherTongue,
+        religion: application.religion,
+        dateOfAdmission: application.dateOfAdmission,
+        previousSchool: application.previousSchool,
+
+        parentOccupation: application.parentOccupation,
+        secondaryContactName: application.secondaryContactName,
+        secondaryContactPhone: application.secondaryContactPhone,
+
+        fatherName: application.fatherName,
+        fatherAddress: application.fatherAddress,
+        fatherNationality: application.fatherNationality,
+        fatherMaritalStatus: application.fatherMaritalStatus,
+        fatherPhone: application.fatherPhone,
+        fatherHouseNumber: application.fatherHouseNumber,
+        fatherReligion: application.fatherReligion,
+        fatherOccupation: application.fatherOccupation,
+        fatherPlaceOfWork: application.fatherPlaceOfWork,
+        fatherEducation: application.fatherEducation,
+        fatherEmail: application.fatherEmail,
+
+        motherName: application.motherName,
+        motherAddress: application.motherAddress,
+        motherNationality: application.motherNationality,
+        motherMaritalStatus: application.motherMaritalStatus,
+        motherPhone: application.motherPhone,
+        motherHouseNumber: application.motherHouseNumber,
+        motherReligion: application.motherReligion,
+        motherOccupation: application.motherOccupation,
+        motherPlaceOfWork: application.motherPlaceOfWork,
+        motherEducation: application.motherEducation,
+        motherEmail: application.motherEmail,
+
+        livesWith: application.livesWith,
+        olderChildren: application.olderChildren,
+        youngerChildren: application.youngerChildren,
+
+        language1: application.language1,
+        language2: application.language2,
+        language3: application.language3,
+        language4: application.language4,
+
+        medicalConditions: application.medicalConditions,
+        allergies: application.allergies,
+        specialNeeds: application.specialNeeds,
+        doctorName: application.doctorName,
+        doctorPhone: application.doctorPhone,
+        hospitalName: application.hospitalName,
+        hospitalPhone: application.hospitalPhone,
+
+        emergencyName: application.emergencyName,
+        emergencyRelationship: application.emergencyRelationship,
+        emergencyPhone: application.emergencyPhone,
+        emergencyEmail: application.emergencyEmail,
+        emergencyAddress: application.emergencyAddress,
+        emergencyWhatsapp: application.emergencyWhatsapp,
+
+        nhisFront: application.nhisFront,
+        nhisBack: application.nhisBack,
+        ghanaFront: application.ghanaFront,
+        ghanaBack: application.ghanaBack,
+        signedBooklet: application.signedBooklet,
       }
     })
 
