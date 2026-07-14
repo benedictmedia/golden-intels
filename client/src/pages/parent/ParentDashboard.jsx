@@ -366,6 +366,13 @@ export default function ParentDashboard() {
     .then(res => setFeePayments(res.data))
 }, [])
 
+const getParentDisplayName = (name) => {
+  if (!name) return 'Parent'
+  const parts = name.trim().split(/\s+/)
+  const isTitle = /^(mr|mrs|ms|miss|dr|prof|rev)\.?$/i.test(parts[0])
+  return isTitle ? parts.slice(0, 2).join(' ') : parts[0]
+}
+
   const handleLogout = () => {
     logout()
     navigate('/')
@@ -784,7 +791,7 @@ export default function ParentDashboard() {
                     {selectedAcademicYear} · {selectedTerm}
                   </p>
                   <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-2">
-                    Welcome back, {user?.name?.split(' ')[0] || 'Parent'}
+                    Welcome back, {getParentDisplayName(user?.name)}
                   </h2>
                   <p className="text-purple-100 max-w-2xl text-sm sm:text-base">
                     {students.length > 0
