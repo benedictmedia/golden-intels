@@ -774,22 +774,82 @@ export default function ParentDashboard() {
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
             <div>
+              {/* Welcome banner */}
+              <div
+                className="rounded-2xl p-8 shadow-md mb-8 text-white relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #800080 0%, #4a235a 55%, #0000ff 100%)' }}
+              >
+                <div className="relative z-10">
+                  <p className="text-xs uppercase tracking-[0.25em] text-purple-100 mb-2">
+                    {selectedAcademicYear} · {selectedTerm}
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-bold font-serif mb-2">
+                    Welcome back, {user?.name?.split(' ')[0] || 'Parent'}
+                  </h2>
+                  <p className="text-purple-100 max-w-2xl text-sm sm:text-base">
+                    {students.length > 0
+                      ? `You're following the progress of ${students.length} ${students.length === 1 ? 'learner' : 'learners'} at Golden-Intels International School. Use the shortcuts below to check in on attendance, results, assessments and fees.`
+                      : 'Your Parent Portal is ready. Once your child is enrolled, their attendance, results, assessments, and fee status will appear here.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick access shortcuts */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
-{ label: 'My Children', value: students.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
-{ label: 'Marked Assessments', value: markedAssessmentRecords.length, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-{ label: 'Approved Results', value: studentApprovedResults.length, color: 'bg-[#800080]', textColor: 'text-purple-200' },
-{ label: 'Attendance Rate', value: `${contextualAttendancePercentage}%`, color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-                ].map((stat, index) => (
-                  <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
-                    <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
-                    <p className="text-3xl font-bold">{stat.value}</p>
-                  </div>
+                  { label: 'Attendance', description: 'Daily records', icon: <ClipboardList size={22} />, id: 'attendance', color: 'bg-[#4a235a]' },
+                  { label: 'Statements of Results', description: 'Approved grades', icon: <BookOpen size={22} />, id: 'grades', color: 'bg-[#0000ff]' },
+                  { label: 'Assessments', description: 'Marked work', icon: <FileText size={22} />, id: 'assessments', color: 'bg-[#800080]' },
+                  { label: 'Fee Status', description: 'Payments & balance', icon: <DollarSign size={22} />, id: 'fees', color: 'bg-[#0f6e56]' },
+                ].map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveMenu(item.id)}
+                    className="text-left bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                  >
+                    <div className={`${item.color} text-white w-11 h-11 rounded-xl flex items-center justify-center mb-4`}>
+                      {item.icon}
+                    </div>
+                    <p className="font-bold text-[#4a235a]">{item.label}</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.description}</p>
+                  </button>
                 ))}
               </div>
+
+              {/* Children overview */}
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-2">Parent Dashboard</h2>
-                <p className="text-gray-600">Welcome to your Parent Portal. Use the sidebar to view your child's progress, attendance, grades, assessments, and fee status.</p>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold font-serif text-[#4a235a]">My Children</h2>
+                  <button
+                    onClick={() => setActiveMenu('children')}
+                    className="text-xs font-bold text-[#800080] hover:underline"
+                  >
+                    View all
+                  </button>
+                </div>
+                {students.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No children enrolled yet. Please contact the school admin.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {students.map(student => (
+                      <div key={student.id} className="flex items-center gap-4 border border-gray-100 rounded-xl p-4">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-[#4a235a] flex-shrink-0">
+                          {student.photo ? (
+                            <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[#4a235a] font-bold">
+                              {student.firstName?.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-[#4a235a] truncate">{student.firstName} {student.lastName}</p>
+                          <p className="text-xs text-gray-500">{student.gradeLevel} · {student.studentId}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -947,9 +1007,22 @@ export default function ParentDashboard() {
           {/* Grades */}
           {activeMenu === 'grades' && (
             <div>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Grades & Results</h2>
-                <p className="text-gray-500 text-sm">View and download your child's approved academic results.</p>
+              <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Grades & Results</h2>
+                  <p className="text-gray-500 text-sm">View and download your child's approved academic results.</p>
+                </div>
+                {students.length > 0 && (
+                  <select
+                    value={selectedChild?.id || ''}
+                    onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                  >
+                    {students.map(student => (
+                      <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {contextualApprovedResults.length === 0 ? (
