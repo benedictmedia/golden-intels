@@ -44,7 +44,7 @@ export default function About() {
             </span>
 
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-6">
-              How It All Began
+              How it All Began
             </h2>
 
             <div className="text-gray-700 text-lg leading-relaxed space-y-5">
