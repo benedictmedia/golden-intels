@@ -94,7 +94,7 @@ const clubs = [
     image: clubMusicImg,
     shortDescription: 'Celebrating musical talent through choir, orchestra, and performance.',
     fullDescription: 'The Music and Orchestra Club nurtures the musical talents of students across all year groups. Whether a student is a complete beginner or an experienced musician, the club provides a welcoming and inspiring environment to learn, practice, and perform. Members participate in the school choir, learn to play various instruments, and come together as an orchestra to perform at school events, concerts, and community gatherings. The club instills discipline, teamwork, and a deep appreciation for music and the performing arts.',
-    meets: 'Every Monday and Friday after school',
+    meets: 'Every Friday after school',
     openTo: 'All year groups',
   },
   {
