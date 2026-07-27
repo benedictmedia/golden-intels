@@ -103,7 +103,7 @@ const clubs = [
     image: clubSportsImg,
     shortDescription: 'Building healthy bodies, teamwork, and resilience through sport.',
     fullDescription: 'The Sports Club at Golden-Intels promotes physical fitness, teamwork, and a healthy lifestyle for all students. Members participate in a variety of sporting activities including football, athletics, and physical fitness training. The club teaches students the values of sportsmanship, perseverance, and teamwork while helping them build physical strength, coordination, and confidence. Students have the opportunity to represent the school in inter-school sporting competitions and develop a lifelong love for physical activity and healthy living.',
-    meets: 'Every Friday',
+    meets: 'Every Friday before lesson',
     openTo: 'All year groups',
   },
   {
