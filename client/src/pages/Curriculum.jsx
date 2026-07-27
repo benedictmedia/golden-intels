@@ -7,7 +7,7 @@ import ipcImg from '../assets/ipc.jpg'
 
 const programs = [
   {
-    category: 'Early Years School',
+    category: 'Early Years',
     title: 'Early Years Foundation Stage',
     image: eyfsImg,
     targetAudience: 'Children aged 3-5 years (Nursery & Reception)',
