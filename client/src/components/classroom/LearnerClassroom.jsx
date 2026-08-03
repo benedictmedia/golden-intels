@@ -396,9 +396,9 @@ export default function LearnerClassroom({ gradeLevel }) {
 
       {/* Info box */}
       <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
-        <AlertCircle size={16} className="text-[#0e7490] mt-0.5 flex-shrink-0" />
+        <AlertCircle size={16} className="text-[#1d4ed8] mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-xs font-bold text-[#0e7490]">How Golden Classroom works</p>
+          <p className="text-xs font-bold text-[#1d4ed8]">How Golden Classroom works</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
             When your teacher starts a live class, a <strong>Join Now</strong> button will appear automatically.
             Classes are private — only students in <strong>{gradeLevel || 'your class'}</strong> can join.

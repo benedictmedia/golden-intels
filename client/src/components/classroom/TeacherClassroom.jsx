@@ -38,7 +38,7 @@ function Countdown({ scheduledAt }) {
   const m = Math.floor((diff % 3600000) / 60000)
   const s = Math.floor((diff % 60000) / 1000)
   return (
-    <span className="text-xs font-mono text-[#0e7490] bg-blue-50 px-2 py-0.5 rounded-full">
+    <span className="text-xs font-mono text-[#1d4ed8] bg-blue-50 px-2 py-0.5 rounded-full">
       {h > 0 ? `${h}h ` : ''}{m}m {s}s
     </span>
   )
@@ -243,7 +243,7 @@ export default function TeacherClassroom() {
     return (
       <div className="fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
         {/* Live Header */}
-        <div className="bg-[#0e7490] text-white px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+        <div className="bg-[#1d4ed8] text-white px-4 py-2.5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 bg-red-600 px-3 py-1 rounded-full">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -282,18 +282,18 @@ export default function TeacherClassroom() {
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-[#0e7490] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-[#1d4ed8] flex items-center justify-center">
               <Video size={20} className="text-[#128038]" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold font-serif text-[#0e7490]">Golden Classroom</h2>
+              <h2 className="text-2xl font-bold font-serif text-[#1d4ed8]">Golden Classroom</h2>
               <p className="text-sm text-gray-500">Schedule and host live video classes for your learners</p>
             </div>
           </div>
         </div>
         <button
           onClick={openCreate}
-          className="bg-[#0e7490] hover:bg-[#0c7f9c] text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-md"
+          className="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-md"
         >
           <Plus size={16} /> Schedule Class
         </button>
@@ -302,7 +302,7 @@ export default function TeacherClassroom() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Sessions', value: sessions.length, icon: <LayoutGrid size={18} />, color: 'text-[#0e7490]', bg: 'bg-blue-50' },
+          { label: 'Total Sessions', value: sessions.length, icon: <LayoutGrid size={18} />, color: 'text-[#1d4ed8]', bg: 'bg-blue-50' },
           { label: 'Live Now', value: liveSessions.length, icon: <Wifi size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
           { label: 'Upcoming', value: upcomingSessions.length, icon: <Calendar size={18} />, color: 'text-[#128038]', bg: 'bg-green-50' },
           { label: 'Completed', value: sessions.filter(s => s.status === 'ended').length, icon: <CheckCircle size={18} />, color: 'text-gray-500', bg: 'bg-gray-50' },
@@ -342,7 +342,7 @@ export default function TeacherClassroom() {
               key={val}
               onClick={() => setStatusFilter(val)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                statusFilter === val ? 'bg-[#0e7490] text-white' : 'text-gray-500 hover:bg-gray-100'
+                statusFilter === val ? 'bg-[#1d4ed8] text-white' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
               {label}
@@ -375,7 +375,7 @@ export default function TeacherClassroom() {
                   {/* Session info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-[#0e7490] text-sm">{session.title}</p>
+                      <p className="font-bold text-[#1d4ed8] text-sm">{session.title}</p>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.color}`}>{cfg.label}</span>
                       {canStart && <Countdown scheduledAt={session.scheduledAt} />}
                     </div>
@@ -404,7 +404,7 @@ export default function TeacherClassroom() {
                       <>
                         <button
                           onClick={() => openEdit(session)}
-                          className="text-gray-400 hover:text-[#0e7490] p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                          className="text-gray-400 hover:text-[#1d4ed8] p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                           title="Edit"
                         >
                           <Edit3 size={15} />
@@ -421,7 +421,7 @@ export default function TeacherClassroom() {
                       <>
                         <button
                           onClick={() => setActiveSession(session)}
-                          className="bg-[#0e7490] hover:bg-[#0c7f9c] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors"
+                          className="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors"
                         >
                           <Monitor size={12} /> Rejoin
                         </button>
@@ -452,7 +452,7 @@ export default function TeacherClassroom() {
       {showForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-            <div className="bg-[#0e7490] text-white p-6 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-[#1d4ed8] text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Video size={20} className="text-[#128038]" />
                 <h2 className="text-xl font-bold font-serif">
@@ -466,27 +466,27 @@ export default function TeacherClassroom() {
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
               {/* Title */}
               <div>
-                <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Session Title <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Session Title <span className="text-red-500">*</span></label>
                 <input type="text" value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Fractions and Decimals"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700" />
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700" />
               </div>
               {/* Class & Subject */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Class <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Class <span className="text-red-500">*</span></label>
                   <select value={form.gradeLevel}
                     onChange={e => setForm(f => ({ ...f, gradeLevel: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700">
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700">
                     {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Subject</label>
+                  <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Subject</label>
                   <select value={form.subject}
                     onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700">
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700">
                     {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
@@ -494,40 +494,40 @@ export default function TeacherClassroom() {
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Date <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Date <span className="text-red-500">*</span></label>
                   <input type="date" value={form.date}
                     onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700" />
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Time <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Time <span className="text-red-500">*</span></label>
                   <input type="time" value={form.time}
                     onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700" />
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700" />
                 </div>
               </div>
               {/* Duration */}
               <div>
-                <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Duration (minutes)</label>
+                <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Duration (minutes)</label>
                 <select value={form.duration}
                   onChange={e => setForm(f => ({ ...f, duration: parseInt(e.target.value) }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700">
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700">
                   {[30, 45, 60, 90, 120].map(d => <option key={d} value={d}>{d} minutes</option>)}
                 </select>
               </div>
               {/* Description */}
               <div>
-                <label className="block text-sm font-bold text-[#0e7490] mb-1.5">Description (optional)</label>
+                <label className="block text-sm font-bold text-[#1d4ed8] mb-1.5">Description (optional)</label>
                 <textarea value={form.description}
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   rows={3}
                   placeholder="What will you cover in this class?"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700 resize-none" />
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700 resize-none" />
               </div>
 
               <div className="bg-blue-50 rounded-xl p-3 flex items-start gap-2">
-                <AlertCircle size={14} className="text-[#0e7490] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#0e7490]">
+                <AlertCircle size={14} className="text-[#1d4ed8] mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-[#1d4ed8]">
                   A private room link will be generated automatically. Only learners in <strong>{form.gradeLevel}</strong> will be able to see and join this session.
                 </p>
               </div>
@@ -536,7 +536,7 @@ export default function TeacherClassroom() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 bg-[#0e7490] hover:bg-[#0c7f9c] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                className="flex-1 bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving…' : editingSession ? 'Save Changes' : 'Schedule Class'}
               </button>

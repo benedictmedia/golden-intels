@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 export default function CallToAction() {
   return (
 
-    <section className="py-20 bg-[#0c7f9c] text-white">
+    <section className="py-20 bg-[#2563eb] text-white">
 
       <div className="max-w-4xl mx-auto px-4 text-center">
 

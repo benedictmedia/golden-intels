@@ -729,7 +729,7 @@ const getParentDisplayName = (name) => {
       <div className="portal-main flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-<div className="portal-topbar px-6 py-4 flex items-center justify-between" style={{ background: '#0c7f9c' }}>
+<div className="portal-topbar px-6 py-4 flex items-center justify-between" style={{ background: '#2563eb' }}>
   <div className="flex items-center gap-3">
     <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-white/15 text-white">
       <Menu size={20} />
@@ -784,7 +784,7 @@ const getParentDisplayName = (name) => {
               {/* Welcome banner */}
               <div
                 className="rounded-2xl p-8 shadow-md mb-8 text-white relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #15803d 0%, #15803d 55%, #0c7f9c 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #15803d 0%, #15803d 55%, #2563eb 100%)' }}
               >
                 <div className="relative z-10">
                   <p className="text-xs uppercase tracking-[0.25em] text-purple-100 mb-2">
@@ -805,7 +805,7 @@ const getParentDisplayName = (name) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
                   { label: 'Attendance', description: 'Daily records', icon: <ClipboardList size={22} />, id: 'attendance', color: 'bg-[#15803d]' },
-                  { label: 'Statements of Results', description: 'Approved grades', icon: <BookOpen size={22} />, id: 'grades', color: 'bg-[#0c7f9c]' },
+                  { label: 'Statements of Results', description: 'Approved grades', icon: <BookOpen size={22} />, id: 'grades', color: 'bg-[#2563eb]' },
                   { label: 'Assessments', description: 'Marked work', icon: <FileText size={22} />, id: 'assessments', color: 'bg-[#15803d]' },
                   { label: 'Fee Status', description: 'Payments & balance', icon: <DollarSign size={22} />, id: 'fees', color: 'bg-[#128038]' },
                 ].map(item => (
@@ -952,7 +952,7 @@ const getParentDisplayName = (name) => {
                       ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#128038]', 'text-green-100'],
                       ['Absent (on permission)', contextualAttendanceSummary.absent_permission, 'bg-amber-500', 'text-amber-100'],
                       ['Absent (without permission)', contextualAttendanceSummary.absent_without_permission, 'bg-red-500', 'text-red-100'],
-                      ['Late', contextualAttendanceSummary.late, 'bg-[#0c7f9c]', 'text-blue-100'],
+                      ['Late', contextualAttendanceSummary.late, 'bg-[#2563eb]', 'text-blue-100'],
                     ].map(([label, value, color, textColor]) => (
                       <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                         <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
@@ -1211,7 +1211,7 @@ const getParentDisplayName = (name) => {
                           }}
                         >
                           <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#faf5ff' : '#ecfeff', color: selected ? '#15803d' : '#0c7f9c' }}>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#faf5ff' : '#eff6ff', color: selected ? '#15803d' : '#2563eb' }}>
                               <FolderOpen size={26} />
                             </div>
                             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-50 text-gray-500">

@@ -29,7 +29,7 @@ const menuItems = [
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
-const AVATAR_COLORS = ['#0c7f9c', '#0c7f9c', '#15803d', '#0369a1', '#0e7490', '#0e7490', '#15803d']
+const AVATAR_COLORS = ['#2563eb', '#2563eb', '#15803d', '#0369a1', '#1d4ed8', '#1d4ed8', '#15803d']
 const getAvatarColor = (name = '') => AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
 
 export default function TeacherDashboard() {
@@ -1016,7 +1016,7 @@ useEffect(() => {
 
       {/* Sidebar */}
       <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} flex flex-col transition-all duration-300 flex-shrink-0`}
-        style={{ background: '#0c7f9c' }}>
+        style={{ background: '#2563eb' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(252, 247, 247, 0.91)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -1034,7 +1034,7 @@ useEffect(() => {
               {effectiveUser?.photo ? (
                 <img src={effectiveUser.photo} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" style={{ border: '2px solid #4ade80' }} />
               ) : (
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: '#4ade80', color: '#0c7f9c' }}>{initials}</div>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: '#4ade80', color: '#2563eb' }}>{initials}</div>
               )}
               <div className="min-w-0">
                 <p className="text-white font-bold text-sm truncate">{displayName}</p>
@@ -1114,16 +1114,16 @@ useEffect(() => {
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
-              <p className="text-lg font-bold" style={{ color: '#0c7f9c' }}>{selectedAcademicYear} | {selectedTerm}</p>
+              <p className="text-lg font-bold" style={{ color: '#2563eb' }}>{selectedAcademicYear} | {selectedTerm}</p>
               <p className="text-xs text-gray-400 mt-0.5">Auto-set by admin · change to view previous terms</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <select value={selectedAcademicYear} onChange={e => { setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
-                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 bg-white">
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 bg-white">
                 {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
               </select>
               <select value={selectedTerm} onChange={e => { setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
-                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 bg-white">
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 bg-white">
                 {terms.map(term => <option key={term} value={term}>{term}</option>)}
               </select>
             </div>
@@ -1133,7 +1133,7 @@ useEffect(() => {
           {activeMenu === 'profile' && (
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="rounded-3xl overflow-hidden shadow-lg">
-                <div className="h-28 relative" style={{ background: 'linear-gradient(135deg, #15803d, #0c7f9c)' }}>
+                <div className="h-28 relative" style={{ background: 'linear-gradient(135deg, #15803d, #2563eb)' }}>
                   <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
                   <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,0,0.2)', color: '#4ade80', border: '1px solid rgba(255,255,0,0.5)' }}>
                     {effectiveUser?.role?.toUpperCase() || 'TEACHER'}
@@ -1154,11 +1154,11 @@ useEffect(() => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { icon: Mail, label: 'Email Address', value: effectiveUser?.email || user?.email || '—', color: '#0c7f9c' },
+                      { icon: Mail, label: 'Email Address', value: effectiveUser?.email || user?.email || '—', color: '#2563eb' },
                       { icon: Phone, label: 'Phone Number', value: effectiveUser?.phone || '—', color: '#15803d' },
-                      { icon: Briefcase, label: 'Department', value: effectiveUser?.department || '—', color: '#0c7f9c' },
+                      { icon: Briefcase, label: 'Department', value: effectiveUser?.department || '—', color: '#2563eb' },
                       { icon: BookMarked, label: 'Primary Subject', value: effectiveUser?.staffSubject || effectiveUser?.subjects?.[0] || '—', color: '#15803d' },
-                      { icon: Users, label: 'Assigned Classes', value: teacherClassOptions.length > 0 ? teacherClassOptions.join(', ') : '—', color: '#0c7f9c' },
+                      { icon: Users, label: 'Assigned Classes', value: teacherClassOptions.length > 0 ? teacherClassOptions.join(', ') : '—', color: '#2563eb' },
                       { icon: Award, label: 'Class Teacher For', value: classTeacherClassOptions.length > 0 ? classTeacherClassOptions.join(', ') : '—', color: '#15803d' },
                     ].map(({ icon: Icon, label, value, color }) => (
                       <div key={label} className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
@@ -1193,9 +1193,9 @@ useEffect(() => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { label: 'Students', value: students.length, color: '#0c7f9c', bg: '#ecfeff' },
+                  { label: 'Students', value: students.length, color: '#2563eb', bg: '#eff6ff' },
                   { label: 'Lessons', value: teacherLessons.length, color: '#15803d', bg: '#fdf4ff' },
-                  { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: '#0c7f9c', bg: '#ecfeff' },
+                  { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: '#2563eb', bg: '#eff6ff' },
                 ].map(({ label, value, color, bg }) => (
                   <div key={label} className="rounded-2xl p-5 text-center shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
                     <p className="text-2xl font-black" style={{ color }}>{value}</p>
@@ -2286,7 +2286,7 @@ useEffect(() => {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#0c7f9c"
+        accentColor="#2563eb"
       />
     )}
     </div>

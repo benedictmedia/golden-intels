@@ -36,9 +36,9 @@ const menuItems = [
 ]
 
 const stats = [
-  { label: 'Total Learners', value: '0', color: 'bg-[#0c7f9c]', textColor: 'text-blue-100' },
+  { label: 'Total Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Admissions', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
-  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#0c7f9c]', textColor: 'text-blue-100' },
+  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Staff Members', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
 ]
 
@@ -1488,7 +1488,7 @@ const handleAdminPasswordReset = async (id, email) => {
           })
           .catch(() => alert('Failed to download booklet. Please try again.'))
       }}
-      className="inline-block bg-[#0c7f9c] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+      className="inline-block bg-[#2563eb] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
     >
       Download Signed Booklet
     </button>
@@ -2803,14 +2803,14 @@ const handleAdminPasswordReset = async (id, email) => {
       {activeMenu === 'signature' && (
         <div className="orphan-tab max-w-xl">
     <div className="mb-6">
-      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0c7f9c' }}>Headmaster's Signature</h2>
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#2563eb' }}>Headmaster's Signature</h2>
       <p className="text-gray-500 text-sm">Upload a scanned signature. It will automatically appear on all approved result PDFs.</p>
     </div>
 
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
       {/* Current signature preview */}
       <div className="mb-6">
-        <p className="text-sm font-bold mb-3" style={{ color: '#0c7f9c' }}>Current Signature</p>
+        <p className="text-sm font-bold mb-3" style={{ color: '#2563eb' }}>Current Signature</p>
         {headmasterSigUrl ? (
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 flex items-center justify-center" style={{ minHeight: '100px' }}>
             <img
@@ -2829,7 +2829,7 @@ const handleAdminPasswordReset = async (id, email) => {
 
       {/* Upload */}
       <div>
-        <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Upload New Signature</label>
+        <label className="block text-sm font-bold mb-2" style={{ color: '#2563eb' }}>Upload New Signature</label>
         <p className="text-xs text-gray-400 mb-3">Use a white background scanned image (PNG preferred). The signature will be resized automatically.</p>
         <input
           type="file"
@@ -2843,8 +2843,8 @@ const handleAdminPasswordReset = async (id, email) => {
       </div>
 
       {/* Instructions */}
-      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#ecfeff', border: '1px solid #0c7f9c20' }}>
-        <p className="font-bold mb-2" style={{ color: '#0c7f9c' }}>How it works</p>
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #2563eb20' }}>
+        <p className="font-bold mb-2" style={{ color: '#2563eb' }}>How it works</p>
         <ul className="space-y-1 text-gray-600 text-xs">
           <li>1. Scan the headmaster's signature on white paper</li>
           <li>2. Upload it here as PNG or JPG</li>
@@ -2860,18 +2860,18 @@ const handleAdminPasswordReset = async (id, email) => {
 {activeMenu === 'academic-context' && (
   <div className="orphan-tab max-w-xl">
     <div className="mb-6">
-      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0c7f9c' }}>Academic Context</h2>
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#2563eb' }}>Academic Context</h2>
       <p className="text-gray-500 text-sm">Set the active academic year and term. This automatically applies to all teacher, parent and learner portals — they no longer need to set it manually.</p>
     </div>
 
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Academic Year</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#2563eb' }}>Academic Year</label>
           <select
             value={academicContext.academicYear}
             onChange={e => setAcademicContext(prev => ({ ...prev, academicYear: e.target.value }))}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
           >
             {['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030',
               '2030/2031','2031/2032','2032/2033','2033/2034','2034/2035'].map(y => (
@@ -2880,11 +2880,11 @@ const handleAdminPasswordReset = async (id, email) => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Term</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#2563eb' }}>Term</label>
           <select
             value={academicContext.term}
             onChange={e => setAcademicContext(prev => ({ ...prev, term: e.target.value }))}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
           >
             {['Term 1', 'Term 2', 'Term 3'].map(t => (
               <option key={t} value={t}>{t}</option>
@@ -2897,7 +2897,7 @@ const handleAdminPasswordReset = async (id, email) => {
         onClick={handleSaveAcademicContext}
         disabled={contextSaving}
         className="text-white font-bold px-8 py-3 rounded-xl disabled:opacity-50"
-        style={{ background: '#0c7f9c' }}
+        style={{ background: '#2563eb' }}
       >
         {contextSaving ? 'Saving...' : 'Set as Active Context'}
       </button>
@@ -2908,8 +2908,8 @@ const handleAdminPasswordReset = async (id, email) => {
         </p>
       )}
 
-      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#ecfeff', border: '1px solid #0c7f9c20' }}>
-        <p className="font-bold mb-2" style={{ color: '#0c7f9c' }}>Currently Active</p>
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #2563eb20' }}>
+        <p className="font-bold mb-2" style={{ color: '#2563eb' }}>Currently Active</p>
         <p className="text-gray-700 text-lg font-bold">{academicContext.academicYear} &nbsp;|&nbsp; {academicContext.term}</p>
         {academicContext.setBy && (
           <p className="text-xs text-gray-400 mt-1">Last set by {academicContext.setBy}</p>
@@ -3125,7 +3125,7 @@ const handleAdminPasswordReset = async (id, email) => {
               {selectedStudent.signedBooklet && (
                 <div className="mt-4 bg-blue-50 rounded-lg p-4">
                   <p className="text-sm font-bold text-gray-800 mb-2">Signed Admission Booklet</p>
-                  <a href={selectedStudent.signedBooklet} target="_blank" rel="noreferrer" className="inline-block bg-[#0c7f9c] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+                  <a href={selectedStudent.signedBooklet} target="_blank" rel="noreferrer" className="inline-block bg-[#2563eb] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
                     View Signed Booklet
                   </a>
                 </div>
@@ -3167,7 +3167,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <p className="text-xs text-amber-700 font-bold mb-2">⚠️ This learner has no portal login yet.</p>
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="bg-[#0e7490] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                  className="bg-[#1d4ed8] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                 >
                   Set Login Credentials
                 </button>
@@ -3296,29 +3296,29 @@ const handleAdminPasswordReset = async (id, email) => {
       {showLoginModal && (
   <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
     <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
-      <h3 className="font-bold text-[#0e7490] text-lg mb-1">Set Learner Login</h3>
+      <h3 className="font-bold text-[#1d4ed8] text-lg mb-1">Set Learner Login</h3>
       <p className="text-sm text-gray-500 mb-4">
         Create a portal login for <strong>{selectedStudent.firstName} {selectedStudent.lastName}</strong>.
       </p>
       <div className="space-y-3">
         <div>
-          <label className="block text-sm font-bold text-[#0e7490] mb-1">Email Address</label>
+          <label className="block text-sm font-bold text-[#1d4ed8] mb-1">Email Address</label>
           <input
             type="email"
             value={learnerLoginForm.email}
             onChange={e => setLearnerLoginForm(f => ({ ...f, email: e.target.value }))}
             placeholder="learner@email.com"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-[#0e7490] mb-1">Password</label>
+          <label className="block text-sm font-bold text-[#1d4ed8] mb-1">Password</label>
           <input
             type="password"
             value={learnerLoginForm.password}
             onChange={e => setLearnerLoginForm(f => ({ ...f, password: e.target.value }))}
             placeholder="Set a password"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700 text-sm"
           />
         </div>
         <div className="flex gap-3 pt-2">
@@ -3349,7 +3349,7 @@ const handleAdminPasswordReset = async (id, email) => {
               }
             }}
             disabled={loginCreating}
-            className="flex-1 bg-[#0e7490] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50"
+            className="flex-1 bg-[#1d4ed8] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50"
           >
             {loginCreating ? 'Creating…' : 'Create Login'}
           </button>

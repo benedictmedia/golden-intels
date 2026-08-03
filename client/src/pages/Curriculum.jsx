@@ -63,7 +63,7 @@ export default function Curriculum() {
               placeholder="Search programs..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 text-lg"
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 text-lg"
             />
           </div>
         </div>
@@ -89,25 +89,25 @@ export default function Curriculum() {
 
                   {/* Content */}
                   <div className="p-8">
-                    <span className="inline-block bg-[#0c7f9c] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    <span className="inline-block bg-[#2563eb] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
                       {program.category}
                     </span>
                     <h3 className="text-xl font-bold text-slate-800 mb-3">{program.title}</h3>
                     <p className="text-gray-600 leading-relaxed mb-2">{program.overview}</p>
 
                     <div className="mt-4 mb-2">
-                      <span className="text-sm font-bold text-[#0c7f9c]">Target Audience: </span>
+                      <span className="text-sm font-bold text-[#2563eb]">Target Audience: </span>
                       <span className="text-sm text-gray-600">{program.targetAudience}</span>
                     </div>
 
                     <div className="mt-2 mb-4">
-                      <span className="text-sm font-bold text-[#0c7f9c]">Learning Outcomes: </span>
+                      <span className="text-sm font-bold text-[#2563eb]">Learning Outcomes: </span>
                       <span className="text-sm text-gray-600">{program.shortOutcome}</span>
                     </div>
 
                     <button
                       onClick={() => setSelected(program)}
-                      className="bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                      className="bg-[#2563eb] hover:bg-violet-700 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                     >
                       Learn More
                     </button>
@@ -133,41 +133,41 @@ export default function Curriculum() {
                 className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#0c7f9c]/10 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#2563eb]/10 transition-colors"
               >
-                <X size={20} className="text-[#0c7f9c]" />
+                <X size={20} className="text-[#2563eb]" />
               </button>
             </div>
 
             {/* Modal Content */}
             <div className="p-8">
-              <span className="inline-block bg-[#0c7f9c] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-[#2563eb] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selected.category}
               </span>
               <h2 className="text-2xl font-bold font-serif text-slate-800 mb-4">{selected.title}</h2>
 
               <div className="space-y-5 text-gray-600">
                 <div>
-                  <h4 className="font-bold text-[#0c7f9c] mb-1">Overview</h4>
+                  <h4 className="font-bold text-[#2563eb] mb-1">Overview</h4>
                   <p className="leading-relaxed">{selected.overview}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#0c7f9c] mb-1">Target Audience</h4>
+                  <h4 className="font-bold text-[#2563eb] mb-1">Target Audience</h4>
                   <p>{selected.targetAudience}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#0c7f9c] mb-1">Learning Outcomes</h4>
+                  <h4 className="font-bold text-[#2563eb] mb-1">Learning Outcomes</h4>
                   <p className="leading-relaxed">{selected.fullOutcome}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-[#0c7f9c] mb-1">Curriculum Overview</h4>
+                  <h4 className="font-bold text-[#2563eb] mb-1">Curriculum Overview</h4>
                   <p className="leading-relaxed">{selected.curriculumOverview}</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelected(null)}
-                className="mt-8 w-full bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
+                className="mt-8 w-full bg-[#2563eb] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -183,7 +183,7 @@ export default function Curriculum() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Advantage
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
@@ -197,7 +197,7 @@ export default function Curriculum() {
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 text-center shadow-md">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-8 text-center shadow-md">
               <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-slate-900 font-bold text-xl">C</span>
               </div>
@@ -217,7 +217,7 @@ export default function Curriculum() {
               </p>
             </div>
 
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 text-center shadow-md">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-8 text-center shadow-md">
               <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-slate-900 font-bold text-xl">E</span>
               </div>

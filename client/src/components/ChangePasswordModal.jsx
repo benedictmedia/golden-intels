@@ -25,7 +25,7 @@ function PasswordField({ label, field, value, onChange, show, onToggle, accentCo
   )
 }
 
-export default function ChangePasswordModal({ onClose, accentColor = '#0c7f9c' }) {
+export default function ChangePasswordModal({ onClose, accentColor = '#2563eb' }) {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [show, setShow] = useState({ currentPassword: false, newPassword: false, confirmPassword: false })
   const [loading, setLoading] = useState(false)

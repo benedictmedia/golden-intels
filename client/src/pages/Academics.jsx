@@ -26,7 +26,7 @@ export default function Academics() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Approach
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-6">
@@ -49,9 +49,9 @@ export default function Academics() {
               {approaches.map((item, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 text-slate-700 font-medium bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm hover:border-[#0c7f9c] transition-colors"
+                  className="flex items-center gap-3 text-slate-700 font-medium bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm hover:border-[#2563eb] transition-colors"
                 >
-                  <div className="text-[#0c7f9c]">{item.icon}</div>
+                  <div className="text-[#2563eb]">{item.icon}</div>
                   <span>{item.label}</span>
                 </div>
               ))}
@@ -90,8 +90,8 @@ export default function Academics() {
           {/* Two Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* OIC Card - Blue */}
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-xl">
-              <span className="inline-block bg-white text-[#0c7f9c] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-10 shadow-xl">
+              <span className="inline-block bg-white text-[#2563eb] text-sm font-bold px-4 py-1 rounded-full mb-4">
                 International
               </span>
               <h3 className="text-2xl font-bold font-serif mb-3">
@@ -154,7 +154,7 @@ export default function Academics() {
         <div className="max-w-7xl mx-auto px-4">
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Growth & Development
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
@@ -168,7 +168,7 @@ export default function Academics() {
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
             {/* Expanding Every Year */}
-            <div className="bg-[#0c7f9c] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#2563eb] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Expanding Every Year
               </h3>
@@ -212,7 +212,7 @@ export default function Academics() {
               </ul>
             </div>
             {/* Current Offerings */}
-            <div className="bg-[#0c7f9c] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#2563eb] border border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <h3 className="text-2xl font-bold font-serif mb-3">
                 Current Offerings
               </h3>
@@ -243,8 +243,8 @@ export default function Academics() {
           {/* Three Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Ghana Education Pathway - Blue */}
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-xl">
-              <span className="inline-block bg-white text-[#0c7f9c] text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-10 shadow-xl">
+              <span className="inline-block bg-white text-[#2563eb] text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Local
               </span>
               <h3 className="text-2xl font-bold font-serif mb-6">
@@ -301,7 +301,7 @@ export default function Academics() {
             </div>
 
             {/* Flexible Progression */}
-            <div className="bg-[#0c7f9c] border-slate-200 text-white rounded-2xl p-10 shadow-lg">
+            <div className="bg-[#2563eb] border-slate-200 text-white rounded-2xl p-10 shadow-lg">
               <span className="inline-block bg-slate-800 text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
                 Flexible
               </span>
@@ -339,7 +339,7 @@ export default function Academics() {
           </div>
 
           {/* Right: Text Card - Blue */}
-          <div className="flex-1 bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-xl">
+          <div className="flex-1 bg-[#2563eb] text-white rounded-2xl p-10 shadow-xl">
             <span className="inline-block bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full mb-4">
               What We Offer
             </span>
@@ -372,7 +372,7 @@ export default function Academics() {
         <div className="max-w-7xl mx-auto px-4">
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               How We Teach
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
@@ -382,7 +382,7 @@ export default function Academics() {
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 shadow-xl">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-8 shadow-xl">
               <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center font-bold text-slate-900 mb-4">
                 1
               </div>
@@ -406,8 +406,8 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-[#0c7f9c] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
-              <div className="w-10 h-10 bg-[#0c7f9c] rounded-full flex items-center justify-center font-bold text-white mb-4">
+            <div className="bg-[#2563eb] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
+              <div className="w-10 h-10 bg-[#2563eb] rounded-full flex items-center justify-center font-bold text-white mb-4">
                 3
               </div>
               <h4 className="text-xl font-bold mb-3">
@@ -418,7 +418,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-[#0c7f9c] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#2563eb] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 4
               </div>
@@ -430,7 +430,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 shadow-xl">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-8 shadow-xl">
               <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center font-bold text-slate-900 mb-4">
                 5
               </div>
@@ -466,7 +466,7 @@ export default function Academics() {
               </p>
             </div>
 
-            <div className="bg-[#0c7f9c] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
+            <div className="bg-[#2563eb] border border-slate-200 text-white rounded-2xl p-8 shadow-lg">
               <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center font-bold text-white mb-4">
                 8
               </div>
@@ -479,7 +479,7 @@ export default function Academics() {
             </div>
 
             {/* Empty card to balance the grid */}
-            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 shadow-xl flex items-center justify-center">
+            <div className="bg-[#2563eb] text-white rounded-2xl p-8 shadow-xl flex items-center justify-center">
               <p className="text-slate-300 text-center text-lg font-serif italic">
                 "Education is not the filling of a pail, but the lighting of a fire."
               </p>

@@ -65,7 +65,7 @@ export default function Hero() {
       )}
 
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#0c7f9c]/45 z-10"></div>
+      <div className="absolute inset-0 bg-[#2563eb]/45 z-10"></div>
 
       {/* Content */}
       <div className="relative z-20 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
@@ -96,7 +96,7 @@ export default function Hero() {
 
             <Link
               to="/about"
-              className="bg-transparent border-2 border-white hover:bg-white hover:text-[#0c7f9c] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all"
+              className="bg-transparent border-2 border-white hover:bg-white hover:text-[#2563eb] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all"
             >
               Discover Our Story
             </Link>

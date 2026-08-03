@@ -33,7 +33,7 @@ export default function AcademicExcellence() {
           </span>
 
           {/* Heading */}
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#2563eb] mb-6 leading-tight">
            A Hybrid Curriculum Built for the Future
           </h2>
 
@@ -69,7 +69,7 @@ export default function AcademicExcellence() {
           {/* Button */}
           <Link
             to="/academics"
-            className="inline-block bg-[#0c7f9c] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
+            className="inline-block bg-[#2563eb] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
           >
             Explore Our Programs
           </Link>
