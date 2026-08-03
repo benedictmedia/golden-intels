@@ -134,10 +134,10 @@ export default function ParentMessages() {
       style={{ height: 'calc(100vh - 130px)' }}>
 
       {/* ── Header ── */}
-      <div className="bg-[#1a3c6e] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
+      <div className="bg-[#0e7490] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
         <div className="relative">
-          <div className="w-11 h-11 rounded-full bg-[#d4a017] flex items-center justify-center font-bold text-[#1a3c6e] text-lg select-none">A</div>
-          <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#1a3c6e] ${connected ? 'bg-green-400' : 'bg-gray-400'}`} />
+          <div className="w-11 h-11 rounded-full bg-[#128038] flex items-center justify-center font-bold text-[#0e7490] text-lg select-none">A</div>
+          <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#0e7490] ${connected ? 'bg-green-400' : 'bg-gray-400'}`} />
         </div>
         <div className="flex-1">
           <p className="font-bold text-sm leading-tight">School Admin</p>
@@ -147,7 +147,7 @@ export default function ParentMessages() {
               : <><WifiOff size={10} className="text-gray-400" /> Connecting…</>}
           </p>
         </div>
-        <div className="bg-[#d4a017]/20 text-[#d4a017] text-xs font-bold px-3 py-1 rounded-full">
+        <div className="bg-[#128038]/20 text-[#128038] text-xs font-bold px-3 py-1 rounded-full">
           Golden-Intels
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function ParentMessages() {
             <div key={day}>
               {/* Day divider */}
               <div className="flex justify-center my-3">
-                <span className="bg-[#e1f3fb] text-[#1a3c6e] text-xs font-semibold px-3 py-1 rounded-full shadow-sm select-none">
+                <span className="bg-[#e1f3fb] text-[#0e7490] text-xs font-semibold px-3 py-1 rounded-full shadow-sm select-none">
                   {day}
                 </span>
               </div>
@@ -190,7 +190,7 @@ export default function ParentMessages() {
                             : 'bg-white text-gray-800 rounded-tl-none'
                         }`} style={{ wordBreak: 'break-word' }}>
                       {!isMine && (
-                        <p className="text-[11px] font-bold text-[#1a3c6e] mb-0.5 leading-tight">
+                        <p className="text-[11px] font-bold text-[#0e7490] mb-0.5 leading-tight">
                           School Admin
                         </p>
                       )}
@@ -202,7 +202,7 @@ export default function ParentMessages() {
                         <span className="text-[10px] text-gray-400 leading-none">{formatTime(msg.createdAt)}</span>
                         {isMine && (
                           <CheckCheck size={13}
-                            className={msg.read ? 'text-[#1a3c6e]' : 'text-gray-400'}
+                            className={msg.read ? 'text-[#0e7490]' : 'text-gray-400'}
                             strokeWidth={2.5}
                           />
                         )}
@@ -241,7 +241,7 @@ export default function ParentMessages() {
         <button
           onClick={sendMessage}
           disabled={!input.trim() || sending}
-          className="w-11 h-11 rounded-full bg-[#1a3c6e] hover:bg-[#2a5298] active:scale-95 text-white flex items-center justify-center shadow-md transition-all disabled:opacity-40 flex-shrink-0"
+          className="w-11 h-11 rounded-full bg-[#0e7490] hover:bg-[#0c7f9c] active:scale-95 text-white flex items-center justify-center shadow-md transition-all disabled:opacity-40 flex-shrink-0"
         >
           <Send size={17} strokeWidth={2.5} className={sending ? 'opacity-50' : ''} />
         </button>

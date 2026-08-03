@@ -36,10 +36,10 @@ const menuItems = [
 ]
 
 const stats = [
-  { label: 'Total Learners', value: '0', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-  { label: 'Admissions', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
-  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#0000ff]', textColor: 'text-blue-100' },
-  { label: 'Staff Members', value: '0', color: 'bg-[#800080]', textColor: 'text-purple-200' },
+  { label: 'Total Learners', value: '0', color: 'bg-[#0c7f9c]', textColor: 'text-blue-100' },
+  { label: 'Admissions', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
+  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#0c7f9c]', textColor: 'text-blue-100' },
+  { label: 'Staff Members', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
 ]
 
 const classes = ['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
@@ -1281,7 +1281,7 @@ const handleAdminPasswordReset = async (id, email) => {
   return (
    <div className="portal-shell flex bg-gray-100">
       {/* Sidebar */}
-     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#800080' }}>
+     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#15803d' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -1299,8 +1299,8 @@ const handleAdminPasswordReset = async (id, email) => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
-                color: activeMenu === item.id ? '#ffff00' : 'rgba(255,255,255,0.85)',
-                borderLeft: activeMenu === item.id ? '3px solid #ffff00' : '3px solid transparent',
+                color: activeMenu === item.id ? '#4ade80' : 'rgba(255,255,255,0.85)',
+                borderLeft: activeMenu === item.id ? '3px solid #4ade80' : '3px solid transparent',
                 fontWeight: activeMenu === item.id ? '700' : '400'
               }}>
               {item.icon}{sidebarOpen && <span className="text-sm">{item.label}</span>}
@@ -1326,10 +1326,10 @@ const handleAdminPasswordReset = async (id, email) => {
         {/* Top Bar */}
 <div className="portal-topbar sticky top-0 z-10 px-8 py-4 flex items-center justify-between bg-white border-b">
   <div className="flex items-center gap-4">
-    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-gray-100 text-cyan-700">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-gray-100 text-gray-800">
       <Menu size={20} />
     </button>
-    <h1 className="text-2xl font-bold text-cyan-700">
+    <h1 className="text-2xl font-bold text-gray-800">
       {menuItems.find(m => m.id === activeMenu)?.label || 'Dashboard'}
     </h1>
   </div>
@@ -1358,7 +1358,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 ))}
               </div>
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-2">Admin Dashboard</h2>
+                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-2">Admin Dashboard</h2>
                 <p className="text-gray-600">Welcome to the Golden-Intels Admin Portal. Use the sidebar to navigate between sections.</p>
               </div>
             </div>
@@ -1368,15 +1368,15 @@ const handleAdminPasswordReset = async (id, email) => {
           {activeMenu === 'admissions' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Admissions</h2>
+                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Admissions</h2>
                 <p className="text-gray-500 text-sm">Review and manage admission applications.</p>
               </div>
               <div className="flex flex-wrap gap-3 mb-6">
                 {['All', 'pending', 'approved', 'rejected'].map(status => (
                   <button key={status} onClick={() => setAdmissionFilter(status)}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${admissionFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${admissionFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {status}
-                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">
                       {status === 'All' ? applications.length : applications.filter(a => a.status === status).length}
                     </span>
                   </button>
@@ -1392,17 +1392,17 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div className="flex items-center gap-4">
                           <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                             {app.photo ? <img src={app.photo} alt={app.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                              <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-xl">{app.firstName?.charAt(0)}</div>}
+                              <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-xl">{app.firstName?.charAt(0)}</div>}
                           </div>
                           <div>
-                            <h3 className="font-bold text-cyan-700 text-lg">{app.firstName} {app.lastName}</h3>
+                            <h3 className="font-bold text-gray-800 text-lg">{app.firstName} {app.lastName}</h3>
                             <p className="text-sm text-gray-500">Grade: {app.gradeLevel} | Gender: {app.gender}</p>
                             <p className="text-sm text-gray-400">Parent: {app.parentName} | {app.parentPhone}</p>
                             <p className="text-xs text-gray-400">Applied: {new Date(app.createdAt).toLocaleDateString()} | Serial: {app.serialNumber}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${app.status === 'approved' ? 'bg-green-100 text-green-700' : app.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{app.status}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${app.status === 'approved' ? 'bg-green-100 text-green-700' : app.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{app.status}</span>
                           <button onClick={() => setViewingApplication(app)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"><Eye size={14} /> View</button>
                           {app.status === 'pending' && (
                             <>
@@ -1429,12 +1429,12 @@ const handleAdminPasswordReset = async (id, email) => {
                       <div className="flex items-center gap-6 mb-6">
                         <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-200 border-4 border-blue-600">
                           {viewingApplication.photo ? <img src={viewingApplication.photo} alt={viewingApplication.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                            <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{viewingApplication.firstName?.charAt(0)}</div>}
+                            <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-2xl">{viewingApplication.firstName?.charAt(0)}</div>}
                         </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-cyan-700">{viewingApplication.firstName} {viewingApplication.lastName}</h3>
+                          <h3 className="text-2xl font-bold text-gray-800">{viewingApplication.firstName} {viewingApplication.lastName}</h3>
                           <p className="text-gray-500">{viewingApplication.gradeLevel} | {viewingApplication.gender}</p>
-                          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${viewingApplication.status === 'approved' ? 'bg-green-100 text-green-700' : viewingApplication.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{viewingApplication.status}</span>
+                          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${viewingApplication.status === 'approved' ? 'bg-green-100 text-green-700' : viewingApplication.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{viewingApplication.status}</span>
                         </div>
                       </div>
                       {[
@@ -1447,7 +1447,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           <div className="grid grid-cols-2 gap-2">
                             {section.fields.map(([label, value], fi) => (
                               <div key={fi} className="bg-blue-50 rounded-lg px-3 py-2">
-                                <p className="text-xs font-bold text-cyan-700">{label}</p>
+                                <p className="text-xs font-bold text-gray-800">{label}</p>
                                 <p className="text-sm text-gray-600">{value || '—'}</p>
                               </div>
                             ))}
@@ -1459,14 +1459,14 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div className="grid grid-cols-2 gap-4">
                           {[['NHIS Card - Front', viewingApplication.nhisFront], ['NHIS Card - Back', viewingApplication.nhisBack], ['Ghana Card - Front', viewingApplication.ghanaFront], ['Ghana Card - Back', viewingApplication.ghanaBack]].map((doc, di) => (
                             <div key={di} className="bg-blue-50 rounded-lg p-3">
-                              <p className="text-xs font-bold text-cyan-700 mb-2">{doc[0]}</p>
+                              <p className="text-xs font-bold text-gray-800 mb-2">{doc[0]}</p>
                               {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" loading="lazy" decoding="async" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
                             </div>
                           ))}
                         </div>
                         {viewingApplication.signedBooklet && (
   <div className="mt-4 bg-blue-50 rounded-lg p-4">
-    <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
+    <p className="text-sm font-bold text-gray-800 mb-2">Signed Admission Booklet</p>
     <button
       onClick={() => {
         const token = localStorage.getItem('token')
@@ -1488,7 +1488,7 @@ const handleAdminPasswordReset = async (id, email) => {
           })
           .catch(() => alert('Failed to download booklet. Please try again.'))
       }}
-      className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+      className="inline-block bg-[#0c7f9c] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
     >
       Download Signed Booklet
     </button>
@@ -1515,12 +1515,12 @@ const handleAdminPasswordReset = async (id, email) => {
           {activeMenu === 'finance' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Finance</h2>
+                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Finance</h2>
                 <p className="text-gray-500 text-sm">Manage school fees and payments.</p>
               </div>
               <div className="flex gap-3 mb-6">
                 {['fee-structure', 'payments'].map(tab => (
-                  <button key={tab} onClick={() => setFinanceTab(tab)} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors capitalize ${financeTab === tab ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600'}`}>
+                  <button key={tab} onClick={() => setFinanceTab(tab)} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors capitalize ${financeTab === tab ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600'}`}>
                     {tab === 'fee-structure' ? 'Fee Structure' : 'Fee Payments'}
                   </button>
                 ))}
@@ -1528,11 +1528,11 @@ const handleAdminPasswordReset = async (id, email) => {
               {financeTab === 'fee-structure' && (
                 <div>
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-                    <h3 className="text-lg font-bold text-cyan-700 mb-4">Set Monthly Fees by Class</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">Set Monthly Fees by Class</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">{grade}</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500 text-sm font-bold">GH₵</span>
                             <input type="number" value={feeStructures[grade] || ''} onChange={e => setFeeStructures({ ...feeStructures, [grade]: e.target.value })} placeholder="0.00" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
@@ -1545,20 +1545,20 @@ const handleAdminPasswordReset = async (id, email) => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div className="bg-blue-600 text-white rounded-2xl p-6 shadow-md"><p className="text-cyan-100 text-sm mb-1">Total Students</p><p className="text-3xl font-bold">{students.length}</p></div>
-                    <div className="bg-[#0f6e56] text-white rounded-2xl p-6 shadow-md"><p className="text-green-200 text-sm mb-1">Total Collected</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p></div>
-                    <div className="bg-blue-500 text-cyan-700 rounded-2xl p-6 shadow-md"><p className="text-cyan-700/70 text-sm mb-1">Total Outstanding</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p></div>
+                    <div className="bg-[#128038] text-white rounded-2xl p-6 shadow-md"><p className="text-green-200 text-sm mb-1">Total Collected</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p></div>
+                    <div className="bg-blue-500 text-gray-800 rounded-2xl p-6 shadow-md"><p className="text-gray-800/70 text-sm mb-1">Total Outstanding</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p></div>
                   </div>
                 </div>
               )}
               {financeTab === 'payments' && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-cyan-700">Fee Payments</h3>
+                    <h3 className="text-lg font-bold text-gray-800">Fee Payments</h3>
                     <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
                     {['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(cls => (
-                      <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
+                      <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -1581,18 +1581,18 @@ const handleAdminPasswordReset = async (id, email) => {
                         ) : (
                           filteredFeePayments.map((payment, index) => (
                             <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                              <td className="px-6 py-4 font-medium text-cyan-700">{payment.student?.firstName} {payment.student?.lastName}</td>
+                              <td className="px-6 py-4 font-medium text-gray-800">{payment.student?.firstName} {payment.student?.lastName}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.student?.gradeLevel}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.month} {payment.year}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountPaid.toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.balance.toFixed(2)}</td>
                               <td className="px-6 py-4">
-                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${payment.status === 'paid' ? 'bg-green-100 text-green-700' : payment.status === 'partial' ? 'bg-blue-100 text-cyan-700' : 'bg-red-100 text-red-700'}`}>{payment.status}</span>
+                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${payment.status === 'paid' ? 'bg-green-100 text-green-700' : payment.status === 'partial' ? 'bg-blue-100 text-gray-800' : 'bg-red-100 text-red-700'}`}>{payment.status}</span>
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex gap-2">
-                                  <button onClick={() => { setEditingPayment(payment); setPaymentForm({ amountPaid: payment.amountPaid, notes: payment.notes || '' }) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
+                                  <button onClick={() => { setEditingPayment(payment); setPaymentForm({ amountPaid: payment.amountPaid, notes: payment.notes || '' }) }} className="bg-blue-500 hover:bg-blue-300 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
                                   <button onClick={() => handleDeletePayment(payment.id)} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg"><Trash2 size={14} /></button>
                                 </div>
                               </td>
@@ -1613,7 +1613,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                     <div className="p-6 space-y-4">
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Student</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Student</label>
                         <select value={paymentForm.studentId} onChange={e => { const s = students.find(s => s.id === parseInt(e.target.value)); setPaymentForm(prev => ({ ...prev, studentId: e.target.value, amountDue: s ? feeStructures[s.gradeLevel] || '' : '' })) }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select student...</option>
                           {students.map(s => <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.gradeLevel}</option>)}
@@ -1621,29 +1621,29 @@ const handleAdminPasswordReset = async (id, email) => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Month</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Month</label>
                           <select value={paymentForm.month} onChange={e => setPaymentForm({ ...paymentForm, month: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                             <option value="">Select month</option>
                             {['January','February','March','April','May','June','July','August','September','October','November','December'].map(m => <option key={m} value={m}>{m}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Year</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Year</label>
                           <input type="text" value={paymentForm.year} onChange={e => setPaymentForm({ ...paymentForm, year: e.target.value })} placeholder="e.g. 2026" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Amount Due (GH₵)</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Amount Due (GH₵)</label>
                           <input type="number" value={paymentForm.amountDue} onChange={e => setPaymentForm({ ...paymentForm, amountDue: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Amount Paid (GH₵)</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Amount Paid (GH₵)</label>
                           <input type="number" value={paymentForm.amountPaid} onChange={e => setPaymentForm({ ...paymentForm, amountPaid: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Notes (optional)</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Notes (optional)</label>
                         <input type="text" value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} placeholder="e.g. Paid via mobile money" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
@@ -1663,15 +1663,15 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                     <div className="p-6 space-y-4">
                       <div className="bg-blue-50 rounded-xl p-4">
-                        <p className="text-sm font-bold text-cyan-700">{editingPayment.student?.firstName} {editingPayment.student?.lastName}</p>
+                        <p className="text-sm font-bold text-gray-800">{editingPayment.student?.firstName} {editingPayment.student?.lastName}</p>
                         <p className="text-xs text-gray-500">{editingPayment.month} {editingPayment.year} | Due: GH₵ {editingPayment.amountDue.toFixed(2)}</p>
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Amount Paid (GH₵)</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Amount Paid (GH₵)</label>
                         <input type="number" value={paymentForm.amountPaid} onChange={e => setPaymentForm({ ...paymentForm, amountPaid: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Notes</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Notes</label>
                         <input type="text" value={paymentForm.notes} onChange={e => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
@@ -1689,14 +1689,14 @@ const handleAdminPasswordReset = async (id, email) => {
           {activeMenu === 'performance' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Performance Review</h2>
+                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Performance Review</h2>
                 <p className="text-gray-500 text-sm">Review and approve submitted student results.</p>
               </div>
               <div className="flex flex-wrap gap-3 mb-6">
                 {['All', 'pending', 'approved', 'rejected'].map(status => (
-                  <button key={status} onClick={() => setResultFilter(status)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${resultFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
+                  <button key={status} onClick={() => setResultFilter(status)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors capitalize ${resultFilter === status ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {status}
-                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{status === 'All' ? results.length : results.filter(r => r.status === status).length}</span>
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{status === 'All' ? results.length : results.filter(r => r.status === status).length}</span>
                   </button>
                 ))}
               </div>
@@ -1710,19 +1710,19 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                             {result.student?.photo ? <img src={result.student.photo} alt={result.student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                              <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold">{result.student?.firstName?.charAt(0)}</div>}
+                              <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold">{result.student?.firstName?.charAt(0)}</div>}
                           </div>
                           <div>
-                            <h3 className="font-bold text-cyan-700 text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
+                            <h3 className="font-bold text-gray-800 text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
                             <p className="text-sm text-gray-500">{result.student?.studentId} | {result.gradeLevel}</p>
                             <p className="text-sm text-gray-400">{result.academicYear} | {result.term}</p>
                             <p className="text-xs text-gray-400">Submitted by: {result.submittedBy} on {new Date(result.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-cyan-700'}`}>{result.status}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{result.status}</span>
                           {result.status !== 'approved' && <button onClick={() => handleApproveResult(result.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>}
-                          <button onClick={() => handleAdminEditResult(result)} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-4 py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => handleAdminEditResult(result)} className="bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleAdminDownloadPDF(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download PDF</button>
                           <button onClick={() => handleAdminDeleteResult(result.id)} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Delete</button>
                         </div>
@@ -1739,12 +1739,12 @@ const handleAdminPasswordReset = async (id, email) => {
                       <button onClick={() => setAdminEditResult(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
                     <div className="p-6 space-y-4">
-                      <p className="text-sm text-gray-500">Editing result for <span className="font-bold text-cyan-700">{adminEditResult.student?.firstName} {adminEditResult.student?.lastName}</span></p>
+                      <p className="text-sm text-gray-500">Editing result for <span className="font-bold text-gray-800">{adminEditResult.student?.firstName} {adminEditResult.student?.lastName}</span></p>
                       {SUBJECTS.map(subject => {
                         const s = adminEditScores[subject] || {}
                         return (
                           <div key={subject} className="bg-blue-50 rounded-xl p-4">
-                            <h4 className="font-bold text-cyan-700 mb-3 text-sm">{subject}</h4>
+                            <h4 className="font-bold text-gray-800 mb-3 text-sm">{subject}</h4>
                             <div className="grid grid-cols-2 gap-3">
                               {[{ key: 'classScore', label: 'Class(10)' }, { key: 'cat1', label: 'CAT1(20)' }, { key: 'cat2', label: 'CAT2(20)' }, { key: 'exam', label: 'Exam(100)' }].map(field => (
                                 <div key={field.key}>
@@ -1757,7 +1757,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         )
                       })}
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Teacher's Remarks</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Teacher's Remarks</label>
                         <textarea value={adminEditRemarks} onChange={e => setAdminEditRemarks(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div className="flex gap-3">
@@ -1775,43 +1775,43 @@ const handleAdminPasswordReset = async (id, email) => {
           {activeMenu === 'learners' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold font-serif text-cyan-700">Learners</h2>
+                <h2 className="text-2xl font-bold font-serif text-gray-800">Learners</h2>
                 <button onClick={() => setShowAddStudent(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
               </div>
               {showAddStudent && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                  <h3 className="text-xl font-bold text-cyan-700 mb-6">Add New Learner</h3>
+                  <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Learner</h3>
                   <div className="flex items-center gap-6 mb-6">
                     <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden border-4 border-blue-600 flex items-center justify-center">
                       {photoPreview ? <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" loading="lazy" decoding="async" /> : <span className="text-gray-400 text-xs text-center px-2">No Photo</span>}
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Passport Photo</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Passport Photo</label>
                       <input type="file" accept="image/*" onChange={handlePhotoChange} className="text-sm text-gray-600" />
                       <p className="text-xs text-gray-400 mt-1">JPG, PNG or WEBP. Max 5MB.</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">First Name</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">First Name</label>
                       <input type="text" value={newStudent.firstName} onChange={e => setNewStudent({ ...newStudent, firstName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Last Name</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Last Name</label>
                       <input type="text" value={newStudent.lastName} onChange={e => setNewStudent({ ...newStudent, lastName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Email</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Learner Email</label>
                       <input type="email" value={newStudent.learnerEmail} onChange={e => setNewStudent({ ...newStudent, learnerEmail: e.target.value })} placeholder="Create learner dashboard email" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       <p className="text-xs text-gray-400 mt-1">Optional, but recommended if the learner should access their dashboard.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Password</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Learner Password</label>
                       <input type="password" value={newStudent.learnerPassword} onChange={e => setNewStudent({ ...newStudent, learnerPassword: e.target.value })} placeholder="Create learner dashboard password" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
 
                     <div>
-  <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Email (for Portal Login)</label>
+  <label className="block text-sm font-bold text-gray-800 mb-2">Learner Email (for Portal Login)</label>
   <input 
     type="email" 
     value={newStudent.learnerEmail} 
@@ -1822,11 +1822,11 @@ const handleAdminPasswordReset = async (id, email) => {
   <p className="text-xs text-gray-400 mt-1">This allows the learner to log into their portal.</p>
 </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Date of Birth</label>
                       <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Existing Parent Account</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Existing Parent Account</label>
                       <select value={newStudent.parentEmail} onChange={e => handleParentAccountSelect(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select existing parent or leave blank</option>
                         {parentAccounts.map(parent => (
@@ -1836,23 +1836,23 @@ const handleAdminPasswordReset = async (id, email) => {
                       <p className="text-xs text-gray-400 mt-1">Link the learner to an existing parent user account for better reporting.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Name</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Parent Name</label>
                       <input type="text" value={newStudent.parentName} onChange={e => setNewStudent({ ...newStudent, parentName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Email</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Parent Email</label>
                       <input type="email" value={newStudent.parentEmail} onChange={e => setNewStudent({ ...newStudent, parentEmail: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Phone</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Parent Phone</label>
                       <input type="text" value={newStudent.parentPhone} onChange={e => setNewStudent({ ...newStudent, parentPhone: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Address</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Address</label>
                       <input type="text" value={newStudent.address} onChange={e => setNewStudent({ ...newStudent, address: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Gender</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Gender</label>
                       <select value={newStudent.gender} onChange={e => setNewStudent({ ...newStudent, gender: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select gender</option>
                         <option value="Male">Male</option>
@@ -1860,7 +1860,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                       <select value={newStudent.gradeLevel} onChange={e => setNewStudent({ ...newStudent, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select grade</option>
                         {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
@@ -1875,14 +1875,14 @@ const handleAdminPasswordReset = async (id, email) => {
               )}
               <div className="flex flex-wrap gap-3 mb-6">
                 {classes.map(cls => (
-                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
+                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {cls}
-                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => s.gradeLevel === cls).length}</span>
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => s.gradeLevel === cls).length}</span>
                   </button>
                 ))}
               </div>
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-cyan-700">{activeClass === 'All' ? 'All Learners' : `${activeClass} Class`}<span className="ml-2 text-gray-400 text-sm font-normal">({filteredStudents.length} learners)</span></h3>
+                <h3 className="text-lg font-bold text-gray-800">{activeClass === 'All' ? 'All Learners' : `${activeClass} Class`}<span className="ml-2 text-gray-400 text-sm font-normal">({filteredStudents.length} learners)</span></h3>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
@@ -1906,11 +1906,11 @@ const handleAdminPasswordReset = async (id, email) => {
                           <td className="px-6 py-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                               {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                                <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-sm">{student.firstName?.charAt(0)}</div>}
+                                <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-sm">{student.firstName?.charAt(0)}</div>}
                             </div>
                           </td>
-                          <td className="px-6 py-4"><span className="bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
-                          <td className="px-6 py-4 font-medium text-cyan-700">{student.firstName} {student.lastName}</td>
+                          <td className="px-6 py-4"><span className="bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
+                          <td className="px-6 py-4 font-medium text-gray-800">{student.firstName} {student.lastName}</td>
                           <td className="px-6 py-4"><span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">{student.gradeLevel}</span></td>
                           <td className="px-6 py-4 text-gray-600">{student.gender}</td>
                           <td className="px-6 py-4"><span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span></td>
@@ -1932,19 +1932,19 @@ const handleAdminPasswordReset = async (id, email) => {
           {/* Create Account */}
           {activeMenu === 'create-account' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-2xl">
-              <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-2">Create Account</h2>
+              <h2 className="text-2xl font-bold font-serif text-gray-800 mb-2">Create Account</h2>
               <p className="text-gray-500 mb-8">Create accounts for teachers and parents to access their respective portals.</p>
               {createSuccess && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">Account created successfully!</div>}
               {createError && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{createError}</div>}
               <div className="space-y-5">
                 {[['Full Name','name','text','Enter full name'],['Email Address','email','email','Enter email address'],['Password','password','password','Enter password']].map(([label, key, type, placeholder]) => (
                   <div key={key}>
-                    <label className="block text-sm font-bold text-cyan-700 mb-2">{label}</label>
+                    <label className="block text-sm font-bold text-gray-800 mb-2">{label}</label>
                     <input type={type} value={newUser[key]} onChange={e => setNewUser({ ...newUser, [key]: e.target.value })} placeholder={placeholder} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                   </div>
                 ))}
                 <div>
-                  <label className="block text-sm font-bold text-cyan-700 mb-2">Role</label>
+                  <label className="block text-sm font-bold text-gray-800 mb-2">Role</label>
                   <select value={newUser.role} onChange={e => setNewUser({ ...initialNewUserState, role: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                     <option value="teacher">Teacher</option>
                     <option value="parent">Parent</option>
@@ -1955,7 +1955,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 {newUser.role === 'teacher' && (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Assign Classes</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Assign Classes</label>
                       <div className="grid grid-cols-2 gap-2">
                         {classes.filter(c => c !== 'All').map(className => (
                           <button key={className} type="button" onClick={() => toggleSelection('classes', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classes.includes(className) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
@@ -1965,10 +1965,10 @@ const handleAdminPasswordReset = async (id, email) => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For (optional)</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Class Teacher For (optional)</label>
                       <div className="grid grid-cols-2 gap-2">
                         {classes.filter(c => c !== 'All').map(className => (
-                          <button key={className} type="button" onClick={() => toggleSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classTeacherClasses.includes(className) ? 'bg-[#0f6e56] text-white border-[#0f6e56]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                          <button key={className} type="button" onClick={() => toggleSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classTeacherClasses.includes(className) ? 'bg-[#128038] text-white border-[#128038]' : 'bg-white text-gray-700 border-gray-200'}`}>
                             {className}
                           </button>
                         ))}
@@ -1976,14 +1976,14 @@ const handleAdminPasswordReset = async (id, email) => {
                       <p className="text-xs text-gray-500 mt-2">Select classes that should unlock class-teacher attendance and remarks access for this teacher.</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Primary Subject</label>
                       <select value={newUser.teacherSubject} onChange={e => setNewUser({ ...newUser, teacherSubject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select primary subject</option>
                         {SUBJECTS.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Additional Subjects</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Additional Subjects</label>
                       <div className="grid grid-cols-2 gap-2">
                         {SUBJECTS.map(subject => (
                           <button key={subject} type="button" onClick={() => toggleSelection('subjects', subject)} className={`text-left px-3 py-2 rounded-xl border ${newUser.subjects.includes(subject) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
@@ -1999,26 +1999,26 @@ const handleAdminPasswordReset = async (id, email) => {
                   <div className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Learner First Name</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Learner First Name</label>
                         <input type="text" value={newUser.learnerFirstName} onChange={e => setNewUser({ ...newUser, learnerFirstName: e.target.value })} placeholder="Enter first name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Learner Last Name</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Learner Last Name</label>
                         <input type="text" value={newUser.learnerLastName} onChange={e => setNewUser({ ...newUser, learnerLastName: e.target.value })} placeholder="Enter last name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Date of Birth</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Date of Birth</label>
                         <input type="date" value={newUser.learnerDateOfBirth} onChange={e => setNewUser({ ...newUser, learnerDateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Grade Level</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                         <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select grade</option>
                           {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Gender</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Gender</label>
                         <select value={newUser.learnerGender} onChange={e => setNewUser({ ...newUser, learnerGender: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select gender</option>
                           <option value="Male">Male</option>
@@ -2027,7 +2027,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Existing Parent Account</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Existing Parent Account</label>
                       <select value={newUser.learnerParentEmail} onChange={e => {
                         const email = e.target.value
                         const parent = parentAccounts.find(p => p.email === email)
@@ -2041,11 +2041,11 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Name</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Parent Name</label>
                         <input type="text" value={newUser.learnerParentName} onChange={e => setNewUser({ ...newUser, learnerParentName: e.target.value })} placeholder="Enter parent name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Parent Phone</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Parent Phone</label>
                         <input type="text" value={newUser.learnerParentPhone} onChange={e => setNewUser({ ...newUser, learnerParentPhone: e.target.value })} placeholder="Enter parent phone" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                       </div>
                     </div>
@@ -2063,7 +2063,7 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Accounts</h2>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Accounts</h2>
                   <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. Passwords are protected, but admins can set temporary passwords when needed.</p>
                 </div>
                 <div className="space-x-2">
@@ -2096,7 +2096,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                                <h3 className="font-bold text-[#15803d]">{u.name}</h3>
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                   {u.active ? 'Active' : 'Inactive'}
                                 </span>
@@ -2137,12 +2137,12 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="font-bold text-[#4a235a]">{s.firstName} {s.lastName}</h3>
+                              <h3 className="font-bold text-[#15803d]">{s.firstName} {s.lastName}</h3>
                               <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
-                              <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-yellow-400 text-white rounded">Edit</button>
+                              <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-green-500 text-white rounded">Edit</button>
                               <button
                                 onClick={() => {
                                   if (!s.learnerUserId) {
@@ -2171,7 +2171,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             <div className="flex items-center justify-between">
                               <div>
                                 <div className="flex items-center gap-2 mb-2">
-                                  <h3 className="font-bold text-[#4a235a]">{u.name}</h3>
+                                  <h3 className="font-bold text-[#15803d]">{u.name}</h3>
                                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                     {u.active ? 'Active' : 'Inactive'}
                                   </span>
@@ -2214,22 +2214,22 @@ const handleAdminPasswordReset = async (id, email) => {
                   <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div className="flex items-start justify-between gap-4 mb-5">
                       <div>
-                        <h3 className="font-bold text-cyan-700 text-xl">Edit Account</h3>
+                        <h3 className="font-bold text-gray-800 text-xl">Edit Account</h3>
                         <p className="text-sm text-gray-500">Update the account details and teacher profile information for this user.</p>
                       </div>
                       <button onClick={() => { setEditingUser(null); setEditPhotoFile(null); setEditPhotoPreview('') }} className="text-gray-500">✕</button>
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Full Name</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Full Name</label>
                         <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.name} onChange={e => setEditingUser({ ...editingUser, name: e.target.value })} />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Email</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Email</label>
                         <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.email} onChange={e => setEditingUser({ ...editingUser, email: e.target.value })} />
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Role</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Role</label>
                         <select className="w-full border px-3 py-2 rounded-lg" value={editingUser.role} onChange={e => setEditingUser({ ...editingUser, role: e.target.value })}>
                           <option value="parent">Parent</option>
                           <option value="teacher">Teacher</option>
@@ -2252,22 +2252,22 @@ const handleAdminPasswordReset = async (id, email) => {
                       {editingUser.role === 'teacher' && (
                         <div className="space-y-4 border border-gray-100 rounded-2xl p-4 bg-gray-50">
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Department</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Department</label>
                             <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.teacherDepartment || ''} onChange={e => setEditingUser({ ...editingUser, teacherDepartment: e.target.value })} />
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Primary Subject</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Primary Subject</label>
                             <select className="w-full border px-3 py-2 rounded-lg" value={editingUser.teacherSubject || ''} onChange={e => setEditingUser({ ...editingUser, teacherSubject: e.target.value })}>
                               <option value="">Select primary subject</option>
                               {SUBJECTS.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                             </select>
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Phone</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Phone</label>
                             <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.phone || ''} onChange={e => setEditingUser({ ...editingUser, phone: e.target.value })} />
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Profile Photo</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Profile Photo</label>
                             <div className="space-y-3">
                               {editPhotoPreview || editingUser.photo ? (
                                 <img src={editPhotoPreview || editingUser.photo} alt="Teacher preview" className="h-24 w-24 rounded-full object-cover border" />
@@ -2284,7 +2284,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Classes</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Assigned Classes</label>
                             <div className="grid grid-cols-2 gap-2">
                               {classes.filter(c => c !== 'All').map(className => (
                                 <button key={className} type="button" onClick={() => toggleEditSelection('classes', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classes.includes(className) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
@@ -2294,17 +2294,17 @@ const handleAdminPasswordReset = async (id, email) => {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Class Teacher For</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Class Teacher For</label>
                             <div className="grid grid-cols-2 gap-2">
                               {classes.filter(c => c !== 'All').map(className => (
-                                <button key={className} type="button" onClick={() => toggleEditSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classTeacherClasses.includes(className) ? 'bg-[#0f6e56] text-white border-[#0f6e56]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                <button key={className} type="button" onClick={() => toggleEditSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classTeacherClasses.includes(className) ? 'bg-[#128038] text-white border-[#128038]' : 'bg-white text-gray-700 border-gray-200'}`}>
                                   {className}
                                 </button>
                               ))}
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Additional Subjects</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Additional Subjects</label>
                             <div className="grid grid-cols-2 gap-2">
                               {SUBJECTS.map(subject => (
                                 <button key={subject} type="button" onClick={() => toggleEditSelection('subjects', subject)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.subjects.includes(subject) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'}`}>
@@ -2314,7 +2314,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">Bio</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Bio</label>
                             <textarea className="w-full border px-3 py-2 rounded-lg" rows={4} value={editingUser.bio || ''} onChange={e => setEditingUser({ ...editingUser, bio: e.target.value })} />
                           </div>
                         </div>
@@ -2360,7 +2360,7 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Admission Tokens</h2>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Admission Tokens</h2>
                   <p className="text-gray-500 text-sm">Generate serial numbers and PINs for parents who have paid the admission fee.</p>
                 </div>
                 <button onClick={handleGenerateToken} disabled={tokenLoading} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors disabled:opacity-50">{tokenLoading ? 'Generating...' : '+ Generate Token'}</button>
@@ -2373,15 +2373,15 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="bg-white rounded-xl p-4 border border-green-200">
                       <p className="text-xs text-gray-500 mb-1">Serial Number</p>
                       <div className="flex items-center justify-between">
-                        <p className="font-bold text-cyan-700 text-lg">{newToken.serialNumber}</p>
-                        <button onClick={() => handleCopy(newToken.serialNumber, 'serial')} className="text-gray-400 hover:text-cyan-700">{copiedId === 'serial' ? <CheckCircle size={16} className="text-green-600" /> : <Copy size={16} />}</button>
+                        <p className="font-bold text-gray-800 text-lg">{newToken.serialNumber}</p>
+                        <button onClick={() => handleCopy(newToken.serialNumber, 'serial')} className="text-gray-400 hover:text-gray-800">{copiedId === 'serial' ? <CheckCircle size={16} className="text-green-600" /> : <Copy size={16} />}</button>
                       </div>
                     </div>
                     <div className="bg-white rounded-xl p-4 border border-green-200">
                       <p className="text-xs text-gray-500 mb-1">PIN (shown once)</p>
                       <div className="flex items-center justify-between">
-                        <p className="font-bold text-cyan-700 text-lg tracking-widest">{newToken.pin}</p>
-                        <button onClick={() => handleCopy(newToken.pin, 'pin')} className="text-gray-400 hover:text-cyan-700">{copiedId === 'pin' ? <CheckCircle size={16} className="text-green-600" /> : <Copy size={16} />}</button>
+                        <p className="font-bold text-gray-800 text-lg tracking-widest">{newToken.pin}</p>
+                        <button onClick={() => handleCopy(newToken.pin, 'pin')} className="text-gray-400 hover:text-gray-800">{copiedId === 'pin' ? <CheckCircle size={16} className="text-green-600" /> : <Copy size={16} />}</button>
                       </div>
                     </div>
                   </div>
@@ -2405,7 +2405,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     ) : (
                       tokens.map((token, index) => (
                         <tr key={token.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                          <td className="px-6 py-4 font-bold text-cyan-700">{token.serialNumber}</td>
+                          <td className="px-6 py-4 font-bold text-gray-800">{token.serialNumber}</td>
                           <td className="px-6 py-4"><span className={`text-xs font-bold px-3 py-1 rounded-full ${token.used ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>{token.used ? 'Used' : 'Available'}</span></td>
                           <td className="px-6 py-4 text-gray-600">{new Date(token.createdAt).toLocaleDateString()}</td>
                           <td className="px-6 py-4 text-gray-600">{token.usedAt ? new Date(token.usedAt).toLocaleDateString() : '—'}</td>
@@ -2424,31 +2424,31 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Gallery</h2>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Gallery</h2>
                   <p className="text-gray-500 text-sm">Upload and manage school photos and events.</p>
                 </div>
                 <button onClick={() => setShowAddGallery(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Gallery Item</button>
               </div>
               {showAddGallery && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                  <h3 className="text-xl font-bold text-cyan-700 mb-6">Add New Gallery Item</h3>
+                  <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Gallery Item</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Title</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Title</label>
                       <input type="text" value={galleryForm.title} onChange={e => setGalleryForm({ ...galleryForm, title: e.target.value })} placeholder="e.g. Sports Day 2026" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Category</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Category</label>
                       <select value={galleryForm.category} onChange={e => setGalleryForm({ ...galleryForm, category: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         {['Events','Extra-curricular','Academic','Physical Education','Culture','Arts','Community'].map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Description</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Description</label>
                       <textarea value={galleryForm.description} onChange={e => setGalleryForm({ ...galleryForm, description: e.target.value })} rows={2} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-cyan-700 mb-2">Upload Images (up to 20)</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Upload Images (up to 20)</label>
                       <input type="file" accept="image/*" multiple onChange={handleGalleryImageChange} className="text-sm text-gray-600 mb-3" />
                       {galleryPreviews.length > 0 && (
                         <div className="grid grid-cols-4 gap-3 mt-3">
@@ -2477,15 +2477,15 @@ const handleAdminPasswordReset = async (id, email) => {
                       <div className="relative cursor-pointer" onClick={() => { setViewingGallery(item); setActiveGalleryImage(0) }}>
                         <img src={item.images[0]} alt={item.title} className="w-full h-48 object-cover" loading="lazy" decoding="async" />
                         {item.images.length > 1 && <span className="absolute top-2 right-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded-full">+{item.images.length - 1} more</span>}
-                        <span className="absolute top-2 left-2 bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full">{item.category}</span>
+                        <span className="absolute top-2 left-2 bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{item.category}</span>
                       </div>
                       <div className="p-4">
-                        <h3 className="font-bold text-cyan-700 mb-1">{item.title}</h3>
+                        <h3 className="font-bold text-gray-800 mb-1">{item.title}</h3>
                         {item.description && <p className="text-sm text-gray-500 mb-2">{item.description}</p>}
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</p>
                           <div className="flex gap-2">
-                            <button onClick={(e) => { e.stopPropagation(); setEditingGallery(item); setGalleryForm({ title: item.title, description: item.description || '', category: item.category }) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 p-1.5 rounded-lg transition-colors text-xs font-bold px-3">Edit</button>
+                            <button onClick={(e) => { e.stopPropagation(); setEditingGallery(item); setGalleryForm({ title: item.title, description: item.description || '', category: item.category }) }} className="bg-blue-500 hover:bg-blue-300 text-gray-800 p-1.5 rounded-lg transition-colors text-xs font-bold px-3">Edit</button>
                             <button onClick={(e) => { e.stopPropagation(); handleDeleteGalleryItem(item.id) }} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                           </div>
                         </div>
@@ -2502,16 +2502,16 @@ const handleAdminPasswordReset = async (id, email) => {
                       <button onClick={() => setEditingGallery(null)} className="hover:text-cyan-600"><X size={24} /></button>
                     </div>
                     <div className="p-6 space-y-4">
-                      <div><label className="block text-sm font-bold text-cyan-700 mb-2">Title</label><input type="text" value={galleryForm.title} onChange={e => setGalleryForm({ ...galleryForm, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                      <div><label className="block text-sm font-bold text-gray-800 mb-2">Title</label><input type="text" value={galleryForm.title} onChange={e => setGalleryForm({ ...galleryForm, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Category</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Category</label>
                         <select value={galleryForm.category} onChange={e => setGalleryForm({ ...galleryForm, category: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           {['Events','Extra-curricular','Academic','Physical Education','Culture','Arts','Community'].map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                       </div>
-                      <div><label className="block text-sm font-bold text-cyan-700 mb-2">Description</label><textarea value={galleryForm.description} onChange={e => setGalleryForm({ ...galleryForm, description: e.target.value })} rows={2} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                      <div><label className="block text-sm font-bold text-gray-800 mb-2">Description</label><textarea value={galleryForm.description} onChange={e => setGalleryForm({ ...galleryForm, description: e.target.value })} rows={2} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                       <div>
-                        <label className="block text-sm font-bold text-cyan-700 mb-2">Replace Images (optional)</label>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Replace Images (optional)</label>
                         <input type="file" accept="image/*" multiple onChange={handleGalleryImageChange} className="text-sm text-gray-600" />
                         {galleryPreviews.length > 0 ? (
                           <div className="grid grid-cols-4 gap-2 mt-3">{galleryPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" loading="lazy" decoding="async" />)}</div>
@@ -2570,16 +2570,16 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">News & Events</h2>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">News & Events</h2>
                   <p className="text-gray-500 text-sm">Manage school news and upcoming events.</p>
                 </div>
                 <button onClick={() => setShowAddNews(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add News / Event</button>
               </div>
               <div className="flex gap-3 mb-6">
                 {['All', 'news', 'event'].map(f => (
-                  <button key={f} onClick={() => setNewsFilter(f)} className={`px-5 py-2 rounded-full text-sm font-bold transition-colors capitalize ${newsFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-cyan-700 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
+                  <button key={f} onClick={() => setNewsFilter(f)} className={`px-5 py-2 rounded-full text-sm font-bold transition-colors capitalize ${newsFilter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {f === 'All' ? 'All' : f === 'news' ? 'News' : 'Events'}
-                    <span className="ml-2 bg-blue-500 text-cyan-700 text-xs font-bold px-2 py-0.5 rounded-full">{f === 'All' ? newsItems.length : newsItems.filter(n => n.type === f).length}</span>
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{f === 'All' ? newsItems.length : newsItems.filter(n => n.type === f).length}</span>
                   </button>
                 ))}
               </div>
@@ -2592,30 +2592,30 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                     <div className="p-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div><label className="block text-sm font-bold text-cyan-700 mb-2">Title</label><input type="text" value={newsForm.title} onChange={e => setNewsForm({ ...newsForm, title: e.target.value })} placeholder="Enter title..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                        <div><label className="block text-sm font-bold text-gray-800 mb-2">Title</label><input type="text" value={newsForm.title} onChange={e => setNewsForm({ ...newsForm, title: e.target.value })} placeholder="Enter title..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Type</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Type</label>
                           <select value={newsForm.type} onChange={e => setNewsForm({ ...newsForm, type: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                             <option value="news">News</option>
                             <option value="event">Event</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Category</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Category</label>
                           <select value={newsForm.category} onChange={e => setNewsForm({ ...newsForm, category: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                             {['General','Academic','Sports','Cultural','Community','Achievement'].map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </div>
                         {newsForm.type === 'event' && (
                           <>
-                            <div><label className="block text-sm font-bold text-cyan-700 mb-2">Event Date</label><input type="date" value={newsForm.eventDate} onChange={e => setNewsForm({ ...newsForm, eventDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
-                            <div className="md:col-span-2"><label className="block text-sm font-bold text-cyan-700 mb-2">Venue</label><input type="text" value={newsForm.venue} onChange={e => setNewsForm({ ...newsForm, venue: e.target.value })} placeholder="Event venue..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                            <div><label className="block text-sm font-bold text-gray-800 mb-2">Event Date</label><input type="date" value={newsForm.eventDate} onChange={e => setNewsForm({ ...newsForm, eventDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                            <div className="md:col-span-2"><label className="block text-sm font-bold text-gray-800 mb-2">Venue</label><input type="text" value={newsForm.venue} onChange={e => setNewsForm({ ...newsForm, venue: e.target.value })} placeholder="Event venue..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                           </>
                         )}
-                        <div className="md:col-span-2"><label className="block text-sm font-bold text-cyan-700 mb-2">Content</label><textarea value={newsForm.content} onChange={e => setNewsForm({ ...newsForm, content: e.target.value })} rows={5} placeholder="Write the news or event details here..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
-                        <div><label className="block text-sm font-bold text-cyan-700 mb-2">Video URL (optional)</label><input type="text" value={newsForm.videoUrl} onChange={e => setNewsForm({ ...newsForm, videoUrl: e.target.value })} placeholder="YouTube or video link..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                        <div className="md:col-span-2"><label className="block text-sm font-bold text-gray-800 mb-2">Content</label><textarea value={newsForm.content} onChange={e => setNewsForm({ ...newsForm, content: e.target.value })} rows={5} placeholder="Write the news or event details here..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
+                        <div><label className="block text-sm font-bold text-gray-800 mb-2">Video URL (optional)</label><input type="text" value={newsForm.videoUrl} onChange={e => setNewsForm({ ...newsForm, videoUrl: e.target.value })} placeholder="YouTube or video link..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Images (up to 5)</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Images (up to 5)</label>
                           <input type="file" accept="image/*" multiple onChange={handleNewsImageChange} className="text-sm text-gray-600" />
                           {newsPreviews.length > 0 && <div className="grid grid-cols-4 gap-2 mt-3">{newsPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" loading="lazy" decoding="async" />)}</div>}
                         </div>
@@ -2637,21 +2637,21 @@ const handleAdminPasswordReset = async (id, email) => {
                       {item.images && item.images.length > 0 && <img src={item.images[0]} alt={item.title} className="w-full h-44 object-cover" loading="lazy" decoding="async" />}
                       <div className="p-5">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.type === 'event' ? 'bg-blue-500 text-cyan-700' : 'bg-blue-600 text-white'}`}>{item.type === 'event' ? 'Event' : 'News'}</span>
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.type === 'event' ? 'bg-blue-500 text-gray-800' : 'bg-blue-600 text-white'}`}>{item.type === 'event' ? 'Event' : 'News'}</span>
                           <span className="text-xs text-gray-400">{item.category}</span>
                         </div>
-                        <h3 className="font-bold text-cyan-700 mb-2 line-clamp-2">{item.title}</h3>
+                        <h3 className="font-bold text-gray-800 mb-2 line-clamp-2">{item.title}</h3>
                         <p className="text-sm text-gray-500 mb-3 line-clamp-2">{item.content}</p>
                         {item.type === 'event' && item.eventDate && (
                           <div className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
-                            <p className="text-xs font-bold text-cyan-700">📅 {new Date(item.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                            <p className="text-xs font-bold text-gray-800">📅 {new Date(item.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                             {item.venue && <p className="text-xs text-gray-500">📍 {item.venue}</p>}
                           </div>
                         )}
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString()}</p>
                           <div className="flex gap-2">
-                            <button onClick={() => { setEditingNews(item); setNewsForm({ title: item.title, content: item.content, category: item.category, type: item.type, videoUrl: item.videoUrl || '', eventDate: item.eventDate || '', venue: item.venue || '' }); setNewsPreviews([]); setNewsImages([]) }} className="bg-blue-500 hover:bg-blue-300 text-cyan-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">Edit</button>
+                            <button onClick={() => { setEditingNews(item); setNewsForm({ title: item.title, content: item.content, category: item.category, type: item.type, videoUrl: item.videoUrl || '', eventDate: item.eventDate || '', venue: item.venue || '' }); setNewsPreviews([]); setNewsImages([]) }} className="bg-blue-500 hover:bg-blue-300 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors">Edit</button>
                             <button onClick={() => handleDeleteNews(item.id)} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg transition-colors"><Trash2 size={14} /></button>
                           </div>
                         </div>
@@ -2668,7 +2668,7 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Our Staff</h2>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Our Staff</h2>
                   <p className="text-gray-500 text-sm">Manage school staff members.</p>
                 </div>
                 <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
@@ -2685,24 +2685,24 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600">
                           {staffPhotoPreview ? <img src={staffPhotoPreview} alt="Preview" className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                             editingStaff?.photo ? <img src={editingStaff.photo} alt="Current" className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-                            <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{staffForm.name?.charAt(0) || '?'}</div>}
+                            <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-2xl">{staffForm.name?.charAt(0) || '?'}</div>}
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Staff Photo</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Staff Photo</label>
                           <input type="file" accept="image/*" onChange={handleStaffPhotoChange} className="text-sm text-gray-600" />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         {[['Full Name *','name','text'],['Role *','role','text'],['Department','department','text'],['Email','email','email'],['Phone','phone','text']].map(([label, key, type]) => (
                           <div key={key}>
-                            <label className="block text-sm font-bold text-cyan-700 mb-2">{label}</label>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">{label}</label>
                             <input type={type} value={staffForm[key]} onChange={e => setStaffForm({ ...staffForm, [key]: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                           </div>
                         ))}
                         <div className="md:col-span-2 rounded-3xl border border-cyan-200 bg-cyan-50 p-4">
                           <div className="flex items-center justify-between mb-4">
                             <div>
-                              <h3 className="text-lg font-bold text-cyan-700">Teacher Assignment</h3>
+                              <h3 className="text-lg font-bold text-gray-800">Teacher Assignment</h3>
                               <p className="text-sm text-gray-500">These assignments only apply when the staff role is set to <span className="font-semibold">Teacher</span>.</p>
                             </div>
                             {staffForm.role.toLowerCase() === 'teacher' && (
@@ -2711,7 +2711,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </div>
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                             <div>
-                              <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Classes</label>
+                              <label className="block text-sm font-bold text-gray-800 mb-2">Assigned Classes</label>
                               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
                                 {classes.slice(1).map(cls => (
                                   <label key={cls} className="flex items-center gap-2 text-sm">
@@ -2727,7 +2727,7 @@ const handleAdminPasswordReset = async (id, email) => {
                               </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-bold text-cyan-700 mb-2">Assigned Subjects</label>
+                              <label className="block text-sm font-bold text-gray-800 mb-2">Assigned Subjects</label>
                               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white">
                                 {SUBJECTS.map(subj => (
                                   <label key={subj} className="flex items-center gap-2 text-sm">
@@ -2745,7 +2745,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Category</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Category</label>
                           <select value={staffForm.category} onChange={e => setStaffForm({ ...staffForm, category: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                             <option value="leadership">Leadership & Management</option>
                             <option value="teaching">Teaching Staff</option>
@@ -2753,7 +2753,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </select>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-cyan-700 mb-2">Bio</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Bio</label>
                           <textarea value={staffForm.bio} onChange={e => setStaffForm({ ...staffForm, bio: e.target.value })} rows={3} placeholder="Short bio..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                         </div>
                       </div>
@@ -2774,19 +2774,19 @@ const handleAdminPasswordReset = async (id, email) => {
                       <div className="relative">
                         {member.photo ? <img src={member.photo} alt={member.name} className="w-full h-48 object-cover" loading="lazy" decoding="async" /> :
                           <div className="w-full h-48 bg-blue-600 flex items-center justify-center"><span className="text-cyan-600 text-4xl font-bold">{member.name?.charAt(0)}</span></div>}
-                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-cyan-700' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#0f6e56] text-white'}`}>
+                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-gray-800' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#128038] text-white'}`}>
                           {member.category === 'leadership' ? 'Leadership' : member.category === 'teaching' ? 'Teaching' : 'Support'}
                         </span>
                       </div>
                       <div className="p-5">
-                        <h3 className="font-bold text-cyan-700 mb-1">{member.name}</h3>
+                        <h3 className="font-bold text-gray-800 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
                         {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Assigned Classes: {member.classes.join(', ')}</p>}
-                        {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#0f6e56] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
+                        {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#128038] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
                         {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>
@@ -2803,14 +2803,14 @@ const handleAdminPasswordReset = async (id, email) => {
       {activeMenu === 'signature' && (
         <div className="orphan-tab max-w-xl">
     <div className="mb-6">
-      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Headmaster's Signature</h2>
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0c7f9c' }}>Headmaster's Signature</h2>
       <p className="text-gray-500 text-sm">Upload a scanned signature. It will automatically appear on all approved result PDFs.</p>
     </div>
 
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
       {/* Current signature preview */}
       <div className="mb-6">
-        <p className="text-sm font-bold mb-3" style={{ color: '#0000ff' }}>Current Signature</p>
+        <p className="text-sm font-bold mb-3" style={{ color: '#0c7f9c' }}>Current Signature</p>
         {headmasterSigUrl ? (
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 flex items-center justify-center" style={{ minHeight: '100px' }}>
             <img
@@ -2829,7 +2829,7 @@ const handleAdminPasswordReset = async (id, email) => {
 
       {/* Upload */}
       <div>
-        <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Upload New Signature</label>
+        <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Upload New Signature</label>
         <p className="text-xs text-gray-400 mb-3">Use a white background scanned image (PNG preferred). The signature will be resized automatically.</p>
         <input
           type="file"
@@ -2843,8 +2843,8 @@ const handleAdminPasswordReset = async (id, email) => {
       </div>
 
       {/* Instructions */}
-      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #0000ff20' }}>
-        <p className="font-bold mb-2" style={{ color: '#0000ff' }}>How it works</p>
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#ecfeff', border: '1px solid #0c7f9c20' }}>
+        <p className="font-bold mb-2" style={{ color: '#0c7f9c' }}>How it works</p>
         <ul className="space-y-1 text-gray-600 text-xs">
           <li>1. Scan the headmaster's signature on white paper</li>
           <li>2. Upload it here as PNG or JPG</li>
@@ -2860,18 +2860,18 @@ const handleAdminPasswordReset = async (id, email) => {
 {activeMenu === 'academic-context' && (
   <div className="orphan-tab max-w-xl">
     <div className="mb-6">
-      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0000ff' }}>Academic Context</h2>
+      <h2 className="text-2xl font-bold font-serif mb-1" style={{ color: '#0c7f9c' }}>Academic Context</h2>
       <p className="text-gray-500 text-sm">Set the active academic year and term. This automatically applies to all teacher, parent and learner portals — they no longer need to set it manually.</p>
     </div>
 
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Academic Year</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Academic Year</label>
           <select
             value={academicContext.academicYear}
             onChange={e => setAcademicContext(prev => ({ ...prev, academicYear: e.target.value }))}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700"
           >
             {['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030',
               '2030/2031','2031/2032','2032/2033','2033/2034','2034/2035'].map(y => (
@@ -2880,11 +2880,11 @@ const handleAdminPasswordReset = async (id, email) => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-bold mb-2" style={{ color: '#0000ff' }}>Term</label>
+          <label className="block text-sm font-bold mb-2" style={{ color: '#0c7f9c' }}>Term</label>
           <select
             value={academicContext.term}
             onChange={e => setAcademicContext(prev => ({ ...prev, term: e.target.value }))}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0000ff] text-gray-700"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700"
           >
             {['Term 1', 'Term 2', 'Term 3'].map(t => (
               <option key={t} value={t}>{t}</option>
@@ -2897,7 +2897,7 @@ const handleAdminPasswordReset = async (id, email) => {
         onClick={handleSaveAcademicContext}
         disabled={contextSaving}
         className="text-white font-bold px-8 py-3 rounded-xl disabled:opacity-50"
-        style={{ background: '#0000ff' }}
+        style={{ background: '#0c7f9c' }}
       >
         {contextSaving ? 'Saving...' : 'Set as Active Context'}
       </button>
@@ -2908,8 +2908,8 @@ const handleAdminPasswordReset = async (id, email) => {
         </p>
       )}
 
-      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#eff6ff', border: '1px solid #0000ff20' }}>
-        <p className="font-bold mb-2" style={{ color: '#0000ff' }}>Currently Active</p>
+      <div className="mt-6 rounded-xl p-4 text-sm" style={{ background: '#ecfeff', border: '1px solid #0c7f9c20' }}>
+        <p className="font-bold mb-2" style={{ color: '#0c7f9c' }}>Currently Active</p>
         <p className="text-gray-700 text-lg font-bold">{academicContext.academicYear} &nbsp;|&nbsp; {academicContext.term}</p>
         {academicContext.setBy && (
           <p className="text-xs text-gray-400 mt-1">Last set by {academicContext.setBy}</p>
@@ -2929,7 +2929,7 @@ const handleAdminPasswordReset = async (id, email) => {
 {activeMenu === 'contact-messages' && (
   <div className="orphan-tab">
     <div className="mb-6">
-      <h2 className="text-2xl font-bold font-serif text-cyan-700 mb-1">Contact Messages</h2>
+      <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Contact Messages</h2>
       <p className="text-gray-500 text-sm">Messages sent by visitors from the public contact page.</p>
     </div>
     {contactLoading ? (
@@ -2944,7 +2944,7 @@ const handleAdminPasswordReset = async (id, email) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1">
                   {!msg.read && <span className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />}
-                  <h3 className="font-bold text-cyan-700 text-lg">{msg.name}</h3>
+                  <h3 className="font-bold text-gray-800 text-lg">{msg.name}</h3>
                   <span className="text-xs text-gray-400">{new Date(msg.createdAt).toLocaleString()}</span>
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-2">
@@ -2997,13 +2997,13 @@ const handleAdminPasswordReset = async (id, email) => {
             <div className="grid grid-cols-2 gap-4">
               {[['Name', viewingContact.name], ['Email', viewingContact.email], ['Phone', viewingContact.phone || '—'], ['Subject', viewingContact.subject || '—'], ['Received', new Date(viewingContact.createdAt).toLocaleString()]].map(([label, value]) => (
                 <div key={label} className="bg-blue-50 rounded-xl px-4 py-3">
-                  <p className="text-xs font-bold text-cyan-700">{label}</p>
+                  <p className="text-xs font-bold text-gray-800">{label}</p>
                   <p className="text-sm text-gray-700">{value}</p>
                 </div>
               ))}
             </div>
             <div className="bg-blue-50 rounded-xl px-4 py-3">
-              <p className="text-xs font-bold text-cyan-700 mb-1">Message</p>
+              <p className="text-xs font-bold text-gray-800 mb-1">Message</p>
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{viewingContact.message}</p>
             </div>
             <div className="flex gap-3">
@@ -3041,11 +3041,11 @@ const handleAdminPasswordReset = async (id, email) => {
         <div className="flex items-center gap-6 mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-600 shrink-0">
             {(learnerDocPreviews.photo || selectedStudent.photo) ? <img src={learnerDocPreviews.photo || selectedStudent.photo} alt={selectedStudent.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
-              <div className="w-full h-full flex items-center justify-center text-cyan-700 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
+              <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-2xl">{selectedStudent.firstName?.charAt(0)}</div>}
           </div>
           <div>
-            <h3 className="text-xl font-bold text-cyan-700">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
-            <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
+            <h3 className="text-xl font-bold text-gray-800">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
             <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
             <span className="inline-block bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full mt-1">
               {selectedStudent.source === 'admission' ? 'From admission application' : 'Added manually'}
@@ -3104,7 +3104,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <div className="grid grid-cols-2 gap-2">
                   {section.fields.map(([label, value], fi) => (
                     <div key={fi} className="bg-blue-50 rounded-lg px-3 py-2">
-                      <p className="text-xs font-bold text-cyan-700">{label}</p>
+                      <p className="text-xs font-bold text-gray-800">{label}</p>
                       <p className="text-sm text-gray-600">{value || '—'}</p>
                     </div>
                   ))}
@@ -3117,15 +3117,15 @@ const handleAdminPasswordReset = async (id, email) => {
               <div className="grid grid-cols-2 gap-4">
                 {[['NHIS Card - Front', selectedStudent.nhisFront], ['NHIS Card - Back', selectedStudent.nhisBack], ['Ghana Card - Front', selectedStudent.ghanaFront], ['Ghana Card - Back', selectedStudent.ghanaBack]].map((doc, di) => (
                   <div key={di} className="bg-blue-50 rounded-lg p-3">
-                    <p className="text-xs font-bold text-cyan-700 mb-2">{doc[0]}</p>
+                    <p className="text-xs font-bold text-gray-800 mb-2">{doc[0]}</p>
                     {doc[1] ? <img src={doc[1]} alt={doc[0]} className="w-full h-28 object-cover rounded-lg" loading="lazy" decoding="async" /> : <p className="text-xs text-gray-400 italic">Not uploaded</p>}
                   </div>
                 ))}
               </div>
               {selectedStudent.signedBooklet && (
                 <div className="mt-4 bg-blue-50 rounded-lg p-4">
-                  <p className="text-sm font-bold text-cyan-700 mb-2">Signed Admission Booklet</p>
-                  <a href={selectedStudent.signedBooklet} target="_blank" rel="noreferrer" className="inline-block bg-[#0000ff] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+                  <p className="text-sm font-bold text-gray-800 mb-2">Signed Admission Booklet</p>
+                  <a href={selectedStudent.signedBooklet} target="_blank" rel="noreferrer" className="inline-block bg-[#0c7f9c] hover:opacity-80 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
                     View Signed Booklet
                   </a>
                 </div>
@@ -3137,7 +3137,7 @@ const handleAdminPasswordReset = async (id, email) => {
               {(selectedStudent.results && selectedStudent.results.length > 0) ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm bg-blue-50 rounded-lg overflow-hidden">
-                    <thead className="bg-blue-100 text-cyan-700">
+                    <thead className="bg-blue-100 text-gray-800">
                       <tr>
                         <th className="px-3 py-2 text-left">Academic Year</th>
                         <th className="px-3 py-2 text-left">Term</th>
@@ -3167,7 +3167,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <p className="text-xs text-amber-700 font-bold mb-2">⚠️ This learner has no portal login yet.</p>
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="bg-[#1a3c6e] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                  className="bg-[#0e7490] hover:bg-blue-800 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
                 >
                   Set Login Credentials
                 </button>
@@ -3175,7 +3175,7 @@ const handleAdminPasswordReset = async (id, email) => {
             )}
 
             <div className="flex gap-3">
-              <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
+              <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
               <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
             </div>
           </div>
@@ -3194,7 +3194,7 @@ const handleAdminPasswordReset = async (id, email) => {
                   ['signedBooklet', 'Signed Booklet (PDF)'],
                 ].map(([field, label]) => (
                   <div key={field} className="bg-blue-50 rounded-lg p-3">
-                    <p className="text-xs font-bold text-cyan-700 mb-2">{label}</p>
+                    <p className="text-xs font-bold text-gray-800 mb-2">{label}</p>
                     {field !== 'signedBooklet' && (learnerDocPreviews[field] || editStudent[field]) && (
                       <img src={learnerDocPreviews[field] || editStudent[field]} alt={label} className="w-full h-20 object-cover rounded-lg mb-2" loading="lazy" decoding="async" />
                     )}
@@ -3261,7 +3261,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <div className="grid grid-cols-2 gap-4">
                   {section.fields.map(([key, label, type, options]) => (
                     <div key={key}>
-                      <label className="block text-sm font-bold text-cyan-700 mb-1">{label}</label>
+                      <label className="block text-sm font-bold text-gray-800 mb-1">{label}</label>
                       {type === 'select' ? (
                         <select
                           value={editStudent[key] || ''}
@@ -3296,29 +3296,29 @@ const handleAdminPasswordReset = async (id, email) => {
       {showLoginModal && (
   <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
     <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
-      <h3 className="font-bold text-[#1a3c6e] text-lg mb-1">Set Learner Login</h3>
+      <h3 className="font-bold text-[#0e7490] text-lg mb-1">Set Learner Login</h3>
       <p className="text-sm text-gray-500 mb-4">
         Create a portal login for <strong>{selectedStudent.firstName} {selectedStudent.lastName}</strong>.
       </p>
       <div className="space-y-3">
         <div>
-          <label className="block text-sm font-bold text-[#1a3c6e] mb-1">Email Address</label>
+          <label className="block text-sm font-bold text-[#0e7490] mb-1">Email Address</label>
           <input
             type="email"
             value={learnerLoginForm.email}
             onChange={e => setLearnerLoginForm(f => ({ ...f, email: e.target.value }))}
             placeholder="learner@email.com"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1a3c6e] text-gray-700 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700 text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-[#1a3c6e] mb-1">Password</label>
+          <label className="block text-sm font-bold text-[#0e7490] mb-1">Password</label>
           <input
             type="password"
             value={learnerLoginForm.password}
             onChange={e => setLearnerLoginForm(f => ({ ...f, password: e.target.value }))}
             placeholder="Set a password"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1a3c6e] text-gray-700 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0e7490] text-gray-700 text-sm"
           />
         </div>
         <div className="flex gap-3 pt-2">
@@ -3349,7 +3349,7 @@ const handleAdminPasswordReset = async (id, email) => {
               }
             }}
             disabled={loginCreating}
-            className="flex-1 bg-[#1a3c6e] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50"
+            className="flex-1 bg-[#0e7490] text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-50"
           >
             {loginCreating ? 'Creating…' : 'Create Login'}
           </button>
@@ -3371,7 +3371,7 @@ const handleAdminPasswordReset = async (id, email) => {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#800080"
+        accentColor="#15803d"
       />
     )}
     </div>

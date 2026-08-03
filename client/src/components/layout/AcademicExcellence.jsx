@@ -28,12 +28,12 @@ export default function AcademicExcellence() {
         <div className="flex-1">
 
           {/* Badge */}
-          <span className="inline-block bg-[#7C3AED] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#128038] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Academic Excellence
           </span>
 
           {/* Heading */}
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#2563EB] mb-6 leading-tight">
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6 leading-tight">
            A Hybrid Curriculum Built for the Future
           </h2>
 
@@ -52,7 +52,7 @@ export default function AcademicExcellence() {
                 className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-md border border-[#D6E4FF]"
               >
 
-                <div className="text-[#F4B400]">
+                <div className="text-[#128038]">
                   {item.icon}
                 </div>
 
@@ -69,7 +69,7 @@ export default function AcademicExcellence() {
           {/* Button */}
           <Link
             to="/academics"
-            className="inline-block bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
+            className="inline-block bg-[#0c7f9c] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
           >
             Explore Our Programs
           </Link>

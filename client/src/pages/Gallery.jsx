@@ -58,8 +58,8 @@ export default function Gallery() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
                   activeCategory === cat
-                    ? 'bg-[#8a2be2] text-white'
-                    : 'bg-white text-slate-700 border border-[#8a2be2] hover:bg-[#8a2be2] hover:text-white'
+                    ? 'bg-[#0c7f9c] text-white'
+                    : 'bg-white text-slate-700 border border-[#0c7f9c] hover:bg-[#0c7f9c] hover:text-white'
                 }`}
               >
                 {cat}
@@ -70,7 +70,7 @@ export default function Gallery() {
       </section>
 
       {/* Gallery Grid */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-green-50">
         <div className="max-w-7xl mx-auto px-4">
           {loading ? (
             <div className="text-center text-gray-400 py-20">Loading gallery...</div>
@@ -97,7 +97,7 @@ export default function Gallery() {
                         +{item.images.length - 1} more
                       </span>
                     )}
-                    <span className="absolute top-3 left-3 bg-[#8a2be2] text-white text-xs font-bold px-3 py-1 rounded-full">
+                    <span className="absolute top-3 left-3 bg-[#0c7f9c] text-white text-xs font-bold px-3 py-1 rounded-full">
                       {item.category}
                     </span>
                   </div>
@@ -133,7 +133,7 @@ export default function Gallery() {
               </div>
               <button 
                 onClick={() => setViewingItem(null)} 
-                className="text-white hover:text-[#8a2be2] transition-colors"
+                className="text-white hover:text-[#0c7f9c] transition-colors"
               >
                 <X size={28} />
               </button>
@@ -177,7 +177,7 @@ export default function Gallery() {
                     onClick={() => setActiveImage(index)}
                     className={`w-16 h-16 object-cover rounded-lg cursor-pointer shrink-0 transition-all ${
                       activeImage === index 
-                        ? 'ring-2 ring-[#8a2be2] opacity-100' 
+                        ? 'ring-2 ring-[#0c7f9c] opacity-100' 
                         : 'opacity-50 hover:opacity-100'
                     }`}
                     loading="lazy"

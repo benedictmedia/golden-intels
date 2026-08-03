@@ -5,7 +5,7 @@ import BrandLogo from './BrandLogo'
 import oxfordLogo from "../../assets/oxford-logo.png"
 
 // School colour palette is defined in index.css as CSS variables
-// --color-primary (purple), --color-secondary (blue), --color-accent (yellow)
+// --color-primary (turquoise-700), --color-secondary (turquoise-600), --color-accent (summer green)
 
 const navLinks = [
   { name: 'Home', path: '/' },

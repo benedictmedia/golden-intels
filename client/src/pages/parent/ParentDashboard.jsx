@@ -676,7 +676,7 @@ const getParentDisplayName = (name) => {
     <div className="portal-shell flex bg-gray-100">
 
       {/* Sidebar */}
-      <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col`} style={{ background: '#800080' }}>
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col`} style={{ background: '#15803d' }}>
         <div className="flex items-center justify-between p-4 border-b border-purple-900">
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -700,8 +700,8 @@ const getParentDisplayName = (name) => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
-                color: activeMenu === item.id ? '#ffff00' : 'rgba(255,255,255,0.85)',
-                borderLeft: activeMenu === item.id ? '3px solid #ffff00' : '3px solid transparent',
+                color: activeMenu === item.id ? '#4ade80' : 'rgba(255,255,255,0.85)',
+                borderLeft: activeMenu === item.id ? '3px solid #4ade80' : '3px solid transparent',
                 fontWeight: activeMenu === item.id ? '700' : '400'
         }}
             >
@@ -729,7 +729,7 @@ const getParentDisplayName = (name) => {
       <div className="portal-main flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-<div className="portal-topbar px-6 py-4 flex items-center justify-between" style={{ background: '#0000ff' }}>
+<div className="portal-topbar px-6 py-4 flex items-center justify-between" style={{ background: '#0c7f9c' }}>
   <div className="flex items-center gap-3">
     <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-white/15 text-white">
       <Menu size={20} />
@@ -763,16 +763,16 @@ const getParentDisplayName = (name) => {
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Academic Context</p>
-              <p className="text-lg font-bold text-[#800080]">{selectedAcademicYear} | {selectedTerm}</p>
+              <p className="text-lg font-bold text-[#15803d]">{selectedAcademicYear} | {selectedTerm}</p>
               <p className="text-xs text-gray-400 mt-0.5">Auto-set by admin · change to view previous terms</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <select value={selectedAcademicYear} onChange={e => setSelectedAcademicYear(e.target.value)}
-                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#800080] text-gray-700 bg-white">
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#15803d] text-gray-700 bg-white">
                 {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
               </select>
               <select value={selectedTerm} onChange={e => setSelectedTerm(e.target.value)}
-                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#800080] text-gray-700 bg-white">
+                className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#15803d] text-gray-700 bg-white">
                 {terms.map(term => <option key={term} value={term}>{term}</option>)}
               </select>
             </div>
@@ -784,7 +784,7 @@ const getParentDisplayName = (name) => {
               {/* Welcome banner */}
               <div
                 className="rounded-2xl p-8 shadow-md mb-8 text-white relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #800080 0%, #4a235a 55%, #0000ff 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #15803d 0%, #15803d 55%, #0c7f9c 100%)' }}
               >
                 <div className="relative z-10">
                   <p className="text-xs uppercase tracking-[0.25em] text-purple-100 mb-2">
@@ -804,10 +804,10 @@ const getParentDisplayName = (name) => {
               {/* Quick access shortcuts */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
-                  { label: 'Attendance', description: 'Daily records', icon: <ClipboardList size={22} />, id: 'attendance', color: 'bg-[#4a235a]' },
-                  { label: 'Statements of Results', description: 'Approved grades', icon: <BookOpen size={22} />, id: 'grades', color: 'bg-[#0000ff]' },
-                  { label: 'Assessments', description: 'Marked work', icon: <FileText size={22} />, id: 'assessments', color: 'bg-[#800080]' },
-                  { label: 'Fee Status', description: 'Payments & balance', icon: <DollarSign size={22} />, id: 'fees', color: 'bg-[#0f6e56]' },
+                  { label: 'Attendance', description: 'Daily records', icon: <ClipboardList size={22} />, id: 'attendance', color: 'bg-[#15803d]' },
+                  { label: 'Statements of Results', description: 'Approved grades', icon: <BookOpen size={22} />, id: 'grades', color: 'bg-[#0c7f9c]' },
+                  { label: 'Assessments', description: 'Marked work', icon: <FileText size={22} />, id: 'assessments', color: 'bg-[#15803d]' },
+                  { label: 'Fee Status', description: 'Payments & balance', icon: <DollarSign size={22} />, id: 'fees', color: 'bg-[#128038]' },
                 ].map(item => (
                   <button
                     key={item.id}
@@ -817,7 +817,7 @@ const getParentDisplayName = (name) => {
                     <div className={`${item.color} text-white w-11 h-11 rounded-xl flex items-center justify-center mb-4`}>
                       {item.icon}
                     </div>
-                    <p className="font-bold text-[#4a235a]">{item.label}</p>
+                    <p className="font-bold text-[#15803d]">{item.label}</p>
                     <p className="text-xs text-gray-500 mt-1">{item.description}</p>
                   </button>
                 ))}
@@ -826,10 +826,10 @@ const getParentDisplayName = (name) => {
               {/* Children overview */}
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold font-serif text-[#4a235a]">My Children</h2>
+                  <h2 className="text-xl font-bold font-serif text-[#15803d]">My Children</h2>
                   <button
                     onClick={() => setActiveMenu('children')}
-                    className="text-xs font-bold text-[#800080] hover:underline"
+                    className="text-xs font-bold text-[#15803d] hover:underline"
                   >
                     View all
                   </button>
@@ -840,17 +840,17 @@ const getParentDisplayName = (name) => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {students.map(student => (
                       <div key={student.id} className="flex items-center gap-4 border border-gray-100 rounded-xl p-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-[#4a235a] flex-shrink-0">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 border-2 border-[#15803d] flex-shrink-0">
                           {student.photo ? (
                             <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#4a235a] font-bold">
+                            <div className="w-full h-full flex items-center justify-center text-[#15803d] font-bold">
                               {student.firstName?.charAt(0)}
                             </div>
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-[#4a235a] truncate">{student.firstName} {student.lastName}</p>
+                          <p className="font-bold text-[#15803d] truncate">{student.firstName} {student.lastName}</p>
                           <p className="text-xs text-gray-500">{student.gradeLevel} · {student.studentId}</p>
                         </div>
                       </div>
@@ -864,7 +864,7 @@ const getParentDisplayName = (name) => {
           {/* My Children */}
           {activeMenu === 'children' && (
             <div>
-              <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-6">My Children</h2>
+              <h2 className="text-2xl font-bold font-serif text-[#15803d] mb-6">My Children</h2>
               {students.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">
                   No children enrolled yet. Please contact the school admin.
@@ -874,28 +874,28 @@ const getParentDisplayName = (name) => {
                   {students.map(student => (
                     <div key={student.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 border-4 border-[#4a235a]">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 border-4 border-[#15803d]">
                           {student.photo ? (
                             <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[#4a235a] font-bold text-xl">
+                            <div className="w-full h-full flex items-center justify-center text-[#15803d] font-bold text-xl">
                               {student.firstName?.charAt(0)}
                             </div>
                           )}
                         </div>
                         <div>
-                          <h3 className="font-bold text-[#4a235a]">{student.firstName} {student.lastName}</h3>
-                          <span className="inline-block bg-blue-500 text-cyan-700 text-xs font-bold px-3 py-1 rounded-full mt-1">{student.studentId}</span>
+                          <h3 className="font-bold text-[#15803d]">{student.firstName} {student.lastName}</h3>
+                          <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full mt-1">{student.studentId}</span>
                         </div>
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-500">Grade</span>
-                          <span className="font-bold text-[#4a235a]">{student.gradeLevel}</span>
+                          <span className="font-bold text-[#15803d]">{student.gradeLevel}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Gender</span>
-                          <span className="font-bold text-[#4a235a]">{student.gender}</span>
+                          <span className="font-bold text-[#15803d]">{student.gender}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Status</span>
@@ -914,14 +914,14 @@ const getParentDisplayName = (name) => {
             <div>
               <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Attendance Record</h2>
+                  <h2 className="text-2xl font-bold font-serif text-[#15803d] mb-1">Attendance Record</h2>
                   <p className="text-gray-500 text-sm">Daily attendance updates recorded by teachers.</p>
                 </div>
                 {students.length > 0 && (
                   <select
                     value={selectedChild?.id || ''}
                     onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
-                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#15803d] text-gray-700"
                   >
                     {students.map(student => (
                       <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
@@ -939,7 +939,7 @@ const getParentDisplayName = (name) => {
                   </p>
                   <button
                     onClick={() => setActiveMenu('fees')}
-                    className="mt-2 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                    className="mt-2 bg-[#15803d] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
                   >
                     View Fee Status
                   </button>
@@ -948,11 +948,11 @@ const getParentDisplayName = (name) => {
                 <>
                   <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
                     {[
-                      ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#4a235a]', 'text-purple-100'],
-                      ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#0f6e56]', 'text-green-100'],
+                      ['Attendance', `${contextualAttendancePercentage}%`, 'bg-[#15803d]', 'text-purple-100'],
+                      ['Present', contextualAttendanceSummary.present + contextualAttendanceSummary.late, 'bg-[#128038]', 'text-green-100'],
                       ['Absent (on permission)', contextualAttendanceSummary.absent_permission, 'bg-amber-500', 'text-amber-100'],
                       ['Absent (without permission)', contextualAttendanceSummary.absent_without_permission, 'bg-red-500', 'text-red-100'],
-                      ['Late', contextualAttendanceSummary.late, 'bg-[#0000ff]', 'text-blue-100'],
+                      ['Late', contextualAttendanceSummary.late, 'bg-[#0c7f9c]', 'text-blue-100'],
                     ].map(([label, value, color, textColor]) => (
                       <div key={label} className={`${color} text-white rounded-2xl p-5 shadow-sm`}>
                         <p className={`${textColor} text-xs font-bold uppercase tracking-wide`}>{label}</p>
@@ -969,7 +969,7 @@ const getParentDisplayName = (name) => {
 
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-[#4a235a] text-white">
+                      <thead className="bg-[#15803d] text-white">
                         <tr>
                           <th className="px-6 py-4 text-left">Date</th>
                           <th className="px-6 py-4 text-left">Status</th>
@@ -988,13 +988,13 @@ const getParentDisplayName = (name) => {
                           </tr>
                         ) : contextualAttendanceRecords.map((record, index) => (
                           <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                            <td className="px-6 py-4 font-medium text-[#4a235a]">{new Date(record.date).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 font-medium text-[#15803d]">{new Date(record.date).toLocaleDateString()}</td>
                             <td className="px-6 py-4">
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                                 record.status === 'present' ? 'bg-green-100 text-green-700' :
                                 record.status === 'absent_permission' ? 'bg-amber-100 text-amber-700' :
                                 record.status === 'absent_without_permission' || record.status === 'absent' ? 'bg-red-100 text-red-700' :
-                                'bg-blue-100 text-cyan-700'
+                                'bg-blue-100 text-gray-800'
                               }`}>
                                 {formatAttendanceStatus(record.status)}
                               </span>
@@ -1016,14 +1016,14 @@ const getParentDisplayName = (name) => {
             <div>
               <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Grades & Results</h2>
+                  <h2 className="text-2xl font-bold font-serif text-[#15803d] mb-1">Grades & Results</h2>
                   <p className="text-gray-500 text-sm">View and download your child's approved academic results.</p>
                 </div>
                 {students.length > 0 && (
                   <select
                     value={selectedChild?.id || ''}
                     onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
-                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#15803d] text-gray-700"
                   >
                     {students.map(student => (
                       <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
@@ -1045,7 +1045,7 @@ const getParentDisplayName = (name) => {
 
                           {/* Info */}
                         <div>
-                          <h3 className="font-bold text-[#4a235a] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
+                          <h3 className="font-bold text-[#15803d] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
                           <p className="text-sm text-gray-500">{result.student?.studentId} | {result.gradeLevel}</p>
                           <p className="text-sm text-gray-400">{result.academicYear} | {result.term}</p>
                           <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mt-2">
@@ -1057,7 +1057,7 @@ const getParentDisplayName = (name) => {
                           {isFeeClearedForTerm(result.student?.id) ? (
                             <div className="overflow-x-auto rounded-2xl border border-gray-100">
                               <table className="w-full text-sm">
-                                <thead className="bg-[#4a235a] text-white">
+                                <thead className="bg-[#15803d] text-white">
                                   <tr>
                                     <th className="px-4 py-3 text-left">Subject</th>
                                     <th className="px-4 py-3 text-center">Class(10)</th>
@@ -1080,19 +1080,19 @@ const getParentDisplayName = (name) => {
                                     const grade = getGradeLetter(total)
                                     return (
                                       <tr key={subject} className={subjectIndex % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                                        <td className="px-4 py-3 font-bold text-[#4a235a]">{subject}</td>
+                                        <td className="px-4 py-3 font-bold text-[#15803d]">{subject}</td>
                                         <td className="px-4 py-3 text-center text-gray-600">{classScore}</td>
                                         <td className="px-4 py-3 text-center text-gray-600">{cat1}</td>
                                         <td className="px-4 py-3 text-center text-gray-600">{cat2}</td>
                                         <td className="px-4 py-3 text-center text-gray-600">{wExam.toFixed(2)}</td>
                                         <td className="px-4 py-3 text-center font-bold text-gray-700">{total.toFixed(2)}</td>
-                                        <td className="px-4 py-3 text-center font-bold text-[#4a235a]">{grade}</td>
+                                        <td className="px-4 py-3 text-center font-bold text-[#15803d]">{grade}</td>
                                       </tr>
                                     )
                                   })}
-                                  <tr className="bg-[#4a235a]/10 font-bold">
-                                    <td colSpan="5" className="px-4 py-3 text-[#4a235a]">Grand Total</td>
-                                    <td colSpan="2" className="px-4 py-3 text-center text-[#4a235a]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
+                                  <tr className="bg-[#15803d]/10 font-bold">
+                                    <td colSpan="5" className="px-4 py-3 text-[#15803d]">Grand Total</td>
+                                    <td colSpan="2" className="px-4 py-3 text-center text-[#15803d]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -1114,24 +1114,24 @@ const getParentDisplayName = (name) => {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <p className="text-xs text-gray-500 uppercase">Grand Total</p>
-                              <p className="text-xl font-bold text-[#4a235a]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</p>
+                              <p className="text-xl font-bold text-[#15803d]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</p>
                             </div>
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <p className="text-xs text-gray-500 uppercase">Class</p>
-                              <p className="text-xl font-bold text-[#4a235a]">{result.gradeLevel}</p>
+                              <p className="text-xl font-bold text-[#15803d]">{result.gradeLevel}</p>
                             </div>
                           </div>
                           {isFeeClearedForTerm(result.student?.id) ? (
                             <div className="flex flex-col lg:flex-row gap-3 mt-4">
                               <button
                                 onClick={() => setViewingResult(result)}
-                                className="flex-1 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                                className="flex-1 bg-[#15803d] hover:bg-purple-900 text-white font-bold px-6 py-3 rounded-xl transition-colors text-sm"
                               >
                                 View Full Result
                               </button>
                               <button
                                 onClick={() => handleParentDownloadPDF(result)}
-                                className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
+                                className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold px-6 py-3 rounded-xl transition-colors text-sm"
                               >
                                 Download PDF
                               </button>
@@ -1161,14 +1161,14 @@ const getParentDisplayName = (name) => {
             <div>
               <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Progress Updates</h2>
+                  <h2 className="text-2xl font-bold font-serif text-[#15803d] mb-1">Progress Updates</h2>
                   <p className="text-gray-500 text-sm">Marked assignments and quizzes, plus manual exercise entries recorded by teachers, are shown here.</p>
                 </div>
                 {students.length > 0 && (
                   <select
                     value={selectedChild?.id || ''}
                     onChange={e => setSelectedChild(students.find(student => student.id.toString() === e.target.value))}
-                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4a235a] text-gray-700"
+                    className="bg-white px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#15803d] text-gray-700"
                   >
                     {students.map(student => (
                       <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
@@ -1185,7 +1185,7 @@ const getParentDisplayName = (name) => {
                   </p>
                   <button
                     onClick={() => setActiveMenu('fees')}
-                    className="mt-2 bg-[#4a235a] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                    className="mt-2 bg-[#15803d] hover:bg-purple-900 text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
                   >
                     View Fee Status
                   </button>
@@ -1206,19 +1206,19 @@ const getParentDisplayName = (name) => {
                           onClick={() => setActiveAssessmentSubject(folder.subject)}
                           className="text-left bg-white rounded-2xl p-5 shadow-sm transition-all border"
                           style={{
-                            borderColor: selected ? '#800080' : '#e5e7eb',
+                            borderColor: selected ? '#15803d' : '#e5e7eb',
                             boxShadow: selected ? '0 12px 24px rgba(128,0,128,0.12)' : undefined
                           }}
                         >
                           <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#faf5ff' : '#eff6ff', color: selected ? '#800080' : '#2563eb' }}>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#faf5ff' : '#ecfeff', color: selected ? '#15803d' : '#0c7f9c' }}>
                               <FolderOpen size={26} />
                             </div>
                             <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-gray-50 text-gray-500">
                               {folder.total} marked
                             </span>
                           </div>
-                          <p className="font-bold text-base mb-2 text-[#4a235a]">{folder.subject}</p>
+                          <p className="font-bold text-base mb-2 text-[#15803d]">{folder.subject}</p>
                           <p className="text-xs text-gray-500">
                             {folder.assignments} assignment{folder.assignments === 1 ? '' : 's'} | {folder.quizzes} quiz{folder.quizzes === 1 ? '' : 'zes'}
                           </p>
@@ -1228,7 +1228,7 @@ const getParentDisplayName = (name) => {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-bold text-[#4a235a] mb-4">{selectedAssessmentSubject} Folder</h3>
+                    <h3 className="text-lg font-bold text-[#15803d] mb-4">{selectedAssessmentSubject} Folder</h3>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {visibleMarkedAssessmentRecords.map((assignment, index) => (
                         <div key={`${assignment.itemId}-${assignment.learnerEmail || assignment.learnerName}-${index}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -1237,7 +1237,7 @@ const getParentDisplayName = (name) => {
                               <span className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 bg-green-100 text-green-700">
                                 {assignment.type === 'manual-exercise' ? 'Manual exercise' : assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
                               </span>
-                              <h3 className="text-lg font-bold text-[#4a235a] mb-1">{assignment.title}</h3>
+                              <h3 className="text-lg font-bold text-[#15803d] mb-1">{assignment.title}</h3>
                               <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
                               <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                             </div>
@@ -1247,12 +1247,12 @@ const getParentDisplayName = (name) => {
                             </div>
                           </div>
                           <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                            <p className="text-xs font-bold text-[#4a235a] mb-1">Child</p>
+                            <p className="text-xs font-bold text-[#15803d] mb-1">Child</p>
                             <p className="text-sm text-gray-700">{assignment.learnerName || 'Learner'}</p>
                           </div>
                           {assignment.type === 'manual-exercise' ? (
                             <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                              <p className="text-xs font-bold text-[#4a235a] mb-1">Exercise Details</p>
+                              <p className="text-xs font-bold text-[#15803d] mb-1">Exercise Details</p>
                               <p className="text-sm text-gray-700">Work status: {assignment.workStatus === 'not-done' ? 'Not done' : 'Completed'}</p>
                               <p className="text-sm text-gray-700 mt-1">Score: {assignment.score != null ? `${assignment.score}/${assignment.maxScore}` : 'Not entered'}</p>
                               {assignment.feedback && <p className="text-sm text-gray-700 mt-1">Feedback: {assignment.feedback}</p>}
@@ -1260,11 +1260,11 @@ const getParentDisplayName = (name) => {
                           ) : (
                             <>
                               <div className="bg-blue-50 rounded-xl p-4 mb-4">
-                                <p className="text-xs font-bold text-[#4a235a] mb-3">Questions & Answers</p>
+                                <p className="text-xs font-bold text-[#15803d] mb-3">Questions & Answers</p>
                                 <div className="space-y-3">
                                   {(assignment.questions?.length ? assignment.questions : [{ prompt: assignment.description || assignment.title, selected: assignment.answer }]).map((question, questionIndex) => (
                                     <div key={questionIndex} className="bg-white rounded-lg border border-gray-100 p-3">
-                                      <p className="text-sm font-bold text-[#4a235a]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
+                                      <p className="text-sm font-bold text-[#15803d]">Q{questionIndex + 1}. {question.prompt || 'Question'}</p>
                                       <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">Answer: {question.selected || 'No answer recorded.'}</p>
                                       {question.answer && !['short-answer', 'paragraph'].includes(question.type) && (
                                         <p className="text-xs text-gray-500 mt-1">Expected answer: {question.answer}</p>
@@ -1294,13 +1294,13 @@ const getParentDisplayName = (name) => {
           {activeMenu === 'fees' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#4a235a] mb-1">Fee Status</h2>
+                <h2 className="text-2xl font-bold font-serif text-[#15803d] mb-1">Fee Status</h2>
                 <p className="text-gray-500 text-sm">View your child's fee payment records.</p>
               </div>
 
               {/* Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                <div className="bg-[#4a235a] text-white rounded-2xl p-6 shadow-md">
+                <div className="bg-[#15803d] text-white rounded-2xl p-6 shadow-md">
                   <p className="text-purple-200 text-sm mb-1">Total Paid</p>
                   <p className="text-3xl font-bold">GH₵ {contextualFeePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p>
                 </div>
@@ -1312,7 +1312,7 @@ const getParentDisplayName = (name) => {
                     return Math.max(acc, calculateCumulativeBalance(p, contextualFeePayments))
                   }, 0).toFixed(2)}</p>
                 </div>
-                <div className="bg-[#0f6e56] text-white rounded-2xl p-6 shadow-md">
+                <div className="bg-[#128038] text-white rounded-2xl p-6 shadow-md">
                   <p className="text-green-200 text-sm mb-1">Months Paid</p>
                   <p className="text-3xl font-bold">{contextualFeePayments.filter(p => p.status === 'paid').length}</p>
                 </div>
@@ -1326,7 +1326,7 @@ const getParentDisplayName = (name) => {
               ) : (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                   <table className="w-full text-sm">
-                    <thead className="bg-[#4a235a] text-white">
+                    <thead className="bg-[#15803d] text-white">
                       <tr>
                         <th className="px-6 py-4 text-left">Student</th>
                         <th className="px-6 py-4 text-left">Month</th>
@@ -1342,7 +1342,7 @@ const getParentDisplayName = (name) => {
                     <tbody>
                       {contextualFeePayments.map((payment, index) => (
                         <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                          <td className="px-6 py-4 font-medium text-[#4a235a]">{payment.student?.firstName} {payment.student?.lastName}</td>
+                          <td className="px-6 py-4 font-medium text-[#15803d]">{payment.student?.firstName} {payment.student?.lastName}</td>
                           <td className="px-6 py-4 text-gray-600">{payment.month}</td>
                           <td className="px-6 py-4 text-gray-600">{payment.year}</td>
                           <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
@@ -1351,7 +1351,7 @@ const getParentDisplayName = (name) => {
                           <td className="px-6 py-4">
                             <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                               payment.status === 'paid' ? 'bg-green-100 text-green-700' :
-                              payment.status === 'partial' ? 'bg-blue-100 text-cyan-700' :
+                              payment.status === 'partial' ? 'bg-blue-100 text-gray-800' :
                               'bg-red-100 text-red-700'
                             }`}>
                               {payment.status}
@@ -1370,7 +1370,7 @@ const getParentDisplayName = (name) => {
                             {payment.status !== 'paid' ? (
                               <button
                                 onClick={() => navigate('/parent/pay-fees', { state: { alert: payment } })}
-                                className="bg-[#0f6e56] hover:bg-[#085041] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+                                className="bg-[#128038] hover:bg-[#15803d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                               >
                                 Pay Now
                               </button>
@@ -1416,19 +1416,19 @@ const getParentDisplayName = (name) => {
               <div className="bg-blue-50 rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-gray-500">Student Name</p>
-                  <p className="font-bold text-cyan-700">{viewingResult.student?.firstName} {viewingResult.student?.lastName}</p>
+                  <p className="font-bold text-gray-800">{viewingResult.student?.firstName} {viewingResult.student?.lastName}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Student ID</p>
-                  <p className="font-bold text-cyan-700">{viewingResult.student?.studentId}</p>
+                  <p className="font-bold text-gray-800">{viewingResult.student?.studentId}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Class</p>
-                  <p className="font-bold text-cyan-700">{viewingResult.gradeLevel}</p>
+                  <p className="font-bold text-gray-800">{viewingResult.gradeLevel}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Gender</p>
-                  <p className="font-bold text-cyan-700">{viewingResult.student?.gender}</p>
+                  <p className="font-bold text-gray-800">{viewingResult.student?.gender}</p>
                 </div>
               </div>
 
@@ -1474,7 +1474,7 @@ const getParentDisplayName = (name) => {
                       }
                       return (
                         <tr key={subject} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                          <td className="px-4 py-3 font-bold text-cyan-700">{subject}</td>
+                          <td className="px-4 py-3 font-bold text-gray-800">{subject}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{classScore}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{cat1}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{cat2}</td>
@@ -1486,8 +1486,8 @@ const getParentDisplayName = (name) => {
                     })}
                     {/* Grand Total Row */}
                     <tr className="bg-blue-500">
-                      <td colSpan="5" className="px-4 py-3 font-bold text-cyan-700">Grand Total</td>
-                      <td colSpan="2" className="px-4 py-3 text-center font-bold text-cyan-700">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
+                      <td colSpan="5" className="px-4 py-3 font-bold text-gray-800">Grand Total</td>
+                      <td colSpan="2" className="px-4 py-3 text-center font-bold text-gray-800">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1495,14 +1495,14 @@ const getParentDisplayName = (name) => {
 
               <div className="bg-blue-50 rounded-xl p-4 mb-6">
                 <p className="text-xs text-gray-500 uppercase mb-1">Attendance</p>
-                <p className="text-sm font-bold text-[#0f6e56]">
+                <p className="text-sm font-bold text-[#128038]">
                   Total: {contextualAttendanceRecords.length}  Present: {contextualAttendanceSummary.present}  Absent: {contextualAttendanceSummary.absent_permission + contextualAttendanceSummary.absent_without_permission}  Late: {contextualAttendanceSummary.late}  Rate: {contextualAttendancePercentage}%
                 </p>
               </div>
 
               {/* Remarks */}
               <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <p className="text-sm font-bold text-cyan-700 mb-1">Class Teacher's Remarks</p>
+                <p className="text-sm font-bold text-gray-800 mb-1">Class Teacher's Remarks</p>
                 <p className="text-sm text-gray-600 italic">{viewingResult.remarks || 'No remarks provided.'}</p>
               </div>
 
@@ -1510,7 +1510,7 @@ const getParentDisplayName = (name) => {
               <div className="flex gap-3">
                 <button
                   onClick={() => handleParentDownloadPDF(viewingResult)}
-                  className="flex-1 bg-blue-500 hover:bg-blue-300 text-cyan-700 font-bold py-3 rounded-xl transition-colors"
+                  className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-3 rounded-xl transition-colors"
                 >
                   Download PDF
                 </button>
@@ -1530,7 +1530,7 @@ const getParentDisplayName = (name) => {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#800080"
+        accentColor="#15803d"
       />
     )}
 

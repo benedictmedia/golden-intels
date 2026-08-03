@@ -87,7 +87,7 @@ export default function Footer() {
               <li key={link.label}>
                 <Link
                   to={link.path}
-                  className="text-slate-300 hover:text-[#F4B400] transition-colors duration-300"
+                  className="text-slate-300 hover:text-[#128038] transition-colors duration-300"
                 >
                   {link.label}
                 </Link>
@@ -110,7 +110,7 @@ export default function Footer() {
               <li key={link.label}>
                 <Link
                   to={link.path}
-                  className="text-slate-300 hover:text-[#F4B400] transition-colors duration-300"
+                  className="text-slate-300 hover:text-[#128038] transition-colors duration-300"
                 >
                   {link.label}
                 </Link>
@@ -121,32 +121,32 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h4 className="font-bold text-[#F4B400] mb-4">Contact Us</h4>
+          <h4 className="font-bold text-[#128038] mb-4">Contact Us</h4>
           <ul className="space-y-4 text-sm">
             <li className="flex items-start gap-3">
-  <span className="text-xs text-[#2563EB] mt-1 block">Get Directions →</span>
-  <MapPin size={16} className="text-[#2563EB] mt-0.5 shrink-0" />
+  <span className="text-xs text-[#0c7f9c] mt-1 block">Get Directions →</span>
+  <MapPin size={16} className="text-[#0c7f9c] mt-0.5 shrink-0" />
   <a
     href="https://www.google.com/maps/search/?api=1&query=JF8G+32Q%2C+Ho%2C+Volta+Region%2C+Ghana"
     target="_blank"
     rel="noopener noreferrer"
-    className="text-slate-300 hover:text-[#F4B400] hover:underline transition-colors duration-300 flex items-start gap-1 group"
+    className="text-slate-300 hover:text-[#128038] hover:underline transition-colors duration-300 flex items-start gap-1 group"
   >
     Golden-Intels International School, <br />
     New Housing, directly opposite the Voltic Depot, <br />
     Ho-Volta Region, Ghana <br />
-    <span className="text-xs text-[#2563EB] group-hover:underline">(JF8G+32Q)</span>
+    <span className="text-xs text-[#0c7f9c] group-hover:underline">(JF8G+32Q)</span>
     <ExternalLink size={14} className="mt-0.5 opacity-70 group-hover:opacity-100" />
   </a>
 </li>
 
             <li className="flex items-center gap-3">
-              <Phone size={16} className="text-[#2563EB] shrink-0" />
+              <Phone size={16} className="text-[#0c7f9c] shrink-0" />
               <span className="text-slate-300">+233 59 433 0816</span>
             </li>
 
             <li className="flex items-center gap-3">
-              <Mail size={16} className="text-[#2563EB] shrink-0" />
+              <Mail size={16} className="text-[#0c7f9c] shrink-0" />
               <span className="text-slate-300">info@goldenintels.edu.gh</span>
             </li>
           </ul>

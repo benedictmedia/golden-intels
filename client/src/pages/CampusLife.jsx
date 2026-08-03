@@ -141,12 +141,12 @@ export default function CampusLife() {
       <PageHero badge="Activities & Clubs" title="Our Activities & Clubs" subtitle="A vibrant community where students grow, explore, and thrive beyond the classroom." image={campusLifeImg}/>
 
       {/* Beyond Academics */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Beyond Academics
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-6">
@@ -182,7 +182,7 @@ export default function CampusLife() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Activities
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
@@ -205,8 +205,8 @@ export default function CampusLife() {
                   className="w-full h-48 object-cover" loading="lazy" decoding="async" />
 
                 {/* Content */}
-                <div className="bg-[#8a2be2] p-6 h-full">
-                  <span className="inline-block bg-yellow-400 text-slate-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                <div className="bg-[#0c7f9c] p-6 h-full">
+                  <span className="inline-block bg-green-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     {activity.category}
                   </span>
                   <p className="text-blue-100 text-sm leading-relaxed mb-4">
@@ -215,14 +215,14 @@ export default function CampusLife() {
                   <ul className="space-y-2 mb-6">
                     {activity.items.map((item, i) => (
                       <li key={i} className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-300"></div>
+                        <div className="w-2 h-2 rounded-full bg-green-400"></div>
                         <span className="text-blue-100 text-sm">{item}</span>
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={() => setSelected(activity)}
-                    className="w-full bg-white hover:bg-yellow-100 text-[#8a2be2] font-bold py-2 rounded-lg text-sm transition-colors"
+                    className="w-full bg-white hover:bg-green-100 text-[#0c7f9c] font-bold py-2 rounded-lg text-sm transition-colors"
                   >
                     Learn More
                   </button>
@@ -246,7 +246,7 @@ export default function CampusLife() {
               placeholder="Search activities and clubs..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-lg"
+              className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 text-lg"
             />
           </div>
 
@@ -258,8 +258,8 @@ export default function CampusLife() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-5 py-2 rounded-full text-sm font-bold transition-colors ${
                   activeCategory === cat
-                    ? 'bg-[#8a2be2] text-white'
-                    : 'bg-white text-slate-700 border border-[#8a2be2] hover:bg-[#8a2be2] hover:text-white'
+                    ? 'bg-[#0c7f9c] text-white'
+                    : 'bg-white text-slate-700 border border-[#0c7f9c] hover:bg-[#0c7f9c] hover:text-white'
                 }`}
               >
                 {cat}
@@ -278,8 +278,8 @@ export default function CampusLife() {
             }).map((club, index) => (
               <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                 <img src={club.image} alt={club.name} className="w-full h-48 object-cover" loading="lazy" decoding="async" />
-                <div className="bg-[#8a2be2] p-6">
-                  <span className="inline-block bg-yellow-400 text-slate-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
+                <div className="bg-[#0c7f9c] p-6">
+                  <span className="inline-block bg-green-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
                     {club.category}
                   </span>
                   <h3 className="text-xl font-bold text-white mb-2">{club.name}</h3>
@@ -290,7 +290,7 @@ export default function CampusLife() {
                   </div>
                   <button 
                     onClick={() => setSelectedClub(club)} 
-                    className="w-full bg-white hover:bg-yellow-100 text-[#8a2be2] font-bold py-2 rounded-lg text-sm transition-colors"
+                    className="w-full bg-white hover:bg-green-100 text-[#0c7f9c] font-bold py-2 rounded-lg text-sm transition-colors"
                   >
                     Learn More
                   </button>
@@ -313,24 +313,24 @@ export default function CampusLife() {
                 className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button
                 onClick={() => setSelected(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#8a2be2]/10 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#0c7f9c]/10 transition-colors"
               >
-                <X size={20} className="text-[#8a2be2]" />
+                <X size={20} className="text-[#0c7f9c]" />
               </button>
             </div>
 
             <div className="p-8">
-              <span className="inline-block bg-[#8a2be2] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-[#0c7f9c] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selected.category}
               </span>
               <h2 className="text-2xl font-bold font-serif text-slate-800 mb-4">{selected.category} Activities</h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">{selected.fullDescription}</p>
 
-              <h4 className="font-bold text-[#8a2be2] mb-3">What We Offer:</h4>
+              <h4 className="font-bold text-[#0c7f9c] mb-3">What We Offer:</h4>
               <ul className="space-y-2 mb-8">
                 {selected.items.map((item, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
                     <span className="text-gray-600">{item}</span>
                   </li>
                 ))}
@@ -338,7 +338,7 @@ export default function CampusLife() {
 
               <button
                 onClick={() => setSelected(null)}
-                className="w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -356,27 +356,27 @@ export default function CampusLife() {
               <img src={selectedClub.image} alt={selectedClub.name} className="w-full h-56 object-cover rounded-t-2xl" loading="lazy" decoding="async" />
               <button 
                 onClick={() => setSelectedClub(null)} 
-                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#8a2be2]/10 transition-colors"
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-[#0c7f9c]/10 transition-colors"
               >
-                <X size={20} className="text-[#8a2be2]" />
+                <X size={20} className="text-[#0c7f9c]" />
               </button>
             </div>
 
             <div className="p-8">
-              <span className="inline-block bg-[#8a2be2] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
+              <span className="inline-block bg-[#0c7f9c] text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
                 {selectedClub.category}
               </span>
               <h2 className="text-2xl font-bold font-serif text-slate-800 mb-4">{selectedClub.name}</h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">{selectedClub.fullDescription}</p>
 
               <div className="bg-blue-50 rounded-xl p-4 mb-8 space-y-2">
-                <p className="text-gray-700"><span className="font-bold text-[#8a2be2]">Meets: </span>{selectedClub.meets}</p>
-                <p className="text-gray-700"><span className="font-bold text-[#8a2be2]">Open to: </span>{selectedClub.openTo}</p>
+                <p className="text-gray-700"><span className="font-bold text-[#0c7f9c]">Meets: </span>{selectedClub.meets}</p>
+                <p className="text-gray-700"><span className="font-bold text-[#0c7f9c]">Open to: </span>{selectedClub.openTo}</p>
               </div>
 
               <button 
                 onClick={() => setSelectedClub(null)} 
-                className="w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 Close
               </button>
@@ -391,7 +391,7 @@ export default function CampusLife() {
 
           {/* Heading */}
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Highlights
             </span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">
@@ -402,8 +402,8 @@ export default function CampusLife() {
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-            <div className="bg-[#8a2be2] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 shadow-md">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-slate-900 font-bold text-lg">🎉</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Annual Events</h4>
@@ -422,8 +422,8 @@ export default function CampusLife() {
               </p>
             </div>
 
-            <div className="bg-[#8a2be2] text-white rounded-2xl p-8 shadow-md">
-              <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-[#0c7f9c] text-white rounded-2xl p-8 shadow-md">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-4">
                 <span className="text-slate-900 font-bold text-lg">🤝</span>
               </div>
               <h4 className="text-xl font-bold mb-3">Community Service</h4>

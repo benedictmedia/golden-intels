@@ -50,7 +50,7 @@ function CopyRow({ label, value }) {
       <button
         type="button"
         onClick={handleCopy}
-        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-[#0f6e56] hover:text-[#0f6e56] transition-colors text-gray-600"
+        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-[#128038] hover:text-[#128038] transition-colors text-gray-600"
       >
         {copied ? <Check size={14} /> : <Copy size={14} />}
         {copied ? 'Copied' : 'Copy'}
@@ -102,7 +102,7 @@ export default function FeePayment() {
       <div className="w-full max-w-lg">
         <button
           onClick={() => navigate('/parent')}
-          className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#0f6e56] mb-6 transition-colors"
+          className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#128038] mb-6 transition-colors"
         >
           <ArrowLeft size={18} />
           Back to Dashboard
@@ -112,7 +112,7 @@ export default function FeePayment() {
           <div className="flex items-center gap-3 mb-6">
             <BrandLogo className="w-10 h-10 shadow-sm" />
             <div>
-              <h1 className="text-xl font-bold text-[#0f6e56] font-serif">Complete Fee Payment</h1>
+              <h1 className="text-xl font-bold text-[#128038] font-serif">Complete Fee Payment</h1>
               <p className="text-xs text-gray-500">Golden-Intels International School</p>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function FeePayment() {
               </p>
               <button
                 onClick={() => navigate('/parent')}
-                className="bg-[#0f6e56] hover:bg-[#085041] text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
+                className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-6 py-2.5 rounded-xl transition-colors text-sm"
               >
                 Return to Dashboard
               </button>
@@ -148,7 +148,7 @@ export default function FeePayment() {
 
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Smartphone size={18} className="text-[#0f6e56]" />
+                  <Smartphone size={18} className="text-[#128038]" />
                   <h2 className="font-bold text-gray-800">Mobile Money</h2>
                 </div>
                 <div className="space-y-2">
@@ -166,7 +166,7 @@ export default function FeePayment() {
 
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
-                  <Landmark size={18} className="text-[#0f6e56]" />
+                  <Landmark size={18} className="text-[#128038]" />
                   <h2 className="font-bold text-gray-800">Bank Transfer</h2>
                 </div>
                 <div className="border border-gray-100 rounded-xl p-3 space-y-2">
@@ -186,7 +186,7 @@ export default function FeePayment() {
               <button
                 onClick={handleConfirmPayment}
                 disabled={confirming}
-                className="w-full bg-[#0f6e56] hover:bg-[#085041] disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors"
+                className="w-full bg-[#128038] hover:bg-[#15803d] disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors"
               >
                 {confirming ? 'Confirming...' : "I've Completed This Payment"}
               </button>

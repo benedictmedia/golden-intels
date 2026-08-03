@@ -30,10 +30,10 @@ export default function Contact() {
   // ... add success/error UI before the button:
               {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
   return (
-    <main className="bg-gradient-to-br from-blue-50 via-white to-yellow-50 text-slate-900">
+    <main className="bg-gradient-to-br from-blue-50 via-white to-green-50 text-slate-900">
       <section className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex rounded-full bg-[#8a2be2] px-4 py-2 text-sm font-semibold text-white">
+          <p className="inline-flex rounded-full bg-[#0c7f9c] px-4 py-2 text-sm font-semibold text-white">
             Reach out to Golden-Intels
           </p>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
@@ -52,15 +52,15 @@ export default function Contact() {
           <div className="space-y-6 md:col-span-2 lg:col-span-1">
             <div className="rounded-[2rem] bg-white p-8 shadow-xl border border-slate-100">
               <div className="flex items-start gap-4">
-                <div className="rounded-3xl bg-[#8a2be2] p-4 text-white shadow-md">
+                <div className="rounded-3xl bg-[#0c7f9c] p-4 text-white shadow-md">
                   <Phone size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Phone</h2>
                   <p className="mt-3 text-slate-600">Call our school office for quick support and admissions help.</p>
                   <div className="mt-4 space-y-2 text-sm text-slate-700">
-                    <p><strong>Main:</strong> <a href="tel:+233 59 433 0816" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 0816</a></p>
-                    <p><strong>Admissions:</strong> <a href="tel:+233 59 433 0816" className="text-[#8a2be2] hover:text-violet-700">+233 59 433 0816</a></p>
+                    <p><strong>Main:</strong> <a href="tel:+233 59 433 0816" className="text-[#0c7f9c] hover:text-violet-700">+233 59 433 0816</a></p>
+                    <p><strong>Admissions:</strong> <a href="tel:+233 59 433 0816" className="text-[#0c7f9c] hover:text-violet-700">+233 59 433 0816</a></p>
                   </div>
                 </div>
               </div>
@@ -81,13 +81,13 @@ export default function Contact() {
 
             <div className="rounded-[2rem] bg-white p-8 shadow-xl border border-slate-100">
               <div className="flex items-start gap-4">
-                <div className="rounded-3xl bg-[#8a2be2] p-4 text-white shadow-md">
+                <div className="rounded-3xl bg-[#0c7f9c] p-4 text-white shadow-md">
                   <Mail size={24} />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Email</h2>
                   <p className="mt-3 text-slate-600">Send documents, questions, or admissions requests to our official inbox.</p>
-                  <p className="mt-4 text-slate-700"><a href="mailto:info@goldenintels.edu.gh" className="text-[#8a2be2] hover:text-violet-700">info@goldenintels.edu.gh</a></p>
+                  <p className="mt-4 text-slate-700"><a href="mailto:info@goldenintels.edu.gh" className="text-[#0c7f9c] hover:text-violet-700">info@goldenintels.edu.gh</a></p>
                 </div>
               </div>
             </div>
@@ -105,14 +105,14 @@ export default function Contact() {
         href="https://www.google.com/maps/search/?api=1&query=JF8G+32Q%2C+Ho%2C+Volta+Region%2C+Ghana"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 block text-slate-700 hover:text-[#8a2be2] transition-colors group"
+        className="mt-4 block text-slate-700 hover:text-[#0c7f9c] transition-colors group"
       >
         <p>
           Golden-Intels International School<br />
           New Housing, directly opposite the Voltic Depot<br />
           Ho-Volta Region, Ghana
         </p>
-        <p className="mt-2 text-sm flex items-center gap-1.5 text-[#8a2be2] group-hover:underline">
+        <p className="mt-2 text-sm flex items-center gap-1.5 text-[#0c7f9c] group-hover:underline">
           Digital Address: JF8G+32Q
           <ExternalLink size={16} className="opacity-70 group-hover:opacity-100" />
         </p>
@@ -124,7 +124,7 @@ export default function Contact() {
 
           {/* Contact Form */}
           <form onSubmit={handleSubmit} className="rounded-[2rem] bg-slate-900 p-6 sm:p-8 shadow-2xl text-white md:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-r from-[#8a2be2] to-violet-600 p-5 shadow-lg">
+            <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-r from-[#0c7f9c] to-violet-600 p-5 shadow-lg">
               <div className="rounded-2xl bg-white/10 p-3">
                 <MessageCircle size={24} />
               </div>
@@ -145,7 +145,7 @@ export default function Contact() {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#8a2be2] focus:ring-2 focus:ring-[#8a2be2]/30"
+                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#0c7f9c] focus:ring-2 focus:ring-[#0c7f9c]/30"
                   placeholder="Your full name"
                 />
               </label>
@@ -158,7 +158,7 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#8a2be2] focus:ring-2 focus:ring-[#8a2be2]/30"
+                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#0c7f9c] focus:ring-2 focus:ring-[#0c7f9c]/30"
                   placeholder="you@example.com"
                 />
               </label>
@@ -182,7 +182,7 @@ export default function Contact() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/30"
+                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/30"
                   placeholder="Reason for your message"
                 />
               </label>
@@ -195,7 +195,7 @@ export default function Contact() {
                   onChange={handleChange}
                   required
                   rows="6"
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#8a2be2] focus:ring-2 focus:ring-[#8a2be2]/30"
+                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#0c7f9c] focus:ring-2 focus:ring-[#0c7f9c]/30"
                   placeholder="How can we help you today?"
                 />
               </label>
@@ -212,7 +212,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-[#8a2be2] via-violet-600 to-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-[#0c7f9c] via-violet-600 to-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:opacity-50"
         >
           {loading ? 'Sending...' : 'Send Message'}
         </button>

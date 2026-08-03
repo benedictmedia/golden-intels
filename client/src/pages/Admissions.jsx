@@ -123,13 +123,13 @@ export default function Admissions() {
     }
   }
 
-  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-sm text-base"
-  const labelClass = "block text-sm font-bold text-[#8a2be2] mb-2"
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 text-sm text-base"
+  const labelClass = "block text-sm font-bold text-[#0c7f9c] mb-2"
   const sectionClass = "bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-6"
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-yellow-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center px-4">
         <div className="bg-white rounded-2xl p-12 shadow-xl max-w-lg w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} className="text-green-600" />
@@ -138,12 +138,12 @@ export default function Admissions() {
           <p className="text-gray-600 mb-2">Thank you for applying to Golden-Intels International School.</p>
           <p className="text-gray-600 mb-6">We will review your application and contact you within <strong>1 week</strong> to schedule an assessment.</p>
           <div className="bg-blue-50 rounded-xl p-4 mb-8">
-            <p className="text-sm text-[#8a2be2] font-bold">What happens next?</p>
+            <p className="text-sm text-[#0c7f9c] font-bold">What happens next?</p>
             <p className="text-sm text-gray-600 mt-1">Our admissions team will reach out to you via email or phone to schedule your child's assessment and campus visit.</p>
           </div>
           <button
             onClick={() => setSubmitted(false)}
-            className="bg-[#8a2be2] hover:bg-violet-700 text-white font-bold px-8 py-3 rounded-xl transition-colors"
+            className="bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold px-8 py-3 rounded-xl transition-colors"
           >
             Submit Another Application
           </button>
@@ -157,9 +157,9 @@ export default function Admissions() {
       <div>
         <PageHero badge="Admissions" title="Admissions" subtitle="Begin your journey to excellence. Join our community of learners." />
 
-        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+        <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50">
           <div className="max-w-4xl mx-auto px-4">
-            <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-md mb-8">
+            <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-md mb-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <Lock size={20} className="text-white" />
@@ -195,29 +195,29 @@ export default function Admissions() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-[#8a2be2] mb-2">Serial Number</label>
+                  <label className="block text-sm font-bold text-[#0c7f9c] mb-2">Serial Number</label>
                   <input
                     type="text"
                     value={serialNumber}
                     onChange={e => setSerialNumber(e.target.value)}
                     placeholder="e.g. GI-2026-12345"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-base"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 text-base"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#8a2be2] mb-2">PIN</label>
+                  <label className="block text-sm font-bold text-[#0c7f9c] mb-2">PIN</label>
                   <input
                     type="password"
                     value={pin}
                     onChange={e => setPin(e.target.value)}
                     placeholder="Enter your 4-digit PIN"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#8a2be2] text-gray-700 text-base"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c7f9c] text-gray-700 text-base"
                   />
                 </div>
                 <button
                   onClick={handleTokenLogin}
                   disabled={loginLoading}
-                  className="sm:col-span-2 w-full bg-[#8a2be2] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+                  className="sm:col-span-2 w-full bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {loginLoading ? 'Verifying...' : 'Access Admission Form'}
                 </button>
@@ -225,7 +225,7 @@ export default function Admissions() {
 
               <div className="mt-6 bg-blue-50 rounded-xl p-4">
                 <p className="text-sm text-gray-500">
-                  <strong className="text-[#8a2be2]">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
+                  <strong className="text-[#0c7f9c]">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
                 </p>
                 <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.edu.gh</p>
               </div>
@@ -239,8 +239,8 @@ export default function Admissions() {
   return (
     <div>
       {/* Hero Banner */}
-      <section className="bg-[#8a2be2] text-white py-20 text-center">
-        <span className="inline-block bg-yellow-400 text-slate-900 text-sm font-bold px-4 py-1 rounded-full mb-4">
+      <section className="bg-[#0c7f9c] text-white py-20 text-center">
+        <span className="inline-block bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full mb-4">
           Admissions
         </span>
         <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4">Admissions</h1>
@@ -250,20 +250,20 @@ export default function Admissions() {
       </section>
 
       {/* Admission Process */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">Process</span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">Admission Process</h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">Our straightforward admission process ensures a smooth experience for families.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
               <div key={index} className="bg-white border border-gray-100 rounded-2xl p-8 text-center shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 bg-[#8a2be2] text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-14 h-14 bg-[#0c7f9c] text-white rounded-full flex items-center justify-center mx-auto mb-4">
                   {step.icon}
                 </div>
-                <span className="text-[#8a2be2] text-sm font-bold">{step.step}</span>
+                <span className="text-[#0c7f9c] text-sm font-bold">{step.step}</span>
                 <h4 className="text-xl font-bold mt-1 mb-3 text-slate-800">{step.title}</h4>
                 <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
               </div>
@@ -275,13 +275,13 @@ export default function Admissions() {
       {/* Requirements and Dates */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-md">
+          <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-md">
             <h3 className="text-2xl font-bold font-serif mb-6">Admission Requirements</h3>
-            <h4 className="text-yellow-300 font-bold mb-4">Required Documents</h4>
+            <h4 className="text-green-400 font-bold mb-4">Required Documents</h4>
             <ul className="space-y-3">
               {requirements.map((req, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <CheckCircle size={18} className="text-yellow-300 mt-0.5 shrink-0" />
+                  <CheckCircle size={18} className="text-green-400 mt-0.5 shrink-0" />
                   <span className="text-blue-100 text-sm">{req}</span>
                 </li>
               ))}
@@ -292,15 +292,15 @@ export default function Admissions() {
             <h3 className="text-2xl font-bold font-serif mb-6">Important Dates</h3>
             <div className="space-y-6">
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-yellow-300 font-bold mb-1">Application Deadline</h4>
+                <h4 className="text-green-400 font-bold mb-1">Application Deadline</h4>
                 <p className="text-green-100 text-sm">Rolling admissions — Applications accepted first and second term</p>
               </div>
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-yellow-300 font-bold mb-1">Assessment Period</h4>
+                <h4 className="text-green-400 font-bold mb-1">Assessment Period</h4>
                 <p className="text-green-100 text-sm">Scheduled within 1 week of application submission</p>
               </div>
               <div className="bg-white/10 rounded-xl p-4">
-                <h4 className="text-yellow-300 font-bold mb-1">Enrolment Confirmation</h4>
+                <h4 className="text-green-400 font-bold mb-1">Enrolment Confirmation</h4>
                 <p className="text-green-100 text-sm">Within 1 week of assessment completion</p>
               </div>
             </div>
@@ -309,10 +309,10 @@ export default function Admissions() {
       </section>
 
       {/* Admission Form */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-green-50">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-10">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">Apply Now</span>
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-800 mb-4">Admission Form</h2>
             <p className="text-gray-600">Complete all sections below to begin your admission process.</p>
           </div>
@@ -401,7 +401,7 @@ export default function Admissions() {
                 <label className={labelClass}>Passport-Sized Picture</label>
                 <p className="text-xs text-gray-400 mb-2">Recommended: JPG or PNG format, 4x6 cm (passport size)</p>
                 <div className="flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-xl bg-blue-100 overflow-hidden border-2 border-[#8a2be2] flex items-center justify-center">
+                  <div className="w-24 h-24 rounded-xl bg-blue-100 overflow-hidden border-2 border-[#0c7f9c] flex items-center justify-center">
                     {photoPreview ? (
                       <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
@@ -665,7 +665,7 @@ export default function Admissions() {
 
             <div className="bg-blue-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-[#8a2be2] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
+                <div className="w-8 h-8 bg-[#0c7f9c] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
                 <div className="flex-1">
                   <h4 className="font-bold text-slate-800 mb-1">Download Admission Booklet</h4>
                   <p className="text-sm text-gray-600 mb-3">
@@ -673,7 +673,7 @@ export default function Admissions() {
                   </p>
                   <button
                     onClick={() => generateAdmissionBooklet(formData, photo, nhisFront, nhisBack, ghanaFront, ghanaBack)}
-                    className="flex items-center gap-2 bg-[#8a2be2] hover:bg-violet-700 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
+                    className="flex items-center gap-2 bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors"
                   >
                     <Download size={16} />
                     Download Admission Booklet (.docx)
@@ -684,7 +684,7 @@ export default function Admissions() {
 
             <div className="bg-blue-50 rounded-xl p-5 mb-4">
               <div className="flex items-start gap-4">
-                <div className="w-8 h-8 bg-[#8a2be2] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">2</div>
+                <div className="w-8 h-8 bg-[#0c7f9c] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">2</div>
                 <div>
                   <h4 className="font-bold text-slate-800 mb-1">Read, Sign and Save</h4>
                   <p className="text-sm text-gray-600">
@@ -728,7 +728,7 @@ export default function Admissions() {
               </div>
             </div>
 
-            <div className="bg-[#8a2be2] rounded-xl p-5">
+            <div className="bg-[#0c7f9c] rounded-xl p-5">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -748,7 +748,7 @@ export default function Admissions() {
             <button
               onClick={handleSubmit}
               disabled={!consentGiven || !signedBooklet || submitLoading}
-              className="bg-[#8a2be2] hover:bg-violet-700 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#0c7f9c] hover:bg-violet-700 text-white font-bold px-16 py-4 rounded-xl text-lg transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitLoading ? 'Submitting Application...' : 'Submit Application'}
             </button>

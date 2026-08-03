@@ -11,8 +11,8 @@ const getInitials = (name = '') =>
   name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
 
 const AVATAR_COLORS = [
-  '#1a3c6e', '#0f6e56', '#4a235a', '#b45309', '#0369a1',
-  '#065f46', '#7c3aed', '#be123c', '#0e7490', '#166534'
+  '#0e7490', '#128038', '#15803d', '#b45309', '#0369a1',
+  '#065f46', '#128038', '#be123c', '#0e7490', '#166534'
 ]
 const avatarColor = (name = '') =>
   AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
@@ -208,9 +208,9 @@ export default function AdminMessages() {
       <div className="w-80 flex flex-col bg-white border-r border-gray-200 flex-shrink-0">
 
         {/* Header */}
-        <div className="bg-[#1a3c6e] text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0">
+        <div className="bg-[#0e7490] text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#d4a017] flex items-center justify-center font-bold text-[#1a3c6e] text-sm select-none">
+            <div className="w-9 h-9 rounded-full bg-[#128038] flex items-center justify-center font-bold text-[#0e7490] text-sm select-none">
               {user?.name?.charAt(0)}
             </div>
             <div>
@@ -280,7 +280,7 @@ export default function AdminMessages() {
                     <div className="flex items-center justify-between gap-1 mt-0.5">
                       <p className="text-xs text-gray-500 truncate">{preview}</p>
                       {conv.unreadCount > 0 && (
-                        <span className="bg-[#1a3c6e] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 min-w-[18px] text-center">
+                        <span className="bg-[#0e7490] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 min-w-[18px] text-center">
                           {conv.unreadCount}
                         </span>
                       )}
@@ -298,19 +298,19 @@ export default function AdminMessages() {
         {!activeConv ? (
           /* Empty state */
           <div className="flex-1 flex flex-col items-center justify-center bg-[#f0f2f5]">
-            <div className="w-20 h-20 rounded-full bg-[#1a3c6e]/10 flex items-center justify-center mb-4">
-              <MessageCircle size={36} className="text-[#1a3c6e]/30" />
+            <div className="w-20 h-20 rounded-full bg-[#0e7490]/10 flex items-center justify-center mb-4">
+              <MessageCircle size={36} className="text-[#0e7490]/30" />
             </div>
             <p className="text-lg font-semibold text-gray-500">Golden-Intels Messages</p>
             <p className="text-sm text-gray-400 mt-1">Select a conversation to start chatting</p>
             {totalUnread > 0 && (
-              <p className="text-xs text-[#1a3c6e] mt-2 font-semibold">{totalUnread} unread message{totalUnread > 1 ? 's' : ''}</p>
+              <p className="text-xs text-[#0e7490] mt-2 font-semibold">{totalUnread} unread message{totalUnread > 1 ? 's' : ''}</p>
             )}
           </div>
         ) : (
           <>
             {/* ── Chat header ── */}
-            <div className="bg-[#1a3c6e] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0 shadow-md">
+            <div className="bg-[#0e7490] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0 shadow-md">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm select-none flex-shrink-0"
                 style={{ backgroundColor: avatarColor(activeConv.parentName) }}>
                 {getInitials(activeConv.parentName)}
@@ -345,7 +345,7 @@ export default function AdminMessages() {
                   <div key={day}>
                     {/* Day divider */}
                     <div className="flex justify-center my-3">
-                      <span className="bg-[#e1f3fb] text-[#1a3c6e] text-xs font-semibold px-3 py-1 rounded-full shadow-sm select-none">
+                      <span className="bg-[#e1f3fb] text-[#0e7490] text-xs font-semibold px-3 py-1 rounded-full shadow-sm select-none">
                         {day}
                       </span>
                     </div>
@@ -373,7 +373,7 @@ export default function AdminMessages() {
                               <span className="text-[10px] text-gray-400 leading-none">{formatTime(msg.createdAt)}</span>
                               {isMine && (
                                 <CheckCheck size={13}
-                                    className={msg.read ? 'text-[#1a3c6e]' : 'text-gray-400'}
+                                    className={msg.read ? 'text-[#0e7490]' : 'text-gray-400'}
                                     strokeWidth={2.5}
                                 />
                         )}
@@ -411,7 +411,7 @@ export default function AdminMessages() {
               <button
                 onClick={sendMessage}
                 disabled={!input.trim() || sending}
-                className="w-11 h-11 rounded-full bg-[#1a3c6e] hover:bg-[#2a5298] active:scale-95 text-white flex items-center justify-center shadow-md transition-all disabled:opacity-40 flex-shrink-0"
+                className="w-11 h-11 rounded-full bg-[#0e7490] hover:bg-[#0c7f9c] active:scale-95 text-white flex items-center justify-center shadow-md transition-all disabled:opacity-40 flex-shrink-0"
               >
                 <Send size={17} strokeWidth={2.5} />
               </button>

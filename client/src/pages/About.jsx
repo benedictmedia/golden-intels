@@ -39,11 +39,11 @@ export default function About() {
 
           {/* Left: Text */}
           <div className="flex-1">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Story
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6">
               How it All Began
             </h2>
 
@@ -82,11 +82,11 @@ export default function About() {
 
     {/* Left: Text Content */}
     <div className="flex-1">
-      <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+      <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
         Our Educational Programs
       </span>
 
-      <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2] mb-6">
+      <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6">
         A Complete Learning Pathway
       </h2>
 
@@ -97,7 +97,7 @@ export default function About() {
       <div className="space-y-5 text-gray-700 text-lg leading-relaxed">
 
         <div>
-          <h5 className="font-bold text-[#0654f9] mb-1">Early Childhood Education</h5>
+          <h5 className="font-bold text-[#0c7f9c] mb-1">Early Childhood Education</h5>
           <ul className="ml-4 space-y-1 text-gray-600">
             <li>• Creche (Babies)</li>
             <li>• Pre-Nursery</li>
@@ -106,14 +106,14 @@ export default function About() {
         </div>
 
         <div>
-          <h5 className="font-bold text-[#0654f9] mb-1">Primary Education</h5>
+          <h5 className="font-bold text-[#0c7f9c] mb-1">Primary Education</h5>
           <p className="ml-4 text-gray-600">
             Grades 1 to 6 – A forward-thinking, futuristic curriculum that builds strong foundational skills while nurturing curiosity and creativity.
           </p>
         </div>
 
         <div>
-          <h5 className="font-bold text-[#0654f9] mb-1">Secondary Education</h5>
+          <h5 className="font-bold text-[#0c7f9c] mb-1">Secondary Education</h5>
           <ul className="ml-4 space-y-1 text-gray-600">
             <li>• Lower Secondary (Grades 7 to 9)</li>
             <li>• Upper Secondary (Grades 10 to 12)</li>
@@ -149,8 +149,8 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
 
           {/* Mission */}
-          <div className="bg-[#0654f9] text-white rounded-2xl p-10 shadow-xl">
-            <div className="text-[#ffff00] mb-4">
+          <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-xl">
+            <div className="text-[#4ade80] mb-4">
               <Target size={40} />
             </div>
 
@@ -164,8 +164,8 @@ export default function About() {
           </div>
 
           {/* Vision */}
-          <div className="bg-[#8a2be2] text-white rounded-2xl p-10 shadow-xl">
-            <div className="text-[#ffff00] mb-4">
+          <div className="bg-[#0c7f9c] text-white rounded-2xl p-10 shadow-xl">
+            <div className="text-[#4ade80] mb-4">
               <Eye size={40} />
             </div>
 
@@ -186,11 +186,11 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4">
 
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Core Values
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2]">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c]">
               What We Stand For
             </h2>
           </div>
@@ -199,13 +199,13 @@ export default function About() {
             {values.map((value, index) => (
               <div
                 key={index}
-                className="bg-white border-t-4 border-[#ffff00] rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition"
+                className="bg-white border-t-4 border-[#4ade80] rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition"
               >
-                <div className="text-[#0654f9] flex justify-center mb-4">
+                <div className="text-[#0c7f9c] flex justify-center mb-4">
                   <Heart size={36} />
                 </div>
 
-                <h4 className="text-xl font-bold text-[#8a2be2] mb-2">
+                <h4 className="text-xl font-bold text-[#0c7f9c] mb-2">
                   {value.title}
                 </h4>
 
@@ -224,11 +224,11 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-4">
 
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#8a2be2] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Goals
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0654f9] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6">
               Our Goals
             </h2>
           </div>
@@ -260,11 +260,11 @@ export default function About() {
           {/* Left: Text */}
           <div className="flex-1">
 
-            <span className="inline-block bg-[#0654f9] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
+            <span className="inline-block bg-[#0c7f9c] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
               Our Accreditation
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#8a2be2] mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-serif text-[#0c7f9c] mb-6">
               Oxford Accreditation
             </h2>
 

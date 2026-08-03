@@ -17,8 +17,8 @@ const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
 const AVATAR_COLORS = [
-  '#1a3c6e', '#4a235a', '#0f6e56', '#b45309', '#0369a1',
-  '#7c3aed', '#be123c', '#0e7490', '#166534', '#92400e'
+  '#0e7490', '#15803d', '#128038', '#b45309', '#0369a1',
+  '#128038', '#be123c', '#0e7490', '#166534', '#92400e'
 ]
 const getAvatarColor = (name = '') =>
   AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
@@ -315,7 +315,7 @@ export default function LearnerDashboard() {
     <div className="portal-shell flex" style={{ background: '#0f1729' }}>
 
       {/* ── Sidebar ── */}
-      <div className={`portal-sidebar ${sidebarOpen ? 'is-open' : ''} w-64 flex flex-col flex-shrink-0 transition-all duration-300`} style={{ background: 'linear-gradient(180deg, #0000ff 0%, #8a2be2 60%, #800080 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open' : ''} w-64 flex flex-col flex-shrink-0 transition-all duration-300`} style={{ background: 'linear-gradient(180deg, #0c7f9c 0%, #0c7f9c 60%, #15803d 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
@@ -440,11 +440,11 @@ export default function LearnerDashboard() {
                   {/* Hero card */}
 <div className="rounded-3xl shadow-lg" style={{ background: '#fff', border: '1px solid #e2e8f0' }}>
   {/* Banner */}
-  <div className="h-28 rounded-t-3xl relative" style={{ background: 'linear-gradient(135deg, #8a2be2 0%, #800080 50%, #0000ff 100%)' }}>
+  <div className="h-28 rounded-t-3xl relative" style={{ background: 'linear-gradient(135deg, #0c7f9c 0%, #15803d 50%, #0c7f9c 100%)' }}>
     <div className="absolute inset-0 rounded-t-3xl opacity-20"
       style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
     <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full"
-      style={{ background: 'rgba(255,255,0,0.2)', color: '#ffff00', border: '1px solid rgba(255,255,0,0.5)' }}>
+      style={{ background: 'rgba(255,255,0,0.2)', color: '#4ade80', border: '1px solid rgba(255,255,0,0.5)' }}>
       {studentProfile?.status?.toUpperCase() || 'ACTIVE'}
     </div>
   </div>
@@ -455,23 +455,23 @@ export default function LearnerDashboard() {
       {studentProfile?.photo ? (
         <img src={studentProfile.photo} alt={displayName}
           className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg"
-          style={{ border: '4px solid #8a2be2' }} />
+          style={{ border: '4px solid #0c7f9c' }} />
       ) : (
         <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg"
-          style={{ backgroundColor: avatarColor, border: '4px solid #8a2be2' }}>
+          style={{ backgroundColor: avatarColor, border: '4px solid #0c7f9c' }}>
           {initials}
         </div>
       )}
       <div className="flex-1 min-w-0 pt-2">
         <h2 className="text-2xl font-black truncate" style={{ color: '#1e293b' }}>{displayName}</h2>
-        <p className="text-sm font-bold mt-0.5" style={{ color: '#8a2be2' }}>
+        <p className="text-sm font-bold mt-0.5" style={{ color: '#0c7f9c' }}>
           {studentProfile?.gradeLevel || 'Grade not assigned'}
         </p>
       </div>
       {studentProfile?.studentId && (
         <div className="text-right pt-2 flex-shrink-0">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#94a3b8' }}>Student ID</p>
-          <p className="text-lg font-black" style={{ color: '#0000ff' }}>{studentProfile.studentId}</p>
+          <p className="text-lg font-black" style={{ color: '#0c7f9c' }}>{studentProfile.studentId}</p>
         </div>
       )}
     </div>
@@ -479,11 +479,11 @@ export default function LearnerDashboard() {
     {/* Info grid */}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {[
-        { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#8a2be2' },
-        { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#0000ff' },
-        { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#800080' },
-        { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#0000ff' },
-        { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#8a2be2' },
+        { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#0c7f9c' },
+        { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#0c7f9c' },
+        { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#15803d' },
+        { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#0c7f9c' },
+        { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#0c7f9c' },
         { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#059669' },
         /* { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' } */
       ].map(({ icon: Icon, label, value, color }) => (
@@ -525,8 +525,8 @@ export default function LearnerDashboard() {
                   {/* Academic snapshot */}
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { label: 'Lessons', value: learnerLessons.length, icon: BookOpen, color: '#2563eb', bg: '#eff6ff' },
-                      { label: 'Assignments', value: learnerAssignments.length, icon: ClipboardList, color: '#7c3aed', bg: '#f5f3ff' },
+                      { label: 'Lessons', value: learnerLessons.length, icon: BookOpen, color: '#0c7f9c', bg: '#ecfeff' },
+                      { label: 'Assignments', value: learnerAssignments.length, icon: ClipboardList, color: '#128038', bg: '#f0fdf4' },
                       { label: 'Completion', value: `${completionRate}%`, icon: CheckCircle, color: '#059669', bg: '#f0fdf4' },
                     ].map(({ label, value, icon: Icon, color, bg }) => (
                       <div key={label} className="rounded-2xl p-5 text-center shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
@@ -548,8 +548,8 @@ export default function LearnerDashboard() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: 'Lessons', value: learnerLessons.length, color: '#2563eb', bg: '#eff6ff' },
-                  { label: 'Assignments', value: learnerAssignments.length, color: '#7c3aed', bg: '#f5f3ff' },
+                  { label: 'Lessons', value: learnerLessons.length, color: '#0c7f9c', bg: '#ecfeff' },
+                  { label: 'Assignments', value: learnerAssignments.length, color: '#128038', bg: '#f0fdf4' },
                   { label: 'Quizzes', value: learnerQuizzes.length, color: '#d97706', bg: '#fffbeb' },
                   { label: 'Completion', value: `${completionRate}%`, color: '#059669', bg: '#f0fdf4' },
                 ].map(({ label, value, color, bg }) => (
@@ -567,7 +567,7 @@ export default function LearnerDashboard() {
                     <p style={{ color: '#94a3b8' }}>No lessons published yet.</p>
                   ) : (
                     <div>
-                      <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{learnerLessons[0].gradeLevel}</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#ecfeff', color: '#0c7f9c' }}>{learnerLessons[0].gradeLevel}</span>
                       <h4 className="font-bold mt-3 mb-1" style={{ color: '#1e293b' }}>{learnerLessons[0].title}</h4>
                       <p className="text-sm mb-3" style={{ color: '#64748b' }}>{learnerLessons[0].subject}</p>
                       <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>{learnerLessons[0].content}</p>
@@ -579,8 +579,8 @@ export default function LearnerDashboard() {
                   <h3 className="font-bold mb-4" style={{ color: '#1e293b' }}>Progress Summary</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'Assignments completed', value: `${completedAssignmentCount} / ${learnerAssignments.length}`, color: '#7c3aed' },
-                      { label: 'Quizzes completed', value: `${completedQuizCount} / ${learnerQuizzes.length}`, color: '#2563eb' },
+                      { label: 'Assignments completed', value: `${completedAssignmentCount} / ${learnerAssignments.length}`, color: '#128038' },
+                      { label: 'Quizzes completed', value: `${completedQuizCount} / ${learnerQuizzes.length}`, color: '#0c7f9c' },
                       { label: 'Latest quiz score', value: latestQuizScore, color: '#d97706' },
                     ].map(({ label, value, color }) => (
                       <div key={label} className="flex items-center justify-between p-3 rounded-xl" style={{ background: '#f8fafc' }}>
@@ -601,7 +601,7 @@ export default function LearnerDashboard() {
                       ...learnerQuizzes.slice(0, 2).map(i => ({ ...i, kind: 'Quiz' }))
                     ].map(item => (
                       <div key={item.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.kind === 'Quiz' ? '#d97706' : '#7c3aed' }} />
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.kind === 'Quiz' ? '#d97706' : '#128038' }} />
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm truncate" style={{ color: '#1e293b' }}>{item.title}</p>
                           <p className="text-xs" style={{ color: '#94a3b8' }}>{item.kind} · {item.subject}</p>
@@ -632,8 +632,8 @@ export default function LearnerDashboard() {
                   {learnerLessons.map(lesson => (
                     <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{lesson.gradeLevel}</span>
-                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#f5f3ff', color: '#7c3aed' }}>{lesson.subject}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#ecfeff', color: '#0c7f9c' }}>{lesson.gradeLevel}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#f0fdf4', color: '#128038' }}>{lesson.subject}</span>
                       </div>
                       <h4 className="text-lg font-bold mb-1" style={{ color: '#1e293b' }}>{lesson.title}</h4>
                       <p className="text-xs mb-4" style={{ color: '#94a3b8' }}>{lesson.academicYear || selectedAcademicYear} · {lesson.term || selectedTerm}</p>
@@ -661,12 +661,12 @@ export default function LearnerDashboard() {
                           onClick={() => setActiveAssessmentSubject(folder.subject)}
                           className="text-left bg-white rounded-2xl p-5 shadow-sm transition-all"
                           style={{
-                            border: selected ? '2px solid #7c3aed' : '1px solid #e2e8f0',
+                            border: selected ? '2px solid #128038' : '1px solid #e2e8f0',
                             boxShadow: selected ? '0 12px 24px rgba(124,58,237,0.12)' : undefined
                           }}
                         >
                           <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#f5f3ff' : '#eff6ff', color: selected ? '#7c3aed' : '#2563eb' }}>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#f0fdf4' : '#ecfeff', color: selected ? '#128038' : '#0c7f9c' }}>
                               <FolderOpen size={26} />
                             </div>
                             <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#f8fafc', color: '#64748b' }}>
@@ -737,11 +737,11 @@ export default function LearnerDashboard() {
                                 onChange={e => handleAssignmentAnswerChange(assignment.id, e.target.value)}
                                 rows={4}
                                 className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 resize-none"
-                                style={{ border: '1px solid #e2e8f0', color: '#374151', focusRingColor: '#7c3aed' }}
+                                style={{ border: '1px solid #e2e8f0', color: '#374151', focusRingColor: '#128038' }}
                               />
                               <button onClick={() => handleSubmitAssignment(assignment)}
                                 className="font-bold px-6 py-2.5 rounded-xl text-sm transition-all"
-                                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff' }}>
+                                style={{ background: 'linear-gradient(135deg, #128038, #0c7f9c)', color: '#fff' }}>
                                 Submit Assignment
                               </button>
                             </div>
@@ -858,7 +858,7 @@ export default function LearnerDashboard() {
                                     ) : (
                                       <div className="space-y-2">
                                         {(q.options || []).map((opt, oi) => (
-                                          <label key={oi} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all" style={{ background: selected === opt ? '#eff6ff' : '#fff', border: `1px solid ${selected === opt ? '#2563eb' : '#e2e8f0'}` }}>
+                                          <label key={oi} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all" style={{ background: selected === opt ? '#ecfeff' : '#fff', border: `1px solid ${selected === opt ? '#0c7f9c' : '#e2e8f0'}` }}>
                                             <input type="radio" name={`quiz-${quiz.id}-q-${idx}`} value={opt} checked={selected === opt} onChange={() => handleQuizAnswer(quiz.id, idx, opt)} className="h-4 w-4" />
                                             <span className="text-sm" style={{ color: '#374151' }}>{opt}</span>
                                           </label>
@@ -870,7 +870,7 @@ export default function LearnerDashboard() {
                               })}
                               <button onClick={() => handleSubmitQuiz(quiz)}
                                 className="font-bold px-6 py-2.5 rounded-xl text-sm"
-                                style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)', color: '#fff' }}>
+                                style={{ background: 'linear-gradient(135deg, #128038, #0c7f9c)', color: '#fff' }}>
                                 Submit Quiz
                               </button>
                             </div>
@@ -907,7 +907,7 @@ export default function LearnerDashboard() {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#800080"
+        accentColor="#15803d"
       />
     )}
     </div>
