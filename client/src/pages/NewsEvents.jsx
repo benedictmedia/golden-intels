@@ -67,15 +67,15 @@ export default function NewsEvents() {
 
       {/* Upcoming Events Banner */}
       {upcomingEvents.length > 0 && (
-        <section className="bg-[#2563eb] py-4">
+        <section className="bg-white border-b border-blue-100 py-4">
           <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 overflow-x-auto">
-            <span className="text-white font-bold text-sm shrink-0">📅 Upcoming:</span>
+            <span className="text-slate-900 font-bold text-sm shrink-0">📅 Upcoming:</span>
             {upcomingEvents.map(event => (
               <div key={event.id} className="flex items-center gap-2 shrink-0">
-                <span className="text-white text-sm font-bold">{event.title}</span>
-                <span className="text-blue-100 text-xs">— {new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                {event.venue && <span className="text-blue-100 text-xs">@ {event.venue}</span>}
-                <span className="text-blue-200 mx-2">|</span>
+                <span className="text-slate-900 text-sm font-bold">{event.title}</span>
+                <span className="text-slate-500 text-xs">— {new Date(event.eventDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                {event.venue && <span className="text-slate-500 text-xs">@ {event.venue}</span>}
+                <span className="text-slate-300 mx-2">|</span>
               </div>
             ))}
           </div>

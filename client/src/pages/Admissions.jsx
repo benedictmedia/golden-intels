@@ -239,12 +239,12 @@ export default function Admissions() {
   return (
     <div>
       {/* Hero Banner */}
-      <section className="bg-[#2563eb] text-white py-20 text-center">
-        <span className="inline-block bg-green-500 text-slate-900 text-sm font-bold px-4 py-1 rounded-full mb-4">
+      <section className="bg-white text-slate-900 py-20 text-center">
+        <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4">
           Admissions
         </span>
-        <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4">Admissions</h1>
-        <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold font-serif mb-4 text-slate-900">Admissions</h1>
+        <p className="text-slate-600 text-lg max-w-2xl mx-auto">
           Begin your journey to excellence. Join our community of learners.
         </p>
       </section>

@@ -13,7 +13,7 @@ const activities = [
 
 export default function CampusLife() {
   return (
-    <section className="py-20 bg-[#1D4ED8] text-white">
+    <section className="py-20 bg-white text-slate-900">
 
       <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
@@ -23,7 +23,7 @@ export default function CampusLife() {
           <img
             src={campusImg}
             alt="Our Activities & Clubs at Golden-Intels"
-            className="w-full h-[420px] object-cover rounded-2xl shadow-2xl border-4 border-white/20"
+            className="w-full h-[420px] object-cover rounded-2xl shadow-2xl border-4 border-blue-100"
             loading="lazy"
             decoding="async"
           />
@@ -39,12 +39,12 @@ export default function CampusLife() {
           </span>
 
           {/* Heading */}
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6 leading-tight">
-            Discover Our <span className="text-[#60a5fa]">Activities & Clubs</span>
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-900 mb-6 leading-tight">
+            Discover Our <span className="text-[#2563eb]">Activities & Clubs</span>
           </h2>
 
           {/* Description */}
-          <p className="text-[#E5E7EB] text-lg leading-relaxed mb-8">
+          <p className="text-slate-600 text-lg leading-relaxed mb-8">
             Beyond academics, our Oxford International Curriculum based on the British Curriculum and GES Curriculum help students thrive in computer skills, STEM, arts, physical education and sports together with well-being, and Global Skills Projects. We believe our Oxford International GES Curriculum develops well-rounded learners prepared for every aspect of life.
           </p>
 
@@ -55,14 +55,14 @@ export default function CampusLife() {
 
               <div
                 key={index}
-                className="flex items-center gap-3 bg-white/10 rounded-xl p-4 border border-white/20 shadow-md"
+                className="flex items-center gap-3 bg-blue-50 rounded-xl p-4 border border-blue-100 shadow-sm"
               >
 
                 <div className="text-[#2563eb]">
                   {item.icon}
                 </div>
 
-                <span className="text-white font-medium">
+                <span className="text-slate-800 font-medium">
                   {item.label}
                 </span>
 

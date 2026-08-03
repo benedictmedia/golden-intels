@@ -64,8 +64,8 @@ export default function Hero() {
         />
       )}
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-[#2563eb]/45 z-10"></div>
+      {/* Light overlay */}
+      <div className="absolute inset-0 bg-white/45 z-10"></div>
 
       {/* Content */}
       <div className="relative z-20 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
@@ -76,13 +76,13 @@ export default function Hero() {
             Oxford Accredited International School
           </span>
 
-          <h1 className="text-5xl md:text-6xl font-bold font-serif leading-tight mb-6 tracking-tight text-white">
-            Welcome to <br />
-            <span className="text-[#60a5fa]">Golden-Intels</span> <br />
-            International School
+          <h1 className="font-bold font-serif leading-tight mb-6 tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
+            <span className="block text-3xl md:text-4xl">Welcome to</span>
+            <span className="block text-6xl md:text-7xl text-white">Golden-Intels</span>
+            <span className="block text-2xl md:text-3xl mt-1">International School</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-[#60a5fa] max-w-lg mx-auto md:mx-0 mb-10 font-light">
+          <p className="text-xl md:text-2xl text-white max-w-lg mx-auto md:mx-0 mb-10 font-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
             We nurture for nature.
           </p>
 
@@ -105,14 +105,14 @@ export default function Hero() {
 
         {/* Right Side - Mission Statement */}
         <div className="flex justify-center md:justify-end">
-          <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl px-8 py-8 max-w-md w-full">
+          <div className="bg-white/80 backdrop-blur-md border border-white shadow-xl rounded-2xl px-8 py-8 max-w-md w-full">
             <div className="flex items-start gap-4">
               <div className="w-1.5 min-h-full bg-[#2563eb] rounded-full flex-shrink-0 self-stretch mt-1" />
               <div className="text-left">
                 <p className="text-[#2563eb] text-xs font-bold uppercase tracking-[2px] mb-3">
                   OUR MISSION
                 </p>
-                <p className="text-white text-[15.5px] leading-relaxed font-medium">
+                <p className="text-slate-800 text-[15.5px] leading-relaxed font-medium">
                   Raising Godly, globally minded scholars through international education that builds academic excellence, critical thinking, and Christ-centred character for a life of purpose.
                 </p>
               </div>

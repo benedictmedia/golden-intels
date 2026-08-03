@@ -35,7 +35,7 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 bg-[#2563eb] text-white">
+    <section className="py-20 bg-white text-slate-900">
 
       <div className="max-w-7xl mx-auto px-4">
 
@@ -48,12 +48,12 @@ export default function WhyChooseUs() {
           </span>
 
           {/* Title */}
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
-            Why Choose <span className="text-[#60a5fa]">Golden-Intels</span>
+          <h2 className="text-3xl md:text-4xl font-bold font-serif text-slate-900 mb-4">
+            Why Choose <span className="text-[#2563eb]">Golden-Intels</span>
           </h2>
 
           {/* Description */}
-          <p className="text-[#E5E7EB] text-lg max-w-2xl mx-auto">
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
             We provide world-class education that prepares students for global success.
           </p>
 
@@ -65,7 +65,7 @@ export default function WhyChooseUs() {
           {reasons.map((reason, index) => (
             <div
               key={index}
-              className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-white/20"
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-slate-100"
             >
 
               {/* Icon */}
@@ -74,12 +74,12 @@ export default function WhyChooseUs() {
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-bold text-white mb-3">
+              <h3 className="text-xl font-bold text-slate-900 mb-3">
                 {reason.title}
               </h3>
 
               {/* Description */}
-              <p className="text-[#E5E7EB] leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 {reason.description}
               </p>
 
