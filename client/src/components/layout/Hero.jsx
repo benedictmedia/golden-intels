@@ -40,7 +40,7 @@ export default function Hero() {
   const nextBg = nextIndex !== null ? heroImages[nextIndex] : null
 
   return (
-    <div className="relative text-[#15803d] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
+    <div className="relative text-[#1d4ed8] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
       
       {/* Current Background */}
       <div
@@ -72,24 +72,24 @@ export default function Hero() {
 
         {/* Left Side */}
         <div className="text-center md:text-left">
-          <span className="inline-block bg-[#128038] text-white text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
+          <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
             Oxford Accredited International School
           </span>
 
           <h1 className="text-5xl md:text-6xl font-bold font-serif leading-tight mb-6 tracking-tight text-white">
             Welcome to <br />
-            <span className="text-[#4ade80]">Golden-Intels</span> <br />
+            <span className="text-[#60a5fa]">Golden-Intels</span> <br />
             International School
           </h1>
 
-          <p className="text-xl md:text-2xl text-[#4ade80] max-w-lg mx-auto md:mx-0 mb-10 font-light">
+          <p className="text-xl md:text-2xl text-[#60a5fa] max-w-lg mx-auto md:mx-0 mb-10 font-light">
             We nurture for nature.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
             <Link
               to="/admissions"
-              className="bg-[#128038] hover:bg-[#6D28D9] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl"
+              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl"
             >
               Apply Now
             </Link>
@@ -107,9 +107,9 @@ export default function Hero() {
         <div className="flex justify-center md:justify-end">
           <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl px-8 py-8 max-w-md w-full">
             <div className="flex items-start gap-4">
-              <div className="w-1.5 min-h-full bg-[#128038] rounded-full flex-shrink-0 self-stretch mt-1" />
+              <div className="w-1.5 min-h-full bg-[#2563eb] rounded-full flex-shrink-0 self-stretch mt-1" />
               <div className="text-left">
-                <p className="text-[#128038] text-xs font-bold uppercase tracking-[2px] mb-3">
+                <p className="text-[#2563eb] text-xs font-bold uppercase tracking-[2px] mb-3">
                   OUR MISSION
                 </p>
                 <p className="text-white text-[15.5px] leading-relaxed font-medium">

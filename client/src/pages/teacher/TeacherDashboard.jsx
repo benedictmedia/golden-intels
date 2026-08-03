@@ -29,7 +29,7 @@ const menuItems = [
 const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
-const AVATAR_COLORS = ['#2563eb', '#2563eb', '#15803d', '#0369a1', '#1d4ed8', '#1d4ed8', '#15803d']
+const AVATAR_COLORS = ['#2563eb', '#2563eb', '#1d4ed8', '#0369a1', '#1d4ed8', '#1d4ed8', '#1d4ed8']
 const getAvatarColor = (name = '') => AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
 
 export default function TeacherDashboard() {
@@ -1032,13 +1032,13 @@ useEffect(() => {
           <div className="mx-3 my-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.12)' }}>
             <div className="flex items-center gap-3">
               {effectiveUser?.photo ? (
-                <img src={effectiveUser.photo} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" style={{ border: '2px solid #4ade80' }} />
+                <img src={effectiveUser.photo} alt={displayName} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" style={{ border: '2px solid #60a5fa' }} />
               ) : (
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: '#4ade80', color: '#2563eb' }}>{initials}</div>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: '#60a5fa', color: '#2563eb' }}>{initials}</div>
               )}
               <div className="min-w-0">
                 <p className="text-white font-bold text-sm truncate">{displayName}</p>
-                <p className="text-xs truncate" style={{ color: '#4ade80' }}>{effectiveUser?.department || 'Teacher'}</p>
+                <p className="text-xs truncate" style={{ color: '#60a5fa' }}>{effectiveUser?.department || 'Teacher'}</p>
               </div>
             </div>
           </div>
@@ -1057,8 +1057,8 @@ useEffect(() => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
             style={{
               background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
-              color: activeMenu === item.id ? '#4ade80' : 'rgba(255,255,255,0.8)',
-              borderLeft: activeMenu === item.id ? '3px solid #4ade80' : '3px solid transparent',
+              color: activeMenu === item.id ? '#60a5fa' : 'rgba(255,255,255,0.8)',
+              borderLeft: activeMenu === item.id ? '3px solid #60a5fa' : '3px solid transparent',
               fontWeight: activeMenu === item.id ? '700' : '400'
             }}
             >
@@ -1088,10 +1088,10 @@ useEffect(() => {
        {/* Top Bar */}
 <div className="portal-topbar px-6 py-4 flex items-center justify-between border-b" style={{ background: '#fff' }}>
   <div className="flex items-center gap-3">
-    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-blue-50 text-[#128038]">
+    <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 rounded-lg bg-blue-50 text-[#2563eb]">
       <Menu size={20} />
     </button>
-    <h1 className="text-2xl font-bold text-[#128038]">{menuItems.find(m => m.id === activeMenu)?.label}</h1>
+    <h1 className="text-2xl font-bold text-[#2563eb]">{menuItems.find(m => m.id === activeMenu)?.label}</h1>
   </div>
 
   <div className="flex items-center gap-4">
@@ -1133,33 +1133,33 @@ useEffect(() => {
           {activeMenu === 'profile' && (
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="rounded-3xl overflow-hidden shadow-lg">
-                <div className="h-28 relative" style={{ background: 'linear-gradient(135deg, #15803d, #2563eb)' }}>
+                <div className="h-28 relative" style={{ background: 'linear-gradient(135deg, #1d4ed8, #2563eb)' }}>
                   <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
-                  <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,0,0.2)', color: '#4ade80', border: '1px solid rgba(255,255,0,0.5)' }}>
+                  <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,0,0.2)', color: '#60a5fa', border: '1px solid rgba(255,255,0,0.5)' }}>
                     {effectiveUser?.role?.toUpperCase() || 'TEACHER'}
                   </div>
                 </div>
                 <div className="bg-white px-8 pt-6 pb-8">
                   <div className="flex items-start gap-6 mb-6">
                     {effectiveUser?.photo ? (
-                      <img src={effectiveUser.photo} alt={displayName} className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg" style={{ border: '4px solid #15803d' }} />
+                      <img src={effectiveUser.photo} alt={displayName} className="w-24 h-24 rounded-2xl object-cover flex-shrink-0 shadow-lg" style={{ border: '4px solid #1d4ed8' }} />
                     ) : (
-                      <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg" style={{ backgroundColor: avatarColor, border: '4px solid #15803d' }}>{initials}</div>
+                      <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-black text-3xl text-white flex-shrink-0 shadow-lg" style={{ backgroundColor: avatarColor, border: '4px solid #1d4ed8' }}>{initials}</div>
                     )}
                     <div className="flex-1 min-w-0 pt-2">
                       <h2 className="text-2xl font-black" style={{ color: '#1e293b' }}>{displayName}</h2>
-                      <p className="text-sm font-bold mt-0.5" style={{ color: '#15803d' }}>{effectiveUser?.department || 'Teaching Staff'}</p>
+                      <p className="text-sm font-bold mt-0.5" style={{ color: '#1d4ed8' }}>{effectiveUser?.department || 'Teaching Staff'}</p>
                       <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{teacherClassOptions.length > 0 ? `Classes: ${teacherClassOptions.join(', ')}` : 'No classes assigned yet'}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
                       { icon: Mail, label: 'Email Address', value: effectiveUser?.email || user?.email || '—', color: '#2563eb' },
-                      { icon: Phone, label: 'Phone Number', value: effectiveUser?.phone || '—', color: '#15803d' },
+                      { icon: Phone, label: 'Phone Number', value: effectiveUser?.phone || '—', color: '#1d4ed8' },
                       { icon: Briefcase, label: 'Department', value: effectiveUser?.department || '—', color: '#2563eb' },
-                      { icon: BookMarked, label: 'Primary Subject', value: effectiveUser?.staffSubject || effectiveUser?.subjects?.[0] || '—', color: '#15803d' },
+                      { icon: BookMarked, label: 'Primary Subject', value: effectiveUser?.staffSubject || effectiveUser?.subjects?.[0] || '—', color: '#1d4ed8' },
                       { icon: Users, label: 'Assigned Classes', value: teacherClassOptions.length > 0 ? teacherClassOptions.join(', ') : '—', color: '#2563eb' },
-                      { icon: Award, label: 'Class Teacher For', value: classTeacherClassOptions.length > 0 ? classTeacherClassOptions.join(', ') : '—', color: '#15803d' },
+                      { icon: Award, label: 'Class Teacher For', value: classTeacherClassOptions.length > 0 ? classTeacherClassOptions.join(', ') : '—', color: '#1d4ed8' },
                     ].map(({ icon: Icon, label, value, color }) => (
                       <div key={label} className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}><Icon size={18} style={{ color }} /></div>
@@ -1178,7 +1178,7 @@ useEffect(() => {
                   <h3 className="font-bold text-sm uppercase tracking-widest mb-4" style={{ color: '#94a3b8' }}>All Assigned Subjects</h3>
                   <div className="flex flex-wrap gap-2">
                     {effectiveUser.subjects.map(s => (
-                      <span key={s} className="text-sm font-bold px-3 py-1.5 rounded-full" style={{ background: '#f0fdf4', color: '#15803d', border: '1px solid rgba(128,0,128,0.2)' }}>{s}</span>
+                      <span key={s} className="text-sm font-bold px-3 py-1.5 rounded-full" style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid rgba(128,0,128,0.2)' }}>{s}</span>
                     ))}
                   </div>
                 </div>
@@ -1194,7 +1194,7 @@ useEffect(() => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
                   { label: 'Students', value: students.length, color: '#2563eb', bg: '#eff6ff' },
-                  { label: 'Lessons', value: teacherLessons.length, color: '#15803d', bg: '#fdf4ff' },
+                  { label: 'Lessons', value: teacherLessons.length, color: '#1d4ed8', bg: '#eff6ff' },
                   { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: '#2563eb', bg: '#eff6ff' },
                 ].map(({ label, value, color, bg }) => (
                   <div key={label} className="rounded-2xl p-5 text-center shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
@@ -1211,9 +1211,9 @@ useEffect(() => {
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {[
-                  { label: 'My Students', value: students.length, color: 'bg-[#128038]', textColor: 'text-green-200' },
+                  { label: 'My Students', value: students.length, color: 'bg-[#2563eb]', textColor: 'text-green-200' },
                   { label: 'Assessments', value: teacherAssignments.length + teacherQuizzes.length, color: 'bg-blue-600', textColor: 'text-cyan-100' },
-                  { label: 'Lessons', value: teacherLessons.length, color: 'bg-[#15803d]', textColor: 'text-purple-200' },
+                  { label: 'Lessons', value: teacherLessons.length, color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
                   { label: 'Classes', value: teacherClassOptions.length, color: 'bg-blue-500', textColor: 'text-gray-800/80' }
                 ].map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
@@ -1223,7 +1223,7 @@ useEffect(() => {
                 ))}
               </div>
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h2 className="text-2xl font-bold font-serif text-[#128038] mb-2">Teacher Dashboard</h2>
+                <h2 className="text-2xl font-bold font-serif text-[#2563eb] mb-2">Teacher Dashboard</h2>
                 <p className="text-gray-600">Welcome to your Teacher Portal. Use the sidebar to manage your classes, attendance, grades, assignments and lessons.</p>
               </div>
             </div>
@@ -1232,14 +1232,14 @@ useEffect(() => {
           {/* My Classes */}
           {activeMenu === 'classes' && (
             <div>
-              <h2 className="text-2xl font-bold font-serif text-[#128038] mb-6">My Classes</h2>
+              <h2 className="text-2xl font-bold font-serif text-[#2563eb] mb-6">My Classes</h2>
               <div className="flex flex-wrap gap-3 mb-6">
                 {teacherClassOptions.map(cls => (
                   <button
                     key={cls}
                     onClick={() => setActiveClass(cls)}
                     className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
-                      activeClass === cls ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038] hover:bg-[#128038] hover:text-white'
+                      activeClass === cls ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb] hover:bg-[#2563eb] hover:text-white'
                     }`}
                   >
                     {cls}
@@ -1251,7 +1251,7 @@ useEffect(() => {
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#128038] text-white">
+                  <thead className="bg-[#2563eb] text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Photo</th>
                       <th className="px-6 py-4 text-left">Student ID</th>
@@ -1269,11 +1269,11 @@ useEffect(() => {
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4">
-                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-[#128038]">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-[#2563eb]">
                               {student.photo ? (
                                 <img src={`${student.photo}`} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-[#128038] font-bold text-sm">
+                                <div className="w-full h-full flex items-center justify-center text-[#2563eb] font-bold text-sm">
                                   {student.firstName?.charAt(0)}
                                 </div>
                               )}
@@ -1282,7 +1282,7 @@ useEffect(() => {
                           <td className="px-6 py-4">
                             <span className="bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span>
                           </td>
-                          <td className="px-6 py-4 font-medium text-[#128038]">{student.firstName} {student.lastName}</td>
+                          <td className="px-6 py-4 font-medium text-[#2563eb]">{student.firstName} {student.lastName}</td>
                           <td className="px-6 py-4 text-gray-600">{student.gender}</td>
                           <td className="px-6 py-4">
                             <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span>
@@ -1301,23 +1301,23 @@ useEffect(() => {
             <div>
               <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-[#128038] mb-1">Attendance Register</h2>
+                  <h2 className="text-2xl font-bold font-serif text-[#2563eb] mb-1">Attendance Register</h2>
                   <p className="text-gray-500 text-sm">Record daily class attendance by date. Saved records update parent dashboards immediately.</p>
                 </div>
                 <div className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm">
-                  <label className="block text-xs font-bold text-[#128038] mb-1">Attendance Date</label>
+                  <label className="block text-xs font-bold text-[#2563eb] mb-1">Attendance Date</label>
                   <input
                     type="date"
                     value={attendanceDate}
                     onChange={e => setAttendanceDate(e.target.value)}
-                    className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700"
+                    className="px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 {[
-                  ['Present', attendanceStats.present, 'bg-[#128038]', 'text-green-100'],
+                  ['Present', attendanceStats.present, 'bg-[#2563eb]', 'text-green-100'],
                   ['Absent (on permission)', attendanceStats.absent_permission, 'bg-amber-500', 'text-amber-100'],
                   ['Absent (without permission)', attendanceStats.absent_without_permission, 'bg-red-500', 'text-red-100'],
                   ['Late', attendanceStats.late, 'bg-blue-500', 'text-gray-800/80'],
@@ -1336,7 +1336,7 @@ useEffect(() => {
                     key={cls}
                     onClick={() => setActiveClass(cls)}
                     className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
-                      activeClass === cls ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038] hover:bg-[#128038] hover:text-white'
+                      activeClass === cls ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb] hover:bg-[#2563eb] hover:text-white'
                     }`}
                   >
                     {cls}
@@ -1360,7 +1360,7 @@ useEffect(() => {
               )}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
                 <table className="w-full text-sm">
-                  <thead className="bg-[#128038] text-white">
+                  <thead className="bg-[#2563eb] text-white">
                     <tr>
                       <th className="px-6 py-4 text-left">Student</th>
                       <th className="px-6 py-4 text-left">Status</th>
@@ -1380,13 +1380,13 @@ useEffect(() => {
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4">
-                            <p className="font-bold text-[#128038]">{student.firstName} {student.lastName}</p>
+                            <p className="font-bold text-[#2563eb]">{student.firstName} {student.lastName}</p>
                             <p className="text-xs text-gray-400">{student.studentId}</p>
                           </td>
                           <td className="px-6 py-4">
                             <div className="inline-flex bg-blue-100 rounded-xl p-1 flex-wrap gap-1">
                               {[
-                                ['present', 'Present', 'bg-[#128038] text-white'],
+                                ['present', 'Present', 'bg-[#2563eb] text-white'],
                                 ['late', 'Late', 'bg-blue-500 text-gray-800'],
                                 ['absent_permission', 'Absent (on permission)', 'bg-amber-500 text-white'],
                                 ['absent_without_permission', 'Absent (without permission)', 'bg-red-500 text-white'],
@@ -1396,7 +1396,7 @@ useEffect(() => {
                                   type="button"
                                   onClick={() => handleAttendance(student.id, status)}
                                   className={`px-3 py-2 rounded-lg text-[10px] font-bold transition-colors ${
-                                    (attendance[student.id] || 'present') === status ? activeClassName : 'text-gray-500 hover:text-[#128038]'
+                                    (attendance[student.id] || 'present') === status ? activeClassName : 'text-gray-500 hover:text-[#2563eb]'
                                   }`}
                                 >
                                   {label}
@@ -1416,7 +1416,7 @@ useEffect(() => {
               <button
                 onClick={saveAttendance}
                 disabled={attendanceSaving || filteredStudents.length === 0}
-                className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50"
+                className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50"
               >
                 {attendanceSaving ? 'Saving Attendance...' : 'Save Attendance'}
               </button>
@@ -1427,7 +1427,7 @@ useEffect(() => {
           {activeMenu === 'gradebook' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-2xl font-bold font-serif text-[#128038] mb-1">Gradebook</h2>
+                <h2 className="text-2xl font-bold font-serif text-[#2563eb] mb-1">Gradebook</h2>
                 <p className="text-gray-500 text-sm">Enter and manage student performance data.</p>
               </div>
 
@@ -1436,7 +1436,7 @@ useEffect(() => {
                 <button
                   onClick={() => setActiveGradebookTab('enter')}
                   className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${
-                    activeGradebookTab === 'enter' ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038]'
+                    activeGradebookTab === 'enter' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'
                   }`}
                 >
                   Enter Performance
@@ -1444,7 +1444,7 @@ useEffect(() => {
                 <button
                   onClick={() => setActiveGradebookTab('submitted')}
                   className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${
-                    activeGradebookTab === 'submitted' ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038]'
+                    activeGradebookTab === 'submitted' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'
                   }`}
                 >
                   Submitted Results
@@ -1472,7 +1472,7 @@ useEffect(() => {
                         <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between flex-wrap gap-4">
                             <div>
-                              <h3 className="font-bold text-[#128038] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
+                              <h3 className="font-bold text-[#2563eb] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
                               <p className="text-sm text-gray-500">{result.gradeLevel} | {result.academicYear} | {result.term}</p>
                               <p className="text-sm text-gray-400">Submitted by: {result.submittedBy} on {new Date(result.createdAt).toLocaleDateString()}</p>
                             </div>
@@ -1508,52 +1508,52 @@ useEffect(() => {
               {activeGradebookTab === 'enter' && (
 
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h3 className="text-lg font-bold text-[#128038] mb-6">Enter Performance Data</h3>
+                <h3 className="text-lg font-bold text-[#2563eb] mb-6">Enter Performance Data</h3>
 
                 {/* Top Selectors */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                   <div>
-                    <label className="block text-sm font-bold text-[#128038] mb-2">Class <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold text-[#2563eb] mb-2">Class <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookClass}
                       onChange={e => { setGradebookClass(e.target.value); setGradebookStudent('') }}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                     >
                       {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#128038] mb-2">Academic Year <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold text-[#2563eb] mb-2">Academic Year <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookYear}
                       onChange={e => {
                         setGradebookYear(e.target.value)
                         setSelectedAcademicYear(e.target.value)
                       }}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                     >
                       {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#128038] mb-2">Term <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold text-[#2563eb] mb-2">Term <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookTerm}
                       onChange={e => {
                         setGradebookTerm(e.target.value)
                         setSelectedTerm(e.target.value)
                       }}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                     >
                       {terms.map(term => <option key={term} value={term}>{term}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-[#128038] mb-2">Select Student <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold text-[#2563eb] mb-2">Select Student <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookStudent}
                       onChange={e => setGradebookStudent(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                     >
                       <option value="">Choose a student...</option>
                       {students.filter(student => matchesClass(student.gradeLevel, gradebookClass)).map(student => (
@@ -1564,7 +1564,7 @@ useEffect(() => {
                 </div>
 
                 {/* Subject Scores */}
-                <h4 className="text-md font-bold text-[#128038] mb-4">Subject Scores</h4>
+                <h4 className="text-md font-bold text-[#2563eb] mb-4">Subject Scores</h4>
                 {gradebookLoading && (
                   <p className="text-sm text-gray-500 mb-4">Loading the current result for this student...</p>
                 )}
@@ -1595,7 +1595,7 @@ useEffect(() => {
                     return (
                       <div key={subject} className="bg-blue-50 rounded-2xl p-6 border border-gray-100">
                         <div className="flex items-center justify-between gap-4 mb-4">
-                          <h5 className="text-md font-bold text-[#128038]">{subject}</h5>
+                          <h5 className="text-md font-bold text-[#2563eb]">{subject}</h5>
                           {!editable && (
                             <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-700">Read-only</span>
                           )}
@@ -1608,7 +1608,7 @@ useEffect(() => {
                               value={scores.classScore}
                               onChange={e => handleSubjectScore(subject, 'classScore', e.target.value)}
                               readOnly={!editable}
-                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 10</p>
                           </div>
@@ -1619,7 +1619,7 @@ useEffect(() => {
                               value={scores.cat1}
                               onChange={e => handleSubjectScore(subject, 'cat1', e.target.value)}
                               readOnly={!editable}
-                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 20</p>
                           </div>
@@ -1630,7 +1630,7 @@ useEffect(() => {
                               value={scores.cat2}
                               onChange={e => handleSubjectScore(subject, 'cat2', e.target.value)}
                               readOnly={!editable}
-                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Max: 20</p>
                           </div>
@@ -1641,13 +1641,13 @@ useEffect(() => {
                               value={scores.exam}
                               onChange={e => handleSubjectScore(subject, 'exam', e.target.value)}
                               readOnly={!editable}
-                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                              className={`w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 text-sm ${!editable ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <p className="text-xs text-gray-400 mt-1">Weighted: {wExam.toFixed(2)}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-6">
-                          <div className="bg-[#128038] text-white rounded-xl px-4 py-2 text-sm font-bold">
+                          <div className="bg-[#2563eb] text-white rounded-xl px-4 py-2 text-sm font-bold">
                             Total: {subjectTotal.toFixed(2)}/100
                           </div>
                           <div className="bg-blue-500 text-gray-800 rounded-xl px-4 py-2 text-sm font-bold">
@@ -1661,7 +1661,7 @@ useEffect(() => {
 
                 {/* Teacher Remarks */}
                 <div className="mb-8">
-                  <label className="block text-sm font-bold text-[#128038] mb-2">Class Teacher's Remarks</label>
+                  <label className="block text-sm font-bold text-[#2563eb] mb-2">Class Teacher's Remarks</label>
                   <p className="text-xs text-gray-400 mb-2">
                     {isClassTeacherForSelectedClass
                       ? 'Provide constructive feedback on the student\'s overall performance across all subjects.'
@@ -1673,7 +1673,7 @@ useEffect(() => {
                     rows={4}
                     placeholder={isClassTeacherForSelectedClass ? 'Enter remarks here...' : 'Remarks are read-only for non-class teachers.'}
                     readOnly={!isClassTeacherForSelectedClass}
-                    className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 ${!isClassTeacherForSelectedClass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 ${!isClassTeacherForSelectedClass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                 </div>
 
@@ -1681,11 +1681,11 @@ useEffect(() => {
                 <div className="bg-blue-50 rounded-2xl p-6 mb-6 flex flex-wrap gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Total Score (All Subjects)</p>
-                    <p className="text-2xl font-bold text-[#128038]">{totalAllSubjects.toFixed(2)}/1100</p>
+                    <p className="text-2xl font-bold text-[#2563eb]">{totalAllSubjects.toFixed(2)}/1100</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Subjects Completed</p>
-                    <p className="text-2xl font-bold text-[#128038]">{subjectsCompleted}/{visibleSubjects.length}</p>
+                    <p className="text-2xl font-bold text-[#2563eb]">{subjectsCompleted}/{visibleSubjects.length}</p>
                   </div>
                 </div>
 
@@ -1699,7 +1699,7 @@ useEffect(() => {
              <button
                   onClick={handleGradebookSubmit}
                   disabled={!gradebookStudent}
-                  className="w-full bg-[#128038] hover:bg-[#15803d] text-white font-bold py-4 rounded-xl transition-colors disabled:opacity-50 text-lg"
+                  className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-4 rounded-xl transition-colors disabled:opacity-50 text-lg"
                 >
                   {editingResult ? 'Update Result' : 'Preview and Submit Entry'}
                 </button>
@@ -1712,28 +1712,28 @@ useEffect(() => {
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold font-serif text-[#128038]">Learning Management System</h2>
+                  <h2 className="text-2xl font-bold font-serif text-[#2563eb]">Learning Management System</h2>
                   <p className="text-gray-500">Create lessons and publish assessments learners can answer online.</p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <button onClick={() => setLmsView('resources')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'resources' ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038]'}`}>Resources</button>
-                  <button onClick={() => setLmsView('assessments')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'assessments' ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038]'}`}>Assessments</button>
-                  <button onClick={() => setLmsView('submissions')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'submissions' ? 'bg-[#128038] text-white' : 'bg-white text-[#128038] border border-[#128038]'}`}>Responses</button>
+                  <button onClick={() => setLmsView('resources')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'resources' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'}`}>Resources</button>
+                  <button onClick={() => setLmsView('assessments')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'assessments' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'}`}>Assessments</button>
+                  <button onClick={() => setLmsView('submissions')} className={`px-4 py-2 rounded-full text-sm font-bold transition ${lmsView === 'submissions' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'}`}>Responses</button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Lessons</p>
-                  <p className="text-3xl font-bold text-[#128038]">{teacherLessons.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#2563eb]">{teacherLessons.filter(item => item.published).length}</p>
                 </div>
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Assignments</p>
-                  <p className="text-3xl font-bold text-[#128038]">{teacherAssignments.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#2563eb]">{teacherAssignments.filter(item => item.published).length}</p>
                 </div>
                 <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center">
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-3">Published Quizzes</p>
-                  <p className="text-3xl font-bold text-[#128038]">{teacherQuizzes.filter(item => item.published).length}</p>
+                  <p className="text-3xl font-bold text-[#2563eb]">{teacherQuizzes.filter(item => item.published).length}</p>
                 </div>
               </div>
 
@@ -1742,7 +1742,7 @@ useEffect(() => {
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Preview {lmsItemView.type}</p>
-                      <h3 className="text-xl font-bold text-[#128038] mb-2">{lmsItemView.item.title}</h3>
+                      <h3 className="text-xl font-bold text-[#2563eb] mb-2">{lmsItemView.item.title}</h3>
                       <p className="text-sm text-gray-500">{lmsItemView.item.subject} · {lmsItemView.item.gradeLevel}</p>
                     </div>
                     <button onClick={() => setLmsItemView(null)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full">Close</button>
@@ -1766,7 +1766,7 @@ useEffect(() => {
                       <div className="space-y-4">
                         {lmsItemView.item.questions.map((question, index) => (
                           <div key={index} className="bg-slate-50 rounded-2xl p-4">
-                            <p className="font-bold text-[#128038] mb-2">Q{index + 1}. {question.prompt}</p>
+                            <p className="font-bold text-[#2563eb] mb-2">Q{index + 1}. {question.prompt}</p>
                             <div className="grid gap-2">
                               {question.options.map((option, optionIndex) => (
                                 <div key={optionIndex} className="text-sm text-gray-700">{option}</div>
@@ -1784,9 +1784,9 @@ useEffect(() => {
                       <div className="flex items-center justify-between gap-4 mb-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Responses</p>
-                          <h4 className="text-lg font-bold text-[#128038]">Student answers and marks</h4>
+                          <h4 className="text-lg font-bold text-[#2563eb]">Student answers and marks</h4>
                         </div>
-                        <span className="bg-blue-50 text-[#128038] text-sm font-bold px-3 py-1 rounded-full">
+                        <span className="bg-blue-50 text-[#2563eb] text-sm font-bold px-3 py-1 rounded-full">
                           {getResponsesForItem(lmsItemView.item, lmsItemView.type).length} responses
                         </span>
                       </div>
@@ -1806,7 +1806,7 @@ useEffect(() => {
                             <tbody>
                               {getResponsesForItem(lmsItemView.item, lmsItemView.type).map((record, index) => (
                                 <tr key={`${record.itemId}-${record.learnerEmail}-${index}`} className="border-t border-gray-100">
-                                  <td className="px-4 py-3 font-bold text-[#128038]">{record.learnerName || 'Unknown'}</td>
+                                  <td className="px-4 py-3 font-bold text-[#2563eb]">{record.learnerName || 'Unknown'}</td>
                                   <td className="px-4 py-3 text-gray-600">{formatDateTime(record.submittedAt)}</td>
                                   <td className="px-4 py-3 text-gray-700">{record.score ?? '-'}{record.totalQuestions ? ` / ${record.totalQuestions}` : ''}</td>
                                   <td className="px-4 py-3">
@@ -1828,41 +1828,41 @@ useEffect(() => {
               {lmsView === 'resources' && (
                 <div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    <button onClick={() => setShowAddLesson(true)} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Lesson</button>
+                    <button onClick={() => setShowAddLesson(true)} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Lesson</button>
                   </div>
 
                   {showAddLesson && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#128038] mb-6">{editingLmsItem?.type === 'lesson' ? 'Edit Lesson' : 'Create Lesson'}</h3>
+                      <h3 className="text-xl font-bold text-[#2563eb] mb-6">{editingLmsItem?.type === 'lesson' ? 'Edit Lesson' : 'Create Lesson'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Lesson Title</label>
-                          <input type="text" value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Lesson Title</label>
+                          <input type="text" value={newLesson.title} onChange={e => setNewLesson({ ...newLesson, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Subject</label>
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Subject</label>
                           {teacherSubjectOptions.length > 0 ? (
-                          <select value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <select value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             <option value="">Choose subject</option>
                             {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                           </select>
                         ) : (
-                          <input type="text" value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <input type="text" value={newLesson.subject} onChange={e => setNewLesson({ ...newLesson, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         )}
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Grade Level</label>
-                          <select value={newLesson.gradeLevel} onChange={e => setNewLesson({ ...newLesson, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Grade Level</label>
+                          <select value={newLesson.gradeLevel} onChange={e => setNewLesson({ ...newLesson, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Lesson Content</label>
-                          <textarea value={newLesson.content} onChange={e => setNewLesson({ ...newLesson, content: e.target.value })} rows={5} placeholder="Write your lesson content here..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Lesson Content</label>
+                          <textarea value={newLesson.content} onChange={e => setNewLesson({ ...newLesson, content: e.target.value })} rows={5} placeholder="Write your lesson content here..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={handleAddLesson} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Lesson</button>
+                        <button onClick={handleAddLesson} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Lesson</button>
                         <button onClick={() => setShowAddLesson(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
@@ -1880,13 +1880,13 @@ useEffect(() => {
                               {lesson.published ? 'Published' : 'Draft'}
                             </button>
                           </div>
-                          <h3 className="text-lg font-bold text-[#128038] mb-2">{lesson.title}</h3>
+                          <h3 className="text-lg font-bold text-[#2563eb] mb-2">{lesson.title}</h3>
                           <p className="text-sm text-gray-500 mb-3">{lesson.subject}</p>
                           <p className="text-xs font-bold text-gray-400 mb-3">{lesson.academicYear || selectedAcademicYear} | {lesson.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 leading-relaxed">{lesson.content}</p>
                           <div className="flex flex-wrap gap-2 mt-4">
-                            <button onClick={() => handleViewLmsItem(lesson, 'lesson')} className="bg-[#128038] hover:bg-[#15803d] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
-                            <button onClick={() => handleEditLmsItem(lesson, 'lesson')} className="bg-white border border-[#128038] text-[#128038] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleViewLmsItem(lesson, 'lesson')} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(lesson, 'lesson')} className="bg-white border border-[#2563eb] text-[#2563eb] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
                             <button onClick={() => handleDeleteLmsItem(lesson.id, 'lesson')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
                           </div>
                         </div>
@@ -1899,51 +1899,51 @@ useEffect(() => {
               {lmsView === 'assessments' && (
                 <div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    <button onClick={() => setShowAddAssignment(true)} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Assignment</button>
-                    <button onClick={() => setShowAddQuiz(true)} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Quiz</button>
+                    <button onClick={() => setShowAddAssignment(true)} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Assignment</button>
+                    <button onClick={() => setShowAddQuiz(true)} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ New Quiz</button>
                     <button onClick={() => setShowAddManualExercise(true)} className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Manual Exercise</button>
                   </div>
 
                   {showAddAssignment && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#128038] mb-6">{editingLmsItem?.type === 'assignment' ? 'Edit Assignment' : 'Create Assignment'}</h3>
+                      <h3 className="text-xl font-bold text-[#2563eb] mb-6">{editingLmsItem?.type === 'assignment' ? 'Edit Assignment' : 'Create Assignment'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Title</label>
-                          <input type="text" value={newAssignment.title} onChange={e => setNewAssignment({ ...newAssignment, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Title</label>
+                          <input type="text" value={newAssignment.title} onChange={e => setNewAssignment({ ...newAssignment, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Subject</label>
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Subject</label>
                           {teacherSubjectOptions.length > 0 ? (
-                            <select value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                            <select value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                               <option value="">Choose subject</option>
                               {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                             </select>
                           ) : (
-                            <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                            <input type="text" value={newAssignment.subject} onChange={e => setNewAssignment({ ...newAssignment, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                           )}
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Grade Level</label>
-                          <select value={newAssignment.gradeLevel} onChange={e => setNewAssignment({ ...newAssignment, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Grade Level</label>
+                          <select value={newAssignment.gradeLevel} onChange={e => setNewAssignment({ ...newAssignment, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Due Date</label>
-                          <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Due Date</label>
+                          <input type="date" value={newAssignment.dueDate} onChange={e => setNewAssignment({ ...newAssignment, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Due Time</label>
-                          <input type="time" value={newAssignment.dueTime} onChange={e => setNewAssignment({ ...newAssignment, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Due Time</label>
+                          <input type="time" value={newAssignment.dueTime} onChange={e => setNewAssignment({ ...newAssignment, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Description</label>
-                          <textarea value={newAssignment.description} onChange={e => setNewAssignment({ ...newAssignment, description: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Description</label>
+                          <textarea value={newAssignment.description} onChange={e => setNewAssignment({ ...newAssignment, description: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={handleAddAssignment} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Assignment</button>
+                        <button onClick={handleAddAssignment} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Assignment</button>
                         <button onClick={() => setShowAddAssignment(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
@@ -1951,7 +1951,7 @@ useEffect(() => {
 
                   {showAddManualExercise && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#128038] mb-6">Record a Manual Exercise</h3>
+                      <h3 className="text-xl font-bold text-[#2563eb] mb-6">Record a Manual Exercise</h3>
                       {manualExerciseSaved && (
                         <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
                           Manual exercise recorded and shared with parents.
@@ -1964,25 +1964,25 @@ useEffect(() => {
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Exercise Title</label>
-                          <input type="text" value={manualExercise.title} onChange={e => setManualExercise({ ...manualExercise, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Exercise Title</label>
+                          <input type="text" value={manualExercise.title} onChange={e => setManualExercise({ ...manualExercise, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Subject</label>
-                          <select value={manualExercise.subject} onChange={e => setManualExercise({ ...manualExercise, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Subject</label>
+                          <select value={manualExercise.subject} onChange={e => setManualExercise({ ...manualExercise, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             <option value="">Choose subject</option>
                             {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Class</label>
-                          <select value={manualExercise.gradeLevel} onChange={e => setManualExercise({ ...manualExercise, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Class</label>
+                          <select value={manualExercise.gradeLevel} onChange={e => setManualExercise({ ...manualExercise, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Learner</label>
-                          <select value={manualExercise.studentId} onChange={e => setManualExercise({ ...manualExercise, studentId: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Learner</label>
+                          <select value={manualExercise.studentId} onChange={e => setManualExercise({ ...manualExercise, studentId: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             <option value="">Select learner</option>
                             {students.filter(student => matchesClass(student.gradeLevel, manualExercise.gradeLevel)).map(student => (
                               <option key={student.id} value={student.id}>{student.firstName} {student.lastName}</option>
@@ -1990,27 +1990,27 @@ useEffect(() => {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Work Status</label>
-                          <select value={manualExercise.workStatus} onChange={e => setManualExercise({ ...manualExercise, workStatus: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Work Status</label>
+                          <select value={manualExercise.workStatus} onChange={e => setManualExercise({ ...manualExercise, workStatus: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             <option value="completed">Completed</option>
                             <option value="not-done">Not done</option>
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Score</label>
-                          <input type="number" min="0" max="100" value={manualExercise.score} onChange={e => setManualExercise({ ...manualExercise, score: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" placeholder={manualExercise.workStatus === 'not-done' ? 'Not needed' : 'e.g. 85'} />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Score</label>
+                          <input type="number" min="0" max="100" value={manualExercise.score} onChange={e => setManualExercise({ ...manualExercise, score: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" placeholder={manualExercise.workStatus === 'not-done' ? 'Not needed' : 'e.g. 85'} />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Max Score</label>
-                          <input type="number" min="1" value={manualExercise.maxScore} onChange={e => setManualExercise({ ...manualExercise, maxScore: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Max Score</label>
+                          <input type="number" min="1" value={manualExercise.maxScore} onChange={e => setManualExercise({ ...manualExercise, maxScore: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Teacher Feedback</label>
-                          <textarea value={manualExercise.feedback} onChange={e => setManualExercise({ ...manualExercise, feedback: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" placeholder="Add a professional note for the parent and learner." />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Teacher Feedback</label>
+                          <textarea value={manualExercise.feedback} onChange={e => setManualExercise({ ...manualExercise, feedback: e.target.value })} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" placeholder="Add a professional note for the parent and learner." />
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={handleAddManualExercise} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Manual Exercise</button>
+                        <button onClick={handleAddManualExercise} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Manual Exercise</button>
                         <button onClick={() => setShowAddManualExercise(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
@@ -2019,10 +2019,10 @@ useEffect(() => {
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
                     <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
                       <div>
-                        <h3 className="text-lg font-bold text-[#128038]">Recorded Manual Exercises</h3>
+                        <h3 className="text-lg font-bold text-[#2563eb]">Recorded Manual Exercises</h3>
                         <p className="text-sm text-gray-500">These entries are shared with the parent portal for progress tracking.</p>
                       </div>
-                      <span className="bg-blue-50 text-[#128038] text-sm font-bold px-3 py-1 rounded-full">
+                      <span className="bg-blue-50 text-[#2563eb] text-sm font-bold px-3 py-1 rounded-full">
                         {teacherManualExercises.length} recorded
                       </span>
                     </div>
@@ -2034,7 +2034,7 @@ useEffect(() => {
                           <div key={item.id} className="border border-gray-100 rounded-2xl p-4 bg-slate-50">
                             <div className="flex items-start justify-between gap-4 flex-wrap">
                               <div>
-                                <p className="font-bold text-[#128038]">{item.title}</p>
+                                <p className="font-bold text-[#2563eb]">{item.title}</p>
                                 <p className="text-sm text-gray-500">{item.subject} · {item.gradeLevel} · {item.learnerName}</p>
                               </div>
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.workStatus === 'not-done' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -2061,7 +2061,7 @@ useEffect(() => {
                               {assignment.published ? 'Published' : 'Draft'}
                             </button>
                           </div>
-                          <h3 className="text-lg font-bold text-[#128038] mb-2">{assignment.title}</h3>
+                          <h3 className="text-lg font-bold text-[#2563eb] mb-2">{assignment.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{assignment.subject}</p>
                           <p className="text-xs font-bold text-gray-400 mb-2">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 mb-3">{assignment.description}</p>
@@ -2070,8 +2070,8 @@ useEffect(() => {
                             {assignment.published ? 'Learners can now access this assignment.' : 'Draft: publish to send it to learners.'}
                           </div>
                           <div className="flex flex-wrap gap-2 mt-4">
-                            <button onClick={() => handleViewLmsItem(assignment, 'assignment')} className="bg-[#128038] hover:bg-[#15803d] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
-                            <button onClick={() => handleEditLmsItem(assignment, 'assignment')} className="bg-white border border-[#128038] text-[#128038] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleViewLmsItem(assignment, 'assignment')} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(assignment, 'assignment')} className="bg-white border border-[#2563eb] text-[#2563eb] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
                             <button onClick={() => handleDeleteLmsItem(assignment.id, 'assignment')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
                           </div>
                         </div>
@@ -2085,50 +2085,50 @@ useEffect(() => {
                 <div className="mt-8">
                   {showAddQuiz && (
                     <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
-                      <h3 className="text-xl font-bold text-[#128038] mb-6">{editingLmsItem?.type === 'quiz' ? 'Edit Quiz' : 'Create Quiz'}</h3>
+                      <h3 className="text-xl font-bold text-[#2563eb] mb-6">{editingLmsItem?.type === 'quiz' ? 'Edit Quiz' : 'Create Quiz'}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Quiz Title</label>
-                          <input type="text" value={newQuiz.title} onChange={e => setNewQuiz({ ...newQuiz, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Quiz Title</label>
+                          <input type="text" value={newQuiz.title} onChange={e => setNewQuiz({ ...newQuiz, title: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Subject</label>
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Subject</label>
                           {teacherSubjectOptions.length > 0 ? (
-                            <select value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                            <select value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                               <option value="">Choose subject</option>
                               {teacherSubjectOptions.map(subject => <option key={subject} value={subject}>{subject}</option>)}
                             </select>
                           ) : (
-                            <input type="text" value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                            <input type="text" value={newQuiz.subject} onChange={e => setNewQuiz({ ...newQuiz, subject: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                           )}
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Grade Level</label>
-                          <select value={newQuiz.gradeLevel} onChange={e => setNewQuiz({ ...newQuiz, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Grade Level</label>
+                          <select value={newQuiz.gradeLevel} onChange={e => setNewQuiz({ ...newQuiz, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                             {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Due Date</label>
-                          <input type="date" value={newQuiz.dueDate} onChange={e => setNewQuiz({ ...newQuiz, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Due Date</label>
+                          <input type="date" value={newQuiz.dueDate} onChange={e => setNewQuiz({ ...newQuiz, dueDate: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Due Time</label>
-                          <input type="time" value={newQuiz.dueTime} onChange={e => setNewQuiz({ ...newQuiz, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Due Time</label>
+                          <input type="time" value={newQuiz.dueTime} onChange={e => setNewQuiz({ ...newQuiz, dueTime: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-[#128038] mb-2">Duration (minutes)</label>
-                          <input type="number" min="5" value={newQuiz.durationMinutes} onChange={e => setNewQuiz({ ...newQuiz, durationMinutes: Number(e.target.value) })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                          <label className="block text-sm font-bold text-[#2563eb] mb-2">Duration (minutes)</label>
+                          <input type="number" min="5" value={newQuiz.durationMinutes} onChange={e => setNewQuiz({ ...newQuiz, durationMinutes: Number(e.target.value) })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                         </div>
                       </div>
                       <div className="space-y-6">
                         {newQuiz.questions.map((question, index) => (
                           <div key={index} className="bg-blue-50 rounded-2xl p-5 border border-gray-200">
                             <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
-                              <h4 className="font-bold text-[#128038]">Question {index + 1}</h4>
+                              <h4 className="font-bold text-[#2563eb]">Question {index + 1}</h4>
                               <div className="flex items-center gap-3">
-                                <label className="text-sm font-semibold text-[#128038]">Type</label>
-                                <select value={question.type || 'multiple-choice'} onChange={e => handleQuizQuestionChange(index, 'type', e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                                <label className="text-sm font-semibold text-[#2563eb]">Type</label>
+                                <select value={question.type || 'multiple-choice'} onChange={e => handleQuizQuestionChange(index, 'type', e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                                   <option value="multiple-choice">Multiple choice</option>
                                   <option value="fill-in">Fill in the blank</option>
                                   <option value="dropdown">Dropdown</option>
@@ -2138,20 +2138,20 @@ useEffect(() => {
                               </div>
                               <button type="button" onClick={() => removeQuizQuestion(index)} className="text-red-600 text-sm">Remove</button>
                             </div>
-                            <label className="block text-sm font-bold text-[#128038] mb-2">Prompt</label>
-                            <input type="text" value={question.prompt} onChange={e => handleQuizQuestionChange(index, 'prompt', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700 mb-4" />
+                            <label className="block text-sm font-bold text-[#2563eb] mb-2">Prompt</label>
+                            <input type="text" value={question.prompt} onChange={e => handleQuizQuestionChange(index, 'prompt', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 mb-4" />
                             {question.type === 'multiple-choice' || question.type === 'dropdown' ? (
                               <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                   {question.options.map((option, optionIndex) => (
                                     <div key={optionIndex}>
-                                      <label className="block text-sm font-bold text-[#128038] mb-2">Option {optionIndex + 1}</label>
-                                      <input type="text" value={option} onChange={e => handleQuizOptionChange(index, optionIndex, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                                      <label className="block text-sm font-bold text-[#2563eb] mb-2">Option {optionIndex + 1}</label>
+                                      <input type="text" value={option} onChange={e => handleQuizOptionChange(index, optionIndex, e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                                     </div>
                                   ))}
                                 </div>
-                                <label className="block text-sm font-bold text-[#128038] mb-2">Correct Answer</label>
-                                <select value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700">
+                                <label className="block text-sm font-bold text-[#2563eb] mb-2">Correct Answer</label>
+                                <select value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700">
                                   <option value="">Select correct option</option>
                                   {question.options.map((option, optionIndex) => <option key={optionIndex} value={option}>{option || `Option ${optionIndex + 1}`}</option>)}
                                 </select>
@@ -2162,8 +2162,8 @@ useEffect(() => {
                                   <p className="text-xs text-gray-500 mt-2">This response type will be marked manually in Responses after learners submit.</p>
                                 ) : (
                                   <>
-                                    <label className="block text-sm font-bold text-[#128038] mb-2">Correct Answer</label>
-                                    <input type="text" value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#128038] text-gray-700" />
+                                    <label className="block text-sm font-bold text-[#2563eb] mb-2">Correct Answer</label>
+                                    <input type="text" value={question.answer} onChange={e => handleQuizQuestionChange(index, 'answer', e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700" />
                                     <p className="text-xs text-gray-500 mt-2">Learners will type the answer directly.</p>
                                   </>
                                 )}
@@ -2172,9 +2172,9 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
-                      <button type="button" onClick={addQuizQuestion} className="bg-white border border-[#128038] text-[#128038] font-bold px-6 py-3 rounded-xl">Add Question</button>
+                      <button type="button" onClick={addQuizQuestion} className="bg-white border border-[#2563eb] text-[#2563eb] font-bold px-6 py-3 rounded-xl">Add Question</button>
                       <div className="flex gap-4 mt-6">
-                        <button onClick={handleAddQuiz} className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Quiz</button>
+                        <button onClick={handleAddQuiz} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Quiz</button>
                         <button onClick={() => setShowAddQuiz(false)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
                       </div>
                     </div>
@@ -2192,7 +2192,7 @@ useEffect(() => {
                               {quiz.published ? 'Published' : 'Draft'}
                             </button>
                           </div>
-                          <h3 className="text-lg font-bold text-[#128038] mb-2">{quiz.title}</h3>
+                          <h3 className="text-lg font-bold text-[#2563eb] mb-2">{quiz.title}</h3>
                           <p className="text-sm text-gray-500 mb-2">{quiz.subject}</p>
                           <p className="text-xs font-bold text-gray-400 mb-2">{quiz.academicYear || selectedAcademicYear} | {quiz.term || selectedTerm}</p>
                           <p className="text-sm text-gray-600 mb-3">Due {formatDateTime(quiz.dueDate)} · {quiz.durationMinutes} minutes</p>
@@ -2200,8 +2200,8 @@ useEffect(() => {
                             {quiz.published ? 'Learners can now see and take this quiz.' : 'Draft: publish to send it to learners.'}
                           </div>
                           <div className="flex flex-wrap gap-2 mt-4">
-                            <button onClick={() => handleViewLmsItem(quiz, 'quiz')} className="bg-[#128038] hover:bg-[#15803d] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
-                            <button onClick={() => handleEditLmsItem(quiz, 'quiz')} className="bg-white border border-[#128038] text-[#128038] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
+                            <button onClick={() => handleViewLmsItem(quiz, 'quiz')} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-3 py-2 rounded-full">View</button>
+                            <button onClick={() => handleEditLmsItem(quiz, 'quiz')} className="bg-white border border-[#2563eb] text-[#2563eb] text-xs font-bold px-3 py-2 rounded-full">Edit</button>
                             <button onClick={() => handleDeleteLmsItem(quiz.id, 'quiz')} className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-2 rounded-full">Delete</button>
                           </div>
                         </div>
@@ -2213,7 +2213,7 @@ useEffect(() => {
 
               {lmsView === 'submissions' && (
                 <div>
-                  <h3 className="text-2xl font-bold text-[#128038] mb-4">Student Submissions</h3>
+                  <h3 className="text-2xl font-bold text-[#2563eb] mb-4">Student Submissions</h3>
                   {teacherSubmissionRecords.length === 0 ? (
                     <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center text-gray-400">No submission records are available yet.</div>
                   ) : (
@@ -2223,7 +2223,7 @@ useEffect(() => {
                           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                             <div>
                               <p className="text-sm text-gray-500 uppercase tracking-[0.2em]">{record.type} Submission</p>
-                              <h4 className="text-xl font-bold text-[#128038] mt-2">{record.title}</h4>
+                              <h4 className="text-xl font-bold text-[#2563eb] mt-2">{record.title}</h4>
                               <p className="text-sm text-gray-500">Student: {record.learnerName || 'Unknown'} · {record.learnerEmail || 'No email'}</p>
                             </div>
                             <div className="text-sm text-gray-500 text-right">
@@ -2237,7 +2237,7 @@ useEffect(() => {
                             <div className="space-y-3 mt-3">
                               {(record.questions || []).map((question, idx) => (
                                 <div key={idx} className="rounded-2xl p-3 bg-white border border-gray-200">
-                                  <p className="font-bold text-[#128038]">Q{idx + 1}. {question.prompt}</p>
+                                  <p className="font-bold text-[#2563eb]">Q{idx + 1}. {question.prompt}</p>
                                   <p className="text-sm text-gray-700 mt-1">Your answer: {question.selected || 'No answer'}</p>
                               <p className="text-sm text-gray-500">Correct answer: {question.answer}</p>
                                 </div>
@@ -2253,7 +2253,7 @@ useEffect(() => {
                             </div>
                           )}
                           <div className="flex flex-wrap gap-3">
-                            <button onClick={() => handleDownloadSubmissionPdf(record)} className="bg-[#128038] hover:bg-[#15803d] text-white text-xs font-bold px-4 py-2 rounded-full">Download PDF</button>
+                            <button onClick={() => handleDownloadSubmissionPdf(record)} className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-4 py-2 rounded-full">Download PDF</button>
                             {['assignment', 'quiz'].includes(record.type) && (
                               <button onClick={() => handleMarkAssignmentSubmission(record, index)} className="bg-blue-600 hover:bg-blue-400 text-white text-xs font-bold px-4 py-2 rounded-full">
                                 {record.marked ? 'Update Mark' : `Mark ${record.type === 'quiz' ? 'Quiz' : 'Assignment'}`}

@@ -37,9 +37,9 @@ const menuItems = [
 
 const stats = [
   { label: 'Total Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
-  { label: 'Admissions', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
+  { label: 'Admissions', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
   { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
-  { label: 'Staff Members', value: '0', color: 'bg-[#15803d]', textColor: 'text-purple-200' },
+  { label: 'Staff Members', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
 ]
 
 const classes = ['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
@@ -1281,7 +1281,7 @@ const handleAdminPasswordReset = async (id, email) => {
   return (
    <div className="portal-shell flex bg-gray-100">
       {/* Sidebar */}
-     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#15803d' }}>
+     <div className={`portal-sidebar ${sidebarOpen ? 'is-open w-64' : 'w-20'} text-white transition-all duration-300 flex flex-col h-screen overflow-y-auto`} style={{ background: '#1d4ed8' }}>
         <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
           {sidebarOpen && (
             <div className="flex items-center gap-2">
@@ -1299,8 +1299,8 @@ const handleAdminPasswordReset = async (id, email) => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: activeMenu === item.id ? 'rgba(255,255,255,0.18)' : 'transparent',
-                color: activeMenu === item.id ? '#4ade80' : 'rgba(255,255,255,0.85)',
-                borderLeft: activeMenu === item.id ? '3px solid #4ade80' : '3px solid transparent',
+                color: activeMenu === item.id ? '#60a5fa' : 'rgba(255,255,255,0.85)',
+                borderLeft: activeMenu === item.id ? '3px solid #60a5fa' : '3px solid transparent',
                 fontWeight: activeMenu === item.id ? '700' : '400'
               }}>
               {item.icon}{sidebarOpen && <span className="text-sm">{item.label}</span>}
@@ -1545,7 +1545,7 @@ const handleAdminPasswordReset = async (id, email) => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     <div className="bg-blue-600 text-white rounded-2xl p-6 shadow-md"><p className="text-cyan-100 text-sm mb-1">Total Students</p><p className="text-3xl font-bold">{students.length}</p></div>
-                    <div className="bg-[#128038] text-white rounded-2xl p-6 shadow-md"><p className="text-green-200 text-sm mb-1">Total Collected</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p></div>
+                    <div className="bg-[#2563eb] text-white rounded-2xl p-6 shadow-md"><p className="text-green-200 text-sm mb-1">Total Collected</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.amountPaid, 0).toFixed(2)}</p></div>
                     <div className="bg-blue-500 text-gray-800 rounded-2xl p-6 shadow-md"><p className="text-gray-800/70 text-sm mb-1">Total Outstanding</p><p className="text-3xl font-bold">GH₵ {feePayments.reduce((acc, p) => acc + p.balance, 0).toFixed(2)}</p></div>
                   </div>
                 </div>
@@ -1968,7 +1968,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       <label className="block text-sm font-bold text-gray-800 mb-2">Class Teacher For (optional)</label>
                       <div className="grid grid-cols-2 gap-2">
                         {classes.filter(c => c !== 'All').map(className => (
-                          <button key={className} type="button" onClick={() => toggleSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classTeacherClasses.includes(className) ? 'bg-[#128038] text-white border-[#128038]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                          <button key={className} type="button" onClick={() => toggleSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${newUser.classTeacherClasses.includes(className) ? 'bg-[#2563eb] text-white border-[#2563eb]' : 'bg-white text-gray-700 border-gray-200'}`}>
                             {className}
                           </button>
                         ))}
@@ -2096,7 +2096,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-bold text-[#15803d]">{u.name}</h3>
+                                <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                   {u.active ? 'Active' : 'Inactive'}
                                 </span>
@@ -2137,7 +2137,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="font-bold text-[#15803d]">{s.firstName} {s.lastName}</h3>
+                              <h3 className="font-bold text-[#1d4ed8]">{s.firstName} {s.lastName}</h3>
                               <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -2171,7 +2171,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             <div className="flex items-center justify-between">
                               <div>
                                 <div className="flex items-center gap-2 mb-2">
-                                  <h3 className="font-bold text-[#15803d]">{u.name}</h3>
+                                  <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
                                   <span className={`text-xs font-semibold px-2 py-1 rounded-full ${u.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                     {u.active ? 'Active' : 'Inactive'}
                                   </span>
@@ -2297,7 +2297,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             <label className="block text-sm font-bold text-gray-800 mb-2">Class Teacher For</label>
                             <div className="grid grid-cols-2 gap-2">
                               {classes.filter(c => c !== 'All').map(className => (
-                                <button key={className} type="button" onClick={() => toggleEditSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classTeacherClasses.includes(className) ? 'bg-[#128038] text-white border-[#128038]' : 'bg-white text-gray-700 border-gray-200'}`}>
+                                <button key={className} type="button" onClick={() => toggleEditSelection('classTeacherClasses', className)} className={`text-left px-3 py-2 rounded-xl border ${editingUser.classTeacherClasses.includes(className) ? 'bg-[#2563eb] text-white border-[#2563eb]' : 'bg-white text-gray-700 border-gray-200'}`}>
                                   {className}
                                 </button>
                               ))}
@@ -2774,7 +2774,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       <div className="relative">
                         {member.photo ? <img src={member.photo} alt={member.name} className="w-full h-48 object-cover" loading="lazy" decoding="async" /> :
                           <div className="w-full h-48 bg-blue-600 flex items-center justify-center"><span className="text-cyan-600 text-4xl font-bold">{member.name?.charAt(0)}</span></div>}
-                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-gray-800' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#128038] text-white'}`}>
+                        <span className={`absolute top-2 left-2 text-xs font-bold px-3 py-1 rounded-full ${member.category === 'leadership' ? 'bg-blue-500 text-gray-800' : member.category === 'teaching' ? 'bg-blue-600 text-white' : 'bg-[#2563eb] text-white'}`}>
                           {member.category === 'leadership' ? 'Leadership' : member.category === 'teaching' ? 'Teaching' : 'Support'}
                         </span>
                       </div>
@@ -2782,7 +2782,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         <h3 className="font-bold text-gray-800 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
                         {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Assigned Classes: {member.classes.join(', ')}</p>}
-                        {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#128038] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
+                        {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#2563eb] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
                         {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
@@ -3371,7 +3371,7 @@ const handleAdminPasswordReset = async (id, email) => {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#15803d"
+        accentColor="#1d4ed8"
       />
     )}
     </div>

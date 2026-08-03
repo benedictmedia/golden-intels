@@ -49,7 +49,7 @@ export default function FeeAlertModal({ alerts, onPayNow }) {
         {/* Single Action Button */}
         <button
           onClick={() => onPayNow(alert)}
-          className="w-full bg-[#128038] hover:bg-[#15803d] text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
         >
           Proceed to Payment
           <ArrowRight size={18} />

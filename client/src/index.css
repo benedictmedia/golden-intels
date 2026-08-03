@@ -5,13 +5,13 @@
 @tailwind utilities;
 
 /* ==============================
-   School Colour Palette — Royal Blue (primary) + Summer Green (secondary)
+   School Colour Palette — Royal Blue + White, red used sparingly for alerts
    ============================== */
 @layer base {
   :root {
     --color-primary: #1d4ed8;   /* Royal Blue-700 — nav bg, important headers */
     --color-secondary: #2563eb; /* Royal Blue-600 — CTA buttons, key links */
-    --color-accent: #4ade80;    /* Summer green-400 — hover states, highlights */
+    --color-accent: #60a5fa;    /* Royal Blue-400 — hover states, highlights */
     --color-bg-light: #F9FAFB;  /* Light neutral page background */
     --color-text-dark: #1F2937; /* Dark grey/near-black text for contrast */
   }
@@ -34,7 +34,7 @@
   }
 
   .section-bg-alt {
-    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #eff6ff 100%);
   }
 
   .card-hover {

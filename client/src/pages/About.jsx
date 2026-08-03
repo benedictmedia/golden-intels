@@ -150,7 +150,7 @@ export default function About() {
 
           {/* Mission */}
           <div className="bg-[#2563eb] text-white rounded-2xl p-10 shadow-xl">
-            <div className="text-[#4ade80] mb-4">
+            <div className="text-[#60a5fa] mb-4">
               <Target size={40} />
             </div>
 
@@ -165,7 +165,7 @@ export default function About() {
 
           {/* Vision */}
           <div className="bg-[#2563eb] text-white rounded-2xl p-10 shadow-xl">
-            <div className="text-[#4ade80] mb-4">
+            <div className="text-[#60a5fa] mb-4">
               <Eye size={40} />
             </div>
 
@@ -182,7 +182,7 @@ export default function About() {
       </section>
 
       {/* Core Values */}
-      <section className="py-20 bg-gradient-to-br from-[#ecfdf5] to-[#d1fae5]">
+      <section className="py-20 bg-gradient-to-br from-[#eff6ff] to-[#dbeafe]">
         <div className="max-w-7xl mx-auto px-4">
 
           <div className="text-center mb-14">
@@ -199,7 +199,7 @@ export default function About() {
             {values.map((value, index) => (
               <div
                 key={index}
-                className="bg-white border-t-4 border-[#4ade80] rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition"
+                className="bg-white border-t-4 border-[#60a5fa] rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition"
               >
                 <div className="text-[#2563eb] flex justify-center mb-4">
                   <Heart size={36} />
@@ -237,9 +237,9 @@ export default function About() {
             {goals.map((goal, index) => (
               <div
                 key={index}
-                className="flex items-start gap-4 bg-[#f9fafb] border-l-4 border-[#22c55e] rounded-xl p-6 shadow-md"
+                className="flex items-start gap-4 bg-[#f9fafb] border-l-4 border-[#3b82f6] rounded-xl p-6 shadow-md"
               >
-                <div className="text-[#22c55e] mt-1">
+                <div className="text-[#3b82f6] mt-1">
                   <CheckCircle size={24} />
                 </div>
 
@@ -254,7 +254,7 @@ export default function About() {
       </section>
 
       {/* Oxford Accreditation */}
-      <section className="py-20 bg-gradient-to-br from-[#dbeafe] to-[#f0fdf4]">
+      <section className="py-20 bg-gradient-to-br from-[#dbeafe] to-[#eff6ff]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-14">
 
           {/* Left: Text */}

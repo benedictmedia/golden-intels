@@ -136,7 +136,7 @@ export default function ParentMessages() {
       {/* ── Header ── */}
       <div className="bg-[#1d4ed8] text-white px-4 py-3 flex items-center gap-3 flex-shrink-0">
         <div className="relative">
-          <div className="w-11 h-11 rounded-full bg-[#128038] flex items-center justify-center font-bold text-[#1d4ed8] text-lg select-none">A</div>
+          <div className="w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center font-bold text-[#1d4ed8] text-lg select-none">A</div>
           <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#1d4ed8] ${connected ? 'bg-green-400' : 'bg-gray-400'}`} />
         </div>
         <div className="flex-1">
@@ -147,7 +147,7 @@ export default function ParentMessages() {
               : <><WifiOff size={10} className="text-gray-400" /> Connecting…</>}
           </p>
         </div>
-        <div className="bg-[#128038]/20 text-[#128038] text-xs font-bold px-3 py-1 rounded-full">
+        <div className="bg-[#2563eb]/20 text-[#2563eb] text-xs font-bold px-3 py-1 rounded-full">
           Golden-Intels
         </div>
       </div>

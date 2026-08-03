@@ -283,7 +283,7 @@ export default function TeacherClassroom() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="w-10 h-10 rounded-xl bg-[#1d4ed8] flex items-center justify-center">
-              <Video size={20} className="text-[#128038]" />
+              <Video size={20} className="text-[#2563eb]" />
             </div>
             <div>
               <h2 className="text-2xl font-bold font-serif text-[#1d4ed8]">Golden Classroom</h2>
@@ -304,7 +304,7 @@ export default function TeacherClassroom() {
         {[
           { label: 'Total Sessions', value: sessions.length, icon: <LayoutGrid size={18} />, color: 'text-[#1d4ed8]', bg: 'bg-blue-50' },
           { label: 'Live Now', value: liveSessions.length, icon: <Wifi size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
-          { label: 'Upcoming', value: upcomingSessions.length, icon: <Calendar size={18} />, color: 'text-[#128038]', bg: 'bg-green-50' },
+          { label: 'Upcoming', value: upcomingSessions.length, icon: <Calendar size={18} />, color: 'text-[#2563eb]', bg: 'bg-green-50' },
           { label: 'Completed', value: sessions.filter(s => s.status === 'ended').length, icon: <CheckCircle size={18} />, color: 'text-gray-500', bg: 'bg-gray-50' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
@@ -411,7 +411,7 @@ export default function TeacherClassroom() {
                         </button>
                         <button
                           onClick={() => handleStartSession(session)}
-                          className="bg-[#128038] hover:bg-[#15803d] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+                          className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
                         >
                           <Play size={12} fill="white" /> Start Class
                         </button>
@@ -454,12 +454,12 @@ export default function TeacherClassroom() {
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
             <div className="bg-[#1d4ed8] text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Video size={20} className="text-[#128038]" />
+                <Video size={20} className="text-[#2563eb]" />
                 <h2 className="text-xl font-bold font-serif">
                   {editingSession ? 'Edit Session' : 'Schedule a Class'}
                 </h2>
               </div>
-              <button onClick={() => { setShowForm(false); setEditingSession(null); resetForm() }} className="hover:text-[#128038] transition-colors">
+              <button onClick={() => { setShowForm(false); setEditingSession(null); resetForm() }} className="hover:text-[#2563eb] transition-colors">
                 <X size={22} />
               </button>
             </div>

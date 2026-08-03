@@ -123,8 +123,8 @@ export default function Contact() {
           </div>
 
           {/* Contact Form */}
-          <form onSubmit={handleSubmit} className="rounded-[2rem] bg-slate-900 p-6 sm:p-8 shadow-2xl text-white md:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-r from-[#2563eb] to-violet-600 p-5 shadow-lg">
+          <form onSubmit={handleSubmit} className="rounded-[2rem] bg-gradient-to-br from-[#1e3a8a] to-[#1d4ed8] p-6 sm:p-8 shadow-2xl text-white md:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-3 rounded-3xl bg-white/10 p-5 shadow-lg">
               <div className="rounded-2xl bg-white/10 p-3">
                 <MessageCircle size={24} />
               </div>
@@ -134,85 +134,85 @@ export default function Contact() {
               </div>
             </div>
 
-            <p className="mt-6 text-slate-300">Fill in your details and a member of our team will respond within one business day.</p>
+            <p className="mt-6 text-blue-100">Fill in your details and a member of our team will respond within one business day.</p>
 
             <div className="mt-8 grid gap-6">
               <label className="block">
-                <span className="text-sm font-medium text-slate-200">Full Name</span>
+                <span className="text-sm font-medium text-blue-100">Full Name</span>
                 <input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/30"
+                  className="mt-2 w-full rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition focus:border-white focus:ring-2 focus:ring-white/30"
                   placeholder="Your full name"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-200">Email address</span>
+                <span className="text-sm font-medium text-blue-100">Email address</span>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/30"
+                  className="mt-2 w-full rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition focus:border-white focus:ring-2 focus:ring-white/30"
                   placeholder="you@example.com"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-200">Phone number</span>
+                <span className="text-sm font-medium text-blue-100">Phone number</span>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/30"
+                  className="mt-2 w-full rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition focus:border-white focus:ring-2 focus:ring-white/30"
                   placeholder="+233 24 000 0000"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-200">Subject</span>
+                <span className="text-sm font-medium text-blue-100">Subject</span>
                 <input
                   type="text"
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-green-500 focus:ring-2 focus:ring-green-500/30"
+                  className="mt-2 w-full rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition focus:border-white focus:ring-2 focus:ring-white/30"
                   placeholder="Reason for your message"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-200">Message</span>
+                <span className="text-sm font-medium text-blue-100">Message</span>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   required
                   rows="6"
-                  className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none transition focus:border-[#2563eb] focus:ring-2 focus:ring-[#2563eb]/30"
+                  className="mt-2 w-full rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-white/50 outline-none transition focus:border-white focus:ring-2 focus:ring-white/30"
                   placeholder="How can we help you today?"
                 />
               </label>
 
               {success && (
-                <div className="flex items-center gap-3 bg-green-900/40 border border-green-500 text-green-300 px-4 py-3 rounded-2xl">
+                <div className="flex items-center gap-3 bg-white/10 border border-white/30 text-white px-4 py-3 rounded-2xl">
                   <CheckCircle size={18} />
                   <p className="text-sm font-semibold">Message sent! We'll get back to you within 24 hours of working days.</p>
                 </div>
               )}
               {error && (
-                <div className="bg-red-900/40 border border-red-500 text-red-300 px-4 py-3 rounded-2xl text-sm">{error}</div>
+                <div className="bg-red-900/40 border border-red-500 text-red-100 px-4 py-3 rounded-2xl text-sm">{error}</div>
               )}
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center justify-center rounded-3xl bg-gradient-to-r from-[#2563eb] via-violet-600 to-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:opacity-50"
+                className="inline-flex items-center justify-center rounded-3xl bg-white px-6 py-3.5 text-sm font-semibold text-[#1e3a8a] shadow-lg transition hover:scale-[1.02] hover:bg-blue-50 disabled:opacity-50"
         >
           {loading ? 'Sending...' : 'Send Message'}
         </button>

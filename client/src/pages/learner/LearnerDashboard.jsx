@@ -17,8 +17,8 @@ const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029
 const terms = ['Term 1', 'Term 2', 'Term 3']
 
 const AVATAR_COLORS = [
-  '#1d4ed8', '#15803d', '#128038', '#b45309', '#0369a1',
-  '#128038', '#be123c', '#1d4ed8', '#166534', '#92400e'
+  '#1d4ed8', '#1d4ed8', '#2563eb', '#b45309', '#0369a1',
+  '#2563eb', '#be123c', '#1d4ed8', '#1e40af', '#92400e'
 ]
 const getAvatarColor = (name = '') =>
   AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
@@ -315,7 +315,7 @@ export default function LearnerDashboard() {
     <div className="portal-shell flex" style={{ background: '#0f1729' }}>
 
       {/* ── Sidebar ── */}
-      <div className={`portal-sidebar ${sidebarOpen ? 'is-open' : ''} w-64 flex flex-col flex-shrink-0 transition-all duration-300`} style={{ background: 'linear-gradient(180deg, #2563eb 0%, #2563eb 60%, #15803d 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className={`portal-sidebar ${sidebarOpen ? 'is-open' : ''} w-64 flex flex-col flex-shrink-0 transition-all duration-300`} style={{ background: 'linear-gradient(180deg, #2563eb 0%, #2563eb 60%, #1d4ed8 100%)', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Logo */}
         <div className="px-6 pt-8 pb-6">
@@ -440,11 +440,11 @@ export default function LearnerDashboard() {
                   {/* Hero card */}
 <div className="rounded-3xl shadow-lg" style={{ background: '#fff', border: '1px solid #e2e8f0' }}>
   {/* Banner */}
-  <div className="h-28 rounded-t-3xl relative" style={{ background: 'linear-gradient(135deg, #2563eb 0%, #15803d 50%, #2563eb 100%)' }}>
+  <div className="h-28 rounded-t-3xl relative" style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #2563eb 100%)' }}>
     <div className="absolute inset-0 rounded-t-3xl opacity-20"
       style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E\")" }} />
     <div className="absolute top-3 right-4 text-xs font-bold px-3 py-1 rounded-full"
-      style={{ background: 'rgba(255,255,0,0.2)', color: '#4ade80', border: '1px solid rgba(255,255,0,0.5)' }}>
+      style={{ background: 'rgba(255,255,0,0.2)', color: '#60a5fa', border: '1px solid rgba(255,255,0,0.5)' }}>
       {studentProfile?.status?.toUpperCase() || 'ACTIVE'}
     </div>
   </div>
@@ -481,10 +481,10 @@ export default function LearnerDashboard() {
       {[
         { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#2563eb' },
         { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#2563eb' },
-        { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#15803d' },
+        { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#1d4ed8' },
         { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#2563eb' },
         { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#2563eb' },
-        { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#059669' },
+        { icon: Award, label: 'Status', value: studentProfile?.status ? studentProfile.status.charAt(0).toUpperCase() + studentProfile.status.slice(1) : 'Active', color: '#2563eb' },
         /* { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' } */
       ].map(({ icon: Icon, label, value, color }) => (
         <div key={label} className="flex items-center gap-4 p-4 rounded-2xl"
@@ -526,8 +526,8 @@ export default function LearnerDashboard() {
                   <div className="grid grid-cols-3 gap-4">
                     {[
                       { label: 'Lessons', value: learnerLessons.length, icon: BookOpen, color: '#2563eb', bg: '#eff6ff' },
-                      { label: 'Assignments', value: learnerAssignments.length, icon: ClipboardList, color: '#128038', bg: '#f0fdf4' },
-                      { label: 'Completion', value: `${completionRate}%`, icon: CheckCircle, color: '#059669', bg: '#f0fdf4' },
+                      { label: 'Assignments', value: learnerAssignments.length, icon: ClipboardList, color: '#2563eb', bg: '#eff6ff' },
+                      { label: 'Completion', value: `${completionRate}%`, icon: CheckCircle, color: '#2563eb', bg: '#eff6ff' },
                     ].map(({ label, value, icon: Icon, color, bg }) => (
                       <div key={label} className="rounded-2xl p-5 text-center shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: `${color}20` }}>
@@ -549,9 +549,9 @@ export default function LearnerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: 'Lessons', value: learnerLessons.length, color: '#2563eb', bg: '#eff6ff' },
-                  { label: 'Assignments', value: learnerAssignments.length, color: '#128038', bg: '#f0fdf4' },
+                  { label: 'Assignments', value: learnerAssignments.length, color: '#2563eb', bg: '#eff6ff' },
                   { label: 'Quizzes', value: learnerQuizzes.length, color: '#d97706', bg: '#fffbeb' },
-                  { label: 'Completion', value: `${completionRate}%`, color: '#059669', bg: '#f0fdf4' },
+                  { label: 'Completion', value: `${completionRate}%`, color: '#2563eb', bg: '#eff6ff' },
                 ].map(({ label, value, color, bg }) => (
                   <div key={label} className="rounded-2xl p-5 shadow-sm" style={{ background: bg, border: `1px solid ${color}20` }}>
                     <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: '#64748b' }}>{label}</p>
@@ -579,7 +579,7 @@ export default function LearnerDashboard() {
                   <h3 className="font-bold mb-4" style={{ color: '#1e293b' }}>Progress Summary</h3>
                   <div className="space-y-3">
                     {[
-                      { label: 'Assignments completed', value: `${completedAssignmentCount} / ${learnerAssignments.length}`, color: '#128038' },
+                      { label: 'Assignments completed', value: `${completedAssignmentCount} / ${learnerAssignments.length}`, color: '#2563eb' },
                       { label: 'Quizzes completed', value: `${completedQuizCount} / ${learnerQuizzes.length}`, color: '#2563eb' },
                       { label: 'Latest quiz score', value: latestQuizScore, color: '#d97706' },
                     ].map(({ label, value, color }) => (
@@ -601,7 +601,7 @@ export default function LearnerDashboard() {
                       ...learnerQuizzes.slice(0, 2).map(i => ({ ...i, kind: 'Quiz' }))
                     ].map(item => (
                       <div key={item.id} className="flex items-center gap-4 p-3 rounded-xl" style={{ background: '#f8fafc' }}>
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.kind === 'Quiz' ? '#d97706' : '#128038' }} />
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.kind === 'Quiz' ? '#d97706' : '#2563eb' }} />
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm truncate" style={{ color: '#1e293b' }}>{item.title}</p>
                           <p className="text-xs" style={{ color: '#94a3b8' }}>{item.kind} · {item.subject}</p>
@@ -633,7 +633,7 @@ export default function LearnerDashboard() {
                     <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{lesson.gradeLevel}</span>
-                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#f0fdf4', color: '#128038' }}>{lesson.subject}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{lesson.subject}</span>
                       </div>
                       <h4 className="text-lg font-bold mb-1" style={{ color: '#1e293b' }}>{lesson.title}</h4>
                       <p className="text-xs mb-4" style={{ color: '#94a3b8' }}>{lesson.academicYear || selectedAcademicYear} · {lesson.term || selectedTerm}</p>
@@ -661,12 +661,12 @@ export default function LearnerDashboard() {
                           onClick={() => setActiveAssessmentSubject(folder.subject)}
                           className="text-left bg-white rounded-2xl p-5 shadow-sm transition-all"
                           style={{
-                            border: selected ? '2px solid #128038' : '1px solid #e2e8f0',
+                            border: selected ? '2px solid #2563eb' : '1px solid #e2e8f0',
                             boxShadow: selected ? '0 12px 24px rgba(124,58,237,0.12)' : undefined
                           }}
                         >
                           <div className="flex items-start justify-between gap-4 mb-4">
-                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#f0fdf4' : '#eff6ff', color: selected ? '#128038' : '#2563eb' }}>
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: selected ? '#eff6ff' : '#eff6ff', color: selected ? '#2563eb' : '#2563eb' }}>
                               <FolderOpen size={26} />
                             </div>
                             <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: '#f8fafc', color: '#64748b' }}>
@@ -717,8 +717,8 @@ export default function LearnerDashboard() {
                           <p className="text-sm mb-4 leading-relaxed" style={{ color: '#374151' }}>{assignment.description}</p>
                           {submission ? (
                             <div className="space-y-3">
-                              <div className="rounded-xl p-4" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                                <p className="font-bold text-sm mb-1" style={{ color: '#166534' }}>✓ Submitted</p>
+                              <div className="rounded-xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                                <p className="font-bold text-sm mb-1" style={{ color: '#1e40af' }}>✓ Submitted</p>
                                 <p className="text-sm" style={{ color: '#374151' }}>{submission.answer}</p>
                                 <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
                               </div>
@@ -737,11 +737,11 @@ export default function LearnerDashboard() {
                                 onChange={e => handleAssignmentAnswerChange(assignment.id, e.target.value)}
                                 rows={4}
                                 className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 resize-none"
-                                style={{ border: '1px solid #e2e8f0', color: '#374151', focusRingColor: '#128038' }}
+                                style={{ border: '1px solid #e2e8f0', color: '#374151', focusRingColor: '#2563eb' }}
                               />
                               <button onClick={() => handleSubmitAssignment(assignment)}
                                 className="font-bold px-6 py-2.5 rounded-xl text-sm transition-all"
-                                style={{ background: 'linear-gradient(135deg, #128038, #2563eb)', color: '#fff' }}>
+                                style={{ background: 'linear-gradient(135deg, #2563eb, #2563eb)', color: '#fff' }}>
                                 Submit Assignment
                               </button>
                             </div>
@@ -797,8 +797,8 @@ export default function LearnerDashboard() {
 
                           {submission ? (
                             <div className="space-y-4">
-                              <div className="rounded-xl p-4" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-                                <p className="font-bold text-sm" style={{ color: '#166534' }}>✓ Quiz submitted — Score: {submission.score} / {quiz.questions.length}</p>
+                              <div className="rounded-xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                                <p className="font-bold text-sm" style={{ color: '#1e40af' }}>✓ Quiz submitted — Score: {submission.score} / {quiz.questions.length}</p>
                                 <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
                               </div>
                               <div className="space-y-3">
@@ -807,10 +807,10 @@ export default function LearnerDashboard() {
                                   const needsManual = ['short-answer', 'paragraph'].includes(q.type)
                                   const isCorrect = !needsManual && String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase()
                                   return (
-                                    <div key={idx} className="rounded-xl p-4" style={{ background: needsManual ? '#fffbeb' : isCorrect ? '#f0fdf4' : '#fef2f2', border: `1px solid ${needsManual ? '#fde68a' : isCorrect ? '#bbf7d0' : '#fecaca'}` }}>
+                                    <div key={idx} className="rounded-xl p-4" style={{ background: needsManual ? '#fffbeb' : isCorrect ? '#eff6ff' : '#fef2f2', border: `1px solid ${needsManual ? '#fde68a' : isCorrect ? '#bfdbfe' : '#fecaca'}` }}>
                                       <div className="flex items-start justify-between gap-4">
                                         <p className="font-bold text-sm" style={{ color: '#1e293b' }}>Q{idx + 1}. {q.prompt}</p>
-                                        <span className="text-xs font-bold flex-shrink-0" style={{ color: needsManual ? '#d97706' : isCorrect ? '#166534' : '#dc2626' }}>
+                                        <span className="text-xs font-bold flex-shrink-0" style={{ color: needsManual ? '#d97706' : isCorrect ? '#1e40af' : '#dc2626' }}>
                                           {needsManual ? 'Awaiting mark' : isCorrect ? '✔ Correct' : '✖ Incorrect'}
                                         </span>
                                       </div>
@@ -870,7 +870,7 @@ export default function LearnerDashboard() {
                               })}
                               <button onClick={() => handleSubmitQuiz(quiz)}
                                 className="font-bold px-6 py-2.5 rounded-xl text-sm"
-                                style={{ background: 'linear-gradient(135deg, #128038, #2563eb)', color: '#fff' }}>
+                                style={{ background: 'linear-gradient(135deg, #2563eb, #2563eb)', color: '#fff' }}>
                                 Submit Quiz
                               </button>
                             </div>
@@ -907,7 +907,7 @@ export default function LearnerDashboard() {
     {showChangePassword && (
       <ChangePasswordModal
         onClose={() => setShowChangePassword(false)}
-        accentColor="#15803d"
+        accentColor="#1d4ed8"
       />
     )}
     </div>

@@ -11,8 +11,8 @@ const getInitials = (name = '') =>
   name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
 
 const AVATAR_COLORS = [
-  '#1d4ed8', '#128038', '#15803d', '#b45309', '#0369a1',
-  '#065f46', '#128038', '#be123c', '#1d4ed8', '#166534'
+  '#1d4ed8', '#2563eb', '#1d4ed8', '#b45309', '#0369a1',
+  '#065f46', '#2563eb', '#be123c', '#1d4ed8', '#1e40af'
 ]
 const avatarColor = (name = '') =>
   AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
@@ -210,7 +210,7 @@ export default function AdminMessages() {
         {/* Header */}
         <div className="bg-[#1d4ed8] text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-[#128038] flex items-center justify-center font-bold text-[#1d4ed8] text-sm select-none">
+            <div className="w-9 h-9 rounded-full bg-[#2563eb] flex items-center justify-center font-bold text-[#1d4ed8] text-sm select-none">
               {user?.name?.charAt(0)}
             </div>
             <div>

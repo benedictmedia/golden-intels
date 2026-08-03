@@ -28,7 +28,7 @@ export default function AcademicExcellence() {
         <div className="flex-1">
 
           {/* Badge */}
-          <span className="inline-block bg-[#128038] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Academic Excellence
           </span>
 
@@ -52,7 +52,7 @@ export default function AcademicExcellence() {
                 className="flex items-center gap-3 bg-white rounded-xl p-4 shadow-md border border-[#D6E4FF]"
               >
 
-                <div className="text-[#128038]">
+                <div className="text-[#2563eb]">
                   {item.icon}
                 </div>
 

@@ -33,57 +33,37 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
-        // Secondary: Summer green — secondary buttons, icons, highlights,
-        // subtle section backgrounds, hover states, success messages (~10%)
-        // 'fuchsia', 'emerald', 'violet' and 'purple' all point here so any
-        // existing class using those names renders as summer green instead.
+        // Secondary/accent: royal blue as well (green has been retired).
+        // 'fuchsia', 'emerald', 'violet', 'purple' AND 'green' all point to
+        // the same royal-blue scale as 'blue'/'cyan' above, so every existing
+        // bg-green-*, text-emerald-*, hover:violet-*, etc. class in the app
+        // renders as royal blue instead of green — no per-component edits
+        // needed. Only 'red'/'rose'/'amber' are left as Tailwind defaults so
+        // errors, warnings and the occasional accent still read as red.
         fuchsia: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#128038',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
         },
         emerald: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#128038',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
         },
         violet: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#128038',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
         },
         purple: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#128038',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
+        },
+        green: {
+          50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+          400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+          800: '#1e40af', 900: '#1e3a8a',
         },
       },
       fontFamily: {

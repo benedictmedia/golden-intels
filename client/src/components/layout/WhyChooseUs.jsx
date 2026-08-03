@@ -43,13 +43,13 @@ export default function WhyChooseUs() {
         <div className="text-center mb-14">
 
           {/* Badge */}
-          <span className="inline-block bg-[#128038] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Why Choose Us
           </span>
 
           {/* Title */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-4">
-            Why Choose <span className="text-[#4ade80]">Golden-Intels</span>
+            Why Choose <span className="text-[#60a5fa]">Golden-Intels</span>
           </h2>
 
           {/* Description */}
@@ -69,7 +69,7 @@ export default function WhyChooseUs() {
             >
 
               {/* Icon */}
-              <div className="text-[#128038] mb-4">
+              <div className="text-[#2563eb] mb-4">
                 {reason.icon}
               </div>
 

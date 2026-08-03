@@ -34,13 +34,13 @@ export default function CampusLife() {
         <div className="flex-1">
 
           {/* Badge */}
-          <span className="inline-block bg-[#128038] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
+          <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-4 py-1 rounded-full mb-4 shadow-md">
             Activities & Clubs
           </span>
 
           {/* Heading */}
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-white mb-6 leading-tight">
-            Discover Our <span className="text-[#4ade80]">Activities & Clubs</span>
+            Discover Our <span className="text-[#60a5fa]">Activities & Clubs</span>
           </h2>
 
           {/* Description */}
@@ -58,7 +58,7 @@ export default function CampusLife() {
                 className="flex items-center gap-3 bg-white/10 rounded-xl p-4 border border-white/20 shadow-md"
               >
 
-                <div className="text-[#128038]">
+                <div className="text-[#2563eb]">
                   {item.icon}
                 </div>
 
@@ -75,7 +75,7 @@ export default function CampusLife() {
           {/* Button */}
           <Link
             to="/campus-life"
-            className="inline-block bg-[#128038] hover:bg-[#6D28D9] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
+            className="inline-block bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-8 py-3 rounded-lg text-lg transition-all duration-300 shadow-lg"
           >
             Discover Our Activities & Clubs
           </Link>

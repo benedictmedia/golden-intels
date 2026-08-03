@@ -39,7 +39,7 @@ function Countdown({ scheduledAt }) {
   const m = Math.floor((diff % 3600000) / 60000)
   const s = Math.floor((diff % 60000) / 1000)
   return (
-    <span className="text-xs font-mono text-[#15803d] bg-purple-50 px-2 py-0.5 rounded-full">
+    <span className="text-xs font-mono text-[#1d4ed8] bg-purple-50 px-2 py-0.5 rounded-full">
       Starts in {h > 0 ? `${h}h ` : ''}{m}m {s}s
     </span>
   )
@@ -187,7 +187,7 @@ export default function LearnerClassroom({ gradeLevel }) {
     return (
       <div className="fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col">
         {/* Header */}
-        <div className="bg-[#15803d] text-white px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+        <div className="bg-[#1d4ed8] text-white px-4 py-2.5 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 bg-red-600 px-3 py-1 rounded-full">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
@@ -219,11 +219,11 @@ export default function LearnerClassroom({ gradeLevel }) {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#15803d] flex items-center justify-center">
-            <MonitorPlay size={20} className="text-[#128038]" />
+          <div className="w-10 h-10 rounded-xl bg-[#1d4ed8] flex items-center justify-center">
+            <MonitorPlay size={20} className="text-[#2563eb]" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold font-serif text-[#15803d]">Golden Classroom</h2>
+            <h2 className="text-2xl font-bold font-serif text-[#1d4ed8]">Golden Classroom</h2>
             <p className="text-sm text-gray-500">
               Live video classes for <strong>{gradeLevel || 'your class'}</strong>
             </p>
@@ -241,9 +241,9 @@ export default function LearnerClassroom({ gradeLevel }) {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[
-          { label: 'Total Classes', value: sessions.length, icon: <LayoutGrid size={18} />, color: 'text-[#15803d]', bg: 'bg-purple-50' },
+          { label: 'Total Classes', value: sessions.length, icon: <LayoutGrid size={18} />, color: 'text-[#1d4ed8]', bg: 'bg-purple-50' },
           { label: 'Live Now', value: liveSessions.length, icon: <Wifi size={18} />, color: 'text-red-600', bg: 'bg-red-50' },
-          { label: 'Upcoming', value: upcomingSessions.length, icon: <Calendar size={18} />, color: 'text-[#128038]', bg: 'bg-green-50' },
+          { label: 'Upcoming', value: upcomingSessions.length, icon: <Calendar size={18} />, color: 'text-[#2563eb]', bg: 'bg-green-50' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
             <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center ${stat.color}`}>{stat.icon}</div>
@@ -267,7 +267,7 @@ export default function LearnerClassroom({ gradeLevel }) {
           {liveSessions.map(s => (
             <div key={s.id} className="flex items-center justify-between flex-wrap gap-3">
               <div>
-                <p className="font-bold text-[#15803d]">{s.title}</p>
+                <p className="font-bold text-[#1d4ed8]">{s.title}</p>
                 <p className="text-sm text-gray-600">Teacher: {s.createdBy} · {s.subject} · {s.duration} min</p>
               </div>
               <button
@@ -290,7 +290,7 @@ export default function LearnerClassroom({ gradeLevel }) {
               key={val}
               onClick={() => setStatusFilter(val)}
               className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                statusFilter === val ? 'bg-[#15803d] text-white' : 'text-gray-500 hover:bg-gray-100'
+                statusFilter === val ? 'bg-[#1d4ed8] text-white' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
               {label}
@@ -337,7 +337,7 @@ export default function LearnerClassroom({ gradeLevel }) {
                   {/* Session Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`font-bold text-sm ${isEnded ? 'text-gray-400' : 'text-[#15803d]'}`}>
+                      <p className={`font-bold text-sm ${isEnded ? 'text-gray-400' : 'text-[#1d4ed8]'}`}>
                         {session.title}
                       </p>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cfg.color}`}>
@@ -371,7 +371,7 @@ export default function LearnerClassroom({ gradeLevel }) {
                     {isLive && (
                       <button
                         onClick={() => handleJoin(session)}
-                        className="bg-[#15803d] hover:bg-purple-900 text-white font-bold px-5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-md"
+                        className="bg-[#1d4ed8] hover:bg-purple-900 text-white font-bold px-5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-md"
                       >
                         <Play size={12} fill="white" /> Join Class
                       </button>
