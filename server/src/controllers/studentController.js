@@ -70,12 +70,10 @@ const extractDocumentUrls = (req) => {
 const generateStudentId = async () => {
   const year = new Date().getFullYear()
 
-  // Count only students enrolled in the current year
-  // We identify them by their studentId prefix GI{year}
   const countThisYear = await prisma.student.count({
     where: {
       studentId: {
-        startsWith: `GI${year}`
+        startsWith: `STU${year}`
       }
     }
   })
@@ -86,7 +84,7 @@ const generateStudentId = async () => {
 
   // Safety loop: if the sequential number is somehow taken, increment until free
   while (!isUnique) {
-    studentId = `GI${year}${String(nextNumber).padStart(4, '0')}`
+    studentId = `STU${year}${String(nextNumber).padStart(5, '0')}`
     const existing = await prisma.student.findUnique({ where: { studentId } })
     if (!existing) {
       isUnique = true
@@ -151,7 +149,8 @@ const createStudent = async (req, res) => {
     const {
       firstName, lastName, dateOfBirth, gender, gradeLevel,
       parentName, parentEmail, parentPhone, address,
-      email, learnerEmail, password
+      email, learnerEmail, password, studentId: requestedStudentId,
+      division, academicYear, street, city, state
     } = req.body
 
     const finalEmail = (email || learnerEmail || '').trim() || null
@@ -172,7 +171,7 @@ const createStudent = async (req, res) => {
       }
     }
 
-    const studentId = await generateStudentId()
+    const studentId = requestedStudentId?.trim() || await generateStudentId()
     const documentUrls = extractDocumentUrls(req)
     const extendedData = pickExtendedFields(req.body)
 
@@ -209,11 +208,16 @@ const createStudent = async (req, res) => {
           dateOfBirth:  dateOfBirth  || null,
           gender,
           gradeLevel,
+          division: division || null,
+          academicYear: academicYear || null,
           parentId,
           parentName,
           parentEmail:  parentEmail  || null,
           parentPhone:  parentPhone  || null,
-          address:      address      || null,
+          address:      address || [street, city, state].filter(Boolean).join(', ') || null,
+          street:       street       || null,
+          city:         city         || null,
+          state:        state        || null,
           email:        finalEmail,
           learnerUserId,
           photo: documentUrls.photo || null,
@@ -244,10 +248,13 @@ const updateStudent = async (req, res) => {
     const {
       firstName, lastName, dateOfBirth, gender, gradeLevel,
       parentName, parentEmail, parentPhone, address, status,
-      email, learnerEmail
+      email, learnerEmail, studentId, division, academicYear, street, city, state
     } = req.body
 
     const data = {}
+    if (studentId !== undefined && !String(studentId).trim()) {
+      return res.status(400).json({ message: 'Student ID cannot be empty.' })
+    }
     if (firstName !== undefined)   data.firstName   = firstName
     if (lastName !== undefined)    data.lastName    = lastName
     if (dateOfBirth !== undefined) data.dateOfBirth = dateOfBirth
@@ -258,6 +265,12 @@ const updateStudent = async (req, res) => {
     if (parentPhone !== undefined) data.parentPhone = parentPhone
     if (address !== undefined)     data.address     = address
     if (status !== undefined)      data.status      = status
+    if (studentId !== undefined)   data.studentId   = studentId.trim()
+    if (division !== undefined)    data.division    = division || null
+    if (academicYear !== undefined) data.academicYear = academicYear || null
+    if (street !== undefined)      data.street      = street || null
+    if (city !== undefined)        data.city        = city || null
+    if (state !== undefined)       data.state       = state || null
 
     // email field: accept either key from frontend
     const finalEmail = email || learnerEmail
@@ -291,6 +304,73 @@ const updateStudent = async (req, res) => {
     console.error('Update Student Error:', error)
     res.status(400).json({ message: error.message || 'Failed to update student' })
   }
+}
+
+const bulkImportStudents = async (req, res) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Only administrators can import learners.' })
+  }
+
+  const { students } = req.body
+  if (!Array.isArray(students) || students.length === 0) {
+    return res.status(400).json({ message: 'The import must contain at least one learner.' })
+  }
+
+  const result = { created: 0, updated: 0, errors: [] }
+  const importFields = [
+    'firstName', 'lastName', 'dateOfBirth', 'gender', 'gradeLevel', 'division',
+    'academicYear', 'email', 'parentName', 'parentPhone', 'fatherName',
+    'motherName', 'street', 'city', 'state'
+  ]
+
+  for (const [index, row] of students.entries()) {
+    const rowNumber = Number.isInteger(row.rowNumber) ? row.rowNumber : index + 2
+    const studentId = String(row.studentId ?? '').trim()
+    const firstName = String(row.firstName ?? '').trim()
+    const lastName = String(row.lastName ?? '').trim()
+    const gradeLevel = String(row.gradeLevel ?? '').trim()
+
+    if (!studentId || !firstName || !gradeLevel) {
+      result.errors.push({ row: rowNumber, message: 'Admission Number, Name, and Class are required.' })
+      continue
+    }
+
+    const data = {}
+    for (const field of importFields) {
+      if (row[field] !== undefined && row[field] !== null && String(row[field]).trim() !== '') {
+        data[field] = String(row[field]).trim()
+      }
+    }
+    data.firstName = firstName
+    data.lastName = lastName
+    data.gradeLevel = gradeLevel
+
+    const addressParts = [data.street || row.street, data.city || row.city, data.state || row.state]
+      .map(value => String(value ?? '').trim())
+      .filter(Boolean)
+    if (addressParts.length) data.address = addressParts.join(', ')
+
+    try {
+      const existing = await prisma.student.findUnique({ where: { studentId } })
+      await prisma.student.upsert({
+        where: { studentId },
+        update: data,
+        create: {
+          studentId,
+          ...data,
+          gender: data.gender || 'Not specified',
+          parentName: data.parentName || 'Not provided',
+          status: 'active',
+          source: 'manual'
+        }
+      })
+      result[existing ? 'updated' : 'created']++
+    } catch (error) {
+      result.errors.push({ row: rowNumber, studentId, message: error.message || 'Could not save learner.' })
+    }
+  }
+
+  res.json(result)
 }
 
 // Get a single learner's full profile (every admission-form field) plus
@@ -423,4 +503,4 @@ const getMyProfile = async (req, res) => {
   }
 }
 
-module.exports = { getStudents, getStudent, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin }
+module.exports = { getStudents, getStudent, getMyProfile, createStudent, updateStudent, bulkImportStudents, deleteStudent, createLearnerLogin }

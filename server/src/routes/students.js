@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getStudents, getStudent, getMyProfile, createStudent, updateStudent, deleteStudent, createLearnerLogin } = require('../controllers/studentController')
+const { getStudents, getStudent, getMyProfile, createStudent, updateStudent, bulkImportStudents, deleteStudent, createLearnerLogin } = require('../controllers/studentController')
 const protect = require('../middleware/authMiddleware')
 
 // A learner's profile can now include every admission-form document, not
@@ -56,6 +56,7 @@ const handleUpload = (req, res, next) => {
 
 router.get('/', protect, getStudents)
 router.post('/', protect, handleUpload, createStudent)
+router.post('/bulk-import', protect, bulkImportStudents)
 router.get('/me', protect, getMyProfile)
 router.get('/:id', protect, getStudent)
 router.put('/:id', protect, handleUpload, updateStudent)

@@ -22,11 +22,18 @@ async function migrateStudentIds() {
   let updated = 0
   let skipped = 0
 
+  for (const student of students) {
+    await prisma.student.update({
+      where: { id: student.id },
+      data: { studentId: `__STUDENT_ID_MIGRATION__${student.id}` }
+    })
+  }
+
   for (const [year, group] of Object.entries(byYear).sort()) {
     console.log(`\n📅 Year ${year}: ${group.length} student(s)`)
     for (let i = 0; i < group.length; i++) {
       const student = group[i]
-      const newId = `GI${year}${String(i + 1).padStart(4, '0')}`
+      const newId = `STU${year}${String(i + 1).padStart(5, '0')}`
 
       if (student.studentId === newId) {
         console.log(`  ⏭  Already correct: ${newId}`)

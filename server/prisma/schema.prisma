@@ -43,6 +43,8 @@ model Student {
   dateOfBirth     String?
   gender          String
   gradeLevel      String
+  division        String?
+  academicYear    String?
   email           String?            @unique
   learnerUserId   Int?
   parentId        Int?
@@ -51,6 +53,9 @@ model Student {
   parentEmail     String?
   parentPhone     String?
   address         String?
+  street          String?
+  city            String?
+  state            String?
   photo           String?
   status          String?            @default("active")
 

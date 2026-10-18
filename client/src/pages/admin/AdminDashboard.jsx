@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -16,6 +16,7 @@ import AdminMessages from '../../components/messages/AdminMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
+import { parseStudentFile } from '../../utils/studentImport'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -89,10 +90,14 @@ export default function AdminDashboard() {
   const [learnerDocFiles, setLearnerDocFiles] = useState({})
   const [learnerDocPreviews, setLearnerDocPreviews] = useState({})
   const [newStudent, setNewStudent] = useState({
-    firstName: '', lastName: '', dateOfBirth: '', gender: '',
-    gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+    studentId: '', firstName: '', lastName: '', dateOfBirth: '', gender: '',
+    gradeLevel: '', division: '', academicYear: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+    street: '', city: '', state: '',
     learnerEmail: '', learnerPassword: ''
   })
+  const [studentImportLoading, setStudentImportLoading] = useState(false)
+  const [studentImportResult, setStudentImportResult] = useState(null)
+  const [dashboardCounts, setDashboardCounts] = useState({ learners: 0, staff: 0 })
 
   // Results state
   const [results, setResults] = useState([])
@@ -182,8 +187,22 @@ export default function AdminDashboard() {
   const filteredStudents = activeClass === 'All' ? students : students.filter(s => s.gradeLevel === activeClass)
   const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => p.student?.gradeLevel === feeClassFilter)
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
+  const dashboardStats = stats.map(stat => ({
+    ...stat,
+    value: stat.label === 'Total Learners' ? String(dashboardCounts.learners)
+      : stat.label === 'Staff Members' ? String(dashboardCounts.staff)
+        : stat.value
+  }))
 
   useEffect(() => {
+  if (activeMenu === 'dashboard') {
+    axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
+      .then(res => setDashboardCounts(prev => ({ ...prev, learners: res.data.length })))
+      .catch(err => console.error('Failed to refresh learner total:', err))
+    axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
+      .then(res => setDashboardCounts(prev => ({ ...prev, staff: res.data.length })))
+      .catch(err => console.error('Failed to refresh staff total:', err))
+  }
   if (activeMenu === 'learners' || activeMenu === 'create-account') {
     axios.get(`${API_URL}/api/students`)
       .then(res => {
@@ -441,8 +460,9 @@ const handleSaveAcademicContext = async () => {
     setPhotoFile(null)
     setPhotoPreview(null)
     setNewStudent({
-      firstName: '', lastName: '', dateOfBirth: '', gender: '',
-      gradeLevel: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+      studentId: '', firstName: '', lastName: '', dateOfBirth: '', gender: '',
+      gradeLevel: '', division: '', academicYear: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
+      street: '', city: '', state: '',
       learnerEmail: '', learnerPassword: ''
     })
 
@@ -452,6 +472,30 @@ const handleSaveAcademicContext = async () => {
     alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
   }
 }
+
+  const handleStudentImport = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setStudentImportLoading(true)
+    setStudentImportResult(null)
+    try {
+      const rows = await parseStudentFile(file)
+      if (!rows.length) throw new Error('No learner rows were found in this file.')
+      const importResponse = await axios.post(
+        `${API_URL}/api/students/bulk-import`,
+        { students: rows },
+        { headers: getAuthHeaders() }
+      )
+      const refreshedStudents = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
+      setStudents(refreshedStudents.data)
+      setStudentImportResult(importResponse.data)
+    } catch (err) {
+      setStudentImportResult({ error: err.response?.data?.message || err.message || 'Could not import this file.' })
+    } finally {
+      setStudentImportLoading(false)
+      event.target.value = ''
+    }
+  }
 
   const handleSignatureUpload = async (e) => {
   const file = e.target.files[0]
@@ -1350,7 +1394,7 @@ const handleAdminPasswordReset = async (id, email) => {
           {activeMenu === 'dashboard' && (
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {stats.map((stat, index) => (
+                {dashboardStats.map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
                     <p className="text-3xl font-bold">{stat.value}</p>
@@ -1776,8 +1820,29 @@ const handleAdminPasswordReset = async (id, email) => {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold font-serif text-gray-800">Learners</h2>
-                <button onClick={() => setShowAddStudent(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex items-center gap-2 bg-white border border-blue-600 text-blue-700 hover:bg-blue-50 font-bold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
+                    <Upload size={16} />
+                    {studentImportLoading ? 'Importing…' : 'Import Excel / CSV'}
+                    <input type="file" accept=".xlsx,.csv" onChange={handleStudentImport} disabled={studentImportLoading} className="sr-only" />
+                  </label>
+                  <button onClick={() => setShowAddStudent(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
+                </div>
               </div>
+              {studentImportResult && (
+                <div className={`mb-5 rounded-lg border px-4 py-3 text-sm ${studentImportResult.error || studentImportResult.errors?.length ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-green-200 bg-green-50 text-green-800'}`}>
+                  {studentImportResult.error ? studentImportResult.error : (
+                    <>
+                      <p>Import complete: {studentImportResult.created} added, {studentImportResult.updated} updated, {studentImportResult.errors?.length || 0} failed.</p>
+                      {studentImportResult.errors?.length > 0 && (
+                        <ul className="mt-2 max-h-32 list-disc overflow-y-auto pl-5">
+                          {studentImportResult.errors.map((error, index) => <li key={`${error.row}-${index}`}>Row {error.row}: {error.message}</li>)}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
               {showAddStudent && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Learner</h3>
@@ -1792,6 +1857,10 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Student ID</label>
+                      <input type="text" value={newStudent.studentId} onChange={e => setNewStudent({ ...newStudent, studentId: e.target.value })} placeholder="Leave blank to generate automatically" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    </div>
                     <div>
                       <label className="block text-sm font-bold text-gray-800 mb-2">First Name</label>
                       <input type="text" value={newStudent.firstName} onChange={e => setNewStudent({ ...newStudent, firstName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
@@ -1866,6 +1935,15 @@ const handleAdminPasswordReset = async (id, email) => {
                         {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
+                    {[
+                      ['division', 'Division'], ['academicYear', 'Academic Year'],
+                      ['street', 'Street'], ['city', 'City'], ['state', 'State'],
+                    ].map(([key, label]) => (
+                      <div key={key}>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">{label}</label>
+                        <input type="text" value={newStudent[key]} onChange={e => setNewStudent({ ...newStudent, [key]: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                      </div>
+                    ))}
                   </div>
                   <div className="flex gap-4 mt-6">
                     <button onClick={handleAddStudent} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors">Save Learner</button>
@@ -3059,7 +3137,8 @@ const handleAdminPasswordReset = async (id, email) => {
               { title: "Learner's Data", fields: [
                 ['Date of Birth', selectedStudent.dateOfBirth], ['Age', selectedStudent.age], ['Gender', selectedStudent.gender],
                 ['Month of Birth', selectedStudent.monthOfBirth], ['Place of Birth', selectedStudent.placeOfBirth],
-                ['Grade Level', selectedStudent.gradeLevel], ['Previous School', selectedStudent.previousSchool],
+                ['Grade Level', selectedStudent.gradeLevel], ['Division', selectedStudent.division],
+                ['Academic Year', selectedStudent.academicYear], ['Previous School', selectedStudent.previousSchool],
                 ['Height', selectedStudent.height], ['Weight', selectedStudent.weight],
                 ['Hometown', selectedStudent.hometown], ['Mother Tongue', selectedStudent.motherTongue], ['Religion', selectedStudent.religion],
                 ['Date of Admission', selectedStudent.dateOfAdmission], ['Learner Email', selectedStudent.email || '—'],
@@ -3071,6 +3150,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 ['Parent Email', selectedStudent.parentEmail], ['Parent Phone', selectedStudent.parentPhone],
                 ['Parent Account', selectedStudent.parent ? `${selectedStudent.parent.name} (${selectedStudent.parent.email})` : 'Not linked'],
                 ['Address', selectedStudent.address],
+                ['Street', selectedStudent.street], ['City', selectedStudent.city], ['State', selectedStudent.state],
                 ['Secondary Contact Name', selectedStudent.secondaryContactName], ['Secondary Contact Phone', selectedStudent.secondaryContactPhone],
               ] },
               { title: "Father's Details", fields: [
@@ -3214,10 +3294,11 @@ const handleAdminPasswordReset = async (id, email) => {
 
             {[
               { title: "Learner's Data", fields: [
-                ['firstName', 'First Name', 'text'], ['lastName', 'Last Name', 'text'],
+                ['studentId', 'Student ID', 'text'], ['firstName', 'First Name', 'text'], ['lastName', 'Last Name', 'text'],
                 ['dateOfBirth', 'Date of Birth', 'date'], ['age', 'Age', 'text'], ['monthOfBirth', 'Month of Birth', 'text'],
                 ['gender', 'Gender', 'select', ['Male', 'Female']], ['placeOfBirth', 'Place of Birth', 'text'],
                 ['gradeLevel', 'Grade Level', 'select', ['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']],
+                ['division', 'Division', 'text'], ['academicYear', 'Academic Year', 'text'],
                 ['previousSchool', 'Previous School', 'text'], ['height', 'Height', 'text'], ['weight', 'Weight', 'text'],
                 ['hometown', 'Hometown', 'text'], ['motherTongue', 'Mother Tongue', 'text'], ['religion', 'Religion', 'text'],
                 ['dateOfAdmission', 'Date of Admission', 'date'],
@@ -3228,6 +3309,7 @@ const handleAdminPasswordReset = async (id, email) => {
               { title: 'Parent / Guardian', fields: [
                 ['parentName', 'Parent Name', 'text'], ['parentOccupation', 'Parent Occupation', 'text'],
                 ['parentEmail', 'Parent Email', 'email'], ['parentPhone', 'Parent Phone', 'text'], ['address', 'Address', 'text'],
+                ['street', 'Street', 'text'], ['city', 'City', 'text'], ['state', 'State', 'text'],
                 ['secondaryContactName', 'Secondary Contact Name', 'text'], ['secondaryContactPhone', 'Secondary Contact Phone', 'text'],
               ] },
               { title: "Father's Details", fields: [
