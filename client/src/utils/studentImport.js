@@ -5,6 +5,7 @@ const normalizeHeader = (value) => String(value ?? '').toLowerCase().replace(/[^
 
 const HEADER_FIELDS = {
   admissionnumber: 'studentId',
+  admissionno: 'studentId',
   studentid: 'studentId',
   name: 'name',
   firstname: 'firstName',
@@ -13,6 +14,7 @@ const HEADER_FIELDS = {
   grade: 'gradeLevel',
   gradelevel: 'gradeLevel',
   division: 'division',
+  divition: 'division',
   academicyear: 'academicYear',
   email: 'email',
   phone: 'parentPhone',
@@ -55,11 +57,19 @@ const normalizeDate = (value) => {
 }
 
 export const mapStudentRows = (rows) => {
-  if (!Array.isArray(rows) || rows.length < 2) return []
+  if (!Array.isArray(rows) || rows.length === 0) return []
 
-  const headers = rows[0].map(header => HEADER_FIELDS[normalizeHeader(header)] || null)
-  return rows.slice(1).flatMap((cells, index) => {
-    const row = { rowNumber: index + 2 }
+  const headerIndex = rows.slice(0, 25).findIndex((cells) => {
+    const fields = cells.map(header => HEADER_FIELDS[normalizeHeader(header)])
+    return fields.includes('studentId') && fields.includes('gradeLevel') && (fields.includes('name') || fields.includes('firstName'))
+  })
+  if (headerIndex < 0) {
+    throw new Error('Could not find the header row. Include Admission Number, Name, and Class columns.')
+  }
+
+  const headers = rows[headerIndex].map(header => HEADER_FIELDS[normalizeHeader(header)] || null)
+  return rows.slice(headerIndex + 1).flatMap((cells, index) => {
+    const row = { rowNumber: headerIndex + index + 2 }
     headers.forEach((field, column) => {
       if (field) row[field] = field === 'dateOfBirth' ? normalizeDate(cells[column]) : cellText(cells[column])
     })

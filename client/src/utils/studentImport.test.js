@@ -53,3 +53,21 @@ test('ignores blank spreadsheet rows', () => {
   assert.equal(rows.length, 1)
   assert.equal(rows[0].rowNumber, 3)
 })
+
+test('finds headers after leading title rows and accepts a misspelled Division header', () => {
+  const rows = mapStudentRows([
+    ['Golden Intels Learner List'],
+    [],
+    ['Admission Number', 'Name', 'Class', 'Divition'],
+    ['STU202600004', 'Ethan Skye', 'CRECHE', 'EARLY YEARS'],
+  ])
+
+  assert.deepEqual(rows[0], {
+    rowNumber: 4,
+    studentId: 'STU202600004',
+    firstName: 'Ethan',
+    lastName: 'Skye',
+    gradeLevel: 'CRECHE',
+    division: 'EARLY YEARS',
+  })
+})
