@@ -5,12 +5,11 @@ import oxfordImg from '../assets/oxford.jpg'
 import educationalprogramsImg from '../assets/educationalprograms.jpg'
 
 const values = [
-  { title: 'C - Character', description: 'We model humility, Godliness, and obedience in word and action.' },
-  { title: 'H - Honesty', description: 'We respect authority, self, and others in all we do.' },
-  { title: 'R - Respect', description: 'We respect everyone first and pursue wisdom that begins with the fear of the Lord.' },
-  { title: 'I - Integrity', description: 'We choose moral uprightness even when no one is watching.' },
-  { title: 'S - Sincerity', description: 'We are truthful and genuine in our intentions and actions.' },
-  { title: 'T - Teamwork & Service', description: 'We work together to help our environment by serving others locally and globally, using our gifts to impact the world for the greater good.' },
+  { title: 'Integrity', description: 'Doing the right thing even when no one is watching.' },
+  { title: 'Honesty', description: 'Telling the truth, owning up to mistakes, and never copying someone else’s work as your own.' },
+  { title: 'Respect', description: 'Listening when others speak and treating colleagues, classmates, teaching and non-teaching staff and everyone with reverence.' },
+  { title: 'Responsibility', description: 'Coming prepared, finishing work on time, and taking care of school property.' },
+  { title: 'Teamwork & Service', description: 'Working together as a team and lending a hand to someone who needs help.' },
 ]
 
 const goals = [
