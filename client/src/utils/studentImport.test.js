@@ -16,7 +16,7 @@ test('maps the provided spreadsheet columns to learner fields', () => {
     gradeLevel: 'Grade 2',
     division: 'Lower Primary',
     academicYear: '2026-27',
-    email: 'ama@example.com',
+    parentEmail: 'ama@example.com',
     parentPhone: '0240000000',
     street: 'Main Road',
     city: 'Accra',

@@ -44,6 +44,7 @@ const stats = [
 ]
 
 const classes = ['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+const normalizeClassName = value => String(value ?? '').trim().toLocaleLowerCase()
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -184,7 +185,11 @@ export default function AdminDashboard() {
 
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
-  const filteredStudents = activeClass === 'All' ? students : students.filter(s => s.gradeLevel === activeClass)
+  const learnerClasses = ['All', ...new Map(
+    [...classes.slice(1), ...students.map(student => String(student.gradeLevel ?? '').trim()).filter(Boolean)]
+      .map(className => [normalizeClassName(className), className])
+  ).values()]
+  const filteredStudents = activeClass === 'All' ? students : students.filter(s => normalizeClassName(s.gradeLevel) === normalizeClassName(activeClass))
   const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => p.student?.gradeLevel === feeClassFilter)
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
   const dashboardStats = stats.map(stat => ({
@@ -1952,10 +1957,10 @@ const handleAdminPasswordReset = async (id, email) => {
                 </div>
               )}
               <div className="flex flex-wrap gap-3 mb-6">
-                {classes.map(cls => (
+                {learnerClasses.map(cls => (
                   <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {cls}
-                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => s.gradeLevel === cls).length}</span>
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => normalizeClassName(s.gradeLevel) === normalizeClassName(cls)).length}</span>
                   </button>
                 ))}
               </div>

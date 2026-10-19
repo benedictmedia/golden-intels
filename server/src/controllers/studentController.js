@@ -319,7 +319,7 @@ const bulkImportStudents = async (req, res) => {
   const result = { created: 0, updated: 0, errors: [] }
   const importFields = [
     'firstName', 'lastName', 'dateOfBirth', 'gender', 'gradeLevel', 'division',
-    'academicYear', 'email', 'parentName', 'parentPhone', 'fatherName',
+    'academicYear', 'parentEmail', 'parentName', 'parentPhone', 'fatherName',
     'motherName', 'street', 'city', 'state'
   ]
 
