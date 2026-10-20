@@ -118,6 +118,20 @@ const getTeacherResultPayload = async (req, body) => {
 
 const filterApprovedResults = (results = []) => results.filter((result) => result.status === 'approved')
 
+const filterVisibleAcademicPeriods = async (user, results = []) => {
+  if (user?.role === 'admin') return results
+  const storedContext = await prisma.academicContext.findFirst({ orderBy: { updatedAt: 'desc' } })
+  const storedYear = Number(String(storedContext?.academicYear || '').match(/^(\d{4})/)?.[1])
+  const activeYear = Number.isFinite(storedYear) && storedYear >= 2026 ? storedYear : 2026
+  const currentTerm = Number(String(storedContext?.term || 'Term 1').match(/\d+/)?.[0] || 1)
+
+  return results.filter(result => {
+    const year = Number(String(result.academicYear || '').match(/^(\d{4})/)?.[1])
+    const term = Number(String(result.term || '').match(/\d+/)?.[0] || 0)
+    return year >= 2026 && year <= activeYear && (year < activeYear || term <= currentTerm)
+  })
+}
+
 // Withholds the actual scores for any result belonging to a student with an
 // outstanding fee balance. The result record (and its "approved" status)
 // still comes through so the parent knows a result exists, but the scores
@@ -143,11 +157,14 @@ const getResults = async (req, res) => {
   try {
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
-      const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
+      const children = await prisma.student.findMany({
+        where: { OR: [{ parentEmail: email }, { parentId: req.user.id }] },
+        select: { id: true }
+      })
       const ids = children.map((child) => child.id)
       const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
       const approved = filterApprovedResults(results)
-      return res.json(await redactLockedResults(approved))
+      return res.json(await redactLockedResults(await filterVisibleAcademicPeriods(req.user, approved)))
     }
 
     if (req.user && req.user.role === 'teacher') {
@@ -162,7 +179,16 @@ const getResults = async (req, res) => {
         : staff?.department
           ? results.filter((result) => normalizeClassName(result.gradeLevel) === normalizeClassName(staff.department) || result.submittedBy === req.user.name)
           : results.filter((result) => result.submittedBy === req.user.name)
-      return res.json(filteredResults)
+      return res.json(await filterVisibleAcademicPeriods(req.user, filteredResults))
+    }
+
+    if (req.user && req.user.role === 'learner') {
+      const learner = await prisma.student.findFirst({
+        where: { OR: [{ learnerUserId: req.user.id }, { email: req.user.email }] }
+      })
+      if (!learner) return res.json([])
+      const results = await prisma.result.findMany({ where: { studentId: learner.id }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      return res.json(await filterVisibleAcademicPeriods(req.user, results))
     }
 
     const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
@@ -178,7 +204,17 @@ const getResultsByStudent = async (req, res) => {
   try {
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+      if (!student || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) return res.status(403).json({ message: 'Forbidden' })
+    }
+
+    if (req.user && req.user.role === 'learner') {
+      const student = await prisma.student.findFirst({
+        where: {
+          id: parseInt(studentId),
+          OR: [{ learnerUserId: req.user.id }, { email: req.user.email }]
+        }
+      })
+      if (!student) return res.status(403).json({ message: 'Forbidden' })
     }
 
     if (req.user && req.user.role === 'teacher') {
@@ -194,7 +230,8 @@ const getResultsByStudent = async (req, res) => {
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
 
-    const results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    let results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    results = await filterVisibleAcademicPeriods(req.user, results)
     if (req.user && req.user.role === 'parent') {
       return res.json(await redactLockedResults(filterApprovedResults(results)))
     }

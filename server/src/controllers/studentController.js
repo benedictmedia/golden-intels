@@ -114,6 +114,7 @@ const getStudents = async (req, res) => {
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
       const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
+        .replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
       const students = await prisma.student.findMany({ 
         orderBy: order, 
         include: { parent: { select: { id: true, name: true, email: true } } } 

@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   const [viewingContact, setViewingContact] = useState(null)
   const [showChangePassword, setShowChangePassword] = useState(false)
 
-  const [academicContext, setAcademicContext] = useState({ academicYear: '2025/2026', term: 'Term 1' })
+  const [academicContext, setAcademicContext] = useState({ academicYear: '2026/2027', term: 'Term 1' })
   const [contextSaving, setContextSaving] = useState(false)
   const [contextSaved, setContextSaved] = useState(false)
 
@@ -2969,8 +2969,8 @@ const handleAdminPasswordReset = async (id, email) => {
             onChange={e => setAcademicContext(prev => ({ ...prev, academicYear: e.target.value }))}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
           >
-            {['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030',
-              '2030/2031','2031/2032','2032/2033','2033/2034','2034/2035'].map(y => (
+            {['2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032',
+              '2032/2033','2033/2034','2034/2035','2035/2036','2036/2037'].map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>

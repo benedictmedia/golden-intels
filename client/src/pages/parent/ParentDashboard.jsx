@@ -14,6 +14,7 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import FeeAlertModal from '../../components/FeeAlertModal'
 import BrandLogo from '../../components/layout/BrandLogo'
+import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -24,9 +25,6 @@ const menuItems = [
   { icon: <DollarSign size={20} />, label: 'Fee Status', id: 'fees' },
   { icon: <MessageSquare size={20} />, label: 'Messages', id: 'messages' },
 ]
-
-const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
-const terms = ['Term 1', 'Term 2', 'Term 3']
 
 const getSubjectName = (item) => item?.subject || 'General'
 const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item) => {
@@ -41,9 +39,8 @@ const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item
 export default function ParentDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
   const [activeMenu, setActiveMenu] = useState('dashboard')
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
-  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [students, setStudents] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)
@@ -61,16 +58,6 @@ export default function ParentDashboard() {
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
   const [feeAlerts, setFeeAlerts] = useState([])
   const [showFeeAlertModal, setShowFeeAlertModal] = useState(false)
-
-  useEffect(() => {
-  const token = localStorage.getItem('token')
-  axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(res => {
-      if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
-      if (res.data?.term) setSelectedTerm(res.data.term)
-    })
-    .catch(() => {})
-}, [])
 
   const fetchParentApprovedResults = async () => {
     const token = localStorage.getItem('token')
@@ -640,8 +627,16 @@ const getParentDisplayName = (name) => {
   useEffect(() => {
     const loadAssignmentRecords = async () => {
       try {
-        const saved = window.localStorage.getItem('goldenIntelsSubmissionRecords')
-        setAssignmentRecords(saved ? JSON.parse(saved) : [])
+        if (selectedChild?.id) {
+          const token = localStorage.getItem('token')
+          const res = await axios.get(`${API_URL}/api/classwork`, {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { studentId: selectedChild.id, academicYear: selectedAcademicYear, term: selectedTerm }
+          })
+          setAssignmentRecords(res.data.submissions || [])
+        } else {
+          setAssignmentRecords([])
+        }
       } catch {
         setAssignmentRecords([])
       }
@@ -667,10 +662,7 @@ const getParentDisplayName = (name) => {
       }
     }
     loadAssignmentRecords()
-    // Keep storage listener for backwards compatibility
-    window.addEventListener('storage', loadAssignmentRecords)
-    return () => window.removeEventListener('storage', loadAssignmentRecords)
-  }, [selectedChild])
+  }, [selectedChild?.id, selectedAcademicYear, selectedTerm])
 
   return (
     <div className="portal-shell flex bg-gray-100">

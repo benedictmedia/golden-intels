@@ -12,9 +12,8 @@ import LearnerClassroom from '../../components/classroom/LearnerClassroom'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
-
-const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
-const terms = ['Term 1', 'Term 2', 'Term 3']
+import useAcademicPeriods from '../../hooks/useAcademicPeriods'
+import { normalizeStudentClassName } from '../../utils/studentClasses'
 
 const AVATAR_COLORS = [
   '#1d4ed8', '#1d4ed8', '#2563eb', '#b45309', '#0369a1',
@@ -36,10 +35,9 @@ const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item
 export default function LearnerDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
   const [activeTab, setActiveTab] = useState('profile')
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
-  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [assignments, setAssignments] = useState([])
   const [lessons, setLessons] = useState([])
   const [quizzes, setQuizzes] = useState([])
@@ -54,29 +52,7 @@ export default function LearnerDashboard() {
   const [activeQuizId, setActiveQuizId] = useState(null)
   const [activeAssessmentSubject, setActiveAssessmentSubject] = useState('')
   const [now, setNow] = useState(Date.now())
-  const learnerSubmissionKey = `goldenIntelsSubmissions:${user?.email || 'anonymous'}`
-
   useEffect(() => {
-  const token = localStorage.getItem('token')
-  axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(res => {
-      if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
-      if (res.data?.term) setSelectedTerm(res.data.term)
-    })
-    .catch(() => {})
-}, [])
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem('goldenIntelsLms')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      setAssignments(parsed.assignments || [])
-      setLessons(parsed.lessons || [])
-      setQuizzes(parsed.quizzes || [])
-    }
-    const savedSubmissions = window.localStorage.getItem(learnerSubmissionKey)
-    if (savedSubmissions) setSubmissions(JSON.parse(savedSubmissions))
-
     const fetchStudentProfile = async () => {
       setProfileLoading(true)
       try {
@@ -92,22 +68,35 @@ export default function LearnerDashboard() {
       }
     }
     fetchStudentProfile()
-  }, [learnerSubmissionKey])
+  }, [])
+
+  useEffect(() => {
+    const fetchClasswork = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await axios.get(`${API_URL}/api/classwork`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { academicYear: selectedAcademicYear, term: selectedTerm }
+        })
+        const items = res.data.items || []
+        setAssignments(items.filter(item => item.type === 'assignment'))
+        setLessons(items.filter(item => item.type === 'lesson'))
+        setQuizzes(items.filter(item => item.type === 'quiz'))
+        setSubmissions({
+          assignments: Object.fromEntries(items.filter(item => item.type === 'assignment' && item.submission).map(item => [item.id, item.submission])),
+          quizzes: Object.fromEntries(items.filter(item => item.type === 'quiz' && item.submission).map(item => [item.id, item.submission]))
+        })
+      } catch (error) {
+        console.error('Failed to load classwork:', error.response?.data || error)
+      }
+    }
+    fetchClasswork()
+  }, [selectedAcademicYear, selectedTerm])
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [])
-
-  useEffect(() => {
-    window.localStorage.setItem(learnerSubmissionKey, JSON.stringify(submissions))
-  }, [submissions, learnerSubmissionKey])
-
-  const saveTeacherSubmissionRecord = (record) => {
-    const existing = JSON.parse(window.localStorage.getItem('goldenIntelsSubmissionRecords') || '[]')
-    const updated = [record, ...existing.filter(r => !(r.type === record.type && r.itemId === record.itemId && r.learnerEmail === record.learnerEmail))]
-    window.localStorage.setItem('goldenIntelsSubmissionRecords', JSON.stringify(updated))
-  }
 
   const getDeviceInfo = () => {
     if (typeof navigator === 'undefined') return 'Unknown device'
@@ -170,7 +159,7 @@ export default function LearnerDashboard() {
     (item.term || selectedTerm) === selectedTerm
   const isForLearnerClass = (item) =>
     item.teacherEmail && learnerGradeLevel &&
-    item.gradeLevel === learnerGradeLevel && matchesAcademicContext(item)
+    normalizeStudentClassName(item.gradeLevel) === normalizeStudentClassName(learnerGradeLevel) && matchesAcademicContext(item)
 
   const learnerLessons = publishedLessons.filter(isForLearnerClass)
   const learnerAssignments = publishedAssignments.filter(isForLearnerClass)
@@ -209,33 +198,31 @@ export default function LearnerDashboard() {
     setAssignmentStartTimes(prev => ({ ...prev, [assignmentId]: prev[assignmentId] || new Date().toISOString() }))
   }
 
-  const handleSubmitAssignment = (assignment) => {
+  const handleSubmitAssignment = async (assignment) => {
     const answer = assignmentAnswers[assignment.id] || ''
     if (!answer.trim()) return
     const submittedAt = new Date().toISOString()
     const startedAt = assignmentStartTimes[assignment.id] || submittedAt
     const timeUsedSeconds = Math.round((new Date(submittedAt) - new Date(startedAt)) / 1000)
-    const learnerName = user?.name || 'Learner'
-    const learnerEmail = user?.email || ''
-    const record = {
-      type: 'assignment', itemId: assignment.id, title: assignment.title,
-      subject: assignment.subject, gradeLevel: assignment.gradeLevel,
-      dueDate: assignment.dueDate, description: assignment.description,
-      studentId: studentProfile?.studentId, teacherEmail: assignment.teacherEmail,
-      teacherName: assignment.teacherName, academicYear: assignment.academicYear,
-      term: assignment.term, learnerName, learnerEmail,
-      device: getDeviceInfo(), startedAt, submittedAt, timeUsedSeconds, answer,
-      questions: [{ prompt: assignment.description || assignment.title, selected: answer, answer: 'Student response' }]
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.post(`${API_URL}/api/classwork/${assignment.id}/submissions`, {
+        answer,
+        startedAt,
+        timeUsedSeconds,
+        device: getDeviceInfo()
+      }, { headers: { Authorization: `Bearer ${token}` } })
+      setSubmissions(prev => ({
+        ...prev,
+        assignments: {
+          ...prev.assignments,
+          [assignment.id]: { ...res.data, answer, learnerName: user?.name || 'Learner', learnerEmail: user?.email || '' }
+        }
+      }))
+      setAssignmentAnswers(prev => ({ ...prev, [assignment.id]: '' }))
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not submit this assignment.')
     }
-    saveTeacherSubmissionRecord(record)
-    setSubmissions(prev => ({
-      ...prev,
-      assignments: {
-        ...prev.assignments,
-        [assignment.id]: { answer, submittedAt, learnerName, learnerEmail, device: getDeviceInfo(), startedAt, timeUsedSeconds, studentId: studentProfile?.studentId }
-      }
-    }))
-    setAssignmentAnswers(prev => ({ ...prev, [assignment.id]: '' }))
   }
 
   const handleQuizAnswer = (quizId, questionIndex, value) => {
@@ -243,41 +230,32 @@ export default function LearnerDashboard() {
     setQuizAnswers(prev => ({ ...prev, [quizId]: { ...prev[quizId], [questionIndex]: value } }))
   }
 
-  const handleSubmitQuiz = (quiz) => {
+  const handleSubmitQuiz = async (quiz) => {
     const answers = quizAnswers[quiz.id] || {}
-    const manualTypes = new Set(['short-answer', 'paragraph'])
-    const hasManualQuestions = quiz.questions.some(q => manualTypes.has(q.type))
-    const score = quiz.questions.reduce((sum, q, i) => {
-      if (manualTypes.has(q.type)) return sum
-      return answers[i] === q.answer ? sum + 1 : sum
-    }, 0)
     const submittedAt = new Date().toISOString()
     const startedAt = quizStartTimes[quiz.id] || submittedAt
     const timeUsedSeconds = Math.round((new Date(submittedAt) - new Date(startedAt)) / 1000)
-    const learnerName = user?.name || 'Learner'
-    const learnerEmail = user?.email || ''
-    const record = {
-      type: 'quiz', itemId: quiz.id, title: quiz.title, subject: quiz.subject,
-      gradeLevel: quiz.gradeLevel, dueDate: quiz.dueDate,
-      studentId: studentProfile?.studentId, teacherEmail: quiz.teacherEmail,
-      teacherName: quiz.teacherName, academicYear: quiz.academicYear, term: quiz.term,
-      learnerName, learnerEmail, device: getDeviceInfo(), startedAt, submittedAt,
-      timeUsedSeconds, score, totalQuestions: quiz.questions.length,
-      marked: !hasManualQuestions, markedAt: hasManualQuestions ? null : submittedAt,
-      markedBy: hasManualQuestions ? null : 'Auto-marked',
-      requiresManualMark: hasManualQuestions,
-      questions: quiz.questions.map((q, idx) => ({
-        prompt: q.prompt, selected: answers[idx] || 'No answer', answer: q.answer, type: q.type
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.post(`${API_URL}/api/classwork/${quiz.id}/submissions`, {
+        answers,
+        startedAt,
+        timeUsedSeconds,
+        device: getDeviceInfo()
+      }, { headers: { Authorization: `Bearer ${token}` } })
+      setSubmissions(prev => ({
+        ...prev,
+        quizzes: {
+          ...prev.quizzes,
+          [quiz.id]: { ...res.data, answers, learnerName: user?.name || 'Learner', learnerEmail: user?.email || '' }
+        }
       }))
-    }
-    saveTeacherSubmissionRecord(record)
-    setSubmissions(prev => ({
-      ...prev,
-      quizzes: {
-        ...prev.quizzes,
-        [quiz.id]: { answers, score, submittedAt, learnerName, learnerEmail, device: getDeviceInfo(), startedAt, timeUsedSeconds, studentId: studentProfile?.studentId, marked: !hasManualQuestions }
+      if (res.data.questions?.length) {
+        setQuizzes(prev => prev.map(item => item.id === quiz.id ? { ...item, questions: res.data.questions } : item))
       }
-    }))
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not submit this quiz.')
+    }
   }
 
   const handleLogout = () => { logout(); navigate('/') }
@@ -720,6 +698,8 @@ export default function LearnerDashboard() {
                               <div className="rounded-xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
                                 <p className="font-bold text-sm mb-1" style={{ color: '#1e40af' }}>✓ Submitted</p>
                                 <p className="text-sm" style={{ color: '#374151' }}>{submission.answer}</p>
+                                {submission.marked && submission.feedback && <p className="text-sm mt-2" style={{ color: '#1e40af' }}>Teacher feedback: {submission.feedback}</p>}
+                                {submission.marked && submission.score != null && <p className="text-sm mt-1" style={{ color: '#374151' }}>Score: {submission.score}</p>}
                                 <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
                               </div>
                               <button onClick={() => handleDownloadLearnerPdf({ ...submission, type: 'assignment', title: assignment.title, questions: [{ prompt: assignment.description || assignment.title, selected: submission.answer, answer: 'Student response' }] })}
@@ -798,24 +778,25 @@ export default function LearnerDashboard() {
                           {submission ? (
                             <div className="space-y-4">
                               <div className="rounded-xl p-4" style={{ background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                                <p className="font-bold text-sm" style={{ color: '#1e40af' }}>✓ Quiz submitted — Score: {submission.score} / {quiz.questions.length}</p>
+                                <p className="font-bold text-sm" style={{ color: '#1e40af' }}>{submission.marked ? `✓ Quiz submitted — Score: ${submission.score} / ${quiz.questions.length}` : '✓ Quiz submitted — Awaiting teacher marking'}</p>
+                                {submission.marked && submission.feedback && <p className="text-sm mt-2" style={{ color: '#1e40af' }}>Teacher feedback: {submission.feedback}</p>}
                                 <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>{new Date(submission.submittedAt).toLocaleString()}</p>
                               </div>
                               <div className="space-y-3">
                                 {quiz.questions.map((q, idx) => {
                                   const selected = submission.answers?.[idx] || 'No answer'
                                   const needsManual = ['short-answer', 'paragraph'].includes(q.type)
-                                  const isCorrect = !needsManual && String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase()
+                                  const isCorrect = submission.marked && !needsManual && String(selected).trim().toLowerCase() === String(q.answer).trim().toLowerCase()
                                   return (
                                     <div key={idx} className="rounded-xl p-4" style={{ background: needsManual ? '#fffbeb' : isCorrect ? '#eff6ff' : '#fef2f2', border: `1px solid ${needsManual ? '#fde68a' : isCorrect ? '#bfdbfe' : '#fecaca'}` }}>
                                       <div className="flex items-start justify-between gap-4">
                                         <p className="font-bold text-sm" style={{ color: '#1e293b' }}>Q{idx + 1}. {q.prompt}</p>
                                         <span className="text-xs font-bold flex-shrink-0" style={{ color: needsManual ? '#d97706' : isCorrect ? '#1e40af' : '#dc2626' }}>
-                                          {needsManual ? 'Awaiting mark' : isCorrect ? '✔ Correct' : '✖ Incorrect'}
+                                          {!submission.marked || needsManual ? 'Awaiting mark' : isCorrect ? '✔ Correct' : '✖ Incorrect'}
                                         </span>
                                       </div>
                                       <p className="text-sm mt-2" style={{ color: '#374151' }}>Your answer: {selected}</p>
-                                      {!needsManual && <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Correct: {q.answer}</p>}
+                                      {submission.marked && !needsManual && <p className="text-xs mt-1" style={{ color: '#94a3b8' }}>Correct: {q.answer}</p>}
                                     </div>
                                   )
                                 })}

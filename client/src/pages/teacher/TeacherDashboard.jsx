@@ -15,6 +15,7 @@ import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
+import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -26,18 +27,14 @@ const menuItems = [
   { icon: <MonitorPlay size={20} />, label: 'Golden Classroom', id: 'classroom' },
 ]
 
-const academicYears = ['2025/2026', '2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037', '2037/2038', '2038/2039', '2039/2040']
-const terms = ['Term 1', 'Term 2', 'Term 3']
-
 const AVATAR_COLORS = ['#2563eb', '#2563eb', '#1d4ed8', '#0369a1', '#1d4ed8', '#1d4ed8', '#1d4ed8']
 const getAvatarColor = (name = '') => AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
 
 export default function TeacherDashboard() {
   const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
+  const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
   const [activeMenu, setActiveMenu] = useState('profile')
-  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025/2026')
-  const [selectedTerm, setSelectedTerm] = useState('Term 1')
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])
@@ -62,7 +59,7 @@ export default function TeacherDashboard() {
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
   const [gradebookClass, setGradebookClass] = useState('')
-  const [gradebookYear, setGradebookYear] = useState('2025/2026')
+  const [gradebookYear, setGradebookYear] = useState('2026/2027')
   const [gradebookTerm, setGradebookTerm] = useState('Term 1')
   const [gradebookStudent, setGradebookStudent] = useState('')
   const [subjectScores, setSubjectScores] = useState({})
@@ -76,22 +73,16 @@ export default function TeacherDashboard() {
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    axios.get(`${API_URL}/api/academic-context`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => {
-        if (res.data?.academicYear) setSelectedAcademicYear(res.data.academicYear)
-        if (res.data?.term) { setSelectedTerm(res.data.term); setGradebookTerm(res.data.term) }
-        if (res.data?.academicYear) setGradebookYear(res.data.academicYear)
-      })
-      .catch(() => {})
-  }, [])
+    setGradebookYear(selectedAcademicYear)
+    setGradebookTerm(selectedTerm)
+  }, [selectedAcademicYear, selectedTerm])
 
   const displayName = (profileUser || user)?.name || user?.name || 'Teacher'
   const avatarColor = getAvatarColor(displayName)
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
-  const classes = ['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
-  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase()
+  const classes = ['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase().replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
   const canonicalizeClass = (value) => {
     const normalizedValue = normalizeClassKey(value)
     if (!normalizedValue) return ''
@@ -565,36 +556,42 @@ export default function TeacherDashboard() {
   useEffect(() => {
     const fetchSaved = async () => {
       try {
-        const saved = window.localStorage.getItem('goldenIntelsLms')
-        if (saved) {
-          const parsed = JSON.parse(saved)
-          setAssignments(parsed.assignments || [])
-          setLessons(parsed.lessons || [])
-          setQuizzes(parsed.quizzes || [])
-        }
-        const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissionRecords')
-        if (savedSubmissions) {
-          setSubmissionRecords(JSON.parse(savedSubmissions))
-        }
-        // Fetch manual exercises from API instead of localStorage
         const token = localStorage.getItem('token')
         const headers = { Authorization: `Bearer ${token}` }
-        const res = await axios.get(`${API_URL}/api/manual-exercises`, { headers })
-        setManualExercises((res.data || []).map(r => ({ ...r, type: 'manual-exercise' })))
-      } catch (err) {
-        // fallback to localStorage when API fails
-        const savedManualExercises = window.localStorage.getItem('goldenIntelsManualExercises')
-        if (savedManualExercises) {
-          try {
-            setManualExercises(JSON.parse(savedManualExercises))
-          } catch {
-            setManualExercises([])
-          }
+        const savedLms = window.localStorage.getItem('goldenIntelsLms')
+        const savedSubmissions = window.localStorage.getItem('goldenIntelsSubmissionRecords')
+        if (savedLms || savedSubmissions) {
+          const legacy = savedLms ? JSON.parse(savedLms) : {}
+          await axios.post(`${API_URL}/api/classwork/sync-legacy`, {
+            items: [
+              ...(legacy.assignments || []).map(item => ({ ...item, type: 'assignment' })),
+              ...(legacy.lessons || []).map(item => ({ ...item, type: 'lesson' })),
+              ...(legacy.quizzes || []).map(item => ({ ...item, type: 'quiz' }))
+            ],
+            submissions: savedSubmissions ? JSON.parse(savedSubmissions) : []
+          }, { headers })
+          window.localStorage.removeItem('goldenIntelsLms')
+          window.localStorage.removeItem('goldenIntelsSubmissionRecords')
         }
+
+        const res = await axios.get(`${API_URL}/api/classwork`, {
+          headers,
+          params: { academicYear: selectedAcademicYear, term: selectedTerm }
+        })
+        const items = res.data.items || []
+        setAssignments(items.filter(item => item.type === 'assignment'))
+        setLessons(items.filter(item => item.type === 'lesson'))
+        setQuizzes(items.filter(item => item.type === 'quiz'))
+        setSubmissionRecords(res.data.submissions || [])
+
+        const exerciseRes = await axios.get(`${API_URL}/api/manual-exercises`, { headers })
+        setManualExercises((exerciseRes.data || []).map(r => ({ ...r, type: 'manual-exercise' })))
+      } catch (err) {
+        console.error('Failed to load shared classwork:', err.response?.data || err)
       }
     }
     fetchSaved()
-  }, [])
+  }, [selectedAcademicYear, selectedTerm, teacherEmail])
 
   useEffect(() => {
   if (!classOptions.length) return
@@ -610,14 +607,6 @@ export default function TeacherDashboard() {
       setGradebookStudent('')
     }
   }, [classOptions, gradebookClass])
-
-  useEffect(() => {
-    window.localStorage.setItem('goldenIntelsLms', JSON.stringify({ assignments, lessons, quizzes }))
-  }, [assignments, lessons, quizzes])
-
-  useEffect(() => {
-    window.localStorage.setItem('goldenIntelsSubmissionRecords', JSON.stringify(submissionRecords))
-  }, [submissionRecords])
 
   useEffect(() => {
   if (activeMenu === 'classes' || activeMenu === 'attendance' || activeMenu === 'gradebook') {
@@ -834,27 +823,21 @@ useEffect(() => {
     doc.save(`${record.learnerName || 'student'}-${record.type}-submission.pdf`)
   }
 
-  const getSubmissionRecordKey = (record) => `${record.type}-${record.itemId}-${record.learnerEmail || record.learnerName || 'learner'}`
-
-  const handleMarkAssignmentSubmission = (record, index) => {
+  const handleMarkAssignmentSubmission = async (record) => {
     const label = record.type === 'quiz' ? 'quiz' : 'assignment'
     const score = window.prompt(`Enter ${label} score or mark:`, record.score ?? '')
     if (score === null) return
     const feedback = window.prompt('Enter teacher feedback:', record.feedback ?? '')
     if (feedback === null) return
-    const targetKey = getSubmissionRecordKey(record)
-    setSubmissionRecords(prev => prev.map((item, itemIndex) => (
-      getSubmissionRecordKey(item) === targetKey
-        ? {
-            ...item,
-            score: score.trim(),
-            feedback: feedback.trim(),
-            marked: true,
-            markedAt: new Date().toISOString(),
-            markedBy: user?.name || 'Teacher'
-          }
-        : item
-    )))
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.put(`${API_URL}/api/classwork/submissions/${record.id}/mark`, {
+        score: score.trim(), feedback: feedback.trim()
+      }, { headers: { Authorization: `Bearer ${token}` } })
+      setSubmissionRecords(prev => prev.map(item => item.id === res.data.id ? res.data : item))
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not save the mark and feedback.')
+    }
   }
 
   const ownsLmsItem = (item) => item.teacherEmail === teacherEmail
@@ -862,7 +845,7 @@ useEffect(() => {
   const teacherLessons = lessons.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
   const teacherQuizzes = quizzes.filter(item => ownsLmsItem(item) && matchesAcademicContext(item))
   const teacherManualExercises = manualExercises.filter(item => item.teacherEmail === teacherEmail && matchesAcademicContext(item))
-  const teacherSubmissionRecords = submissionRecords.filter(record => record.teacherEmail === teacherEmail && matchesAcademicContext(record))
+  const teacherSubmissionRecords = submissionRecords.filter(matchesAcademicContext)
   const getResponsesForItem = (item, type) => teacherSubmissionRecords.filter(record => record.type === type && String(record.itemId) === String(item.id))
 
   const handleEditLmsItem = (item, type) => {
@@ -906,57 +889,82 @@ useEffect(() => {
     }
   }
 
-  const handleDeleteLmsItem = (itemId, type) => {
+  const handleDeleteLmsItem = async (itemId, type) => {
     if (!window.confirm('Delete this item? This cannot be undone.')) return
-    if (type === 'lesson') {
-      setLessons(prev => prev.filter(item => item.id !== itemId))
-    }
-    if (type === 'assignment') {
-      setAssignments(prev => prev.filter(item => item.id !== itemId))
-    }
-    if (type === 'quiz') {
-      setQuizzes(prev => prev.filter(item => item.id !== itemId))
+    try {
+      const token = localStorage.getItem('token')
+      await axios.delete(`${API_URL}/api/classwork/${itemId}`, { headers: { Authorization: `Bearer ${token}` } })
+      if (type === 'lesson') setLessons(prev => prev.filter(item => item.id !== itemId))
+      if (type === 'assignment') setAssignments(prev => prev.filter(item => item.id !== itemId))
+      if (type === 'quiz') setQuizzes(prev => prev.filter(item => item.id !== itemId))
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not delete this item.')
     }
     if (lmsItemView?.item?.id === itemId) setLmsItemView(null)
     if (editingLmsItem?.item?.id === itemId) resetLmsForm()
   }
 
-  const handleAddAssignment = () => {
+  const handleAddAssignment = async () => {
     if (!newAssignment.title) return
-    const assignmentToSave = { ...newAssignment, dueDate: combineDateTime(newAssignment.dueDate, newAssignment.dueTime), teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm }
-    if (editingLmsItem?.type === 'assignment') {
-      setAssignments(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...assignmentToSave, published: editingLmsItem.item.published } : item))
-      setEditingLmsItem(null)
-    } else {
-      setAssignments([{ id: Date.now(), published: false, ...assignmentToSave }, ...assignments])
+    const assignmentToSave = { ...newAssignment, dueDate: combineDateTime(newAssignment.dueDate, newAssignment.dueTime), academicYear: selectedAcademicYear, term: selectedTerm }
+    try {
+      const token = localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}` }
+      if (editingLmsItem?.type === 'assignment') {
+        const res = await axios.put(`${API_URL}/api/classwork/${editingLmsItem.item.id}`, assignmentToSave, { headers })
+        setAssignments(prev => prev.map(item => item.id === res.data.id ? res.data : item))
+        setEditingLmsItem(null)
+      } else {
+        const res = await axios.post(`${API_URL}/api/classwork`, { ...assignmentToSave, type: 'assignment' }, { headers })
+        setAssignments(prev => [res.data, ...prev])
+      }
+      resetLmsForm()
+      setShowAddAssignment(false)
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not save this assignment.')
     }
-    resetLmsForm()
-    setShowAddAssignment(false)
   }
 
-  const handleAddLesson = () => {
+  const handleAddLesson = async () => {
     if (!newLesson.title) return
-    if (editingLmsItem?.type === 'lesson') {
-      setLessons(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...newLesson, published: editingLmsItem.item.published } : item))
-      setEditingLmsItem(null)
-    } else {
-      setLessons([{ id: Date.now(), published: false, teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm, ...newLesson }, ...lessons])
+    const lessonToSave = { ...newLesson, academicYear: selectedAcademicYear, term: selectedTerm }
+    try {
+      const token = localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}` }
+      if (editingLmsItem?.type === 'lesson') {
+        const res = await axios.put(`${API_URL}/api/classwork/${editingLmsItem.item.id}`, lessonToSave, { headers })
+        setLessons(prev => prev.map(item => item.id === res.data.id ? res.data : item))
+        setEditingLmsItem(null)
+      } else {
+        const res = await axios.post(`${API_URL}/api/classwork`, { ...lessonToSave, type: 'lesson' }, { headers })
+        setLessons(prev => [res.data, ...prev])
+      }
+      resetLmsForm()
+      setShowAddLesson(false)
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not save this lesson.')
     }
-    resetLmsForm()
-    setShowAddLesson(false)
   }
 
-  const handleAddQuiz = () => {
+  const handleAddQuiz = async () => {
     if (!newQuiz.title || newQuiz.questions.length === 0) return
-    const quizToSave = { ...newQuiz, dueDate: combineDateTime(newQuiz.dueDate, newQuiz.dueTime), teacherEmail, teacherName, academicYear: selectedAcademicYear, term: selectedTerm }
-    if (editingLmsItem?.type === 'quiz') {
-      setQuizzes(prev => prev.map(item => item.id === editingLmsItem.item.id ? { ...item, ...quizToSave, published: editingLmsItem.item.published } : item))
-      setEditingLmsItem(null)
-    } else {
-      setQuizzes([{ id: Date.now(), published: false, ...quizToSave }, ...quizzes])
+    const quizToSave = { ...newQuiz, dueDate: combineDateTime(newQuiz.dueDate, newQuiz.dueTime), academicYear: selectedAcademicYear, term: selectedTerm }
+    try {
+      const token = localStorage.getItem('token')
+      const headers = { Authorization: `Bearer ${token}` }
+      if (editingLmsItem?.type === 'quiz') {
+        const res = await axios.put(`${API_URL}/api/classwork/${editingLmsItem.item.id}`, quizToSave, { headers })
+        setQuizzes(prev => prev.map(item => item.id === res.data.id ? res.data : item))
+        setEditingLmsItem(null)
+      } else {
+        const res = await axios.post(`${API_URL}/api/classwork`, { ...quizToSave, type: 'quiz' }, { headers })
+        setQuizzes(prev => [res.data, ...prev])
+      }
+      resetLmsForm()
+      setShowAddQuiz(false)
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not save this quiz.')
     }
-    resetLmsForm()
-    setShowAddQuiz(false)
   }
 
   const handleQuizQuestionChange = (index, field, value) => {
@@ -999,15 +1007,18 @@ useEffect(() => {
     }))
   }
 
-  const togglePublishItem = (itemId, type) => {
-    if (type === 'lesson') {
-      setLessons(prev => prev.map(item => item.id === itemId ? { ...item, published: !item.published } : item))
-    }
-    if (type === 'assignment') {
-      setAssignments(prev => prev.map(item => item.id === itemId ? { ...item, published: !item.published } : item))
-    }
-    if (type === 'quiz') {
-      setQuizzes(prev => prev.map(item => item.id === itemId ? { ...item, published: !item.published } : item))
+  const togglePublishItem = async (item, type) => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.put(`${API_URL}/api/classwork/${item.id}`, { published: !item.published }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const updateItems = setter => setter(prev => prev.map(existing => existing.id === res.data.id ? res.data : existing))
+      if (type === 'lesson') updateItems(setLessons)
+      if (type === 'assignment') updateItems(setAssignments)
+      if (type === 'quiz') updateItems(setQuizzes)
+    } catch (error) {
+      alert(error.response?.data?.message || 'Could not update publish status.')
     }
   }
 
@@ -1876,7 +1887,7 @@ useEffect(() => {
                         <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{lesson.gradeLevel}</span>
-                            <button onClick={() => togglePublishItem(lesson.id, 'lesson')} className={`text-xs font-bold px-3 py-1 rounded-full ${lesson.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <button onClick={() => togglePublishItem(lesson, 'lesson')} className={`text-xs font-bold px-3 py-1 rounded-full ${lesson.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {lesson.published ? 'Published' : 'Draft'}
                             </button>
                           </div>
@@ -2057,7 +2068,7 @@ useEffect(() => {
                         <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{assignment.gradeLevel}</span>
-                            <button onClick={() => togglePublishItem(assignment.id, 'assignment')} className={`text-xs font-bold px-3 py-1 rounded-full ${assignment.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <button onClick={() => togglePublishItem(assignment, 'assignment')} className={`text-xs font-bold px-3 py-1 rounded-full ${assignment.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {assignment.published ? 'Published' : 'Draft'}
                             </button>
                           </div>
@@ -2188,7 +2199,7 @@ useEffect(() => {
                         <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
                             <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{quiz.gradeLevel}</span>
-                            <button onClick={() => togglePublishItem(quiz.id, 'quiz')} className={`text-xs font-bold px-3 py-1 rounded-full ${quiz.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <button onClick={() => togglePublishItem(quiz, 'quiz')} className={`text-xs font-bold px-3 py-1 rounded-full ${quiz.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {quiz.published ? 'Published' : 'Draft'}
                             </button>
                           </div>

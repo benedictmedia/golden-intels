@@ -143,6 +143,7 @@ model Student {
   feePayments     FeePayment[]
   attendance      AttendanceRecord[]
   manualExercises ManualExercise[]
+  classworkSubmissions ClassworkSubmission[]
 
   @@map("Student")
 }
@@ -418,6 +419,58 @@ model AcademicContext {
   setBy        String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model ClassworkItem {
+  id             Int                   @id @default(autoincrement())
+  type           String
+  title          String
+  subject        String
+  gradeLevel     String
+  description    String?
+  content        String?
+  dueDate        String?
+  durationMinutes Int?
+  questions      Json?
+  published      Boolean               @default(false)
+  teacherEmail   String
+  teacherName    String
+  academicYear   String
+  term           String
+  legacyId       String?
+  submissions    ClassworkSubmission[]
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([teacherEmail, type, legacyId])
+  @@index([gradeLevel, academicYear, term, published])
+  @@index([teacherEmail, academicYear, term])
+}
+
+model ClassworkSubmission {
+  id              Int           @id @default(autoincrement())
+  classworkItemId Int
+  classworkItem   ClassworkItem @relation(fields: [classworkItemId], references: [id], onDelete: Cascade)
+  studentId       Int
+  student         Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  learnerName     String
+  learnerEmail    String
+  device          String?
+  startedAt       DateTime?
+  submittedAt     DateTime      @default(now())
+  timeUsedSeconds Int?
+  questions       Json
+  score           Float?
+  totalQuestions  Int?
+  marked          Boolean       @default(false)
+  markedAt        DateTime?
+  markedBy        String?
+  feedback        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([classworkItemId, studentId])
+  @@index([studentId, submittedAt])
 }
 
 model ManualExercise {
