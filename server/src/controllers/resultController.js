@@ -9,6 +9,7 @@ const {
 } = require('../utils/resultSubjectHelpers')
 const { createNotificationsForRole } = require('./notificationController')
 const { isStudentFeeCleared } = require('../utils/feeStatus')
+const { archive, isPreviousAcademicPeriod } = require('../utils/archive')
 
 const prisma = new PrismaClient()
 
@@ -71,7 +72,7 @@ const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => 
   if (!allowedTeacherClasses.length) return false
 
   const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-  if (!student) return false
+  if (!student || student.archivedAt) return false
 
   const allowedClass = allowedTeacherClasses.includes(normalizeClassName(student.gradeLevel))
   const allowedGradeLevel = gradeLevel == null
@@ -158,7 +159,7 @@ const getResults = async (req, res) => {
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
       const children = await prisma.student.findMany({
-        where: { OR: [{ parentEmail: email }, { parentId: req.user.id }] },
+        where: { archivedAt: null, OR: [{ parentEmail: email }, { parentId: req.user.id }] },
         select: { id: true }
       })
       const ids = children.map((child) => child.id)
@@ -204,13 +205,14 @@ const getResultsByStudent = async (req, res) => {
   try {
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-      if (!student || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) return res.status(403).json({ message: 'Forbidden' })
+      if (!student || student.archivedAt || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) return res.status(403).json({ message: 'Forbidden' })
     }
 
     if (req.user && req.user.role === 'learner') {
       const student = await prisma.student.findFirst({
         where: {
           id: parseInt(studentId),
+          archivedAt: null,
           OR: [{ learnerUserId: req.user.id }, { email: req.user.email }]
         }
       })
@@ -339,6 +341,9 @@ const createResult = async (req, res) => {
 const updateResult = async (req, res) => {
   const { id } = req.params
   const { scores, remarks, status } = req.body
+  if (!['admin', 'teacher'].includes(req.user?.role)) {
+    return res.status(403).json({ message: 'Only teachers and administrators can update results.' })
+  }
 
   try {
     const existing = await prisma.result.findUnique({ where: { id: parseInt(id) } })
@@ -347,6 +352,9 @@ const updateResult = async (req, res) => {
     }
 
     if (req.user && req.user.role === 'teacher') {
+      if (await isPreviousAcademicPeriod(prisma, existing.academicYear, existing.term)) {
+        return res.status(403).json({ message: 'Previous-term results are read-only.' })
+      }
       const allowed = await isTeacherAllowedForStudent(req, existing.studentId, existing.gradeLevel)
       if (!allowed) {
         return res.status(403).json({ message: 'Forbidden: You may only update results for your assigned classes.' })
@@ -442,14 +450,24 @@ if (sigSetting?.value) {
 
 // Delete result
 const deleteResult = async (req, res) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Only administrators can archive results.' })
+  }
   const { id } = req.params
   try {
-    if (req.user && req.user.role === 'teacher') {
-      return res.status(403).json({ message: 'Teachers cannot delete shared results. Please contact admin.' })
-    }
-
-    await prisma.result.delete({ where: { id: parseInt(id) } })
-    res.json({ message: 'Result deleted successfully' })
+    const result = await prisma.result.findUnique({ where: { id: parseInt(id) } })
+    if (!result) return res.status(404).json({ message: 'Result not found.' })
+    await prisma.$transaction(async tx => {
+      await archive(tx, {
+        entityType: 'result', entityId: result.id, studentId: result.studentId,
+        title: `Result: ${result.gradeLevel} ${result.term} ${result.academicYear}`,
+        academicYear: result.academicYear, term: result.term,
+        reason: 'admin-deleted-result', payload: JSON.parse(JSON.stringify(result)),
+        archivedBy: req.user.name || req.user.email
+      })
+      await tx.result.delete({ where: { id: result.id } })
+    })
+    res.json({ message: 'Result moved to the archive.' })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

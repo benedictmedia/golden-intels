@@ -87,6 +87,7 @@ app.use('/api/video-sessions', require('./routes/videoSessions'))
 app.use('/api/signature', require('./routes/signature'))
 app.use('/api/academic-context', require('./routes/academicContext'))
 app.use('/api/classwork', require('./routes/classwork'))
+app.use('/api/archives', require('./routes/archives'))
 
 const seedDefaultUsers = async () => {
   const defaultUsers = [

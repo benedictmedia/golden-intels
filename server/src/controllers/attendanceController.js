@@ -1,19 +1,28 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const { isStudentFeeCleared } = require('../utils/feeStatus')
+const { archive, isPreviousAcademicPeriod, isAcademicPeriodVisible } = require('../utils/archive')
 
 const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
 
 const getAttendance = async (req, res) => {
   try {
-    const { date, gradeLevel } = req.query
+    const { date, gradeLevel, academicYear, term } = req.query
+    if (req.user?.role !== 'admin' && !await isAcademicPeriodVisible(prisma, academicYear, term)) {
+      return res.status(403).json({ message: 'Upcoming attendance periods are visible to administrators only.' })
+    }
     const where = {}
     if (date) where.date = date
     if (gradeLevel) where.gradeLevel = gradeLevel
+    if (academicYear) where.academicYear = academicYear
+    if (term) where.term = term
     // If parent, restrict to their children
     if (req.user && req.user.role === 'parent') {
-      const children = await prisma.student.findMany({ where: { parentEmail: req.user.email }, select: { id: true } })
+      const children = await prisma.student.findMany({
+        where: { archivedAt: null, OR: [{ parentEmail: req.user.email }, { parentId: req.user.id }] },
+        select: { id: true }
+      })
       const clearedIds = []
       for (const child of children) {
         if (await isStudentFeeCleared(child.id)) clearedIds.push(child.id)
@@ -45,7 +54,7 @@ const getStudentAttendance = async (req, res) => {
     // If parent, ensure the requested student belongs to them
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+      if (!student || student.archivedAt || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) return res.status(403).json({ message: 'Forbidden' })
       // Fees outstanding for this child: withhold attendance records entirely.
       const cleared = await isStudentFeeCleared(studentId)
       if (!cleared) return res.json([])
@@ -58,6 +67,9 @@ const getStudentAttendance = async (req, res) => {
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
     const { academicYear, term } = req.query
+    if (req.user?.role !== 'admin' && !await isAcademicPeriodVisible(prisma, academicYear, term)) {
+      return res.status(403).json({ message: 'Upcoming attendance periods are visible to administrators only.' })
+    }
     const where = { studentId: parseInt(studentId) }
     if (academicYear) where.academicYear = academicYear
     if (term) where.term = term
@@ -72,6 +84,12 @@ const getStudentAttendance = async (req, res) => {
 const saveAttendance = async (req, res) => {
   const { records, date, gradeLevel, recordedBy } = req.body
   try {
+    if (!['admin', 'teacher'].includes(req.user?.role)) return res.status(403).json({ message: 'Only teachers and administrators can record attendance.' })
+    const { academicYear, term } = req.body
+    const isPrevious = await isPreviousAcademicPeriod(prisma, academicYear, term)
+    if (isPrevious && req.user?.role !== 'admin') {
+      return res.status(403).json({ message: 'Previous-term attendance is read-only. Contact an administrator to correct it.' })
+    }
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
       const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
@@ -83,28 +101,34 @@ const saveAttendance = async (req, res) => {
       }
     }
 
-    // Delete existing records for this date, class, and same term/year only
-    const { academicYear, term } = req.body
-    await prisma.attendanceRecord.deleteMany({
-      where: {
-        date,
-        gradeLevel,
-        ...(academicYear ? { academicYear } : {}),
-        ...(term ? { term } : {})
+    const where = {
+      date,
+      gradeLevel,
+      ...(academicYear ? { academicYear } : {}),
+      ...(term ? { term } : {})
+    }
+    const created = await prisma.$transaction(async tx => {
+      const oldRecords = await tx.attendanceRecord.findMany({ where })
+      if (isPrevious && req.user?.role === 'admin') {
+        for (const oldRecord of oldRecords) {
+          await archive(tx, {
+            entityType: 'attendanceRecord', entityId: oldRecord.id, studentId: oldRecord.studentId,
+            title: `Attendance: ${oldRecord.date} (${oldRecord.gradeLevel})`,
+            academicYear: oldRecord.academicYear, term: oldRecord.term,
+            reason: 'admin-replaced-historical-attendance',
+            payload: JSON.parse(JSON.stringify(oldRecord)),
+            archivedBy: req.user.name || req.user.email
+          })
+        }
       }
-    })
-    // Create new records
-    const created = await prisma.attendanceRecord.createMany({
-      data: records.map(r => ({
-        studentId: parseInt(r.studentId),
-        date,
-        status: r.status,
-        gradeLevel,
-        recordedBy,
-        academicYear: academicYear || null,
-        term: term || null
-      })),
-      skipDuplicates: true
+      await tx.attendanceRecord.deleteMany({ where })
+      return tx.attendanceRecord.createMany({
+        data: records.map(r => ({
+          studentId: parseInt(r.studentId), date, status: r.status, gradeLevel, recordedBy,
+          academicYear: academicYear || null, term: term || null
+        })),
+        skipDuplicates: true
+      })
     })
     res.json({ message: 'Attendance saved', count: created.count })
   } catch (error) {
@@ -118,7 +142,7 @@ const getAttendanceSummary = async (req, res) => {
     // If parent, ensure the requested student belongs to them
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-      if (!student || student.parentEmail !== req.user.email) return res.status(403).json({ message: 'Forbidden' })
+      if (!student || student.archivedAt || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) return res.status(403).json({ message: 'Forbidden' })
       const cleared = await isStudentFeeCleared(studentId)
       if (!cleared) return res.json({ total: 0, present: 0, absent: 0, absentOnPermission: 0, absentWithoutPermission: 0, late: 0, percentage: 0, records: [], feeLocked: true })
     }

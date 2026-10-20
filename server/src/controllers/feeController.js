@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const { createNotification, createNotificationsForRole } = require('./notificationController')
+const { archive } = require('../utils/archive')
 const prisma = new PrismaClient()
 
 // Fee Structure
@@ -32,7 +33,10 @@ const getFeePayments = async (req, res) => {
     // Parents should only see payments for their children
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
-      const children = await prisma.student.findMany({ where: { parentEmail: email }, select: { id: true } })
+      const children = await prisma.student.findMany({
+        where: { archivedAt: null, OR: [{ parentEmail: email }, { parentId: req.user.id }] },
+        select: { id: true }
+      })
       const ids = children.map(c => c.id)
       const payments = await prisma.feePayment.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
       return res.json(payments)
@@ -50,7 +54,7 @@ const getStudentFeePayments = async (req, res) => {
     // If parent, ensure the requested student belongs to them
     if (req.user && req.user.role === 'parent') {
       const student = await prisma.student.findUnique({ where: { id: parseInt(studentId) } })
-      if (!student || student.parentEmail !== req.user.email) {
+      if (!student || student.archivedAt || (student.parentEmail !== req.user.email && student.parentId !== req.user.id)) {
         return res.status(403).json({ message: 'Forbidden' })
       }
     }
@@ -150,10 +154,22 @@ const updateFeePayment = async (req, res) => {
 }
 
 const deleteFeePayment = async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Only administrators can archive fee payments.' })
   const { id } = req.params
   try {
-    await prisma.feePayment.delete({ where: { id: parseInt(id) } })
-    res.json({ message: 'Fee payment deleted successfully' })
+    const payment = await prisma.feePayment.findUnique({ where: { id: parseInt(id) } })
+    if (!payment) return res.status(404).json({ message: 'Fee payment not found.' })
+    await prisma.$transaction(async tx => {
+      await archive(tx, {
+        entityType: 'feePayment', entityId: payment.id, studentId: payment.studentId,
+        title: `Fee payment: ${payment.month} ${payment.year}`,
+        academicYear: payment.year, term: null, reason: 'admin-deleted-fee-payment',
+        payload: JSON.parse(JSON.stringify(payment)),
+        archivedBy: req.user.name || req.user.email
+      })
+      await tx.feePayment.delete({ where: { id: payment.id } })
+    })
+    res.json({ message: 'Fee payment moved to the archive.' })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

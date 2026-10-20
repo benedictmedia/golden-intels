@@ -1,10 +1,15 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const { isStudentFeeCleared } = require('../utils/feeStatus')
+const { isPreviousAcademicPeriod } = require('../utils/archive')
 
 const createManualExercise = async (req, res) => {
   try {
     const payload = req.body
+    if (req.user?.role !== 'teacher') return res.status(403).json({ message: 'Only teachers can create manual exercises.' })
+    if (await isPreviousAcademicPeriod(prisma, payload.academicYear, payload.term)) {
+      return res.status(403).json({ message: 'Previous-term exercises are read-only.' })
+    }
     // Basic validation
     if (!payload.studentId || !payload.title || !payload.subject) return res.status(400).json({ message: 'Missing required fields' })
 
@@ -68,7 +73,10 @@ const getManualExercises = async (req, res) => {
 
     // If parent, restrict to their children
     if (req.user && req.user.role === 'parent') {
-      const children = await prisma.student.findMany({ where: { parentEmail: req.user.email }, select: { id: true } })
+      const children = await prisma.student.findMany({
+        where: { archivedAt: null, OR: [{ parentEmail: req.user.email }, { parentId: req.user.id }] },
+        select: { id: true }
+      })
       const ids = children.map(c => c.id)
       if (studentId && !ids.includes(Number(studentId))) return res.status(403).json({ message: 'Forbidden' })
 
@@ -86,6 +94,8 @@ const getManualExercises = async (req, res) => {
         where.studentId = { in: clearedIds }
       }
     }
+
+    if (req.user?.role !== 'admin') where.student = { archivedAt: null }
 
     // If teacher, allow but limit to their own created records optionally
     if (req.user && req.user.role === 'teacher') {

@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
+const { archive, isPreviousAcademicPeriod } = require('../utils/archive')
 
 const prisma = new PrismaClient()
 const CLASSWORK_TYPES = new Set(['assignment', 'quiz', 'lesson'])
@@ -9,6 +10,7 @@ const normalizeClass = (value) => String(value ?? '').trim().toLowerCase()
 
 const getLearner = async (user) => prisma.student.findFirst({
   where: {
+    archivedAt: null,
     OR: [
       { learnerUserId: user.id },
       { email: user.email }
@@ -125,6 +127,7 @@ const getClasswork = async (req, res) => {
       const child = await prisma.student.findFirst({
         where: {
           id: Number(studentId),
+          archivedAt: null,
           OR: [{ parentId: req.user.id }, { parentEmail: req.user.email }]
         }
       })
@@ -158,6 +161,9 @@ const createClasswork = async (req, res) => {
     }
     if (!await isAcademicPeriodAllowed(req.user, academicYear, term)) {
       return res.status(403).json({ message: 'You cannot create classwork for an upcoming academic period.' })
+    }
+    if (await isPreviousAcademicPeriod(prisma, academicYear, term)) {
+      return res.status(403).json({ message: 'Teachers cannot create classwork in a previous academic period.' })
     }
 
     const item = await prisma.classworkItem.create({
@@ -273,6 +279,9 @@ const updateClasswork = async (req, res) => {
     if (!await isAcademicPeriodAllowed(req.user, req.body.academicYear ?? existing.academicYear, req.body.term ?? existing.term)) {
       return res.status(403).json({ message: 'You cannot update classwork for an upcoming academic period.' })
     }
+    if (await isPreviousAcademicPeriod(prisma, existing.academicYear, existing.term)) {
+      return res.status(403).json({ message: 'Previous-term classwork is read-only.' })
+    }
     const data = {}
     for (const field of ['title', 'subject', 'gradeLevel', 'description', 'content', 'dueDate', 'durationMinutes', 'published', 'academicYear', 'term', 'questions']) {
       if (req.body[field] !== undefined) data[field] = req.body[field]
@@ -287,10 +296,27 @@ const updateClasswork = async (req, res) => {
 
 const deleteClasswork = async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') return res.status(403).json({ message: 'Only teachers can delete classwork.' })
-    const deleted = await prisma.classworkItem.deleteMany({ where: { id: Number(req.params.id), teacherEmail: req.user.email } })
-    if (!deleted.count) return res.status(404).json({ message: 'Classwork not found.' })
-    res.json({ message: 'Classwork deleted.' })
+    if (!['teacher', 'admin'].includes(req.user.role)) return res.status(403).json({ message: 'Only teachers and administrators can archive classwork.' })
+    const id = Number(req.params.id)
+    const item = await prisma.classworkItem.findFirst({
+      where: { id, ...(req.user.role === 'teacher' ? { teacherEmail: req.user.email } : {}) },
+      include: { submissions: true }
+    })
+    if (!item) return res.status(404).json({ message: 'Classwork not found.' })
+    if (req.user.role === 'teacher' && await isPreviousAcademicPeriod(prisma, item.academicYear, item.term)) {
+      return res.status(403).json({ message: 'Previous-term classwork cannot be deleted by a teacher.' })
+    }
+    await prisma.$transaction(async tx => {
+      const { submissions, ...itemData } = item
+      await archive(tx, {
+        entityType: 'classwork-item', entityId: item.id, title: `${item.type}: ${item.title}`,
+        academicYear: item.academicYear, term: item.term, reason: `${req.user.role}-deleted-classwork`,
+        payload: JSON.parse(JSON.stringify({ item: itemData, submissions })),
+        archivedBy: req.user.name || req.user.email
+      })
+      await tx.classworkItem.delete({ where: { id } })
+    })
+    res.json({ message: 'Classwork and submissions moved to the archive.' })
   } catch (error) {
     console.error('Delete classwork error:', error)
     res.status(500).json({ message: 'Could not delete classwork.' })
@@ -305,6 +331,9 @@ const submitClasswork = async (req, res) => {
     const item = await prisma.classworkItem.findFirst({ where: { id: Number(req.params.id), published: true } })
     if (!item || normalizeClass(item.gradeLevel) !== normalizeClass(learner.gradeLevel)) {
       return res.status(404).json({ message: 'This classwork is not available to your class.' })
+    }
+    if (await isPreviousAcademicPeriod(prisma, item.academicYear, item.term)) {
+      return res.status(403).json({ message: 'Previous-term classwork is read-only.' })
     }
     const existing = await prisma.classworkSubmission.findUnique({
       where: { classworkItemId_studentId: { classworkItemId: item.id, studentId: learner.id } }
@@ -366,9 +395,13 @@ const markSubmission = async (req, res) => {
   try {
     if (req.user.role !== 'teacher') return res.status(403).json({ message: 'Only teachers can mark submissions.' })
     const submission = await prisma.classworkSubmission.findFirst({
-      where: { id: Number(req.params.submissionId), classworkItem: { teacherEmail: req.user.email } }
+      where: { id: Number(req.params.submissionId), classworkItem: { teacherEmail: req.user.email } },
+      include: { classworkItem: true }
     })
     if (!submission) return res.status(404).json({ message: 'Submission not found.' })
+    if (await isPreviousAcademicPeriod(prisma, submission.classworkItem.academicYear, submission.classworkItem.term)) {
+      return res.status(403).json({ message: 'Previous-term submissions are read-only.' })
+    }
     const score = req.body.score === '' || req.body.score == null ? null : Number(req.body.score)
     if (score !== null && !Number.isFinite(score)) return res.status(400).json({ message: 'Score must be a number.' })
     const updated = await prisma.classworkSubmission.update({

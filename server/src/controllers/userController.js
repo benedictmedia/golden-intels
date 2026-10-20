@@ -1,6 +1,7 @@
 const prisma = require('../config/prismaClient')
 const bcrypt = require('bcryptjs')
 const { sendMail } = require('../utils/mailer')
+const { archive } = require('../utils/archive')
 
 const ensureAdmin = (req, res) => {
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
@@ -234,25 +235,37 @@ const deleteUser = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' })
     if (user.active) return res.status(400).json({ message: 'Deactivate account before deleting it' })
 
-    const operations = []
-    if (user.role === 'parent') {
-      const children = await prisma.student.findMany({ where: { parentEmail: user.email } })
-      const studentIds = children.map(s => s.id)
-      if (studentIds.length) {
-        operations.push(prisma.result.deleteMany({ where: { studentId: { in: studentIds } } }))
-        operations.push(prisma.feePayment.deleteMany({ where: { studentId: { in: studentIds } } }))
-        operations.push(prisma.attendanceRecord.deleteMany({ where: { studentId: { in: studentIds } } }))
-        operations.push(prisma.student.deleteMany({ where: { id: { in: studentIds } } }))
+    await prisma.$transaction(async tx => {
+      if (user.role === 'parent') {
+        const children = await tx.student.findMany({
+          where: { OR: [{ parentEmail: user.email }, { parentId: user.id }], archivedAt: null },
+          include: {
+            results: true, feePayments: true, attendance: true, manualExercises: true,
+            classworkSubmissions: { include: { classworkItem: true } },
+            admissionApplication: true
+          }
+        })
+        for (const child of children) {
+          const messages = await tx.message.findMany({ where: { conversationUserId: child.id } })
+          await archive(tx, {
+            entityType: 'student', entityId: child.id, studentId: child.id,
+            title: `${child.firstName} ${child.lastName}`.trim(),
+            academicYear: child.academicYear || null, term: null,
+            reason: 'parent-account-deleted',
+            payload: JSON.parse(JSON.stringify({ student: child, messages, previousStatus: child.status || 'active' })),
+            archivedBy: req.user.name || req.user.email
+          })
+          await tx.student.update({
+            where: { id: child.id },
+            data: { archivedAt: new Date(), status: 'archived', parentId: null, parentEmail: null }
+          })
+        }
       }
-    }
-    if (user.role === 'teacher') {
-      operations.push(prisma.staff.deleteMany({ where: { email: user.email } }))
-    }
-    operations.push(prisma.accountAudit.deleteMany({ where: { userId: user.id } }))
-    operations.push(prisma.user.delete({ where: { id: user.id } }))
-
-    await prisma.$transaction(operations)
-    res.json({ message: 'User deleted and related data cleared' })
+      if (user.role === 'teacher') await tx.staff.deleteMany({ where: { email: user.email } })
+      await tx.accountAudit.deleteMany({ where: { userId: user.id } })
+      await tx.user.delete({ where: { id: user.id } })
+    })
+    res.json({ message: 'User deleted. Linked learner records were preserved in the archive.' })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

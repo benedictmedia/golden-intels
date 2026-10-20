@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
+const { archive } = require('../utils/archive')
 const prisma = new PrismaClient()
 
 // Every "admission form" field that lives on Student in addition to the core
@@ -99,11 +100,15 @@ const generateStudentId = async () => {
 const getStudents = async (req, res) => {
   try {
     const order = { createdAt: 'desc' }
+    const activeLearnerWhere = {
+      archivedAt: null,
+      OR: [{ status: null }, { status: { notIn: ['transferred', 'graduated', 'archived'] } }]
+    }
     if (req.user && req.user.role === 'parent') {
       const email = req.user.email
       const students = await prisma.student.findMany({
         where: {
-          OR: [{ parentEmail: email }, { parentId: req.user.id }]
+          AND: [activeLearnerWhere, { OR: [{ parentEmail: email }, { parentId: req.user.id }] }]
         },
         orderBy: order,
         include: { parent: { select: { id: true, name: true, email: true } } }
@@ -116,6 +121,7 @@ const getStudents = async (req, res) => {
       const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
         .replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
       const students = await prisma.student.findMany({ 
+        where: activeLearnerWhere,
         orderBy: order, 
         include: { parent: { select: { id: true, name: true, email: true } } } 
       })
@@ -135,6 +141,7 @@ const getStudents = async (req, res) => {
     }
 
     const students = await prisma.student.findMany({ 
+      where: activeLearnerWhere,
       orderBy: order, 
       include: { parent: { select: { id: true, name: true, email: true } } } 
     })
@@ -244,6 +251,7 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params
+    if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Only administrators can update learner records.' })
 
     // Whitelist only the fields admin is allowed to update — never spread the whole body
     const {
@@ -295,9 +303,32 @@ const updateStudent = async (req, res) => {
     const documentUrls = extractDocumentUrls(req)
     Object.assign(data, documentUrls)
 
-    const student = await prisma.student.update({
-      where: { id: parseInt(id) },
-      data
+    const studentIdNumber = parseInt(id)
+    const existingStudent = await prisma.student.findUnique({ where: { id: studentIdNumber } })
+    if (!existingStudent) return res.status(404).json({ message: 'Student not found.' })
+    const shouldArchive = ['transferred', 'graduated'].includes(String(status || '').toLowerCase()) && !existingStudent.archivedAt
+    const student = await prisma.$transaction(async (tx) => {
+      if (shouldArchive) {
+        const related = await tx.student.findUnique({
+          where: { id: studentIdNumber },
+          include: {
+            results: true, feePayments: true, attendance: true, manualExercises: true,
+            classworkSubmissions: { include: { classworkItem: true } },
+            admissionApplication: true
+          }
+        })
+        const messages = await tx.message.findMany({ where: { conversationUserId: studentIdNumber } })
+        const payload = JSON.parse(JSON.stringify({ student: related, messages, previousStatus: existingStudent.status || 'active' }))
+        await archive(tx, {
+          entityType: 'student', entityId: studentIdNumber, studentId: studentIdNumber,
+          title: `${existingStudent.firstName} ${existingStudent.lastName}`.trim(),
+          academicYear: existingStudent.academicYear || null, term: null,
+          reason: `learner-${String(status).toLowerCase()}`, payload,
+          archivedBy: req.user.name || req.user.email
+        })
+        data.archivedAt = new Date()
+      }
+      return tx.student.update({ where: { id: studentIdNumber }, data })
     })
 
     res.json(student)
@@ -393,6 +424,9 @@ const getStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: 'Student not found' })
     }
+    if (student.archivedAt && req.user?.role !== 'admin') {
+      return res.status(404).json({ message: 'This learner profile is archived.' })
+    }
 
     // Role-based access: parents/learners may only view their own child/self
     if (req.user && req.user.role === 'parent') {
@@ -458,17 +492,34 @@ const createLearnerLogin = async (req, res) => {
 }
 
 const deleteStudent = async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Only administrators can archive learner records.' })
   const { id } = req.params
   const studentId = parseInt(id)
   try {
-    await prisma.result.deleteMany({ where: { studentId } })
-    await prisma.attendanceRecord.deleteMany({ where: { studentId } })
-    await prisma.feePayment.deleteMany({ where: { studentId } })
-    await prisma.message.deleteMany({ where: { conversationUserId: studentId } })
-
-    await prisma.student.delete({ where: { id: studentId } })
-
-    res.json({ message: 'Student deleted successfully' })
+    const existingStudent = await prisma.student.findUnique({ where: { id: studentId } })
+    if (!existingStudent) return res.status(404).json({ message: 'Student not found.' })
+    if (existingStudent.archivedAt) return res.status(409).json({ message: 'This learner is already archived.' })
+    await prisma.$transaction(async tx => {
+      const related = await tx.student.findUnique({
+        where: { id: studentId },
+        include: {
+          results: true, feePayments: true, attendance: true, manualExercises: true,
+          classworkSubmissions: { include: { classworkItem: true } },
+          admissionApplication: true
+        }
+      })
+      const messages = await tx.message.findMany({ where: { conversationUserId: studentId } })
+      const payload = JSON.parse(JSON.stringify({ student: related, messages, previousStatus: existingStudent.status || 'active' }))
+      await archive(tx, {
+        entityType: 'student', entityId: studentId, studentId,
+        title: `${existingStudent.firstName} ${existingStudent.lastName}`.trim(),
+        academicYear: existingStudent.academicYear || null, term: null,
+        reason: 'admin-archived-learner', payload,
+        archivedBy: req.user.name || req.user.email
+      })
+      await tx.student.update({ where: { id: studentId }, data: { archivedAt: new Date(), status: 'archived' } })
+    })
+    res.json({ message: 'Learner and linked records moved to the archive.' })
   } catch (error) {
     console.error('Delete student error:', error)
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -497,6 +548,7 @@ const getMyProfile = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: 'Student profile not found' })
     }
+    if (student.archivedAt) return res.status(403).json({ message: 'This learner profile is archived.' })
 
     res.json(student)
   } catch (error) {

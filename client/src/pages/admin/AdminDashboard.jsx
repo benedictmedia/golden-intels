@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -36,6 +36,7 @@ const menuItems = [
   { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
   { icon: <FileSignature size={20} />, label: 'Signature', id: 'signature' },
   { icon: <CalendarDays size={20} />, label: 'Academic Context', id: 'academic-context' },
+  { icon: <Archive size={20} />, label: 'Archive', id: 'archives' },
 ]
 
 const stats = [
@@ -63,6 +64,9 @@ export default function AdminDashboard() {
   const [academicContext, setAcademicContext] = useState({ academicYear: '2026/2027', term: 'Term 1' })
   const [contextSaving, setContextSaving] = useState(false)
   const [contextSaved, setContextSaved] = useState(false)
+  const [archiveRecords, setArchiveRecords] = useState([])
+  const [archiveLoading, setArchiveLoading] = useState(false)
+  const [archiveError, setArchiveError] = useState('')
 
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [learnerLoginForm, setLearnerLoginForm] = useState({ email: '', password: '' })
@@ -205,6 +209,14 @@ export default function AdminDashboard() {
   }))
 
   useEffect(() => {
+    if (activeMenu === 'archives') {
+      setArchiveLoading(true)
+      setArchiveError('')
+      axios.get(`${API_URL}/api/archives`, { headers: getAuthHeaders() })
+        .then(res => setArchiveRecords(res.data || []))
+        .catch(err => setArchiveError(err.response?.data?.message || 'Could not load archived records.'))
+        .finally(() => setArchiveLoading(false))
+    }
   if (activeMenu === 'dashboard') {
     axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
       .then(res => {
@@ -538,7 +550,7 @@ const handleSaveAcademicContext = async () => {
 }
 
   const handleDeleteStudent = async (id) => {
-  if (!window.confirm('Are you sure you want to remove this learner?')) return
+  if (!window.confirm('Archive this learner and preserve all of their records?')) return
 
   try {
     await axios.delete(
@@ -552,7 +564,7 @@ const handleSaveAcademicContext = async () => {
       setSelectedStudent(null)
     }
 
-    alert('Learner deleted successfully.')
+    alert('Learner and linked records moved to the archive.')
   } catch (err) {
     console.error(err.response?.data || err)
 
@@ -562,6 +574,19 @@ const handleSaveAcademicContext = async () => {
     )
   }
 }
+
+  const handleRestoreArchive = async (archiveId) => {
+    if (!window.confirm('Restore this archived record?')) return
+    try {
+      await axios.post(`${API_URL}/api/archives/${archiveId}/restore`, {}, { headers: getAuthHeaders() })
+      setArchiveRecords(prev => prev.map(record => record.id === archiveId
+        ? { ...record, restoredAt: new Date().toISOString(), restoredBy: user?.name || user?.email }
+        : record))
+      alert('Archived record restored successfully.')
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not restore this record.')
+    }
+  }
 
   // Loads the learner's complete profile (every admission-form field, plus
   // their approved results) so the profile modal always shows everything
@@ -631,7 +656,9 @@ const handleSaveAcademicContext = async () => {
       { headers: getAuthHeaders() }
     )
 
-    setStudents(students.map(s => s.id === editStudent.id ? { ...s, ...res.data } : s))
+    setStudents(prev => res.data.archivedAt
+      ? prev.filter(student => student.id !== editStudent.id)
+      : prev.map(student => student.id === editStudent.id ? { ...student, ...res.data } : student))
     setSelectedStudent(prev => ({ ...prev, ...res.data }))
     setEditMode(false)
     setLearnerDocFiles({})
@@ -3015,9 +3042,82 @@ const handleAdminPasswordReset = async (id, email) => {
       <div className="mt-4 rounded-xl p-4 text-sm" style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
         <p className="font-bold text-amber-700 mb-1">Important</p>
         <p className="text-amber-600 text-xs">Changing the context only affects what is currently shown in portals. All historical data for previous terms remains intact and is never deleted.</p>
-        <p className="text-amber-600 text-xs mt-2">⬆️ <strong>Auto-Promotion:</strong> When you advance to a new academic year (e.g. 2025/2026 → 2026/2027), the system will automatically promote all active learners to their next class. You will be asked to confirm before this happens.</p>
+        <p className="text-amber-600 text-xs mt-2">⬆️ <strong>Auto-Promotion:</strong> When you advance to a new academic year (e.g. 2026/2027 → 2027/2028), the system will automatically promote all active learners to their next class. You will be asked to confirm before this happens.</p>
       </div>
     </div>
+  </div>
+)}
+
+{activeMenu === 'archives' && (
+  <div>
+    <div className="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Archive</h2>
+        <p className="text-sm text-gray-500">Archived learners and term records remain available here for restoration.</p>
+      </div>
+      <button onClick={async () => {
+        setArchiveLoading(true)
+        try {
+          const res = await axios.get(`${API_URL}/api/archives`, { headers: getAuthHeaders() })
+          setArchiveRecords(res.data || [])
+          setArchiveError('')
+        } catch (err) {
+          setArchiveError(err.response?.data?.message || 'Could not load archived records.')
+        } finally {
+          setArchiveLoading(false)
+        }
+      }} className="bg-white border border-gray-200 p-2 rounded-lg text-gray-600" title="Refresh archive" aria-label="Refresh archive">
+        <CalendarDays size={18} />
+      </button>
+    </div>
+    {archiveError && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{archiveError}</div>}
+    {archiveLoading ? (
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">Loading archive...</div>
+    ) : archiveRecords.length === 0 ? (
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">No archived records yet.</div>
+    ) : (
+      <div className="overflow-x-auto bg-white rounded-xl border border-gray-100">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-gray-600">
+            <tr>
+              <th className="px-5 py-3 text-left">Record</th>
+              <th className="px-5 py-3 text-left">Academic period</th>
+              <th className="px-5 py-3 text-left">Reason</th>
+              <th className="px-5 py-3 text-left">Archived</th>
+              <th className="px-5 py-3 text-left">Status</th>
+              <th className="px-5 py-3 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {archiveRecords.map(record => (
+              <tr key={record.id} className="border-t border-gray-100">
+                <td className="px-5 py-4">
+                  <p className="font-semibold text-gray-800">{record.title}</p>
+                  <p className="text-xs text-gray-400">{record.entityType}</p>
+                </td>
+                <td className="px-5 py-4 text-gray-600">{[record.academicYear, record.term].filter(Boolean).join(' · ') || 'Learner record'}</td>
+                <td className="px-5 py-4 text-gray-600">{record.reason.replaceAll('-', ' ')}</td>
+                <td className="px-5 py-4 text-gray-600">{new Date(record.archivedAt).toLocaleString()}</td>
+                <td className="px-5 py-4">
+                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${record.restoredAt ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'}`}>
+                    {record.restoredAt ? 'Restored' : 'Archived'}
+                  </span>
+                </td>
+                <td className="px-5 py-4 text-right">
+                  <button
+                    onClick={() => handleRestoreArchive(record.id)}
+                    disabled={Boolean(record.restoredAt)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+                  >
+                    <Archive size={14} /> Restore
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
   </div>
 )}
 

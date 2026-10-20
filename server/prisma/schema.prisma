@@ -58,6 +58,7 @@ model Student {
   state            String?
   photo           String?
   status          String?            @default("active")
+  archivedAt      DateTime?
 
   // Where this learner record originated from
   source          String             @default("manual") // 'manual' | 'admission'
@@ -471,6 +472,26 @@ model ClassworkSubmission {
 
   @@unique([classworkItemId, studentId])
   @@index([studentId, submittedAt])
+}
+
+model ArchiveRecord {
+  id           Int       @id @default(autoincrement())
+  entityType   String
+  entityId     Int
+  studentId    Int?
+  title        String
+  academicYear String?
+  term         String?
+  reason       String
+  payload      Json
+  archivedBy   String
+  archivedAt   DateTime  @default(now())
+  restoredBy   String?
+  restoredAt   DateTime?
+
+  @@index([entityType, entityId])
+  @@index([studentId, archivedAt])
+  @@index([academicYear, term, archivedAt])
 }
 
 model ManualExercise {
