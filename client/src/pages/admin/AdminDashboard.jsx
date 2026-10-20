@@ -17,6 +17,8 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import { parseStudentFile } from '../../utils/studentImport'
+import { displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
+import { countLearnersByGender } from '../../utils/learnerGenderCounts'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -41,10 +43,11 @@ const stats = [
   { label: 'Admissions', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
   { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Staff Members', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
+  { label: 'Male Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
+  { label: 'Female Learners', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
 ]
 
-const classes = ['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
-const normalizeClassName = value => String(value ?? '').trim().toLocaleLowerCase()
+const classes = ['All', 'Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -98,7 +101,7 @@ export default function AdminDashboard() {
   })
   const [studentImportLoading, setStudentImportLoading] = useState(false)
   const [studentImportResult, setStudentImportResult] = useState(null)
-  const [dashboardCounts, setDashboardCounts] = useState({ learners: 0, staff: 0 })
+  const [dashboardCounts, setDashboardCounts] = useState({ learners: 0, staff: 0, maleLearners: 0, femaleLearners: 0 })
 
   // Results state
   const [results, setResults] = useState([])
@@ -186,23 +189,33 @@ export default function AdminDashboard() {
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
   const learnerClasses = ['All', ...new Map(
-    [...classes.slice(1), ...students.map(student => String(student.gradeLevel ?? '').trim()).filter(Boolean)]
-      .map(className => [normalizeClassName(className), className])
+    [...classes.slice(1), ...students.map(student => displayStudentClassName(student.gradeLevel)).filter(Boolean)]
+      .map(className => [normalizeStudentClassName(className), displayStudentClassName(className)])
   ).values()]
-  const filteredStudents = activeClass === 'All' ? students : students.filter(s => normalizeClassName(s.gradeLevel) === normalizeClassName(activeClass))
-  const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => p.student?.gradeLevel === feeClassFilter)
+  const filteredStudents = activeClass === 'All' ? students : students.filter(s => normalizeStudentClassName(s.gradeLevel) === normalizeStudentClassName(activeClass))
+  const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => normalizeStudentClassName(p.student?.gradeLevel) === normalizeStudentClassName(feeClassFilter))
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
   const dashboardStats = stats.map(stat => ({
     ...stat,
     value: stat.label === 'Total Learners' ? String(dashboardCounts.learners)
       : stat.label === 'Staff Members' ? String(dashboardCounts.staff)
+        : stat.label === 'Male Learners' ? String(dashboardCounts.maleLearners)
+          : stat.label === 'Female Learners' ? String(dashboardCounts.femaleLearners)
         : stat.value
   }))
 
   useEffect(() => {
   if (activeMenu === 'dashboard') {
     axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
-      .then(res => setDashboardCounts(prev => ({ ...prev, learners: res.data.length })))
+      .then(res => {
+        const genderCounts = countLearnersByGender(res.data)
+        setDashboardCounts(prev => ({
+          ...prev,
+          learners: res.data.length,
+          maleLearners: genderCounts.male,
+          femaleLearners: genderCounts.female
+        }))
+      })
       .catch(err => console.error('Failed to refresh learner total:', err))
     axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
       .then(res => setDashboardCounts(prev => ({ ...prev, staff: res.data.length })))
@@ -238,7 +251,7 @@ export default function AdminDashboard() {
     if (activeMenu === 'finance') {
       axios.get(`${API_URL}/api/fees/structures`).then(res => {
         const structured = {}
-        res.data.forEach(f => { structured[f.gradeLevel] = f.monthlyFee })
+        res.data.forEach(f => { structured[displayStudentClassName(f.gradeLevel)] = f.monthlyFee })
         setFeeStructures(structured)
       })
       axios.get(`${API_URL}/api/fees/payments`).then(res => setFeePayments(res.data))
@@ -274,7 +287,7 @@ export default function AdminDashboard() {
 
   // Class progression order for auto-promotion
   const CLASS_PROGRESSION = [
-    'Creche(Babies)',
+    'Creche',
     'Pre-Nursery',
     'Nursery 1',
     'Nursery 2',
@@ -295,14 +308,14 @@ export default function AdminDashboard() {
   ]
 
   const getNextClass = (currentClass) => {
-    const idx = CLASS_PROGRESSION.indexOf(currentClass)
+    const idx = CLASS_PROGRESSION.indexOf(displayStudentClassName(currentClass))
     if (idx === -1 || idx === CLASS_PROGRESSION.length - 1) return null // unknown or final class
     return CLASS_PROGRESSION[idx + 1]
   }
 
   // Add this helper near getNextClass
 const getPrevClass = (currentClass) => {
-  const idx = CLASS_PROGRESSION.indexOf(currentClass);
+  const idx = CLASS_PROGRESSION.indexOf(displayStudentClassName(currentClass));
   if (idx <= 0) return null; // first class or unknown
   return CLASS_PROGRESSION[idx - 1];
 };
@@ -1398,7 +1411,7 @@ const handleAdminPasswordReset = async (id, email) => {
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
             <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {dashboardStats.map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -1579,7 +1592,7 @@ const handleAdminPasswordReset = async (id, email) => {
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
                     <h3 className="text-lg font-bold text-gray-800 mb-4">Set Monthly Fees by Class</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
+                      {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-gray-800 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
@@ -1606,7 +1619,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    {['All', 'Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(cls => (
+                    {['All', 'Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(cls => (
                       <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
@@ -1663,7 +1676,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="p-6 space-y-4">
                       <div>
                         <label className="block text-sm font-bold text-gray-800 mb-2">Student</label>
-                        <select value={paymentForm.studentId} onChange={e => { const s = students.find(s => s.id === parseInt(e.target.value)); setPaymentForm(prev => ({ ...prev, studentId: e.target.value, amountDue: s ? feeStructures[s.gradeLevel] || '' : '' })) }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                        <select value={paymentForm.studentId} onChange={e => { const s = students.find(s => s.id === parseInt(e.target.value)); setPaymentForm(prev => ({ ...prev, studentId: e.target.value, amountDue: s ? feeStructures[displayStudentClassName(s.gradeLevel)] || '' : '' })) }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select student...</option>
                           {students.map(s => <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.gradeLevel}</option>)}
                         </select>
@@ -1937,7 +1950,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                       <select value={newStudent.gradeLevel} onChange={e => setNewStudent({ ...newStudent, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select grade</option>
-                        {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
+                        {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
                     {[
@@ -1960,7 +1973,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 {learnerClasses.map(cls => (
                   <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {cls}
-                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => normalizeClassName(s.gradeLevel) === normalizeClassName(cls)).length}</span>
+                    <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => normalizeStudentClassName(s.gradeLevel) === normalizeStudentClassName(cls)).length}</span>
                   </button>
                 ))}
               </div>
@@ -1994,7 +2007,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </td>
                           <td className="px-6 py-4"><span className="bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
                           <td className="px-6 py-4 font-medium text-gray-800">{student.firstName} {student.lastName}</td>
-                          <td className="px-6 py-4"><span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">{student.gradeLevel}</span></td>
+                          <td className="px-6 py-4"><span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">{displayStudentClassName(student.gradeLevel)}</span></td>
                           <td className="px-6 py-4 text-gray-600">{student.gender}</td>
                           <td className="px-6 py-4"><span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span></td>
                           <td className="px-6 py-4">
@@ -2097,7 +2110,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                         <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select grade</option>
-                          {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
+                          {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
                         </select>
                       </div>
                       <div>
@@ -3129,7 +3142,7 @@ const handleAdminPasswordReset = async (id, email) => {
           <div>
             <h3 className="text-xl font-bold text-gray-800">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
             <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full mt-1">{selectedStudent.studentId}</span>
-            <p className="text-gray-500 text-sm mt-1">{selectedStudent.gradeLevel}</p>
+            <p className="text-gray-500 text-sm mt-1">{displayStudentClassName(selectedStudent.gradeLevel)}</p>
             <span className="inline-block bg-gray-100 text-gray-500 text-xs font-semibold px-2 py-0.5 rounded-full mt-1">
               {selectedStudent.source === 'admission' ? 'From admission application' : 'Added manually'}
             </span>
@@ -3142,7 +3155,7 @@ const handleAdminPasswordReset = async (id, email) => {
               { title: "Learner's Data", fields: [
                 ['Date of Birth', selectedStudent.dateOfBirth], ['Age', selectedStudent.age], ['Gender', selectedStudent.gender],
                 ['Month of Birth', selectedStudent.monthOfBirth], ['Place of Birth', selectedStudent.placeOfBirth],
-                ['Grade Level', selectedStudent.gradeLevel], ['Division', selectedStudent.division],
+                ['Grade Level', displayStudentClassName(selectedStudent.gradeLevel)], ['Division', selectedStudent.division],
                 ['Academic Year', selectedStudent.academicYear], ['Previous School', selectedStudent.previousSchool],
                 ['Height', selectedStudent.height], ['Weight', selectedStudent.weight],
                 ['Hometown', selectedStudent.hometown], ['Mother Tongue', selectedStudent.motherTongue], ['Religion', selectedStudent.religion],
@@ -3302,7 +3315,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 ['studentId', 'Student ID', 'text'], ['firstName', 'First Name', 'text'], ['lastName', 'Last Name', 'text'],
                 ['dateOfBirth', 'Date of Birth', 'date'], ['age', 'Age', 'text'], ['monthOfBirth', 'Month of Birth', 'text'],
                 ['gender', 'Gender', 'select', ['Male', 'Female']], ['placeOfBirth', 'Place of Birth', 'text'],
-                ['gradeLevel', 'Grade Level', 'select', ['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']],
+                ['gradeLevel', 'Grade Level', 'select', ['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']],
                 ['division', 'Division', 'text'], ['academicYear', 'Academic Year', 'text'],
                 ['previousSchool', 'Previous School', 'text'], ['height', 'Height', 'text'], ['weight', 'Weight', 'text'],
                 ['hometown', 'Hometown', 'text'], ['motherTongue', 'Mother Tongue', 'text'], ['religion', 'Religion', 'text'],

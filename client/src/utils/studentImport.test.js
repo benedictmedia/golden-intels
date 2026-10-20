@@ -4,8 +4,8 @@ import { mapStudentRows } from './studentImport.js'
 
 test('maps the provided spreadsheet columns to learner fields', () => {
   const rows = mapStudentRows([
-    ['Admission Number', 'Name', 'Class', 'Division', 'Academic Year', 'Email', 'Phone(of guardian)', 'Street', 'City', 'State', 'Guardian', 'Father', 'Mother', 'Date of Birth'],
-    ['STU202600001', 'Ama Mensah', 'Grade 2', 'Lower Primary', '2026-27', 'ama@example.com', '0240000000', 'Main Road', 'Accra', 'Greater Accra', 'Kojo Mensah', 'Kojo Mensah', 'Abena Mensah', '12/05/2018'],
+    ['Admission Number', 'Name', 'Class', 'Gender', 'Division', 'Academic Year', 'Email', 'Phone(of guardian)', 'Street', 'City', 'State', 'Guardian', 'Father', 'Mother', 'Date of Birth'],
+    ['STU202600001', 'Ama Mensah', 'Grade 2', 'Female', 'Lower Primary', '2026-27', 'ama@example.com', '0240000000', 'Main Road', 'Accra', 'Greater Accra', 'Kojo Mensah', 'Kojo Mensah', 'Abena Mensah', '12/05/2018'],
   ])
 
   assert.deepEqual(rows[0], {
@@ -14,6 +14,7 @@ test('maps the provided spreadsheet columns to learner fields', () => {
     firstName: 'Ama',
     lastName: 'Mensah',
     gradeLevel: 'Grade 2',
+    gender: 'Female',
     division: 'Lower Primary',
     academicYear: '2026-27',
     parentEmail: 'ama@example.com',

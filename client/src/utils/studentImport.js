@@ -13,6 +13,7 @@ const HEADER_FIELDS = {
   class: 'gradeLevel',
   grade: 'gradeLevel',
   gradelevel: 'gradeLevel',
+  gender: 'gender',
   division: 'division',
   divition: 'division',
   academicyear: 'academicYear',
