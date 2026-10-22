@@ -588,6 +588,23 @@ const handleSaveAcademicContext = async () => {
     }
   }
 
+  const handlePermanentDeleteArchive = async (record) => {
+    const confirmation = window.prompt(
+      `Permanently delete "${record.title}" and its archived data? This cannot be undone. Only use this for test/demo or otherwise irrelevant records. Type DELETE to continue.`
+    )
+    if (confirmation !== 'DELETE') return
+    try {
+      await axios.delete(`${API_URL}/api/archives/${record.id}/permanent`, {
+        headers: getAuthHeaders(),
+        data: { confirm: confirmation }
+      })
+      setArchiveRecords(prev => prev.filter(item => item.id !== record.id && !(record.entityType === 'student' && item.studentId === record.entityId)))
+      alert('Archived data permanently deleted.')
+    } catch (err) {
+      alert(err.response?.data?.message || 'Could not permanently delete this archive entry.')
+    }
+  }
+
   // Loads the learner's complete profile (every admission-form field, plus
   // their approved results) so the profile modal always shows everything
   // about them — whether they came from an approved admission application
@@ -3104,13 +3121,22 @@ const handleAdminPasswordReset = async (id, email) => {
                   </span>
                 </td>
                 <td className="px-5 py-4 text-right">
-                  <button
-                    onClick={() => handleRestoreArchive(record.id)}
-                    disabled={Boolean(record.restoredAt)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
-                  >
-                    <Archive size={14} /> Restore
-                  </button>
+                  <div className="inline-flex items-center gap-2">
+                    <button
+                      onClick={() => handleRestoreArchive(record.id)}
+                      disabled={Boolean(record.restoredAt)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+                    >
+                      <Archive size={14} /> Restore
+                    </button>
+                    <button
+                      onClick={() => handlePermanentDeleteArchive(record)}
+                      disabled={Boolean(record.restoredAt)}
+                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                    >
+                      <Trash2 size={14} /> Permanently delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

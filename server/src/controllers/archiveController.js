@@ -93,4 +93,68 @@ const restoreArchive = async (req, res) => {
   }
 }
 
-module.exports = { getArchives, restoreArchive }
+const permanentlyDeleteArchive = async (req, res) => {
+  if (!requireAdmin(req, res)) return
+  if (req.body.confirm !== 'DELETE') {
+    return res.status(400).json({ message: 'Explicit DELETE confirmation is required.' })
+  }
+
+  try {
+    const archiveId = Number(req.params.id)
+    const record = await prisma.archiveRecord.findUnique({ where: { id: archiveId } })
+    if (!record) return res.status(404).json({ message: 'Archived record not found.' })
+    if (record.restoredAt) return res.status(409).json({ message: 'Restore this record before managing its active data.' })
+
+    await prisma.$transaction(async tx => {
+      if (record.entityType === 'student') {
+        const student = await tx.student.findUnique({ where: { id: record.entityId } })
+        if (student) {
+          const studentId = student.id
+          const admissionApplicationId = student.admissionApplicationId
+          const learnerUserId = student.learnerUserId
+          await tx.classworkSubmission.deleteMany({ where: { studentId } })
+          await tx.result.deleteMany({ where: { studentId } })
+          await tx.feePayment.deleteMany({ where: { studentId } })
+          await tx.attendanceRecord.deleteMany({ where: { studentId } })
+          await tx.manualExercise.deleteMany({ where: { studentId } })
+          await tx.message.deleteMany({ where: { conversationUserId: studentId } })
+          await tx.student.delete({ where: { id: studentId } })
+          if (admissionApplicationId) {
+            await tx.admissionApplication.deleteMany({ where: { id: admissionApplicationId } })
+          }
+          if (learnerUserId) {
+            await tx.accountAudit.deleteMany({ where: { userId: learnerUserId } })
+            const linkedLearner = await tx.user.findFirst({
+              where: { id: learnerUserId, role: 'learner' },
+              select: { id: true }
+            })
+            if (linkedLearner) await tx.user.delete({ where: { id: linkedLearner.id } })
+          }
+        }
+        const classworkArchives = await tx.archiveRecord.findMany({ where: { entityType: 'classwork-item' } })
+        for (const archivedClasswork of classworkArchives) {
+          const payload = archivedClasswork.payload
+          const submissions = Array.isArray(payload?.submissions) ? payload.submissions : []
+          const retained = submissions.filter(submission => submission.studentId !== record.entityId)
+          if (retained.length !== submissions.length) {
+            await tx.archiveRecord.update({
+              where: { id: archivedClasswork.id },
+              data: { payload: { ...payload, submissions: retained } }
+            })
+          }
+        }
+        await tx.archiveRecord.deleteMany({
+          where: { OR: [{ studentId: record.entityId }, { entityType: 'student', entityId: record.entityId }] }
+        })
+      } else {
+        await tx.archiveRecord.delete({ where: { id: archiveId } })
+      }
+    })
+    res.json({ message: 'Archived data permanently deleted.' })
+  } catch (error) {
+    console.error('Permanent archive deletion error:', error)
+    res.status(400).json({ message: error.message || 'Could not permanently delete this archive entry.' })
+  }
+}
+
+module.exports = { getArchives, restoreArchive, permanentlyDeleteArchive }
