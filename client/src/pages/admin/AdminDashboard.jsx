@@ -2309,7 +2309,7 @@ const handleAdminPasswordReset = async (id, email) => {
 
           {/* Accounts */}
           {activeMenu === 'accounts' && (
-            <div>
+            <div className="admin-accounts">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Accounts</h2>
@@ -2342,7 +2342,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {users.map(u => (
                         <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col gap-4">
                             <div>
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
@@ -2352,7 +2352,7 @@ const handleAdminPasswordReset = async (id, email) => {
                               </div>
                               <p className="text-sm text-gray-500">{u.email}</p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                               <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
                               {u.active ? (
@@ -2382,12 +2382,12 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {students.map(s => (
                         <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col gap-4">
                             <div>
                               <h3 className="font-bold text-[#1d4ed8]">{s.firstName} {s.lastName}</h3>
                               <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
                               <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-green-500 text-white rounded">Edit</button>
                               <button
@@ -2415,7 +2415,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         const staffInfo = u.teacherInfo
                         return (
                           <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-4">
                               <div>
                                 <div className="flex items-center gap-2 mb-2">
                                   <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
@@ -2433,7 +2433,7 @@ const handleAdminPasswordReset = async (id, email) => {
                                   <p className="mt-3 text-xs text-orange-600">No staff assignment found for this teacher.</p>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                                 <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
                                 {u.active ? (

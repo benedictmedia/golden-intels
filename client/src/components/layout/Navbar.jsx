@@ -49,13 +49,13 @@ export default function Navbar() {
           </div>
         </Link>
         {/* Desktop links */}
-        <ul className="hidden lg:flex flex-1 items-center justify-center gap-3 px-3 text-xs font-medium xl:gap-4">
+        <ul className="hidden lg:flex flex-1 items-center justify-between gap-4 px-6 text-xs font-medium">
           <li>
             <details className="group relative">
               <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]">
                 About Us <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
               </summary>
-              <div className="absolute left-0 top-full z-50 mt-3 min-w-52 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
+              <div className="navbar-dropdown absolute left-0 top-full z-50 mt-3 min-w-52 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
                 {aboutLinks.map((link, index) => (
                   <div key={link.name}>
                     {index === 1 && <div className="my-1 border-t border-gray-200" />}
@@ -79,7 +79,7 @@ export default function Navbar() {
               <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]">
                 Portal <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
               </summary>
-              <div className="absolute right-0 top-full z-50 mt-3 min-w-44 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
+              <div className="navbar-dropdown absolute right-0 top-full z-50 mt-3 min-w-44 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
                 <Link to="/login" onClick={closeMenu} className={dropdownLinkClass}>
                   Academics
                 </Link>
@@ -91,7 +91,7 @@ export default function Navbar() {
                   onClick={closeMenu}
                   className={dropdownLinkClass}
                 >
-                  Fees
+                  Finance
                 </a>
               </div>
             </details>
@@ -103,13 +103,13 @@ export default function Navbar() {
   href="https://global.oup.com/education/primary/curricula/oxford-international-curriculum/?region=international"
   target="_blank"
   rel="noopener noreferrer"
-  className="flex items-center gap-1.5 ml-2"
+  className="ml-2 flex shrink-0 items-center justify-center rounded-xl border border-white/60 bg-white px-2 py-1 shadow-md transition-transform duration-300 hover:scale-105"
   title="Oxford International Curriculum Accredited School"
 >
   <img
     src={oxfordLogo}
     alt="Oxford International Curriculum"
-      className="h-8 w-auto shrink-0 object-contain"
+      className="h-9 w-auto shrink-0 object-contain"
   />
 </a>
         {/* Mobile menu button */}
@@ -181,7 +181,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="block rounded-lg px-5 py-2.5 hover:bg-white/10 hover:text-[var(--color-accent)]"
                   >
-                    Fees
+                    Finance
                   </a>
                 </>
               )}
