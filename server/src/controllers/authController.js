@@ -180,12 +180,20 @@ const register = async (req, res) => {
 
 // Login
 const login = async (req, res) => {
-  const { email, password } = req.body
+  const body = req.body || {}
+  const email = typeof body.email === 'string' ? body.email.trim() : ''
+  const { password } = body
+  if (!email || typeof password !== 'string' || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' })
+  }
+
   try {
     // Ensure DB is awake before querying
     await prisma.$queryRaw`SELECT 1`
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } }
+    })
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' })
     }
@@ -256,30 +264,40 @@ const changePassword = async (req, res) => {
   }
 }
 
-const getClientUrl = () => process.env.CLIENT_URL || process.env.FRONTEND_URL || 'http://localhost:5173'
+const getClientUrl = () => {
+  const fallbackUrl = process.env.NODE_ENV === 'production'
+    ? 'https://www.goldenintels.edu.gh'
+    : 'http://localhost:5173'
+  const url = new URL(process.env.CLIENT_URL || process.env.FRONTEND_URL || fallbackUrl)
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('CLIENT_URL must use HTTP or HTTPS.')
+  }
+  return url.origin
+}
 
 const hashResetToken = (token) => crypto.createHash('sha256').update(token).digest('hex')
 
 const forgotPassword = async (req, res) => {
-  const { email } = req.body
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim() : ''
   if (!email) return res.status(400).json({ message: 'Email address is required.' })
 
+  let resetTokenId
   try {
-    const normalizedEmail = String(email).trim()
     const user = await prisma.user.findFirst({
-      where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
+      where: { email: { equals: email, mode: 'insensitive' } }
     })
 
-    if (user && user.active !== false && user.role !== 'admin') {
+    if (user && user.active !== false) {
       const token = crypto.randomBytes(32).toString('hex')
       const tokenHash = hashResetToken(token)
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
 
-      await prisma.passwordResetToken.create({
+      const resetToken = await prisma.passwordResetToken.create({
         data: { tokenHash, userId: user.id, expiresAt }
       })
+      resetTokenId = resetToken.id
 
-      const resetUrl = `${getClientUrl().replace(/\/$/, '')}/reset-password/${token}`
+      const resetUrl = `${getClientUrl()}/reset-password/${token}`
       await sendMail({
         to: user.email,
         subject: 'Reset your Golden-Intels portal password',
@@ -290,13 +308,25 @@ const forgotPassword = async (req, res) => {
           <p><a href="${resetUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:12px 18px;border-radius:8px;text-decoration:none;">Reset password</a></p>
           <p>If the button does not work, copy this link into your browser:</p>
           <p>${resetUrl}</p>
-        `
+        `,
+        throwOnError: true
       })
     }
 
     res.json({ message: 'If that email is registered, a password reset link has been sent.' })
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    if (resetTokenId) {
+      try {
+        await prisma.passwordResetToken.update({
+          where: { id: resetTokenId },
+          data: { usedAt: new Date() }
+        })
+      } catch (cleanupError) {
+        console.error('Failed to invalidate unsent password reset token:', cleanupError.message)
+      }
+    }
+    console.error('Password reset request failed:', error.message)
+    res.status(503).json({ message: 'Password reset is temporarily unavailable. Please contact school support.' })
   }
 }
 

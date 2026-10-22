@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-const sendMail = async ({ to, subject, text, html }) => {
+const sendMail = async ({ to, subject, text, html, throwOnError = false }) => {
   if (!to || (Array.isArray(to) && to.length === 0)) {
     console.warn('⚠️ sendMail skipped: no recipient email provided')
     return
@@ -25,7 +25,7 @@ const sendMail = async ({ to, subject, text, html }) => {
     return info
   } catch (error) {
     console.error('❌ Failed to send email:', error.message)
-    // Don't throw — a failed email should never block admission approval
+    if (throwOnError) throw error
   }
 }
 

@@ -42,12 +42,34 @@ const waitForDB = async (retries = 10, delay = 3000) => {
 const app = express()
 const httpServer = createServer(app)
 
+const configuredOrigins = [
+  ...(process.env.CORS_ORIGINS || '').split(','),
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL
+]
+  .map((origin) => origin?.trim())
+  .filter(Boolean)
+  .map((origin) => {
+    try {
+      const url = new URL(origin)
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw new Error('Only HTTP and HTTPS origins are supported')
+      }
+      return url.origin
+    } catch {
+      throw new Error(`Invalid frontend origin in CORS configuration: ${origin}`)
+    }
+  })
+
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'https://goldenintels.edu.gh',
+    'https://www.goldenintels.edu.gh',
     'https://golden-intels.vercel.app',
     'https://golden-intels-git-main-golden-intels-projects.vercel.app',
-    /\.vercel\.app$/
+    /\.vercel\.app$/,
+    ...configuredOrigins
   ],
   credentials: true
 }))

@@ -29,7 +29,11 @@ export default function ResetPassword() {
       setMessage(res.data.message || 'Password reset successfully.')
       setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not reset password. Please request a new link.')
+      if (!err.response) {
+        setError('Could not reach the portal server. Check your connection or contact school support.')
+      } else {
+        setError(err.response.data?.message || 'Could not reset password. Please request a new link.')
+      }
     } finally {
       setLoading(false)
     }

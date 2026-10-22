@@ -26,8 +26,14 @@ export default function Login() {
       else if (user.role === 'parent') navigate('/parent')
       else if (user.role === 'learner') navigate('/learner')
       else navigate('/')
-    } catch {
-      setError('Invalid email or password. Please try again.')
+    } catch (err) {
+      if (!err.response) {
+        setError('Could not reach the portal server. Check your connection or contact school support.')
+      } else if (err.response.status >= 500) {
+        setError('The portal is temporarily unavailable. Please try again shortly or contact school support.')
+      } else {
+        setError(err.response.data?.message || 'Invalid email or password. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -42,7 +48,11 @@ export default function Login() {
       const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email })
       setMessage(res.data.message || 'If that email is registered, a password reset link has been sent.')
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not request password reset. Please try again.')
+      if (!err.response) {
+        setError('Could not reach the portal server. Check your connection or contact school support.')
+      } else {
+        setError(err.response.data?.message || 'Could not request password reset. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
