@@ -42,13 +42,14 @@ const menuItems = [
 const stats = [
   { label: 'Total Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Admissions', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
-  { label: 'Total Revenue', value: 'GH₵ 0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Staff Members', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
   { label: 'Male Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Female Learners', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
 ]
 
 const classes = ['All', 'Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+const FEE_ACADEMIC_YEARS = ['2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037']
+const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -162,12 +163,14 @@ export default function AdminDashboard() {
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
   const [feeStructures, setFeeStructures] = useState({})
+  const [feeAcademicYear, setFeeAcademicYear] = useState('2026/2027')
+  const [feeTerm, setFeeTerm] = useState('Term 1')
   const [feePayments, setFeePayments] = useState([])
   const [feeSaved, setFeeSaved] = useState(false)
   const [showAddPayment, setShowAddPayment] = useState(false)
   const [editingPayment, setEditingPayment] = useState(null)
   const [feeClassFilter, setFeeClassFilter] = useState('All')
-  const [paymentForm, setPaymentForm] = useState({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
+  const [paymentForm, setPaymentForm] = useState({ studentId: '', academicYear: '2026/2027', term: 'Term 1', amountDue: '', previousTermArrears: '0', amountPaid: '0', notes: '' })
 
   const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -205,7 +208,7 @@ export default function AdminDashboard() {
       : stat.label === 'Staff Members' ? String(dashboardCounts.staff)
         : stat.label === 'Male Learners' ? String(dashboardCounts.maleLearners)
           : stat.label === 'Female Learners' ? String(dashboardCounts.femaleLearners)
-        : stat.value
+            : stat.value
   }))
 
   useEffect(() => {
@@ -261,13 +264,13 @@ export default function AdminDashboard() {
       axios.get(`${API_URL}/api/staff`).then(res => setStaffList(res.data))
     }
     if (activeMenu === 'finance') {
-      axios.get(`${API_URL}/api/fees/structures`).then(res => {
+      axios.get(`${API_URL}/api/fees/structures`, { headers: getAuthHeaders(), params: { academicYear: feeAcademicYear, term: feeTerm } }).then(res => {
         const structured = {}
-        res.data.forEach(f => { structured[displayStudentClassName(f.gradeLevel)] = f.monthlyFee })
+        res.data.forEach(f => { structured[displayStudentClassName(f.gradeLevel)] = f.termFee })
         setFeeStructures(structured)
       })
-      axios.get(`${API_URL}/api/fees/payments`).then(res => setFeePayments(res.data))
-      axios.get(`${API_URL}/api/students`).then(res => setStudents(res.data))
+      axios.get(`${API_URL}/api/fees/payments`, { headers: getAuthHeaders() }).then(res => setFeePayments(res.data))
+      axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }).then(res => setStudents(res.data))
     }
     if (activeMenu === 'contact-messages') {
       setContactLoading(true)
@@ -276,7 +279,7 @@ export default function AdminDashboard() {
         .catch(console.error)
         .finally(() => setContactLoading(false))
     }
-  }, [activeMenu])
+  }, [activeMenu, feeAcademicYear, feeTerm])
 
   useEffect(() => {
   axios.get(`${API_URL}/api/signature`, { headers: getAuthHeaders() })
@@ -286,7 +289,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
   axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
-    .then(res => setAcademicContext(res.data))
+    .then(res => {
+      setAcademicContext(res.data)
+      setFeeAcademicYear(res.data.academicYear || '2026/2027')
+      setFeeTerm(res.data.term || 'Term 1')
+      setPaymentForm(prev => ({ ...prev, academicYear: res.data.academicYear || '2026/2027', term: res.data.term || 'Term 1' }))
+    })
     .catch(() => {})
 }, [])
 
@@ -1351,35 +1359,36 @@ const handleAdminPasswordReset = async (id, email) => {
 
   const handleSaveFeeStructures = async () => {
     try {
-      await Promise.all(Object.entries(feeStructures).map(([gradeLevel, monthlyFee]) =>
-        axios.post(`${API_URL}/api/fees/structures`, { gradeLevel, monthlyFee })
+      await Promise.all(Object.entries(feeStructures).filter(([, termFee]) => termFee !== '' && termFee != null).map(([gradeLevel, termFee]) =>
+        axios.post(`${API_URL}/api/fees/structures`, { gradeLevel, academicYear: feeAcademicYear, term: feeTerm, termFee }, { headers: getAuthHeaders() })
       ))
       setFeeSaved(true); setTimeout(() => setFeeSaved(false), 3000)
     } catch (err) { alert('Failed to save fee structure.') }
   }
 
   const handleAddPayment = async () => {
-    if (!paymentForm.studentId || !paymentForm.month || !paymentForm.year || !paymentForm.amountDue) { alert('Please fill all required fields.'); return }
+    if (!paymentForm.studentId || !paymentForm.academicYear || !paymentForm.term || paymentForm.amountDue === '') { alert('Please fill all required fields.'); return }
     try {
-      const res = await axios.post(`${API_URL}/api/fees/payments`, paymentForm)
-      setFeePayments([res.data, ...feePayments]); setShowAddPayment(false)
-      setPaymentForm({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
-    } catch (err) { alert('Failed to record payment.') }
+      const res = await axios.post(`${API_URL}/api/fees/payments`, paymentForm, { headers: getAuthHeaders() })
+      setFeePayments(prev => [res.data, ...prev.filter(payment => payment.id !== res.data.id)])
+      setShowAddPayment(false)
+      setPaymentForm({ studentId: '', academicYear: feeAcademicYear, term: feeTerm, amountDue: '', previousTermArrears: '0', amountPaid: '0', notes: '' })
+    } catch (err) { alert(err.response?.data?.message || 'Failed to record fee statement.') }
   }
 
   const handleUpdatePayment = async () => {
     try {
-      const res = await axios.put(`${API_URL}/api/fees/payments/${editingPayment.id}`, paymentForm)
+      const res = await axios.put(`${API_URL}/api/fees/payments/${editingPayment.id}`, paymentForm, { headers: getAuthHeaders() })
       setFeePayments(feePayments.map(p => p.id === editingPayment.id ? res.data : p))
       setEditingPayment(null)
-      setPaymentForm({ studentId: '', month: '', year: '', amountDue: '', amountPaid: '', notes: '' })
-    } catch (err) { alert('Failed to update payment.') }
+      setPaymentForm({ studentId: '', academicYear: feeAcademicYear, term: feeTerm, amountDue: '', previousTermArrears: '0', amountPaid: '0', notes: '' })
+    } catch (err) { alert(err.response?.data?.message || 'Failed to update fee statement.') }
   }
 
   const handleDeletePayment = async (id) => {
     if (!window.confirm('Are you sure you want to delete this payment?')) return
     try {
-      await axios.delete(`${API_URL}/api/fees/payments/${id}`)
+      await axios.delete(`${API_URL}/api/fees/payments/${id}`, { headers: getAuthHeaders() })
       setFeePayments(feePayments.filter(p => p.id !== id))
     } catch (err) { alert('Failed to delete payment.') }
   }
@@ -1634,14 +1643,28 @@ const handleAdminPasswordReset = async (id, email) => {
               {financeTab === 'fee-structure' && (
                 <div>
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Set Monthly Fees by Class</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">Set Term Fees by Class</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-xl">
+                      <div>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Academic Year</label>
+                        <select value={feeAcademicYear} onChange={e => setFeeAcademicYear(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-gray-700">
+                          {FEE_ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Term</label>
+                        <select value={feeTerm} onChange={e => setFeeTerm(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-gray-700">
+                          {ACADEMIC_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
+                        </select>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-gray-800 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
                             <span className="text-gray-500 text-sm font-bold">GH₵</span>
-                            <input type="number" value={feeStructures[grade] || ''} onChange={e => setFeeStructures({ ...feeStructures, [grade]: e.target.value })} placeholder="0.00" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+                            <input type="number" min="0" value={feeStructures[grade] ?? ''} onChange={e => setFeeStructures({ ...feeStructures, [grade]: e.target.value })} placeholder="Term fee" className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
                           </div>
                         </div>
                       ))}
@@ -1673,8 +1696,9 @@ const handleAdminPasswordReset = async (id, email) => {
                         <tr>
                           <th className="px-6 py-4 text-left">Student</th>
                           <th className="px-6 py-4 text-left">Class</th>
-                          <th className="px-6 py-4 text-left">Month/Year</th>
-                          <th className="px-6 py-4 text-left">Amount Due</th>
+                          <th className="px-6 py-4 text-left">Academic Period</th>
+                          <th className="px-6 py-4 text-left">Term Fee</th>
+                          <th className="px-6 py-4 text-left">Previous Arrears</th>
                           <th className="px-6 py-4 text-left">Amount Paid</th>
                           <th className="px-6 py-4 text-left">Balance</th>
                           <th className="px-6 py-4 text-left">Status</th>
@@ -1682,15 +1706,16 @@ const handleAdminPasswordReset = async (id, email) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredFeePayments.length === 0 ? (
-                          <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-400">No payments recorded yet.</td></tr>
+                          {filteredFeePayments.length === 0 ? (
+                            <tr><td colSpan="9" className="px-6 py-8 text-center text-gray-400">No fee statements recorded yet.</td></tr>
                         ) : (
                           filteredFeePayments.map((payment, index) => (
                             <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                               <td className="px-6 py-4 font-medium text-gray-800">{payment.student?.firstName} {payment.student?.lastName}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.student?.gradeLevel}</td>
-                              <td className="px-6 py-4 text-gray-600">{payment.month} {payment.year}</td>
+                              <td className="px-6 py-4 text-gray-600">{payment.term ? `${payment.academicYear} · ${payment.term}` : `${payment.month || 'Legacy'} ${payment.year || ''}`}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
+                              <td className="px-6 py-4 text-gray-600">GH₵ {Number(payment.previousTermArrears || 0).toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountPaid.toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.balance.toFixed(2)}</td>
                               <td className="px-6 py-4">
@@ -1698,7 +1723,18 @@ const handleAdminPasswordReset = async (id, email) => {
                               </td>
                               <td className="px-6 py-4">
                                 <div className="flex gap-2">
-                                  <button onClick={() => { setEditingPayment(payment); setPaymentForm({ amountPaid: payment.amountPaid, notes: payment.notes || '' }) }} className="bg-blue-500 hover:bg-blue-300 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
+                                  <button onClick={() => {
+                                    setEditingPayment(payment)
+                                    setPaymentForm({
+                                      studentId: String(payment.studentId),
+                                      academicYear: payment.academicYear || feeAcademicYear,
+                                      term: payment.term || feeTerm,
+                                      amountDue: String(payment.amountDue),
+                                      previousTermArrears: String(payment.previousTermArrears || 0),
+                                      amountPaid: String(payment.amountPaid),
+                                      notes: payment.notes || ''
+                                    })
+                                  }} className="bg-blue-500 hover:bg-blue-300 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg">Edit</button>
                                   <button onClick={() => handleDeletePayment(payment.id)} className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-lg"><Trash2 size={14} /></button>
                                 </div>
                               </td>
@@ -1720,28 +1756,70 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="p-6 space-y-4">
                       <div>
                         <label className="block text-sm font-bold text-gray-800 mb-2">Student</label>
-                        <select value={paymentForm.studentId} onChange={e => { const s = students.find(s => s.id === parseInt(e.target.value)); setPaymentForm(prev => ({ ...prev, studentId: e.target.value, amountDue: s ? feeStructures[displayStudentClassName(s.gradeLevel)] || '' : '' })) }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
+                        <select value={paymentForm.studentId} onChange={async e => {
+                          const studentId = e.target.value
+                          const student = students.find(item => item.id === parseInt(studentId))
+                          let amountDue = ''
+                          if (student) {
+                            try {
+                              const response = await axios.get(`${API_URL}/api/fees/structures`, {
+                                params: { academicYear: paymentForm.academicYear, term: paymentForm.term },
+                                headers: getAuthHeaders()
+                              })
+                              const rate = response.data.find(item => normalizeStudentClassName(item.gradeLevel) === normalizeStudentClassName(student.gradeLevel))
+                              amountDue = rate?.termFee ?? ''
+                            } catch {}
+                          }
+                          setPaymentForm(prev => ({ ...prev, studentId, amountDue }))
+                        }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select student...</option>
                           {students.map(s => <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.gradeLevel}</option>)}
                         </select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-bold text-gray-800 mb-2">Month</label>
-                          <select value={paymentForm.month} onChange={e => setPaymentForm({ ...paymentForm, month: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
-                            <option value="">Select month</option>
-                            {['January','February','March','April','May','June','July','August','September','October','November','December'].map(m => <option key={m} value={m}>{m}</option>)}
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Academic Year</label>
+                          <select value={paymentForm.academicYear} onChange={async e => {
+                            const academicYear = e.target.value
+                            let amountDue = paymentForm.amountDue
+                            const student = students.find(item => item.id === parseInt(paymentForm.studentId))
+                            if (student) {
+                              try {
+                                const response = await axios.get(`${API_URL}/api/fees/structures`, { params: { academicYear, term: paymentForm.term }, headers: getAuthHeaders() })
+                                amountDue = response.data.find(item => normalizeStudentClassName(item.gradeLevel) === normalizeStudentClassName(student.gradeLevel))?.termFee ?? ''
+                              } catch {}
+                            }
+                            setPaymentForm(prev => ({ ...prev, academicYear, amountDue }))
+                          }} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700">
+                            {FEE_ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-bold text-gray-800 mb-2">Year</label>
-                          <input type="text" value={paymentForm.year} onChange={e => setPaymentForm({ ...paymentForm, year: e.target.value })} placeholder="e.g. 2026" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Term</label>
+                          <select value={paymentForm.term} onChange={async e => {
+                            const term = e.target.value
+                            let amountDue = paymentForm.amountDue
+                            const student = students.find(item => item.id === parseInt(paymentForm.studentId))
+                            if (student) {
+                              try {
+                                const response = await axios.get(`${API_URL}/api/fees/structures`, { params: { academicYear: paymentForm.academicYear, term }, headers: getAuthHeaders() })
+                                amountDue = response.data.find(item => normalizeStudentClassName(item.gradeLevel) === normalizeStudentClassName(student.gradeLevel))?.termFee ?? ''
+                              } catch {}
+                            }
+                            setPaymentForm(prev => ({ ...prev, term, amountDue }))
+                          }} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700">
+                            {ACADEMIC_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
+                          </select>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-bold text-gray-800 mb-2">Amount Due (GH₵)</label>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Term Fee (GH₵)</label>
                           <input type="number" value={paymentForm.amountDue} onChange={e => setPaymentForm({ ...paymentForm, amountDue: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Previous-Term Arrears (GH₵)</label>
+                          <input type="number" min="0" value={paymentForm.previousTermArrears} onChange={e => setPaymentForm({ ...paymentForm, previousTermArrears: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-gray-800 mb-2">Amount Paid (GH₵)</label>
@@ -1770,7 +1848,15 @@ const handleAdminPasswordReset = async (id, email) => {
                     <div className="p-6 space-y-4">
                       <div className="bg-blue-50 rounded-xl p-4">
                         <p className="text-sm font-bold text-gray-800">{editingPayment.student?.firstName} {editingPayment.student?.lastName}</p>
-                        <p className="text-xs text-gray-500">{editingPayment.month} {editingPayment.year} | Due: GH₵ {editingPayment.amountDue.toFixed(2)}</p>
+                        <p className="text-xs text-gray-500">{editingPayment.term ? `${editingPayment.academicYear} · ${editingPayment.term}` : `${editingPayment.month || 'Legacy'} ${editingPayment.year || ''}`} | Term fee: GH₵ {editingPayment.amountDue.toFixed(2)} | Arrears: GH₵ {Number(editingPayment.previousTermArrears || 0).toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Term Fee (GH₵)</label>
+                        <input type="number" min="0" value={paymentForm.amountDue} onChange={e => setPaymentForm({ ...paymentForm, amountDue: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-gray-800 mb-2">Previous-Term Arrears (GH₵)</label>
+                        <input type="number" min="0" value={paymentForm.previousTermArrears} onChange={e => setPaymentForm({ ...paymentForm, previousTermArrears: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700" />
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-gray-800 mb-2">Amount Paid (GH₵)</label>

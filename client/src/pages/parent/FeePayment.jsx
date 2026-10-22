@@ -69,7 +69,9 @@ export default function FeePayment() {
   const [error, setError] = useState('')
 
   const studentName = alert?.student ? `${alert.student.firstName} ${alert.student.lastName}`.trim() : null
-  const monthYear = alert ? `${alert.month} ${alert.year}` : null
+  const monthYear = alert
+    ? (alert.term ? `${alert.academicYear} · ${alert.term}` : `${alert.month || 'Legacy'} ${alert.year || ''}`)
+    : null
   const amountText = alert
     ? (alert.balance > 0 ? `GH₵ ${Number(alert.balance).toFixed(2)}` : `GH₵ ${Number(alert.amountDue).toFixed(2)}`)
     : null

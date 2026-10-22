@@ -302,20 +302,27 @@ model Staff {
 }
 
 model FeeStructure {
-  id         Int      @id @default(autoincrement())
-  gradeLevel String   @unique
-  monthlyFee Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  gradeLevel   String
+  academicYear String
+  term         String
+  termFee      Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([gradeLevel, academicYear, term])
 }
 
 model FeePayment {
   id                  Int       @id @default(autoincrement())
   studentId           Int
   student             Student   @relation(fields: [studentId], references: [id])
-  month               String
-  year                String
+  month               String?
+  year                String?
+  academicYear        String?
+  term                String?
   amountDue           Float
+  previousTermArrears Float     @default(0)
   amountPaid          Float     @default(0)
   balance             Float
   status              String    @default("unpaid")
@@ -324,6 +331,8 @@ model FeePayment {
   feePaymentAlertSeen Boolean   @default(false)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+
+  @@unique([studentId, academicYear, term])
 }
 
 model AttendanceRecord {

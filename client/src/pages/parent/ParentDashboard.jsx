@@ -392,6 +392,7 @@ const getParentDisplayName = (name) => {
   }
 
   const calculateCumulativeBalance = (payment, allPayments) => {
+    if (payment.academicYear && payment.term) return Number(payment.balance || 0)
     // Find all payments from same student before this one (by date)
     const studentPayments = allPayments
       .filter(p => p.studentId === payment.studentId)
@@ -582,7 +583,9 @@ const getParentDisplayName = (name) => {
   const contextualTermResult = contextualApprovedResults[0] || null
   const contextualTermGpa = contextualTermResult ? calculateResultMetrics(contextualTermResult).termGpa : 0
   const contextualAttendanceRecords = attendanceRecords.filter(matchesAcademicContext)
-  const contextualFeePayments = feePayments
+  const contextualFeePayments = feePayments.filter(payment => (
+    !payment.academicYear || matchesAcademicContext(payment)
+  ))
   // Returns true if the student has no outstanding balance for the selected term
   const isFeeClearedForTerm = (studentId) => {
     const studentFees = contextualFeePayments.filter(p =>
@@ -1305,7 +1308,7 @@ const getParentDisplayName = (name) => {
                   }, 0).toFixed(2)}</p>
                 </div>
                 <div className="bg-[#2563eb] text-white rounded-2xl p-6 shadow-md">
-                  <p className="text-green-200 text-sm mb-1">Months Paid</p>
+                  <p className="text-green-200 text-sm mb-1">Terms Paid</p>
                   <p className="text-3xl font-bold">{contextualFeePayments.filter(p => p.status === 'paid').length}</p>
                 </div>
               </div>
@@ -1321,9 +1324,10 @@ const getParentDisplayName = (name) => {
                     <thead className="bg-[#1d4ed8] text-white">
                       <tr>
                         <th className="px-6 py-4 text-left">Student</th>
-                        <th className="px-6 py-4 text-left">Month</th>
-                        <th className="px-6 py-4 text-left">Year</th>
-                        <th className="px-6 py-4 text-left">Amount Due</th>
+                        <th className="px-6 py-4 text-left">Academic Year</th>
+                        <th className="px-6 py-4 text-left">Term</th>
+                        <th className="px-6 py-4 text-left">Term Fee</th>
+                        <th className="px-6 py-4 text-left">Previous Arrears</th>
                         <th className="px-6 py-4 text-left">Amount Paid</th>
                         <th className="px-6 py-4 text-left">Balance</th>
                         <th className="px-6 py-4 text-left">Status</th>
@@ -1335,9 +1339,10 @@ const getParentDisplayName = (name) => {
                       {contextualFeePayments.map((payment, index) => (
                         <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                           <td className="px-6 py-4 font-medium text-[#1d4ed8]">{payment.student?.firstName} {payment.student?.lastName}</td>
-                          <td className="px-6 py-4 text-gray-600">{payment.month}</td>
-                          <td className="px-6 py-4 text-gray-600">{payment.year}</td>
+                          <td className="px-6 py-4 text-gray-600">{payment.academicYear || payment.year || '—'}</td>
+                          <td className="px-6 py-4 text-gray-600">{payment.term || payment.month || 'Legacy monthly'}</td>
                           <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-gray-600">GH₵ {Number(payment.previousTermArrears || 0).toFixed(2)}</td>
                           <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountPaid.toFixed(2)}</td>
                           <td className="px-6 py-4 font-semibold text-gray-700">GH₵ {calculateCumulativeBalance(payment, contextualFeePayments).toFixed(2)}</td>
                           <td className="px-6 py-4">
