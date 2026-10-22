@@ -40,7 +40,7 @@ export default function Hero() {
   const nextBg = nextIndex !== null ? heroImages[nextIndex] : null
 
   return (
-    <div className="relative text-[#1d4ed8] min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#a7cdf3]">
+    <div className="relative text-white min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#183d37]">
       
       {/* Current Background */}
       <div
@@ -64,15 +64,18 @@ export default function Hero() {
         />
       )}
 
-      {/* Light overlay */}
-      <div className="absolute inset-0 bg-white/45 z-10"></div>
+      {/* Soft green fade keeps the slideshow visible while grounding the white copy. */}
+      <div
+        className="absolute inset-0 z-10"
+        style={{ background: 'linear-gradient(100deg, rgba(14, 46, 42, 0.76) 0%, rgba(17, 57, 49, 0.54) 52%, rgba(19, 54, 47, 0.24) 100%)' }}
+      />
 
       {/* Content */}
       <div className="relative z-20 w-full max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
 
         {/* Left Side */}
         <div className="text-center md:text-left">
-          <span className="inline-block bg-[#2563eb] text-white text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
+          <span className="inline-block bg-white/90 text-emerald-950 text-sm font-bold px-5 py-2 rounded-full mb-6 shadow-lg">
             Oxford Accredited International School
           </span>
 
