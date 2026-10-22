@@ -113,7 +113,7 @@ app.use('/api/archives', require('./routes/archives'))
 
 const seedDefaultUsers = async () => {
   const defaultUsers = [
-    { email: 'admin@goldenintels.com', name: 'School Admin', role: 'admin' },
+    { email: 'goldenintelse@gmail.com', name: 'School Admin', role: 'admin' },
     { email: 'teacher@goldenintels.com', name: 'Demo Teacher', role: 'teacher' },
     { email: 'parent@goldenintels.com', name: 'Demo Parent', role: 'parent' }
   ]

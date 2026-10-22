@@ -45,13 +45,22 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        {/* Portal button */}
-        <Link
-          to="/login"
-          className="hidden lg:block bg-[var(--color-secondary)] hover:bg-[var(--color-primary)] text-white font-bold text-sm px-5 py-2 rounded-lg transition-all duration-300 shadow-md"
-        >
-          Portal Login
-        </Link>
+        <div className="hidden lg:flex items-center gap-2">
+          <Link
+            to="/login"
+            className="bg-[var(--color-secondary)] hover:bg-[var(--color-primary)] text-white font-bold text-sm px-5 py-2 rounded-lg transition-all duration-300 shadow-md"
+          >
+            Portal Login
+          </Link>
+          <a
+            href="https://goldenintels.wavesoms.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-5 py-2 rounded-lg transition-all duration-300"
+          >
+            Finance System
+          </a>
+        </div>
 
         {/* Oxford International Curriculum badge */}
           <a
@@ -88,6 +97,15 @@ export default function Navbar() {
           <Link to="/login" onClick={() => setMenuOpen(false)} className="mt-4 block text-center bg-[var(--color-secondary)] hover:bg-white/10 text-white font-bold text-sm px-5 py-3 rounded-lg transition-all duration-300">
             Portal Login
           </Link>
+          <a
+            href="https://goldenintels.wavesoms.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMenuOpen(false)}
+            className="mt-2 block text-center bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-5 py-3 rounded-lg transition-all duration-300"
+          >
+            Finance System
+          </a>
 
           {/* Oxford International Curriculum badge */}
           <a

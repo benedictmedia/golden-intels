@@ -22,11 +22,14 @@ const getArchives = async (req, res) => {
       select: {
         id: true, entityType: true, entityId: true, studentId: true, title: true,
         academicYear: true, term: true, reason: true, archivedBy: true,
-        archivedAt: true, restoredBy: true, restoredAt: true
+        archivedAt: true, restoredBy: true, restoredAt: true, payload: true
       },
       orderBy: { archivedAt: 'desc' }
     })
-    res.json(records)
+    res.json(records.map(({ payload, ...record }) => ({
+      ...record,
+      accountEmail: ['parent', 'teacher'].includes(record.entityType) ? payload?.user?.email || null : null
+    })))
   } catch (error) {
     console.error('Get archives error:', error)
     res.status(500).json({ message: 'Could not load the archive.' })
@@ -46,7 +49,7 @@ const restoreArchive = async (req, res) => {
       result: 'result', feePayment: 'feePayment',
       attendanceRecord: 'attendanceRecord', manualExercise: 'manualExercise'
     }
-    if (record.entityType !== 'student' && record.entityType !== 'classwork-item' && !entityMap[record.entityType]) {
+    if (!['student', 'parent', 'teacher', 'classwork-item'].includes(record.entityType) && !entityMap[record.entityType]) {
       return res.status(400).json({ message: 'This archived record type cannot be restored automatically.' })
     }
 
@@ -66,6 +69,24 @@ const restoreArchive = async (req, res) => {
             parentEmail: payload.student?.parentEmail || null
           }
         })
+      } else if (record.entityType === 'parent' || record.entityType === 'teacher') {
+        const { user, staff = [], accountAudits = [] } = payload
+        const existingUser = await tx.user.findFirst({
+          where: { OR: [{ id: user.id }, { email: user.email }] },
+          select: { id: true }
+        })
+        if (existingUser) throw new Error('An account with this archived ID or email already exists.')
+        await tx.user.create({ data: restoreDates(user, ['createdAt', 'updatedAt']) })
+        if (staff.length) {
+          await tx.staff.createMany({
+            data: staff.map(item => restoreDates(item, ['createdAt', 'updatedAt']))
+          })
+        }
+        if (accountAudits.length) {
+          await tx.accountAudit.createMany({
+            data: accountAudits.map(item => restoreDates(item, ['createdAt', 'updatedAt']))
+          })
+        }
       } else if (record.entityType === 'classwork-item') {
         const { item, submissions = [] } = payload
         await tx.classworkItem.create({ data: restoreDates(item, ['createdAt', 'updatedAt']) })

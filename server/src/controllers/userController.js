@@ -229,16 +229,17 @@ const reactivateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
+  if (req.body?.confirm !== true) return res.status(400).json({ message: 'Explicit confirmation is required.' })
   const { id } = req.params
   try {
     const user = await prisma.user.findUnique({ where: { id: parseInt(id) } })
     if (!user) return res.status(404).json({ message: 'User not found' })
-    if (user.active) return res.status(400).json({ message: 'Deactivate account before deleting it' })
+    if (user.role === 'admin') return res.status(400).json({ message: 'Administrator accounts cannot be deleted here.' })
 
     await prisma.$transaction(async tx => {
       if (user.role === 'parent') {
         const children = await tx.student.findMany({
-          where: { OR: [{ parentEmail: user.email }, { parentId: user.id }], archivedAt: null },
+          where: { OR: [{ parentEmail: user.email }, { parentId: user.id }] },
           include: {
             results: true, feePayments: true, attendance: true, manualExercises: true,
             classworkSubmissions: { include: { classworkItem: true } },
@@ -246,6 +247,7 @@ const deleteUser = async (req, res) => {
           }
         })
         for (const child of children) {
+          if (child.archivedAt) continue
           const messages = await tx.message.findMany({ where: { conversationUserId: child.id } })
           await archive(tx, {
             entityType: 'student', entityId: child.id, studentId: child.id,
@@ -261,11 +263,33 @@ const deleteUser = async (req, res) => {
           })
         }
       }
+      const accountAudits = await tx.accountAudit.findMany({ where: { userId: user.id } })
+      const teacherStaff = user.role === 'teacher'
+        ? await tx.staff.findMany({ where: { email: user.email } })
+        : []
+      if (user.role === 'parent' || user.role === 'teacher') {
+        await archive(tx, {
+          entityType: user.role,
+          entityId: user.id,
+          title: user.name,
+          academicYear: null,
+          term: null,
+          reason: 'account-deleted',
+          payload: JSON.parse(JSON.stringify({ user, staff: teacherStaff, accountAudits })),
+          archivedBy: req.user.name || req.user.email
+        })
+      }
+      if (user.role === 'parent') {
+        await tx.student.updateMany({
+          where: { OR: [{ parentEmail: user.email }, { parentId: user.id }] },
+          data: { parentId: null, parentEmail: null }
+        })
+      }
       if (user.role === 'teacher') await tx.staff.deleteMany({ where: { email: user.email } })
       await tx.accountAudit.deleteMany({ where: { userId: user.id } })
       await tx.user.delete({ where: { id: user.id } })
     })
-    res.json({ message: 'User deleted. Linked learner records were preserved in the archive.' })
+    res.json({ message: 'Account and related records moved to the archive.' })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

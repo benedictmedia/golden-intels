@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -68,6 +68,7 @@ export default function AdminDashboard() {
   const [archiveRecords, setArchiveRecords] = useState([])
   const [archiveLoading, setArchiveLoading] = useState(false)
   const [archiveError, setArchiveError] = useState('')
+  const [archiveQuery, setArchiveQuery] = useState('')
 
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [learnerLoginForm, setLearnerLoginForm] = useState({ email: '', password: '' })
@@ -194,6 +195,27 @@ export default function AdminDashboard() {
   const [editPhotoPreview, setEditPhotoPreview] = useState('')
 
   const filteredResults = resultFilter === 'All' ? results : results.filter(r => r.status === resultFilter)
+  const archiveSearch = archiveQuery.trim().toLowerCase()
+  const filteredArchiveRecords = archiveRecords.filter(record => (
+    `${record.title} ${record.accountEmail || ''} ${record.entityType} ${record.reason} ${record.academicYear || ''} ${record.term || ''}`
+      .toLowerCase()
+      .includes(archiveSearch)
+  ))
+  const archiveGroups = [
+    { key: 'student', title: 'Students', records: filteredArchiveRecords.filter(record => record.entityType === 'student') },
+    { key: 'parent', title: 'Parents', records: filteredArchiveRecords.filter(record => record.entityType === 'parent') },
+    { key: 'teacher', title: 'Teachers', records: filteredArchiveRecords.filter(record => record.entityType === 'teacher') },
+    {
+      key: 'academic',
+      title: 'Academic records',
+      records: filteredArchiveRecords.filter(record => ['result', 'feePayment', 'attendanceRecord', 'manualExercise', 'classwork-item'].includes(record.entityType))
+    },
+    {
+      key: 'other',
+      title: 'Other records',
+      records: filteredArchiveRecords.filter(record => !['student', 'parent', 'teacher', 'result', 'feePayment', 'attendanceRecord', 'manualExercise', 'classwork-item'].includes(record.entityType))
+    }
+  ]
   const filteredApplications = admissionFilter === 'All' ? applications : applications.filter(a => a.status === admissionFilter)
   const learnerClasses = ['All', ...new Map(
     [...classes.slice(1), ...students.map(student => displayStudentClassName(student.gradeLevel)).filter(Boolean)]
@@ -812,15 +834,16 @@ const handleReactivateUser = async (email) => {
 }
 
 const handleDeleteUser = async (id, email) => {
-  if (!window.confirm(`Delete deactivated account ${email}? This will remove related data including messages.`)) return
+  if (!window.confirm(`Archive and delete ${email}? Related records will be preserved in the archive.`)) return
   try {
-    await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders() })
-    // Optimistic update — remove from list immediately
+    await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders(), data: { confirm: true } })
     setUsers(prev => prev.filter(u => u.id !== id))
     setAccountTotal(prev => Math.max(0, prev - 1))
-    alert('Account and related data (including messages) deleted.')
+    setParentAccounts(prev => prev.filter(account => account.id !== id))
+    setStaffList(prev => prev.filter(staff => staff.email !== email))
+    alert('Account and related records moved to the archive.')
   } catch (err) { 
-    alert('Failed to delete user account.') 
+    alert(err.response?.data?.message || 'Failed to archive and delete user account.')
   }
 }
 
@@ -2332,14 +2355,12 @@ const handleAdminPasswordReset = async (id, email) => {
                             <div className="flex items-center gap-2">
                               <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                               <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
-                              {!u.active ? (
-                                <>
-                                  <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
-                                  <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
-                                </>
-                              ) : (
+                              {u.active ? (
                                 <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                              ) : (
+                                <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
                               )}
+                              <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Archive &amp; delete</button>
                             </div>
                           </div>
                         </div>
@@ -2415,15 +2436,12 @@ const handleAdminPasswordReset = async (id, email) => {
                               <div className="flex items-center gap-2">
                                 <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
                                 <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
-                                {!u.active ? (
-                                  <>
-                                    <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
-                                    <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Delete</button>
-                                  </>
-                                  
-                                ) : (
+                                {u.active ? (
                                   <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
+                                ) : (
+                                  <button onClick={() => handleReactivateUser(u.email)} className="px-3 py-2 bg-green-600 text-white rounded">Reactivate</button>
                                 )}
+                                <button onClick={() => handleDeleteUser(u.id, u.email)} className="px-3 py-2 bg-gray-700 text-white rounded">Archive &amp; delete</button>
                               </div>
                             </div>
                           </div>
@@ -3174,60 +3192,81 @@ const handleAdminPasswordReset = async (id, email) => {
       </button>
     </div>
     {archiveError && <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{archiveError}</div>}
+    <label className="mb-4 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-gray-500">
+      <Search size={18} />
+      <input
+        type="search"
+        value={archiveQuery}
+        onChange={event => setArchiveQuery(event.target.value)}
+        placeholder="Search archived students, parents, teachers, or records"
+        className="w-full outline-none"
+        aria-label="Search archive"
+      />
+    </label>
     {archiveLoading ? (
       <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">Loading archive...</div>
-    ) : archiveRecords.length === 0 ? (
-      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">No archived records yet.</div>
+    ) : filteredArchiveRecords.length === 0 ? (
+      <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">
+        {archiveRecords.length === 0 ? 'No archived records yet.' : 'No archived records match your search.'}
+      </div>
     ) : (
-      <div className="overflow-x-auto bg-white rounded-xl border border-gray-100">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
-              <th className="px-5 py-3 text-left">Record</th>
-              <th className="px-5 py-3 text-left">Academic period</th>
-              <th className="px-5 py-3 text-left">Reason</th>
-              <th className="px-5 py-3 text-left">Archived</th>
-              <th className="px-5 py-3 text-left">Status</th>
-              <th className="px-5 py-3 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {archiveRecords.map(record => (
-              <tr key={record.id} className="border-t border-gray-100">
-                <td className="px-5 py-4">
-                  <p className="font-semibold text-gray-800">{record.title}</p>
-                  <p className="text-xs text-gray-400">{record.entityType}</p>
-                </td>
-                <td className="px-5 py-4 text-gray-600">{[record.academicYear, record.term].filter(Boolean).join(' · ') || 'Learner record'}</td>
-                <td className="px-5 py-4 text-gray-600">{record.reason.replaceAll('-', ' ')}</td>
-                <td className="px-5 py-4 text-gray-600">{new Date(record.archivedAt).toLocaleString()}</td>
-                <td className="px-5 py-4">
-                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${record.restoredAt ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'}`}>
-                    {record.restoredAt ? 'Restored' : 'Archived'}
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-right">
-                  <div className="inline-flex items-center gap-2">
-                    <button
-                      onClick={() => handleRestoreArchive(record.id)}
-                      disabled={Boolean(record.restoredAt)}
-                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
-                    >
-                      <Archive size={14} /> Restore
-                    </button>
-                    <button
-                      onClick={() => handlePermanentDeleteArchive(record)}
-                      disabled={Boolean(record.restoredAt)}
-                      className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-400"
-                    >
-                      <Trash2 size={14} /> Permanently delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-2">
+        {archiveGroups.filter(group => group.records.length > 0).map(group => (
+          <section key={group.key} className="overflow-x-auto rounded-xl border border-gray-100 bg-white">
+            <h3 className="sticky top-0 z-10 border-b border-gray-100 bg-gray-50 px-5 py-3 font-bold text-gray-800">
+              {group.title} <span className="font-normal text-gray-500">({group.records.length})</span>
+            </h3>
+            <table className="w-full text-sm">
+              <thead className="bg-white text-gray-600">
+                <tr>
+                  <th className="px-5 py-3 text-left">Record</th>
+                  <th className="px-5 py-3 text-left">Academic period</th>
+                  <th className="px-5 py-3 text-left">Reason</th>
+                  <th className="px-5 py-3 text-left">Archived</th>
+                  <th className="px-5 py-3 text-left">Status</th>
+                  <th className="px-5 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {group.records.map(record => (
+                  <tr key={record.id} className="border-t border-gray-100">
+                    <td className="px-5 py-4">
+                      <p className="font-semibold text-gray-800">{record.title}</p>
+                      {record.accountEmail && <p className="text-xs text-gray-500">{record.accountEmail}</p>}
+                      <p className="text-xs text-gray-400">{record.entityType}</p>
+                    </td>
+                    <td className="px-5 py-4 text-gray-600">{[record.academicYear, record.term].filter(Boolean).join(' · ') || '—'}</td>
+                    <td className="px-5 py-4 text-gray-600">{record.reason.replaceAll('-', ' ')}</td>
+                    <td className="px-5 py-4 text-gray-600">{new Date(record.archivedAt).toLocaleString()}</td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${record.restoredAt ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'}`}>
+                        {record.restoredAt ? 'Restored' : 'Archived'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="inline-flex items-center gap-2">
+                        <button
+                          onClick={() => handleRestoreArchive(record.id)}
+                          disabled={Boolean(record.restoredAt)}
+                          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:bg-gray-300"
+                        >
+                          <Archive size={14} /> Restore
+                        </button>
+                        <button
+                          onClick={() => handlePermanentDeleteArchive(record)}
+                          disabled={Boolean(record.restoredAt)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-400"
+                        >
+                          <Trash2 size={14} /> Permanently delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))}
       </div>
     )}
   </div>
