@@ -368,6 +368,19 @@
   }
 }
 
+/* Keep primary actions compact across the admin, teacher, parent, and learner portals. */
+@media (min-width: 768px) {
+  .portal-content button:is([class~="px-6"], [class~="px-8"], [class~="px-10"], [class~="px-12"]) {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .portal-content button:is([class~="py-3"], [class~="py-4"], [class~="py-5"], [class~="py-6"]) {
+    padding-top: 0.625rem !important;
+    padding-bottom: 0.625rem !important;
+  }
+}
+
 @keyframes shake {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-8deg); }
