@@ -30,15 +30,15 @@ export default function Navbar() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [portalOpen, setPortalOpen] = useState(false)
 
-  const closeMenu = (event) => {
-    const dropdown = event.currentTarget.closest('details')
-    if (dropdown) dropdown.open = false
+  const closeMenu = () => {
+    setAboutOpen(false)
+    setPortalOpen(false)
     setMenuOpen(false)
   }
 
   return (
     <nav className="sticky top-0 z-40 bg-[var(--color-primary)] text-white border-b border-white/30 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex shrink-0 items-center gap-2 min-w-0">
           <BrandLogo className="w-10 h-10 shadow-md" />
@@ -49,13 +49,28 @@ export default function Navbar() {
           </div>
         </Link>
         {/* Desktop links */}
-        <ul className="hidden lg:flex flex-1 items-center justify-between gap-4 px-6 text-xs font-medium">
+        <ul className="hidden lg:flex flex-1 items-center justify-center gap-5 px-4 text-xs font-medium">
+          {navLinks.slice(0, 1).map((link) => (
+            <li key={link.name}>
+              <Link to={link.path} className="whitespace-nowrap hover:text-[var(--color-accent)] transition-colors duration-300">
+                {link.name}
+              </Link>
+            </li>
+          ))}
           <li>
-            <details className="group relative">
-              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]">
-                About Us <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="navbar-dropdown absolute left-0 top-full z-50 mt-3 min-w-52 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setPortalOpen(false)
+                  setAboutOpen(open => !open)
+                }}
+                aria-expanded={aboutOpen}
+                className="flex cursor-pointer items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]"
+              >
+                About Us <ChevronDown size={14} className={`transition-transform duration-300 ${aboutOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`navbar-dropdown-panel absolute left-0 top-full z-50 mt-3 min-w-52 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10 ${aboutOpen ? 'is-open' : ''}`}>
                 {aboutLinks.map((link, index) => (
                   <div key={link.name}>
                     {index === 1 && <div className="my-1 border-t border-gray-200" />}
@@ -65,9 +80,9 @@ export default function Navbar() {
                   </div>
                 ))}
               </div>
-            </details>
+            </div>
           </li>
-          {navLinks.map((link) => (
+          {navLinks.slice(1).map((link) => (
             <li key={link.name}>
               <Link to={link.path} className="whitespace-nowrap hover:text-[var(--color-accent)] transition-colors duration-300">
                 {link.name}
@@ -75,11 +90,19 @@ export default function Navbar() {
             </li>
           ))}
           <li>
-            <details className="group relative">
-              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]">
-                Portal <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="navbar-dropdown absolute right-0 top-full z-50 mt-3 min-w-44 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setAboutOpen(false)
+                  setPortalOpen(open => !open)
+                }}
+                aria-expanded={portalOpen}
+                className="flex cursor-pointer items-center gap-1 whitespace-nowrap hover:text-[var(--color-accent)]"
+              >
+                Portal <ChevronDown size={14} className={`transition-transform duration-300 ${portalOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`navbar-dropdown-panel absolute right-0 top-full z-50 mt-3 min-w-44 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10 ${portalOpen ? 'is-open' : ''}`}>
                 <Link to="/login" onClick={closeMenu} className={dropdownLinkClass}>
                   Academics
                 </Link>
@@ -94,7 +117,7 @@ export default function Navbar() {
                   Finance
                 </a>
               </div>
-            </details>
+            </div>
           </li>
         </ul>
 
@@ -103,13 +126,13 @@ export default function Navbar() {
   href="https://global.oup.com/education/primary/curricula/oxford-international-curriculum/?region=international"
   target="_blank"
   rel="noopener noreferrer"
-  className="ml-2 flex shrink-0 items-center justify-center rounded-xl border border-white/60 bg-white px-2 py-1 shadow-md transition-transform duration-300 hover:scale-105"
+  className="flex items-center gap-1.5 ml-2"
   title="Oxford International Curriculum Accredited School"
 >
   <img
     src={oxfordLogo}
     alt="Oxford International Curriculum"
-      className="h-9 w-auto shrink-0 object-contain"
+      className="h-8 w-auto object-contain"
   />
 </a>
         {/* Mobile menu button */}
@@ -137,7 +160,8 @@ export default function Navbar() {
               >
                 About Us <ChevronDown size={16} className={`transition-transform ${aboutOpen ? 'rotate-180' : ''}`} />
               </button>
-              {aboutOpen && aboutLinks.map(link => (
+              <div className={`navbar-dropdown-panel ${aboutOpen ? 'is-open' : ''}`}>
+                {aboutLinks.map(link => (
                   <Link
                     key={link.name}
                     to={link.path}
@@ -147,6 +171,7 @@ export default function Navbar() {
                     {link.name}
                   </Link>
                 ))}
+              </div>
             </li>
             {navLinks.slice(1).map((link) => (
               <li key={link.name}>
@@ -164,8 +189,7 @@ export default function Navbar() {
               >
                 Portal <ChevronDown size={16} className={`transition-transform ${portalOpen ? 'rotate-180' : ''}`} />
               </button>
-              {portalOpen && (
-                <>
+              <div className={`navbar-dropdown-panel ${portalOpen ? 'is-open' : ''}`}>
                   <Link
                     to="/login"
                     onClick={() => setMenuOpen(false)}
@@ -183,8 +207,7 @@ export default function Navbar() {
                   >
                     Finance
                   </a>
-                </>
-              )}
+              </div>
             </li>
           </ul>
 
