@@ -1,10 +1,21 @@
 const nodemailer = require('nodemailer')
+const dns = require('node:dns')
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD
+  },
+  getSocket(options, callback) {
+    dns.promises.resolve4(options.host)
+      .then(([ipv4Address]) => {
+        if (!ipv4Address) {
+          throw new Error(`No IPv4 address found for mail server ${options.host}.`)
+        }
+        callback(null, { host: ipv4Address, servername: options.host })
+      })
+      .catch(callback)
   }
 })
 
