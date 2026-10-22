@@ -116,11 +116,15 @@ const PORT = process.env.PORT || 5000
 
 const startServer = async () => {
   await waitForDB()
-  try {
-    await seedDefaultUsers()
-    console.log('✅ Default users seeded')
-  } catch (err) {
-    console.warn('⚠️ Seed skipped:', err.message)
+  if (process.env.SEED_DEMO_USERS === 'true' && process.env.NODE_ENV !== 'production') {
+    try {
+      await seedDefaultUsers()
+      console.log('✅ Default users seeded')
+    } catch (err) {
+      console.warn('⚠️ Seed skipped:', err.message)
+    }
+  } else {
+    console.log('ℹ️ Default demo users are not enabled')
   }
   httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
 }
