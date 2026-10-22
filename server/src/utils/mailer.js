@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer')
 const dns = require('node:dns')
+const tls = require('node:tls')
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -9,11 +10,27 @@ const transporter = nodemailer.createTransport({
   },
   getSocket(options, callback) {
     dns.promises.resolve4(options.host)
-      .then(([ipv4Address]) => {
+      .then((addresses) => {
+        const ipv4Address = addresses[0]
         if (!ipv4Address) {
           throw new Error(`No IPv4 address found for mail server ${options.host}.`)
         }
-        callback(null, { host: ipv4Address, servername: options.host })
+
+        const connection = tls.connect({
+          host: ipv4Address,
+          port: options.port,
+          servername: options.host
+        })
+        const onError = (error) => {
+          connection.destroy()
+          callback(error)
+        }
+
+        connection.once('error', onError)
+        connection.once('secureConnect', () => {
+          connection.removeListener('error', onError)
+          callback(null, { connection, secured: true })
+        })
       })
       .catch(callback)
   }
