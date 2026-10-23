@@ -105,7 +105,7 @@ export default function Footer() {
               { label: 'Gallery', path: '/gallery' },
               { label: 'News & Events', path: '/news' },
               { label: 'Contact Us', path: '/contact' },
-              { label: 'Portal Login', path: '/login' },
+              { label: 'Portal', path: '/login' },
             ].map(link => (
               <li key={link.label}>
                 <Link
@@ -147,7 +147,7 @@ export default function Footer() {
 
             <li className="flex items-center gap-3">
               <Mail size={16} className="text-blue-200 shrink-0" />
-              <span className="text-blue-100">info@goldenintels.edu.gh</span>
+              <span className="text-blue-100">goldenintelse@gmail.com</span>
             </li>
           </ul>
         </div>
