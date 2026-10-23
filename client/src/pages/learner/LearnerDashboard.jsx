@@ -13,7 +13,7 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
-import { normalizeStudentClassName } from '../../utils/studentClasses'
+import { displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
 
 const AVATAR_COLORS = [
   '#1d4ed8', '#1d4ed8', '#2563eb', '#b45309', '#0369a1',
@@ -323,7 +323,7 @@ export default function LearnerDashboard() {
               <div className="min-w-0">
                 <p className="text-white font-bold text-sm truncate">{displayName}</p>
                 <p className="text-xs truncate" style={{ color: '#f59e0b' }}>
-                  {studentProfile?.gradeLevel || learnerGradeLevel || 'Learner'}
+                  {displayStudentClassName(studentProfile?.gradeLevel || learnerGradeLevel || 'Learner')}
                 </p>
               </div>
             </div>
@@ -443,7 +443,7 @@ export default function LearnerDashboard() {
       <div className="flex-1 min-w-0 pt-2">
         <h2 className="text-2xl font-black truncate" style={{ color: '#1e293b' }}>{displayName}</h2>
         <p className="text-sm font-bold mt-0.5" style={{ color: '#2563eb' }}>
-          {studentProfile?.gradeLevel || 'Grade not assigned'}
+          {displayStudentClassName(studentProfile?.gradeLevel || 'Grade not assigned')}
         </p>
       </div>
       {studentProfile?.studentId && (
@@ -458,7 +458,7 @@ export default function LearnerDashboard() {
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {[
         { icon: Hash, label: 'Student ID', value: studentProfile?.studentId || '—', color: '#2563eb' },
-        { icon: GraduationCap, label: 'Grade Level', value: studentProfile?.gradeLevel || learnerGradeLevel || '—', color: '#2563eb' },
+        { icon: GraduationCap, label: 'Grade Level', value: displayStudentClassName(studentProfile?.gradeLevel || learnerGradeLevel || '—'), color: '#2563eb' },
         { icon: Calendar, label: 'Date of Birth', value: formatDate(studentProfile?.dateOfBirth), color: '#1d4ed8' },
         { icon: Mail, label: 'Email Address', value: user?.email || '—', color: '#2563eb' },
         { icon: User, label: 'Gender', value: studentProfile?.gender || '—', color: '#2563eb' },
@@ -545,7 +545,7 @@ export default function LearnerDashboard() {
                     <p style={{ color: '#94a3b8' }}>No lessons published yet.</p>
                   ) : (
                     <div>
-                      <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{learnerLessons[0].gradeLevel}</span>
+                      <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>                      {displayStudentClassName(learnerLessons[0].gradeLevel)}</span>
                       <h4 className="font-bold mt-3 mb-1" style={{ color: '#1e293b' }}>{learnerLessons[0].title}</h4>
                       <p className="text-sm mb-3" style={{ color: '#64748b' }}>{learnerLessons[0].subject}</p>
                       <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>{learnerLessons[0].content}</p>
@@ -610,7 +610,7 @@ export default function LearnerDashboard() {
                   {learnerLessons.map(lesson => (
                     <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm" style={{ border: '1px solid #e2e8f0' }}>
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{lesson.gradeLevel}</span>
+                        <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>                        {displayStudentClassName(lesson.gradeLevel)}</span>
                         <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#eff6ff', color: '#2563eb' }}>{lesson.subject}</span>
                       </div>
                       <h4 className="text-lg font-bold mb-1" style={{ color: '#1e293b' }}>{lesson.title}</h4>
@@ -684,7 +684,7 @@ export default function LearnerDashboard() {
                           <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
                             <div>
                               <h4 className="text-lg font-bold" style={{ color: '#1e293b' }}>{assignment.title}</h4>
-                              <p className="text-sm" style={{ color: '#64748b' }}>{assignment.subject} · {assignment.gradeLevel}</p>
+                              <p className="text-sm" style={{ color: '#64748b' }}>{assignment.subject} · {displayStudentClassName(assignment.gradeLevel)}</p>
                               <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{assignment.academicYear || selectedAcademicYear} · {assignment.term || selectedTerm}</p>
                             </div>
                             <div className="flex items-center gap-2 text-sm" style={{ color: '#64748b' }}>
@@ -760,7 +760,7 @@ export default function LearnerDashboard() {
                           <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
                             <div>
                               <h4 className="text-lg font-bold" style={{ color: '#1e293b' }}>{quiz.title}</h4>
-                              <p className="text-sm" style={{ color: '#64748b' }}>{quiz.subject} · {quiz.gradeLevel}</p>
+                              <p className="text-sm" style={{ color: '#64748b' }}>{quiz.subject} · {displayStudentClassName(quiz.gradeLevel)}</p>
                               <p className="text-xs mt-0.5" style={{ color: '#94a3b8' }}>{quiz.academicYear || selectedAcademicYear} · {quiz.term || selectedTerm}</p>
                             </div>
                             <div className="text-right">

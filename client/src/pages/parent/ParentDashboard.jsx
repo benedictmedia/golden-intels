@@ -15,6 +15,7 @@ import ChangePasswordModal from '../../components/ChangePasswordModal'
 import FeeAlertModal from '../../components/FeeAlertModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
+import { displayStudentClassName } from '../../utils/studentClasses'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -174,7 +175,7 @@ export default function ParentDashboard() {
     doc.setTextColor(50, 50, 50)
     doc.text(`${student.firstName} ${student.lastName}`, 50, 73)
     doc.text(`${student.studentId}`, 50, 82)
-    doc.text(`${result.gradeLevel}`, 50, 91)
+    doc.text(`${displayStudentClassName(result.gradeLevel)}`, 50, 91)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(26, 60, 110)
     doc.text('Gender:', 120, 73)
@@ -846,7 +847,7 @@ const getParentDisplayName = (name) => {
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-[#1d4ed8] truncate">{student.firstName} {student.lastName}</p>
-                          <p className="text-xs text-gray-500">{student.gradeLevel} · {student.studentId}</p>
+                          <p className="text-xs text-gray-500">{displayStudentClassName(student.gradeLevel)} · {student.studentId}</p>
                         </div>
                       </div>
                     ))}
@@ -886,7 +887,7 @@ const getParentDisplayName = (name) => {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-500">Grade</span>
-                          <span className="font-bold text-[#1d4ed8]">{student.gradeLevel}</span>
+                          <span className="font-bold text-[#1d4ed8]">{displayStudentClassName(student.gradeLevel)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Gender</span>
@@ -994,7 +995,7 @@ const getParentDisplayName = (name) => {
                                 {formatAttendanceStatus(record.status)}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-gray-600">{record.gradeLevel}</td>
+                            <td className="px-6 py-4 text-gray-600">{displayStudentClassName(record.gradeLevel)}</td>
                             <td className="px-6 py-4 text-gray-500">{record.recordedBy}</td>
                           </tr>
                         ))}
@@ -1041,7 +1042,7 @@ const getParentDisplayName = (name) => {
                           {/* Info */}
                         <div>
                           <h3 className="font-bold text-[#1d4ed8] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
-                          <p className="text-sm text-gray-500">{result.student?.studentId} | {result.gradeLevel}</p>
+                          <p className="text-sm text-gray-500">{result.student?.studentId} | {displayStudentClassName(result.gradeLevel)}</p>
                           <p className="text-sm text-gray-400">{result.academicYear} | {result.term}</p>
                           <span className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mt-2">
                             Approved
@@ -1113,7 +1114,7 @@ const getParentDisplayName = (name) => {
                             </div>
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <p className="text-xs text-gray-500 uppercase">Class</p>
-                              <p className="text-xl font-bold text-[#1d4ed8]">{result.gradeLevel}</p>
+                              <p className="text-xl font-bold text-[#1d4ed8]">{displayStudentClassName(result.gradeLevel)}</p>
                             </div>
                           </div>
                           {isFeeClearedForTerm(result.student?.id) ? (
@@ -1233,7 +1234,7 @@ const getParentDisplayName = (name) => {
                                 {assignment.type === 'manual-exercise' ? 'Manual exercise' : assignment.type === 'quiz' ? 'Quiz marked' : 'Assignment marked'}
                               </span>
                               <h3 className="text-lg font-bold text-[#1d4ed8] mb-1">{assignment.title}</h3>
-                              <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${assignment.gradeLevel}` : ''}</p>
+                              <p className="text-sm text-gray-500">{assignment.subject || 'Assignment'} {assignment.gradeLevel ? `| ${displayStudentClassName(assignment.gradeLevel)}` : ''}</p>
                               <p className="text-xs font-bold text-gray-400 mt-1">{assignment.academicYear || selectedAcademicYear} | {assignment.term || selectedTerm}</p>
                             </div>
                             <div className="text-right text-xs text-gray-400">
@@ -1421,7 +1422,7 @@ const getParentDisplayName = (name) => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Class</p>
-                  <p className="font-bold text-gray-800">{viewingResult.gradeLevel}</p>
+                  <p className="font-bold text-gray-800">{displayStudentClassName(viewingResult.gradeLevel)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Gender</p>

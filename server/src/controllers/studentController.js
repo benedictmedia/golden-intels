@@ -1,6 +1,7 @@
-const bcrypt = require('bcryptjs')
 const { PrismaClient } = require('@prisma/client')
 const { archive } = require('../utils/archive')
+const { canonicalStudentClassName, normalizeStudentClassName } = require('../utils/studentClasses')
+const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
 const prisma = new PrismaClient()
 
 // Every "admission form" field that lives on Student in addition to the core
@@ -97,6 +98,23 @@ const generateStudentId = async () => {
   return studentId
 }
 
+const includeLearnerAccountStatus = async (students) => {
+  const learnerUserIds = students.map(student => student.learnerUserId).filter(Boolean)
+  if (!learnerUserIds.length) {
+    return students.map(student => ({ ...student, learnerAccountActive: null }))
+  }
+
+  const learnerUsers = await prisma.user.findMany({
+    where: { id: { in: learnerUserIds }, role: 'learner' },
+    select: { id: true, active: true }
+  })
+  const activeByUserId = new Map(learnerUsers.map(learner => [learner.id, learner.active]))
+  return students.map(student => ({
+    ...student,
+    learnerAccountActive: activeByUserId.get(student.learnerUserId) ?? null
+  }))
+}
+
 const getStudents = async (req, res) => {
   try {
     const order = { createdAt: 'desc' }
@@ -118,8 +136,6 @@ const getStudents = async (req, res) => {
 
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
-        .replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
       const students = await prisma.student.findMany({ 
         where: activeLearnerWhere,
         orderBy: order, 
@@ -131,11 +147,11 @@ const getStudents = async (req, res) => {
       const teacherClasses = Array.from(new Set([
         ...(staff.classes || []),
         ...(staff.classTeacherClasses || [])
-      ].map(normalizeClassName).filter(Boolean)))
+      ].map(value => normalizeStudentClassName(canonicalStudentClassName(value))).filter(Boolean)))
 
       const filteredStudents = teacherClasses.length
-        ? students.filter(student => teacherClasses.includes(normalizeClassName(student.gradeLevel)))
-        : students.filter(student => normalizeClassName(student.gradeLevel) === normalizeClassName(staff.department))
+        ? students.filter(student => teacherClasses.includes(normalizeStudentClassName(canonicalStudentClassName(student.gradeLevel))))
+        : students.filter(student => normalizeStudentClassName(canonicalStudentClassName(student.gradeLevel)) === normalizeStudentClassName(canonicalStudentClassName(staff.department)))
 
       return res.json(filteredStudents)
     }
@@ -145,7 +161,7 @@ const getStudents = async (req, res) => {
       orderBy: order, 
       include: { parent: { select: { id: true, name: true, email: true } } } 
     })
-    res.json(students)
+    res.json(req.user?.role === 'admin' ? await includeLearnerAccountStatus(students) : students)
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Server error' })
@@ -153,60 +169,25 @@ const getStudents = async (req, res) => {
 }
 
 const createStudent = async (req, res) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Only administrators can create learner records.' })
+  }
+
   try {
     const {
       firstName, lastName, dateOfBirth, gender, gradeLevel,
       parentName, parentEmail, parentPhone, address,
-      email, learnerEmail, password, studentId: requestedStudentId,
+      studentId: requestedStudentId,
       division, academicYear, street, city, state
     } = req.body
-
-    const finalEmail = (email || learnerEmail || '').trim() || null
-    const finalPassword = (password || '').trim() || null
-
-    // Both email AND password required together if either is provided
-    if ((finalEmail || finalPassword) && !(finalEmail && finalPassword)) {
-      return res.status(400).json({
-        message: 'Both learner email and password are required to create a dashboard account.'
-      })
-    }
-
-    // Prevent duplicate User email
-    if (finalEmail) {
-      const existing = await prisma.user.findUnique({ where: { email: finalEmail } })
-      if (existing) {
-        return res.status(400).json({ message: `A user with email "${finalEmail}" already exists.` })
-      }
-    }
 
     const studentId = requestedStudentId?.trim() || await generateStudentId()
     const documentUrls = extractDocumentUrls(req)
     const extendedData = pickExtendedFields(req.body)
 
-    // Link to existing parent account if parentEmail matches a parent user
-    let parentId = null
-    if (parentEmail) {
-      const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
-      if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
-    }
-
     const student = await prisma.$transaction(async (tx) => {
-      let learnerUserId = null
-
-      // Create a User account for the learner if credentials were provided
-      if (finalEmail && finalPassword) {
-        const hashed = await bcrypt.hash(finalPassword, 10)
-        const learnerUser = await tx.user.create({
-          data: {
-            name: [firstName, lastName].filter(Boolean).join(' ') || finalEmail,
-            email: finalEmail,
-            password: hashed,
-            role: 'learner',
-            active: true
-          }
-        })
-        learnerUserId = learnerUser.id
-      }
+      const parentId = await createParentAccountIfNeeded(tx, { email: parentEmail, name: parentName })
+      const learnerAccount = await createLearnerAccount(tx, { firstName, lastName, studentId })
 
       return await tx.student.create({
         data: {
@@ -215,19 +196,19 @@ const createStudent = async (req, res) => {
           lastName,
           dateOfBirth:  dateOfBirth  || null,
           gender,
-          gradeLevel,
+          gradeLevel: canonicalStudentClassName(gradeLevel),
           division: division || null,
           academicYear: academicYear || null,
           parentId,
-          parentName,
+          parentName: parentName || 'Not provided',
           parentEmail:  parentEmail  || null,
           parentPhone:  parentPhone  || null,
           address:      address || [street, city, state].filter(Boolean).join(', ') || null,
           street:       street       || null,
           city:         city         || null,
           state:        state        || null,
-          email:        finalEmail,
-          learnerUserId,
+          email:        learnerAccount.email,
+          learnerUserId: learnerAccount.id,
           photo: documentUrls.photo || null,
           nhisFront: documentUrls.nhisFront || null,
           nhisBack: documentUrls.nhisBack || null,
@@ -241,10 +222,10 @@ const createStudent = async (req, res) => {
       })
     })
 
-    res.status(201).json(student)
+    res.status(201).json({ ...student, learnerAccountActive: false })
   } catch (error) {
     console.error('Create Student Error:', error)
-    res.status(400).json({ message: error.message || 'Failed to create student' })
+    res.status(error.statusCode || 400).json({ message: error.message || 'Failed to create student' })
   }
 }
 
@@ -268,7 +249,7 @@ const updateStudent = async (req, res) => {
     if (lastName !== undefined)    data.lastName    = lastName
     if (dateOfBirth !== undefined) data.dateOfBirth = dateOfBirth
     if (gender !== undefined)      data.gender      = gender
-    if (gradeLevel !== undefined)  data.gradeLevel  = gradeLevel
+    if (gradeLevel !== undefined)  data.gradeLevel  = canonicalStudentClassName(gradeLevel)
     if (parentName !== undefined)  data.parentName  = parentName
     if (parentEmail !== undefined) data.parentEmail = parentEmail
     if (parentPhone !== undefined) data.parentPhone = parentPhone
@@ -282,21 +263,13 @@ const updateStudent = async (req, res) => {
     if (state !== undefined)       data.state       = state || null
 
     // email field: accept either key from frontend
-    const finalEmail = email || learnerEmail
-    if (finalEmail !== undefined)  data.email       = finalEmail || null
+    const finalEmail = email !== undefined ? email : learnerEmail
+    if (finalEmail !== undefined) data.email = String(finalEmail).trim() || null
 
     // Every extended admission-form field (father/mother details, medical
     // info, emergency contact, etc.) is editable here too — only fields
     // actually present in the request body are touched.
     Object.assign(data, pickExtendedFields(req.body))
-
-    // If parentEmail changed, try to re-link to the parent's user account
-    if (parentEmail) {
-      const parentUser = await prisma.user.findUnique({ where: { email: parentEmail } })
-      if (parentUser && parentUser.role === 'parent') {
-        data.parentId = parentUser.id
-      }
-    }
 
     // Handle any re-uploaded documents/photo — admin can replace any of them,
     // including the passport photo, at any time.
@@ -308,6 +281,29 @@ const updateStudent = async (req, res) => {
     if (!existingStudent) return res.status(404).json({ message: 'Student not found.' })
     const shouldArchive = ['transferred', 'graduated'].includes(String(status || '').toLowerCase()) && !existingStudent.archivedAt
     const student = await prisma.$transaction(async (tx) => {
+      if (parentEmail !== undefined) {
+        data.parentEmail = String(parentEmail).trim() || null
+        data.parentId = await createParentAccountIfNeeded(tx, {
+          email: parentEmail,
+          name: parentName ?? existingStudent.parentName
+        })
+      }
+      if (finalEmail !== undefined && existingStudent.learnerUserId) {
+        const nextEmail = String(finalEmail).trim()
+        if (!nextEmail) {
+          const error = new Error('A linked learner login must keep an email address.')
+          error.statusCode = 400
+          throw error
+        }
+        await tx.user.update({
+          where: { id: existingStudent.learnerUserId },
+          data: {
+            email: nextEmail,
+            name: [firstName ?? existingStudent.firstName, lastName ?? existingStudent.lastName].filter(Boolean).join(' ').trim()
+          }
+        })
+        data.email = nextEmail
+      }
       if (shouldArchive) {
         const related = await tx.student.findUnique({
           where: { id: studentIdNumber },
@@ -331,10 +327,15 @@ const updateStudent = async (req, res) => {
       return tx.student.update({ where: { id: studentIdNumber }, data })
     })
 
-    res.json(student)
+    res.json({
+      ...student,
+      learnerAccountActive: existingStudent.learnerUserId
+        ? (await prisma.user.findUnique({ where: { id: existingStudent.learnerUserId }, select: { active: true } }))?.active ?? null
+        : null
+    })
   } catch (error) {
     console.error('Update Student Error:', error)
-    res.status(400).json({ message: error.message || 'Failed to update student' })
+    res.status(error.statusCode || 400).json({ message: error.message || 'Failed to update student' })
   }
 }
 
@@ -375,7 +376,7 @@ const bulkImportStudents = async (req, res) => {
     }
     data.firstName = firstName
     data.lastName = lastName
-    data.gradeLevel = gradeLevel
+    data.gradeLevel = canonicalStudentClassName(gradeLevel)
 
     const addressParts = [data.street || row.street, data.city || row.city, data.state || row.state]
       .map(value => String(value ?? '').trim())
@@ -384,16 +385,38 @@ const bulkImportStudents = async (req, res) => {
 
     try {
       const existing = await prisma.student.findUnique({ where: { studentId } })
-      await prisma.student.upsert({
-        where: { studentId },
-        update: data,
-        create: {
+      await prisma.$transaction(async (tx) => {
+        const parentId = data.parentEmail
+          ? await createParentAccountIfNeeded(tx, { email: data.parentEmail, name: data.parentName })
+          : existing?.parentId ?? null
+        const linkedUser = existing?.learnerUserId
+          ? await tx.user.findFirst({ where: { id: existing.learnerUserId, role: 'learner' }, select: { id: true, email: true } })
+          : null
+        const learnerAccount = linkedUser || await createLearnerAccount(tx, {
+          firstName,
+          lastName,
           studentId,
+          active: false
+        })
+        const learnerData = {
           ...data,
-          gender: data.gender || 'Not specified',
-          parentName: data.parentName || 'Not provided',
-          status: 'active',
-          source: 'manual'
+          parentId,
+          email: learnerAccount.email,
+          learnerUserId: learnerAccount.id
+        }
+        if (existing) {
+          await tx.student.update({ where: { studentId }, data: learnerData })
+        } else {
+          await tx.student.create({
+            data: {
+              studentId,
+              ...learnerData,
+              gender: data.gender || 'Not specified',
+              parentName: data.parentName || 'Not provided',
+              status: 'active',
+              source: 'manual'
+            }
+          })
         }
       })
       result[existing ? 'updated' : 'created']++
@@ -445,12 +468,11 @@ const getStudent = async (req, res) => {
 
 // Creates/links a login account for an existing student who has none
 const createLearnerLogin = async (req, res) => {
-  const { id } = req.params
-  const { email, password } = req.body
-
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required.' })
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Only administrators can create learner logins.' })
   }
+
+  const { id } = req.params
 
   try {
     const student = await prisma.student.findUnique({ where: { id: parseInt(id) } })
@@ -460,34 +482,46 @@ const createLearnerLogin = async (req, res) => {
       return res.status(400).json({ message: 'This student already has a login account.' })
     }
 
-    // Check no other user owns this email
-    const existing = await prisma.user.findUnique({ where: { email } })
-    if (existing) {
-      return res.status(400).json({ message: `The email "${email}" is already used by another account.` })
-    }
+    const result = await prisma.$transaction(async (tx) => {
+      const currentStudent = await tx.student.findUnique({ where: { id: parseInt(id) } })
+      if (!currentStudent) {
+        const error = new Error('Student not found.')
+        error.statusCode = 404
+        throw error
+      }
+      if (currentStudent.learnerUserId) {
+        const error = new Error('This student already has a login account.')
+        error.statusCode = 409
+        throw error
+      }
 
-    const hashed = await bcrypt.hash(password, 10)
-
-    const updated = await prisma.$transaction(async (tx) => {
-      const learnerUser = await tx.user.create({
-        data: {
-          name: `${student.firstName} ${student.lastName}`.trim(),
-          email,
-          password: hashed,
-          role: 'learner',
-          active: true
-        }
+      const learnerUser = await createLearnerAccount(tx, {
+        firstName: currentStudent.firstName,
+        lastName: currentStudent.lastName,
+        studentId: currentStudent.studentId,
+        active: false
       })
-      return await tx.student.update({
-        where: { id: parseInt(id) },
-        data: { email, learnerUserId: learnerUser.id }
+      const linked = await tx.student.updateMany({
+        where: { id: parseInt(id), learnerUserId: null },
+        data: { email: learnerUser.email, learnerUserId: learnerUser.id }
       })
+      if (linked.count !== 1) {
+        const error = new Error('A learner login was created by another administrator. Refresh the learner record.')
+        error.statusCode = 409
+        throw error
+      }
+      const updated = await tx.student.findUnique({ where: { id: parseInt(id) } })
+      return { student: updated, learnerEmail: learnerUser.email }
     })
 
-    res.json({ message: 'Login created and linked successfully.', student: updated })
+    res.json({
+      message: 'Login created and linked. An administrator must activate it before the learner can sign in.',
+      ...result,
+      learnerAccountActive: false
+    })
   } catch (error) {
     console.error('Create learner login error:', error)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message || 'Server error' })
   }
 }
 

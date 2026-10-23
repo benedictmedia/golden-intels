@@ -16,6 +16,7 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
+import { STUDENT_CLASSES, canonicalStudentClassName, displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -81,14 +82,9 @@ export default function TeacherDashboard() {
   const avatarColor = getAvatarColor(displayName)
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   const normalizeSubjectKey = (value) => normalizeSubjectName(value).toLowerCase()
-  const classes = ['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
-  const normalizeClassKey = (value) => String(value ?? '').trim().toLowerCase().replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
-  const canonicalizeClass = (value) => {
-    const normalizedValue = normalizeClassKey(value)
-    if (!normalizedValue) return ''
-    return classes.find(cls => normalizeClassKey(cls) === normalizedValue) || String(value ?? '').trim()
-  }
-  const matchesClass = (gradeLevel, targetClass) => normalizeClassKey(gradeLevel) === normalizeClassKey(targetClass)
+  const classes = STUDENT_CLASSES
+  const canonicalizeClass = canonicalStudentClassName
+  const matchesClass = (gradeLevel, targetClass) => normalizeStudentClassName(gradeLevel) === normalizeStudentClassName(targetClass)
   const effectiveUser = profileUser || user
   const assignedClassOptions = Array.from(
     new Set((effectiveUser?.classes || []).map(canonicalizeClass).filter(Boolean))
@@ -355,7 +351,7 @@ export default function TeacherDashboard() {
     doc.setTextColor(50, 50, 50)
     doc.text(`${student.firstName} ${student.lastName}`, 50, 73)
     doc.text(`${student.studentId}`, 50, 82)
-    doc.text(`${result.gradeLevel}`, 50, 91)
+    doc.text(`${displayStudentClassName(result.gradeLevel)}`, 50, 91)
 
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(26, 60, 110)
@@ -1484,7 +1480,7 @@ useEffect(() => {
                           <div className="flex items-center justify-between flex-wrap gap-4">
                             <div>
                               <h3 className="font-bold text-[#2563eb] text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
-                              <p className="text-sm text-gray-500">{result.gradeLevel} | {result.academicYear} | {result.term}</p>
+                              <p className="text-sm text-gray-500">{displayStudentClassName(result.gradeLevel)} | {result.academicYear} | {result.term}</p>
                               <p className="text-sm text-gray-400">Submitted by: {result.submittedBy} on {new Date(result.createdAt).toLocaleDateString()}</p>
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
@@ -1754,7 +1750,7 @@ useEffect(() => {
                     <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Preview {lmsItemView.type}</p>
                       <h3 className="text-xl font-bold text-[#2563eb] mb-2">{lmsItemView.item.title}</h3>
-                      <p className="text-sm text-gray-500">{lmsItemView.item.subject} · {lmsItemView.item.gradeLevel}</p>
+                      <p className="text-sm text-gray-500">{lmsItemView.item.subject} · {displayStudentClassName(lmsItemView.item.gradeLevel)}</p>
                     </div>
                     <button onClick={() => setLmsItemView(null)} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-full">Close</button>
                   </div>
@@ -1886,7 +1882,7 @@ useEffect(() => {
                       teacherLessons.map(lesson => (
                         <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
-                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{lesson.gradeLevel}</span>
+                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{displayStudentClassName(lesson.gradeLevel)}</span>
                             <button onClick={() => togglePublishItem(lesson, 'lesson')} className={`text-xs font-bold px-3 py-1 rounded-full ${lesson.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {lesson.published ? 'Published' : 'Draft'}
                             </button>
@@ -2046,7 +2042,7 @@ useEffect(() => {
                             <div className="flex items-start justify-between gap-4 flex-wrap">
                               <div>
                                 <p className="font-bold text-[#2563eb]">{item.title}</p>
-                                <p className="text-sm text-gray-500">{item.subject} · {item.gradeLevel} · {item.learnerName}</p>
+                                <p className="text-sm text-gray-500">{item.subject} · {displayStudentClassName(item.gradeLevel)} · {item.learnerName}</p>
                               </div>
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${item.workStatus === 'not-done' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                                 {item.workStatus === 'not-done' ? 'Not done' : 'Completed'}
@@ -2067,7 +2063,7 @@ useEffect(() => {
                       teacherAssignments.map(assignment => (
                         <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
-                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{assignment.gradeLevel}</span>
+                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{displayStudentClassName(assignment.gradeLevel)}</span>
                             <button onClick={() => togglePublishItem(assignment, 'assignment')} className={`text-xs font-bold px-3 py-1 rounded-full ${assignment.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {assignment.published ? 'Published' : 'Draft'}
                             </button>
@@ -2198,7 +2194,7 @@ useEffect(() => {
                       teacherQuizzes.map(quiz => (
                         <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex items-center justify-between gap-4 mb-4">
-                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{quiz.gradeLevel}</span>
+                            <span className="inline-block bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{displayStudentClassName(quiz.gradeLevel)}</span>
                             <button onClick={() => togglePublishItem(quiz, 'quiz')} className={`text-xs font-bold px-3 py-1 rounded-full ${quiz.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {quiz.published ? 'Published' : 'Draft'}
                             </button>

@@ -4,6 +4,7 @@ import { generateAdmissionBooklet } from '../utils/generateAdmissionBooklet'
 import axios from 'axios'
 import PageHero from '../components/layout/PageHero'
 import API_URL from '../api/config'
+import { STUDENT_CLASSES } from '../utils/studentClasses'
 
 const steps = [
   { icon: <FileText size={28} />, step: 'Step 1', title: 'Submit Application', description: 'Complete and submit the online application form with required documents' },
@@ -387,7 +388,7 @@ export default function Admissions() {
                 <label className={labelClass}>Level Applying For <span className="text-red-500">*</span></label>
                 <select name="gradeLevel" value={formData.gradeLevel} onChange={handleChange} className={inputClass}>
                   <option value="">Select level</option>
-                  {['Creche(Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'].map(g => (
+                  {STUDENT_CLASSES.slice(0, 12).map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>

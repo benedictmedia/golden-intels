@@ -1,12 +1,12 @@
 const { PrismaClient } = require('@prisma/client')
 const { archive, isPreviousAcademicPeriod } = require('../utils/archive')
+const { normalizeStudentClassName } = require('../utils/studentClasses')
 
 const prisma = new PrismaClient()
 const CLASSWORK_TYPES = new Set(['assignment', 'quiz', 'lesson'])
 const MANUAL_QUESTION_TYPES = new Set(['short-answer', 'paragraph', 'fill-in'])
 
-const normalizeClass = (value) => String(value ?? '').trim().toLowerCase()
-  .replace(/\s*\(babies\)\s*$/i, '').replace(/\s+/g, ' ')
+const normalizeClass = normalizeStudentClassName
 
 const getLearner = async (user) => prisma.student.findFirst({
   where: {

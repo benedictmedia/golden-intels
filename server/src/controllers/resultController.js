@@ -10,10 +10,11 @@ const {
 const { createNotificationsForRole } = require('./notificationController')
 const { isStudentFeeCleared } = require('../utils/feeStatus')
 const { archive, isPreviousAcademicPeriod } = require('../utils/archive')
+const { canonicalStudentClassName, normalizeStudentClassName, studentClassNameVariants } = require('../utils/studentClasses')
 
 const prisma = new PrismaClient()
 
-const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
+const normalizeClassName = normalizeStudentClassName
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
 
 const buildTeacherAssignments = async (email) => {
@@ -53,7 +54,7 @@ const getResultByScope = async (studentId, gradeLevel, academicYear, term) => {
   return prisma.result.findFirst({
     where: {
       studentId: parseInt(studentId),
-      gradeLevel,
+      gradeLevel: { in: studentClassNameVariants(gradeLevel), mode: 'insensitive' },
       academicYear,
       term
     },
@@ -279,7 +280,7 @@ const createResult = async (req, res) => {
         : await prisma.result.create({
             data: {
               studentId: parseInt(studentId),
-              gradeLevel,
+              gradeLevel: canonicalStudentClassName(gradeLevel),
               academicYear,
               term,
               scores: payload.scores,
@@ -304,7 +305,7 @@ const createResult = async (req, res) => {
     const result = await prisma.result.create({
       data: {
         studentId: parseInt(studentId),
-        gradeLevel,
+        gradeLevel: canonicalStudentClassName(gradeLevel),
         academicYear,
         term,
         scores,

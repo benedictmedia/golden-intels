@@ -7,6 +7,7 @@ import {
   MonitorPlay, LayoutGrid, ChevronRight, X
 } from 'lucide-react'
 import API_URL from '../../api/config'
+import { displayStudentClassName } from '../../utils/studentClasses'
 
 const JITSI_DOMAIN = 'meet.jit.si'
 
@@ -196,7 +197,7 @@ export default function LearnerClassroom({ gradeLevel }) {
             <div>
               <p className="font-bold text-sm">{activeSession.title}</p>
               <p className="text-xs text-purple-200">
-                {activeSession.gradeLevel} · {activeSession.subject} · Teacher: {activeSession.createdBy}
+                {displayStudentClassName(activeSession.gradeLevel)} · {activeSession.subject} · Teacher: {activeSession.createdBy}
               </p>
             </div>
           </div>
@@ -225,7 +226,7 @@ export default function LearnerClassroom({ gradeLevel }) {
           <div>
             <h2 className="text-2xl font-bold font-serif text-[#1d4ed8]">Golden Classroom</h2>
             <p className="text-sm text-gray-500">
-              Live video classes for <strong>{gradeLevel || 'your class'}</strong>
+              Live video classes for <strong>{displayStudentClassName(gradeLevel || 'your class')}</strong>
             </p>
           </div>
         </div>
@@ -401,7 +402,7 @@ export default function LearnerClassroom({ gradeLevel }) {
           <p className="text-xs font-bold text-[#1d4ed8]">How Golden Classroom works</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
             When your teacher starts a live class, a <strong>Join Now</strong> button will appear automatically.
-            Classes are private — only students in <strong>{gradeLevel || 'your class'}</strong> can join.
+            Classes are private — only students in <strong>{displayStudentClassName(gradeLevel || 'your class')}</strong> can join.
             Make sure your camera and microphone are allowed in your browser.
           </p>
         </div>

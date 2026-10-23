@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const { v4: uuidv4 } = require('uuid')
 const prisma = new PrismaClient()
+const { canonicalStudentClassName, studentClassNameVariants } = require('../utils/studentClasses')
 
 // Get sessions
 const getSessions = async (req, res) => {
@@ -8,7 +9,7 @@ const getSessions = async (req, res) => {
   const user = req.user
   try {
     const where = {}
-    if (gradeLevel) where.gradeLevel = gradeLevel
+    if (gradeLevel) where.gradeLevel = { in: studentClassNameVariants(gradeLevel), mode: 'insensitive' }
     if (status) where.status = status
 
     if (user.role === 'teacher') {
@@ -42,7 +43,7 @@ const createSession = async (req, res) => {
         title,
         description: description || null,
         roomName,
-        gradeLevel,
+        gradeLevel: canonicalStudentClassName(gradeLevel),
         subject: subject || null,
         scheduledAt: new Date(scheduledAt),
         duration: parseInt(duration) || 60,
@@ -58,7 +59,7 @@ const createSession = async (req, res) => {
     const { createNotification } = require('./notificationController');
 
     const studentsInClass = await prisma.student.findMany({
-      where: { gradeLevel: gradeLevel },
+      where: { gradeLevel: { in: studentClassNameVariants(gradeLevel), mode: 'insensitive' } },
       include: { parent: true }
     });
 
@@ -68,7 +69,7 @@ const createSession = async (req, res) => {
         await createNotification(
           student.parent.id,
           "New Live Class Scheduled",
-          `${title} for ${gradeLevel} has been scheduled.`,
+          `${title} for ${canonicalStudentClassName(gradeLevel)} has been scheduled.`,
           "classroom"
         );
       }
@@ -78,7 +79,7 @@ const createSession = async (req, res) => {
         await createNotification(
           student.learnerUserId,
           "New Live Class Scheduled",
-          `${title} for ${gradeLevel} is now available.`,
+          `${title} for ${canonicalStudentClassName(gradeLevel)} is now available.`,
           "classroom"
         );
       }
@@ -102,7 +103,10 @@ const updateSession = async (req, res) => {
     }
     const updated = await prisma.videoSession.update({
       where: { id: parseInt(id) },
-      data: req.body
+      data: {
+        ...req.body,
+        ...(req.body.gradeLevel ? { gradeLevel: canonicalStudentClassName(req.body.gradeLevel) } : {})
+      }
     })
     res.json(updated)
   } catch (error) {

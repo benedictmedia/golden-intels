@@ -1,5 +1,7 @@
 const { PrismaClient } = require('@prisma/client')
 const { createNotificationsForRole } = require('./notificationController')
+const { canonicalStudentClassName } = require('../utils/studentClasses')
+const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
 const { sendMail } = require('../utils/mailer')
 
 const path = require('path')
@@ -22,29 +24,7 @@ const getFileUrl = (req, file) => {
   return null
 }
 
-const normalizeGradeLevel = (gradeLevel) => {
-  const gradeMap = {
-    'Creche': 'Creche',
-    'Pre-Nursery': 'Pre-Nursery',
-    'Nursery 1': 'Nursery 1',
-    'Nursery 2': 'Nursery 2',
-    'Kindergarten 1': 'Reception 1',
-    'Kindergarten 2': 'Reception 2',
-    'Grade 1': 'Grade 1',
-    'Grade 2': 'Grade 2',
-    'Grade 3': 'Grade 3',
-    'Grade 4': 'Grade 4',
-    'Grade 5': 'Grade 5',
-    'Grade 6': 'Grade 6',
-    'Grade 7': 'Grade 7',
-    'Grade 8': 'Grade 8',
-    'Grade 9': 'Grade 9',
-    'Grade 10': 'Grade 10',
-    'Grade 11': 'Grade 11',
-    'Grade 12': 'Grade 12'
-  }
-  return gradeMap[gradeLevel] || gradeLevel
-}
+const normalizeGradeLevel = canonicalStudentClassName
 
 const getAdmissionApprovalEmails = (application) => Array.from(new Set([
   application.parentEmail,
@@ -207,6 +187,10 @@ const getApplication = async (req, res) => {
 
 // Approve application and create student
 const approveApplication = async (req, res) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Only administrators can approve admissions.' })
+  }
+
   const { id } = req.params
   try {
     const application = await prisma.admissionApplication.findUnique({
@@ -227,17 +211,30 @@ const approveApplication = async (req, res) => {
     // Create student from application — copy over EVERY field captured on the
     // admission form so the learner's full profile is available immediately,
     // not just the handful of summary fields.
-    const student = await prisma.student.create({
-      data: {
+    const { student, updated } = await prisma.$transaction(async (tx) => {
+      const parentId = await createParentAccountIfNeeded(tx, {
+        email: application.parentEmail,
+        name: application.parentName
+      })
+      const learnerAccount = await createLearnerAccount(tx, {
+        firstName: application.firstName,
+        lastName: application.lastName,
+        studentId
+      })
+      const student = await tx.student.create({
+        data: {
         studentId,
         firstName: application.firstName,
         lastName: application.lastName,
         dateOfBirth: application.dateOfBirth,
         gender: application.gender,
         gradeLevel: normalizeGradeLevel(application.gradeLevel),
+        parentId,
         parentName: application.parentName,
         parentEmail: application.parentEmail,
         parentPhone: application.parentPhone,
+        email: learnerAccount.email,
+        learnerUserId: learnerAccount.id,
         address: application.emergencyAddress || '',
         photo: application.photo,
         status: 'active',
@@ -313,12 +310,13 @@ const approveApplication = async (req, res) => {
         ghanaBack: application.ghanaBack,
         signedBooklet: application.signedBooklet,
       }
-    })
+      })
 
-    // Update application status
-    const updated = await prisma.admissionApplication.update({
-      where: { id: parseInt(id) },
-      data: { status: 'approved' }
+      const updated = await tx.admissionApplication.update({
+        where: { id: parseInt(id) },
+        data: { status: 'approved' }
+      })
+      return { student, updated }
     })
 
     const learnerName = `${application.firstName} ${application.lastName}`.trim()
@@ -344,10 +342,10 @@ const approveApplication = async (req, res) => {
       `
     })
 
-    res.json({ application: updated, student })
+    res.json({ application: updated, student: { ...student, learnerAccountActive: false } })
   } catch (error) {
     console.error('Approve application error:', error)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message || 'Server error' })
   }
 }
 

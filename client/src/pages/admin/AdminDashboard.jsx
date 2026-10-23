@@ -17,7 +17,7 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import { parseStudentFile } from '../../utils/studentImport'
-import { displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
+import { displayStudentClassName, normalizeStudentClassName, STUDENT_CLASSES } from '../../utils/studentClasses'
 import { countLearnersByGender } from '../../utils/learnerGenderCounts'
 
 const menuItems = [
@@ -47,7 +47,7 @@ const stats = [
   { label: 'Female Learners', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
 ]
 
-const classes = ['All', 'Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+const classes = ['All', ...STUDENT_CLASSES]
 const FEE_ACADEMIC_YEARS = ['2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037']
 const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
 
@@ -71,7 +71,6 @@ export default function AdminDashboard() {
   const [archiveQuery, setArchiveQuery] = useState('')
 
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [learnerLoginForm, setLearnerLoginForm] = useState({ email: '', password: '' })
   const [loginCreating, setLoginCreating] = useState(false)
 
   // Create account state
@@ -103,7 +102,6 @@ export default function AdminDashboard() {
     studentId: '', firstName: '', lastName: '', dateOfBirth: '', gender: '',
     gradeLevel: '', division: '', academicYear: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
     street: '', city: '', state: '',
-    learnerEmail: '', learnerPassword: ''
   })
   const [studentImportLoading, setStudentImportLoading] = useState(false)
   const [studentImportResult, setStudentImportResult] = useState(null)
@@ -328,26 +326,7 @@ export default function AdminDashboard() {
   const handleLogout = () => { logout(); navigate('/') }
 
   // Class progression order for auto-promotion
-  const CLASS_PROGRESSION = [
-    'Creche',
-    'Pre-Nursery',
-    'Nursery 1',
-    'Nursery 2',
-    'Reception 1',
-    'Reception 2',
-    'Grade 1',
-    'Grade 2',
-    'Grade 3',
-    'Grade 4',
-    'Grade 5',
-    'Grade 6',
-    'Grade 7',
-    'Grade 8',
-    'Grade 9',
-    'Grade 10',
-    'Grade 11',
-    'Grade 12'
-  ]
+  const CLASS_PROGRESSION = STUDENT_CLASSES
 
   const getNextClass = (currentClass) => {
     const idx = CLASS_PROGRESSION.indexOf(displayStudentClassName(currentClass))
@@ -486,26 +465,12 @@ const handleSaveAcademicContext = async () => {
 
   const handleAddStudent = async () => {
   try {
-    const learnerEmail = newStudent.learnerEmail?.trim()
-    const learnerPassword = newStudent.learnerPassword?.trim()
-
-    if ((learnerEmail || learnerPassword) && (!learnerEmail || !learnerPassword)) {
-      alert('Please enter both a learner email and password to create a dashboard account.')
-      return
-    }
-
     const formData = new FormData()
     
     // Send all fields properly
     Object.entries(newStudent).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
-        if (key === 'learnerEmail') {
-          formData.append('email', value)           // ← Important
-        } else if (key === 'learnerPassword') {
-          formData.append('password', value)
-        } else {
-          formData.append(key, value)
-        }
+        formData.append(key, value)
       }
     })
 
@@ -522,11 +487,13 @@ const handleSaveAcademicContext = async () => {
     setNewStudent({
       studentId: '', firstName: '', lastName: '', dateOfBirth: '', gender: '',
       gradeLevel: '', division: '', academicYear: '', parentName: '', parentEmail: '', parentPhone: '', address: '',
-      street: '', city: '', state: '',
-      learnerEmail: '', learnerPassword: ''
+      street: '', city: '', state: ''
     })
 
-    alert('Learner added successfully!')
+    const guardianLogin = res.data.parentEmail
+      ? ` Guardian login: ${res.data.parentEmail} (initial password is configured by the school).`
+      : ''
+    alert(`Learner added successfully. Generated learner login: ${res.data.email} (initial password is configured by the school; inactive until administrator activation).${guardianLogin}`)
   } catch (err) {
     console.error(err.response?.data)
     alert(err.response?.data?.message || 'Failed to add learner. Please fill all fields.')
@@ -822,7 +789,8 @@ const handleDeactivateUser = async (email) => {
     await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
     // Optimistic update — flip active flag immediately
     setUsers(prev => prev.map(u => u.email === email ? { ...u, active: false } : u))
-  } catch (err) { alert('Failed to deactivate user') }
+    setStudents(prev => prev.map(student => student.email === email ? { ...student, learnerAccountActive: false } : student))
+  } catch (err) { alert(err.response?.data?.message || 'Failed to deactivate user') }
 }
 
 const handleReactivateUser = async (email) => {
@@ -830,7 +798,8 @@ const handleReactivateUser = async (email) => {
     await axios.post(`${API_URL}/api/users/reactivate`, { email }, { headers: getAuthHeaders() })
     // Optimistic update — flip active flag immediately
     setUsers(prev => prev.map(u => u.email === email ? { ...u, active: true } : u))
-  } catch (err) { alert('Failed to reactivate user') }
+    setStudents(prev => prev.map(student => student.email === email ? { ...student, learnerAccountActive: true } : student))
+  } catch (err) { alert(err.response?.data?.message || 'Failed to reactivate user') }
 }
 
 const handleDeleteUser = async (id, email) => {
@@ -1189,7 +1158,10 @@ const handleAdminPasswordReset = async (id, email) => {
       const res = await axios.put(`${API_URL}/api/admissions/${id}/approve`, {}, { headers: getAuthHeaders() })
       setApplications(applications.map(a => a.id === id ? res.data.application : a))
       setStudents(prev => [...prev, res.data.student])
-      alert(`Application approved! Student ID: ${res.data.student.studentId} has been added to learners.`)
+      const guardianLogin = res.data.student.parentEmail
+        ? ` Guardian login: ${res.data.student.parentEmail} (initial password is configured by the school).`
+        : ''
+      alert(`Application approved! Student ID: ${res.data.student.studentId} has been added to learners. Learner login: ${res.data.student.email} (initial password is configured by the school; inactive until administrator activation).${guardianLogin}`)
     } catch (err) { alert(err.response?.data?.message || 'Failed to approve application.') }
   }
 
@@ -1534,7 +1506,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </div>
                           <div>
                             <h3 className="font-bold text-gray-800 text-lg">{app.firstName} {app.lastName}</h3>
-                            <p className="text-sm text-gray-500">Grade: {app.gradeLevel} | Gender: {app.gender}</p>
+                            <p className="text-sm text-gray-500">Grade: {displayStudentClassName(app.gradeLevel)} | Gender: {app.gender}</p>
                             <p className="text-sm text-gray-400">Parent: {app.parentName} | {app.parentPhone}</p>
                             <p className="text-xs text-gray-400">Applied: {new Date(app.createdAt).toLocaleDateString()} | Serial: {app.serialNumber}</p>
                           </div>
@@ -1571,7 +1543,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold text-gray-800">{viewingApplication.firstName} {viewingApplication.lastName}</h3>
-                          <p className="text-gray-500">{viewingApplication.gradeLevel} | {viewingApplication.gender}</p>
+                          <p className="text-gray-500">{displayStudentClassName(viewingApplication.gradeLevel)} | {viewingApplication.gender}</p>
                           <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mt-2 ${viewingApplication.status === 'approved' ? 'bg-green-100 text-green-700' : viewingApplication.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{viewingApplication.status}</span>
                         </div>
                       </div>
@@ -1682,7 +1654,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(grade => (
+                      {STUDENT_CLASSES.map(grade => (
                         <div key={grade} className="bg-blue-50 rounded-xl p-4">
                           <label className="block text-sm font-bold text-gray-800 mb-2">{grade}</label>
                           <div className="flex items-center gap-2">
@@ -1709,7 +1681,7 @@ const handleAdminPasswordReset = async (id, email) => {
                     <button onClick={() => setShowAddPayment(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Record Payment</button>
                   </div>
                   <div className="flex flex-wrap gap-3 mb-6">
-                    {['All', 'Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(cls => (
+                    {['All', ...STUDENT_CLASSES].map(cls => (
                       <button key={cls} onClick={() => setFeeClassFilter(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${feeClassFilter === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>{cls}</button>
                     ))}
                   </div>
@@ -1735,7 +1707,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           filteredFeePayments.map((payment, index) => (
                             <tr key={payment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
                               <td className="px-6 py-4 font-medium text-gray-800">{payment.student?.firstName} {payment.student?.lastName}</td>
-                              <td className="px-6 py-4 text-gray-600">{payment.student?.gradeLevel}</td>
+                              <td className="px-6 py-4 text-gray-600">{displayStudentClassName(payment.student?.gradeLevel)}</td>
                               <td className="px-6 py-4 text-gray-600">{payment.term ? `${payment.academicYear} · ${payment.term}` : `${payment.month || 'Legacy'} ${payment.year || ''}`}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {payment.amountDue.toFixed(2)}</td>
                               <td className="px-6 py-4 text-gray-600">GH₵ {Number(payment.previousTermArrears || 0).toFixed(2)}</td>
@@ -1796,7 +1768,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           setPaymentForm(prev => ({ ...prev, studentId, amountDue }))
                         }} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select student...</option>
-                          {students.map(s => <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.gradeLevel}</option>)}
+                          {students.map(s => <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {displayStudentClassName(s.gradeLevel)}</option>)}
                         </select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -1929,7 +1901,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           </div>
                           <div>
                             <h3 className="font-bold text-gray-800 text-lg">{result.student?.firstName} {result.student?.lastName}</h3>
-                            <p className="text-sm text-gray-500">{result.student?.studentId} | {result.gradeLevel}</p>
+                            <p className="text-sm text-gray-500">{result.student?.studentId} | {displayStudentClassName(result.gradeLevel)}</p>
                             <p className="text-sm text-gray-400">{result.academicYear} | {result.term}</p>
                             <p className="text-xs text-gray-400">Submitted by: {result.submittedBy} on {new Date(result.createdAt).toLocaleDateString()}</p>
                           </div>
@@ -2040,27 +2012,9 @@ const handleAdminPasswordReset = async (id, email) => {
                       <label className="block text-sm font-bold text-gray-800 mb-2">Last Name</label>
                       <input type="text" value={newStudent.lastName} onChange={e => setNewStudent({ ...newStudent, lastName: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-800 mb-2">Learner Email</label>
-                      <input type="email" value={newStudent.learnerEmail} onChange={e => setNewStudent({ ...newStudent, learnerEmail: e.target.value })} placeholder="Create learner dashboard email" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
-                      <p className="text-xs text-gray-400 mt-1">Optional, but recommended if the learner should access their dashboard.</p>
+                    <div className="md:col-span-2 rounded-xl bg-blue-50 px-4 py-3 text-xs text-blue-800">
+                      A learner login email will be generated automatically. The initial password is configured on the school server; the account remains inactive until an administrator activates it.
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-800 mb-2">Learner Password</label>
-                      <input type="password" value={newStudent.learnerPassword} onChange={e => setNewStudent({ ...newStudent, learnerPassword: e.target.value })} placeholder="Create learner dashboard password" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
-                    </div>
-
-                    <div>
-  <label className="block text-sm font-bold text-gray-800 mb-2">Learner Email (for Portal Login)</label>
-  <input 
-    type="email" 
-    value={newStudent.learnerEmail} 
-    onChange={e => setNewStudent({ ...newStudent, learnerEmail: e.target.value })} 
-    placeholder="learner@example.com" 
-    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" 
-  />
-  <p className="text-xs text-gray-400 mt-1">This allows the learner to log into their portal.</p>
-</div>
                     <div>
                       <label className="block text-sm font-bold text-gray-800 mb-2">Date of Birth</label>
                       <input type="date" value={newStudent.dateOfBirth} onChange={e => setNewStudent({ ...newStudent, dateOfBirth: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
@@ -2103,7 +2057,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                       <select value={newStudent.gradeLevel} onChange={e => setNewStudent({ ...newStudent, gradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                         <option value="">Select grade</option>
-                        {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
+                        {STUDENT_CLASSES.map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
                     {[
@@ -2122,9 +2076,9 @@ const handleAdminPasswordReset = async (id, email) => {
                   </div>
                 </div>
               )}
-              <div className="flex flex-wrap gap-3 mb-6">
+              <div className="flex flex-wrap gap-2 mb-6">
                 {learnerClasses.map(cls => (
-                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
+                  <button key={cls} onClick={() => setActiveClass(cls)} className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-colors sm:px-3 sm:py-2 ${activeClass === cls ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-blue-600 hover:bg-blue-600 hover:text-white'}`}>
                     {cls}
                     <span className="ml-2 bg-blue-500 text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full">{cls === 'All' ? students.length : students.filter(s => normalizeStudentClassName(s.gradeLevel) === normalizeStudentClassName(cls)).length}</span>
                   </button>
@@ -2133,17 +2087,17 @@ const handleAdminPasswordReset = async (id, email) => {
               <div className="mb-4">
                 <h3 className="text-lg font-bold text-gray-800">{activeClass === 'All' ? 'All Learners' : `${activeClass} Class`}<span className="ml-2 text-gray-400 text-sm font-normal">({filteredStudents.length} learners)</span></h3>
               </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+                <table className="w-full min-w-[620px] text-xs sm:text-sm">
                   <thead className="bg-blue-600 text-white">
                     <tr>
-                      <th className="px-6 py-4 text-left">Photo</th>
-                      <th className="px-6 py-4 text-left">Student ID</th>
-                      <th className="px-6 py-4 text-left">Name</th>
-                      <th className="px-6 py-4 text-left">Grade</th>
-                      <th className="px-6 py-4 text-left">Gender</th>
-                      <th className="px-6 py-4 text-left">Status</th>
-                      <th className="px-6 py-4 text-left">Actions</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Photo</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Student ID</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Name</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Grade</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Gender</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Status</th>
+                      <th className="px-3 py-3 text-left sm:px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2152,18 +2106,18 @@ const handleAdminPasswordReset = async (id, email) => {
                     ) : (
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
-                          <td className="px-6 py-4">
+                          <td className="px-3 py-3 sm:px-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                               {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
                                 <div className="w-full h-full flex items-center justify-center text-gray-800 font-bold text-sm">{student.firstName?.charAt(0)}</div>}
                             </div>
                           </td>
-                          <td className="px-6 py-4"><span className="bg-blue-500 text-gray-800 text-xs font-bold px-3 py-1 rounded-full">{student.studentId}</span></td>
-                          <td className="px-6 py-4 font-medium text-gray-800">{student.firstName} {student.lastName}</td>
-                          <td className="px-6 py-4"><span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">{displayStudentClassName(student.gradeLevel)}</span></td>
-                          <td className="px-6 py-4 text-gray-600">{student.gender}</td>
-                          <td className="px-6 py-4"><span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">{student.status}</span></td>
-                          <td className="px-6 py-4">
+                          <td className="px-3 py-3 sm:px-4"><span className="bg-blue-500 text-gray-800 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full">{student.studentId}</span></td>
+                          <td className="px-3 py-3 font-medium text-gray-800 sm:px-4">{student.firstName} {student.lastName}</td>
+                          <td className="px-3 py-3 sm:px-4"><span className="bg-blue-600 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full">{displayStudentClassName(student.gradeLevel)}</span></td>
+                          <td className="px-3 py-3 text-gray-600 sm:px-4">{student.gender}</td>
+                          <td className="px-3 py-3 sm:px-4"><span className="bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full">{student.status}</span></td>
+                          <td className="px-3 py-3 sm:px-4">
                             <div className="flex items-center gap-2">
                               <button onClick={() => openLearnerProfile(student)} className="bg-blue-600 hover:bg-blue-400 text-white p-2 rounded-lg transition-colors"><Eye size={16} /></button>
                               <button onClick={() => handleDeleteStudent(student.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
@@ -2263,7 +2217,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         <label className="block text-sm font-bold text-gray-800 mb-2">Grade Level</label>
                         <select value={newUser.learnerGradeLevel} onChange={e => setNewUser({ ...newUser, learnerGradeLevel: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700">
                           <option value="">Select grade</option>
-                          {['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'].map(g => <option key={g} value={g}>{g}</option>)}
+                          {STUDENT_CLASSES.map(g => <option key={g} value={g}>{g}</option>)}
                         </select>
                       </div>
                       <div>
@@ -2385,11 +2339,23 @@ const handleAdminPasswordReset = async (id, email) => {
                           <div className="flex flex-col gap-4">
                             <div>
                               <h3 className="font-bold text-[#1d4ed8]">{s.firstName} {s.lastName}</h3>
-                              <p className="text-sm text-gray-500">{s.studentId} | {s.gradeLevel}</p>
+                              <p className="text-sm text-gray-500">{s.studentId} | {displayStudentClassName(s.gradeLevel)}</p>
+                              {s.learnerUserId && (
+                                <p className={`mt-1 text-xs font-semibold ${s.learnerAccountActive ? 'text-green-700' : 'text-amber-700'}`}>
+                                  Learner login: {s.learnerAccountActive ? 'Active' : 'Inactive'}
+                                </p>
+                              )}
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                               <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
                               <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-green-500 text-white rounded">Edit</button>
+                              {s.learnerUserId && (
+                                s.learnerAccountActive ? (
+                                  <button onClick={() => handleDeactivateUser(s.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate Login</button>
+                                ) : (
+                                  <button onClick={() => handleReactivateUser(s.email)} className="px-3 py-2 bg-green-600 text-white rounded">Activate Login</button>
+                                )
+                              )}
                               <button
                                 onClick={() => {
                                   if (!s.learnerUserId) {
@@ -3566,7 +3532,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 ['studentId', 'Student ID', 'text'], ['firstName', 'First Name', 'text'], ['lastName', 'Last Name', 'text'],
                 ['dateOfBirth', 'Date of Birth', 'date'], ['age', 'Age', 'text'], ['monthOfBirth', 'Month of Birth', 'text'],
                 ['gender', 'Gender', 'select', ['Male', 'Female']], ['placeOfBirth', 'Place of Birth', 'text'],
-                ['gradeLevel', 'Grade Level', 'select', ['Creche', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']],
+                ['gradeLevel', 'Grade Level', 'select', STUDENT_CLASSES],
                 ['division', 'Division', 'text'], ['academicYear', 'Academic Year', 'text'],
                 ['previousSchool', 'Previous School', 'text'], ['height', 'Height', 'text'], ['weight', 'Weight', 'text'],
                 ['hometown', 'Hometown', 'text'], ['motherTongue', 'Mother Tongue', 'text'], ['religion', 'Religion', 'text'],
@@ -3647,52 +3613,26 @@ const handleAdminPasswordReset = async (id, email) => {
       {showLoginModal && (
   <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
     <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
-      <h3 className="font-bold text-[#1d4ed8] text-lg mb-1">Set Learner Login</h3>
+      <h3 className="font-bold text-[#1d4ed8] text-lg mb-1">Create Learner Login</h3>
       <p className="text-sm text-gray-500 mb-4">
-        Create a portal login for <strong>{selectedStudent.firstName} {selectedStudent.lastName}</strong>.
+        A login will be generated for <strong>{selectedStudent.firstName} {selectedStudent.lastName}</strong>. The initial password is configured on the school server, and the learner must remain inactive until an administrator activates the account.
       </p>
       <div className="space-y-3">
-        <div>
-          <label className="block text-sm font-bold text-[#1d4ed8] mb-1">Email Address</label>
-          <input
-            type="email"
-            value={learnerLoginForm.email}
-            onChange={e => setLearnerLoginForm(f => ({ ...f, email: e.target.value }))}
-            placeholder="learner@email.com"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-bold text-[#1d4ed8] mb-1">Password</label>
-          <input
-            type="password"
-            value={learnerLoginForm.password}
-            onChange={e => setLearnerLoginForm(f => ({ ...f, password: e.target.value }))}
-            placeholder="Set a password"
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] text-gray-700 text-sm"
-          />
-        </div>
         <div className="flex gap-3 pt-2">
           <button
             onClick={async () => {
-              if (!learnerLoginForm.email || !learnerLoginForm.password) {
-                alert('Please enter both email and password.')
-                return
-              }
               setLoginCreating(true)
               try {
-                await axios.post(
+                const result = await axios.post(
                   `${API_URL}/api/students/${selectedStudent.id}/create-login`,
-                  learnerLoginForm,
+                  {},
                   { headers: getAuthHeaders() }
                 )
-                alert(`Login created! ${selectedStudent.firstName} can now log in with ${learnerLoginForm.email}`)
+                alert(`Login created: ${result.data.learnerEmail}. The account is inactive until an administrator activates it.`)
                 setShowLoginModal(false)
-                setLearnerLoginForm({ email: '', password: '' })
-                // Refresh student list
                 const res = await axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
                 setStudents(res.data)
-                setSelectedStudent(prev => ({ ...prev, learnerUserId: 1 })) // mark as having login
+                setSelectedStudent(prev => ({ ...prev, ...result.data.student, learnerAccountActive: false }))
               } catch (err) {
                 alert(err.response?.data?.message || 'Failed to create login.')
               } finally {
@@ -3705,7 +3645,7 @@ const handleAdminPasswordReset = async (id, email) => {
             {loginCreating ? 'Creating…' : 'Create Login'}
           </button>
           <button
-            onClick={() => { setShowLoginModal(false); setLearnerLoginForm({ email: '', password: '' }) }}
+            onClick={() => setShowLoginModal(false)}
             className="flex-1 bg-gray-100 text-gray-700 font-bold py-2.5 rounded-xl text-sm"
           >
             Cancel

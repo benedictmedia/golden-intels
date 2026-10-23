@@ -7,8 +7,9 @@ import {
   Monitor, CheckCircle, LayoutGrid
 } from 'lucide-react'
 import API_URL from '../../api/config'
+import { displayStudentClassName, STUDENT_CLASSES } from '../../utils/studentClasses'
 
-const CLASSES = ['Creche (Babies)', 'Pre-Nursery', 'Nursery 1', 'Nursery 2', 'Reception 1', 'Reception 2', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']
+const CLASSES = STUDENT_CLASSES
 const SUBJECTS = ['English', 'Maths', 'Science', 'Computing', 'RME', 'History', 'Ewe', 'French', 'UC MAS', 'General']
 const JITSI_DOMAIN = 'meet.jit.si'
 
@@ -251,7 +252,7 @@ export default function TeacherClassroom() {
             </div>
             <div>
               <p className="font-bold text-sm">{activeSession.title}</p>
-              <p className="text-xs text-blue-200">{activeSession.gradeLevel} · {activeSession.subject}</p>
+              <p className="text-xs text-blue-200">{displayStudentClassName(activeSession.gradeLevel)} · {activeSession.subject}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -381,7 +382,7 @@ export default function TeacherClassroom() {
                     </div>
                     <div className="flex items-center gap-3 mt-1 flex-wrap">
                       <span className="flex items-center gap-1 text-xs text-gray-500">
-                        <Users size={11} /> {session.gradeLevel}
+                        <Users size={11} /> {displayStudentClassName(session.gradeLevel)}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-gray-500">
                         <BookOpen size={11} /> {session.subject || 'General'}
@@ -528,7 +529,7 @@ export default function TeacherClassroom() {
               <div className="bg-blue-50 rounded-xl p-3 flex items-start gap-2">
                 <AlertCircle size={14} className="text-[#1d4ed8] mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-[#1d4ed8]">
-                  A private room link will be generated automatically. Only learners in <strong>{form.gradeLevel}</strong> will be able to see and join this session.
+                  A private room link will be generated automatically. Only learners in <strong>{displayStudentClassName(form.gradeLevel)}</strong> will be able to see and join this session.
                 </p>
               </div>
             </div>

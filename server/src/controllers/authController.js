@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken')
 const prisma = require('../config/prismaClient')
 const { sendMail } = require('../utils/mailer')
 const { createNotificationsForRole } = require('./notificationController')
+const { canonicalStudentClassName } = require('../utils/studentClasses')
+const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
 
 // Generate JWT
 const generateToken = (id, role, name, email) => {
@@ -100,16 +102,66 @@ const register = async (req, res) => {
   } = req.body
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } })
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' })
+    const accountRole = role || 'parent'
+    const learnerFirstName = firstName || String(name || '').split(' ')[0] || ''
+    const learnerLastName = lastName || String(name || '').split(' ').slice(1).join(' ') || ''
+
+    if (accountRole === 'learner') {
+      if (!learnerFirstName || !gender || !gradeLevel) {
+        return res.status(400).json({ message: 'Learner first name, gender, and grade level are required.' })
+      }
+    } else {
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Name, email, and password are required.' })
+      }
+      const existingUser = await prisma.user.findUnique({ where: { email } })
+      if (existingUser) {
+        return res.status(400).json({ message: 'User already exists' })
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = accountRole === 'learner' ? null : await bcrypt.hash(password, 10)
 
     const user = await prisma.$transaction(async (tx) => {
+      if (accountRole === 'learner') {
+        const studentId = await generateStudentId(tx)
+        const parentId = await createParentAccountIfNeeded(tx, {
+          email: parentEmail,
+          name: parentName
+        })
+        const learnerAccount = await createLearnerAccount(tx, {
+          firstName: learnerFirstName,
+          lastName: learnerLastName,
+          studentId,
+          active: false
+        })
+        await tx.student.create({
+          data: {
+            studentId,
+            firstName: learnerFirstName,
+            lastName: learnerLastName,
+            dateOfBirth,
+            gender,
+            gradeLevel: canonicalStudentClassName(gradeLevel),
+            parentId,
+            parentName: parentName || `${learnerFirstName} ${learnerLastName}`,
+            parentEmail: parentEmail || null,
+            parentPhone: parentPhone || null,
+            address: address || null,
+            email: learnerAccount.email,
+            learnerUserId: learnerAccount.id
+          }
+        })
+        return tx.user.findUnique({ where: { id: learnerAccount.id } })
+      }
+
       const createdUser = await tx.user.create({
-        data: { name, email, password: hashedPassword, role: role || 'parent' }
+        data: {
+          name,
+          email,
+          password: hashedPassword,
+          role: accountRole
+        }
       })
 
       if (createdUser.role === 'teacher') {
@@ -137,44 +189,17 @@ const register = async (req, res) => {
         }
       }
 
-      if (createdUser.role === 'learner') {
-        const studentFirstName = firstName || name.split(' ')[0] || ''
-        const studentLastName = lastName || name.split(' ').slice(1).join(' ') || ''
-        const parsedParentEmail = parentEmail || null
-        if (studentFirstName && studentLastName && gender && gradeLevel) {
-          let parentId = null
-          if (parsedParentEmail) {
-            const parentUser = await tx.user.findUnique({ where: { email: parsedParentEmail } })
-            if (parentUser && parentUser.role === 'parent') parentId = parentUser.id
-          }
-
-          const studentId = await generateStudentId(tx)
-          await tx.student.create({
-            data: {
-              studentId,
-              firstName: studentFirstName,
-              lastName: studentLastName,
-              dateOfBirth,
-              gender,
-              gradeLevel,
-              parentId,
-              parentName: parentName || `${studentFirstName} ${studentLastName}`,
-              parentEmail: parsedParentEmail,
-              parentPhone: parentPhone || null,
-              address: address || null
-            }
-          })
-        }
-      }
-
       return createdUser
     })
 
-    const token = generateToken(user.id, user.role, user.name, user.email)
     const responseUser = await buildUserResponse(user)
+    if (user.role === 'learner' && !user.active) {
+      return res.status(201).json({ user: responseUser })
+    }
+    const token = generateToken(user.id, user.role, user.name, user.email)
     res.status(201).json({ token, user: responseUser })
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    res.status(error.statusCode || 500).json({ message: error.message || 'Server error' })
   }
 }
 

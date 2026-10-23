@@ -2,8 +2,9 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const { isStudentFeeCleared } = require('../utils/feeStatus')
 const { archive, isPreviousAcademicPeriod, isAcademicPeriodVisible } = require('../utils/archive')
+const { canonicalStudentClassName, normalizeStudentClassName, studentClassNameVariants } = require('../utils/studentClasses')
 
-const normalizeClassName = (value) => String(value ?? '').trim().toLowerCase()
+const normalizeClassName = normalizeStudentClassName
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
 
 const getAttendance = async (req, res) => {
@@ -14,7 +15,7 @@ const getAttendance = async (req, res) => {
     }
     const where = {}
     if (date) where.date = date
-    if (gradeLevel) where.gradeLevel = gradeLevel
+    if (gradeLevel) where.gradeLevel = { in: studentClassNameVariants(gradeLevel), mode: 'insensitive' }
     if (academicYear) where.academicYear = academicYear
     if (term) where.term = term
     // If parent, restrict to their children
@@ -103,7 +104,7 @@ const saveAttendance = async (req, res) => {
 
     const where = {
       date,
-      gradeLevel,
+      gradeLevel: { in: studentClassNameVariants(gradeLevel), mode: 'insensitive' },
       ...(academicYear ? { academicYear } : {}),
       ...(term ? { term } : {})
     }
@@ -124,7 +125,7 @@ const saveAttendance = async (req, res) => {
       await tx.attendanceRecord.deleteMany({ where })
       return tx.attendanceRecord.createMany({
         data: records.map(r => ({
-          studentId: parseInt(r.studentId), date, status: r.status, gradeLevel, recordedBy,
+          studentId: parseInt(r.studentId), date, status: r.status, gradeLevel: canonicalStudentClassName(gradeLevel), recordedBy,
           academicYear: academicYear || null, term: term || null
         })),
         skipDuplicates: true
