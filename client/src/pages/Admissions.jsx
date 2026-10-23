@@ -227,7 +227,7 @@ export default function Admissions() {
                 <p className="text-sm text-gray-500">
                   <strong className="text-[#2563eb]">Need help?</strong> Contact the school office support number for assistance with your serial number and PIN.
                 </p>
-                <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.edu.gh</p>
+                <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ goldenintelse@gmail.com</p>
               </div>
             </div>
           </div>

@@ -82,6 +82,20 @@ export default function Footer() {
               { label: 'Academics', path: '/academics' },
               { label: 'Curriculum', path: '/curriculum' },
               { label: 'Campus Life', path: '/campus-life' },
+              {
+                label: 'Our Services',
+                path: '/services',
+                children: [
+                  { label: 'Golden Learning Day', path: '/services#learning-day' },
+                  { label: 'Golden Pick-Up Time', path: '/services#pick-up' },
+                  { label: 'Golden After-School Care', path: '/services#after-school' },
+                  { label: 'Saturday and Holiday Classes', path: '/services#saturday-holiday' },
+                  { label: 'Golden Summer Vacation', path: '/services#summer' },
+                  { label: 'Golden Day Care', path: '/services#day-care' },
+                  { label: 'Day and Night Care', path: '/services#day-night-care' },
+                  { label: 'Support for Every Child', path: '/services#every-child' },
+                ],
+              },
               { label: 'Admissions', path: '/admissions' },
             ].map(link => (
               <li key={link.label}>
@@ -91,6 +105,20 @@ export default function Footer() {
                 >
                   {link.label}
                 </Link>
+                {link.children && (
+                  <ul className="mt-2 space-y-2 border-l border-white/20 pl-3">
+                    {link.children.map(child => (
+                      <li key={child.path}>
+                        <Link
+                          to={child.path}
+                          className="text-xs text-blue-200 transition-colors duration-300 hover:text-white"
+                        >
+                          {child.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

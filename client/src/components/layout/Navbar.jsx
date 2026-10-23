@@ -10,6 +10,7 @@ import oxfordLogo from "../../assets/oxford-logo.png"
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Admissions', path: '/admissions' },
+  { name: 'Our Services', path: '/services' },
   { name: 'News & Events', path: '/news' },
   { name: 'Contact', path: '/contact' },
 ]
