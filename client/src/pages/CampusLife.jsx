@@ -4,7 +4,7 @@ import PageHero from '../components/layout/PageHero'
 import campusLifeImg from '../assets/campus-life.jpg'
 import academicActivitiesImg from '../assets/academic-activities.jpg'
 import artsActivitiesImg from '../assets/arts-activities.jpg'
-import sportsActivitiesImg from '../assets/sports-activities.jpg'
+import sportsActivitiesImg from '../assets/sports-activities.jpeg'
 import communityActivitiesImg from '../assets/community-activities.jpg'
 import clubDebateImg from '../assets/club-debate.jpg'
 import clubScienceImg from '../assets/club-science.jpg'
@@ -12,7 +12,7 @@ import clubCodingImg from '../assets/club-coding.jpg'
 import clubMusicImg from '../assets/club-music.jpg'
 import clubSportsImg from '../assets/club-sports.jpg'
 import clubDramaImg from '../assets/club-drama.jpg'
-import clubEnvironmentImg from '../assets/club-environment.jpg'
+import clubEnvironmentImg from '../assets/club-environment.jpeg'
 
 const activities = [
   {
