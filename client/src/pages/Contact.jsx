@@ -57,7 +57,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Phone</h2>
-                  <p className="mt-3 text-slate-600">Call our school office for quick support and admissions help.</p>
+                  <p className="mt-3 text-slate-600">Call our school office support number for quick support and admissions help.</p>
                   <div className="mt-4 space-y-2 text-sm text-slate-700">
                     <p><strong>Main:</strong> <a href="tel:+233 59 433 0816" className="text-[#2563eb] hover:text-violet-700">+233 59 433 0816</a></p>
                     <p><strong>Admissions:</strong> <a href="tel:+233 59 433 0816" className="text-[#2563eb] hover:text-violet-700">+233 59 433 0816</a></p>
@@ -73,7 +73,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">WhatsApp</h2>
-                  <p className="mt-3 text-slate-600">Reach school staff on WhatsApp for fast, informal support.</p>
+                  <p className="mt-3 text-slate-600">Reach us on WhatsApp for fast, informal support.</p>
                   <p className="mt-4 text-slate-700"><a href="https://wa.me/233594330816" className="text-green-600 hover:text-green-700">+233 59 433 0816</a></p>
                 </div>
               </div>
@@ -87,7 +87,7 @@ export default function Contact() {
                 <div>
                   <h2 className="text-xl font-semibold text-slate-800">Email</h2>
                   <p className="mt-3 text-slate-600">Send documents, questions, or admissions requests to our official inbox.</p>
-                  <p className="mt-4 text-slate-700"><a href="mailto:info@goldenintels.edu.gh" className="text-[#2563eb] hover:text-violet-700">info@goldenintels.edu.gh</a></p>
+                  <p className="mt-4 text-slate-700"><a href="mailto:goldenintelse@gmail.com" className="text-[#2563eb] hover:text-violet-700">goldenintelse@gmail.com</a></p>
                 </div>
               </div>
             </div>
@@ -113,7 +113,7 @@ export default function Contact() {
           Ho-Volta Region, Ghana
         </p>
         <p className="mt-2 text-sm flex items-center gap-1.5 text-[#2563eb] group-hover:underline">
-          Digital Address: JF8G+32Q
+          Digital Address: VH-0011-0157
           <ExternalLink size={16} className="opacity-70 group-hover:opacity-100" />
         </p>
       </a>

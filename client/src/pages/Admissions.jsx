@@ -167,7 +167,7 @@ export default function Admissions() {
                 <h2 className="text-2xl font-bold font-serif">Admission Access</h2>
               </div>
               <p className="text-blue-100 text-lg mb-6">
-                To begin admissions, please visit the school or call the school office. Admission conversations are arranged in person or by phone with our school leaders.
+                To begin admissions, please visit the school or call the school office support number. Admission conversations are arranged in person or by phone with our school leaders.
               </p>
               <div className="bg-white/10 rounded-xl p-6 mb-6">
                 <h3 className="text-white font-bold text-lg mb-4">How to get your access credentials</h3>
@@ -178,7 +178,7 @@ export default function Admissions() {
               <div className="bg-white/10 rounded-xl p-4">
                 <p className="text-blue-100 text-sm font-bold mb-1">Need help?</p>
                 <p className="text-blue-100 text-sm">
-                  Contact the school office for assistance with admission access and credential issuance.
+                  Contact the school office support numberfor assistance with admission access and credential issuance.
                 </p>
               </div>
             </div>
@@ -225,7 +225,7 @@ export default function Admissions() {
 
               <div className="mt-6 bg-blue-50 rounded-xl p-4">
                 <p className="text-sm text-gray-500">
-                  <strong className="text-[#2563eb]">Need help?</strong> Contact the school office for assistance with your serial number and PIN.
+                  <strong className="text-[#2563eb]">Need help?</strong> Contact the school office support number for assistance with your serial number and PIN.
                 </p>
                 <p className="text-sm text-gray-500 mt-1">📞 +233 594 330 816 &nbsp;|&nbsp; ✉️ info@goldenintels.edu.gh</p>
               </div>

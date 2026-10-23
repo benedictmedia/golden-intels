@@ -67,8 +67,7 @@ const clubs = [
     image: clubDebateImg,
     shortDescription: 'Building confident communicators and critical thinkers through the art of debate.',
     fullDescription: 'The Debators Club at Golden-Intels is a dynamic platform where students develop the art of persuasive communication, critical thinking, and logical reasoning. Members engage in structured debates on a wide range of topics — from current affairs to philosophical questions — sharpening their ability to construct well-reasoned arguments and respond confidently under pressure. The club prepares students for public speaking competitions, inter-school debate tournaments, and builds the confidence needed to express ideas clearly and respectfully in any setting.',
-    meets: 'Every Tuesday after school',
-    openTo: 'All year groups',
+    openTo: 'All Lower and Upper Primary learners',
   },
   {
     name: 'Science and Maths Club',
@@ -89,11 +88,11 @@ const clubs = [
     openTo: 'All year groups',
   },
   {
-    name: 'Music and Orchestra Club',
+    name: 'Music and Dance Club',
     category: 'Arts',
     image: clubMusicImg,
     shortDescription: 'Celebrating musical talent through choir, orchestra, and performance.',
-    fullDescription: 'The Music and Orchestra Club nurtures the musical talents of students across all year groups. Whether a student is a complete beginner or an experienced musician, the club provides a welcoming and inspiring environment to learn, practice, and perform. Members participate in the school choir, learn to play various instruments, and come together as an orchestra to perform at school events, concerts, and community gatherings. The club instills discipline, teamwork, and a deep appreciation for music and the performing arts.',
+    fullDescription: 'The Music and Dance Club nurtures the musical and artistic talents of students across all year groups. Whether a student is a complete beginner or an experienced performer, the club provides a welcoming and inspiring environment to learn, practice, and perform. Members participate in the school choir, learn to play various instruments, and come together as a dance troupe to perform at school events, concerts, and community gatherings. The club instills discipline, teamwork, and a deep appreciation for music and the performing arts.',
     meets: 'Every Friday after school',
     openTo: 'All year groups',
   },
@@ -112,7 +111,7 @@ const clubs = [
     image: clubDramaImg,
     shortDescription: 'Bringing stories to life through theatre, performance, and creative expression.',
     fullDescription: 'The Drama Club is a creative space where students discover the joy of storytelling, performance, and theatrical arts. Members explore scriptwriting, acting techniques, stage direction, costume design, and set building, gaining a comprehensive understanding of what it takes to produce a theatrical performance. The club stages termly productions and performances that showcase the incredible talent of our students. Drama builds confidence, emotional intelligence, empathy, and public speaking skills — all of which are invaluable life skills that extend well beyond the stage.',
-    meets: 'Every Wednesday and Friday after school',
+    meets: 'When the occasion arises (e.g., for rehearsals and performances)',
     openTo: 'All year groups',
   },
   {
@@ -121,7 +120,6 @@ const clubs = [
     image: clubEnvironmentImg,
     shortDescription: 'Championing sustainability, health, and environmental responsibility.',
     fullDescription: 'The Environmental and Health Club empowers students to become responsible stewards of the environment and advocates for healthy living. Members engage in sustainability projects, environmental clean-up campaigns, tree planting, recycling initiatives, and health awareness programs. The club organizes the school\'s annual Environmental Day and leads campaigns that raise awareness about climate change, personal hygiene, nutrition, and mental wellness. Students develop a deep sense of responsibility towards their community, their environment, and their own wellbeing.',
-    meets: 'Every Friday after school',
     openTo: 'All year groups',
   },
 ]
