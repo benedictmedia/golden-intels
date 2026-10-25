@@ -17,6 +17,7 @@ import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { STUDENT_CLASSES, canonicalStudentClassName, displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
+import usePortalSection from '../../hooks/usePortalSection'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -35,7 +36,7 @@ export default function TeacherDashboard() {
   const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
-  const [activeMenu, setActiveMenu] = useState('profile')
+  const [activeMenu, setActiveMenu] = usePortalSection('profile', menuItems.map(item => item.id))
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [profileUser, setProfileUser] = useState(user)
   const [students, setStudents] = useState([])

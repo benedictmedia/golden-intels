@@ -16,6 +16,7 @@ import FeeAlertModal from '../../components/FeeAlertModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { displayStudentClassName } from '../../utils/studentClasses'
+import usePortalSection from '../../hooks/usePortalSection'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -41,7 +42,7 @@ export default function ParentDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
-  const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [activeMenu, setActiveMenu] = usePortalSection('dashboard', menuItems.map(item => item.id))
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [students, setStudents] = useState([])
   const [selectedChild, setSelectedChild] = useState(null)

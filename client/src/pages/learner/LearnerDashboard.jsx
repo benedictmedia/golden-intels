@@ -14,6 +14,7 @@ import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
+import usePortalSection from '../../hooks/usePortalSection'
 
 const AVATAR_COLORS = [
   '#1d4ed8', '#1d4ed8', '#2563eb', '#b45309', '#0369a1',
@@ -21,6 +22,7 @@ const AVATAR_COLORS = [
 ]
 const getAvatarColor = (name = '') =>
   AVATAR_COLORS[(name.charCodeAt(0) || 0) % AVATAR_COLORS.length]
+const LEARNER_TAB_IDS = ['profile', 'dashboard', 'resources', 'assessments', 'classroom']
 
 const getSubjectName = (item) => item?.subject || 'General'
 const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item) => {
@@ -36,7 +38,7 @@ export default function LearnerDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = usePortalSection('profile', LEARNER_TAB_IDS)
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
   const [assignments, setAssignments] = useState([])
   const [lessons, setLessons] = useState([])

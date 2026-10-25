@@ -19,6 +19,7 @@ import BrandLogo from '../../components/layout/BrandLogo'
 import { parseStudentFile } from '../../utils/studentImport'
 import { displayStudentClassName, normalizeStudentClassName, STUDENT_CLASSES } from '../../utils/studentClasses'
 import { countLearnersByGender } from '../../utils/learnerGenderCounts'
+import usePortalSection from '../../hooks/usePortalSection'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -54,7 +55,7 @@ const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [activeMenu, setActiveMenu] = usePortalSection('dashboard', menuItems.map(item => item.id))
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
 
   const [contactMessages, setContactMessages] = useState([])
