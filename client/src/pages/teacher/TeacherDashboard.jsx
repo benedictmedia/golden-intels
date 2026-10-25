@@ -214,6 +214,10 @@ export default function TeacherDashboard() {
 
   const handleGradebookSubmit = async () => {
     if (!gradebookStudent) return
+    if (currentResult?.status === 'approved' || editingResult?.status === 'approved') {
+      alert('Approved results are read-only for teachers. Contact an administrator if a correction is needed.')
+      return
+    }
 
     const payloadScores = getEditableSubjectScores()
     if (!Object.keys(payloadScores).length) {
@@ -259,6 +263,7 @@ export default function TeacherDashboard() {
   }
 
   const handleEditResult = (result) => {
+    if (result.status === 'approved') return
     setEditingResult(result)
     setCurrentResult(result)
     setGradebookClass(result.gradeLevel)
@@ -528,6 +533,7 @@ export default function TeacherDashboard() {
     : SUBJECTS.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
 
   const totalAllSubjects = calculateGrandTotal(subjectScores, visibleSubjects)
+  const approvedResultLocked = currentResult?.status === 'approved' || editingResult?.status === 'approved'
 
   const subjectsCompleted = visibleSubjects.filter(subject => {
     const scores = subjectScores[subject] || {}
@@ -1493,12 +1499,18 @@ useEffect(() => {
                               }`}>
                                 {result.status}
                               </span>
-                              <button
-                                onClick={() => handleEditResult(result)}
-                                className="bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-                              >
-                                Edit
-                              </button>
+                              {result.status === 'approved' ? (
+                                <span className="bg-gray-100 text-gray-600 font-semibold px-4 py-2 rounded-lg text-sm">
+                                  Locked after approval
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => handleEditResult(result)}
+                                  className="bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+                                >
+                                  Edit
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDownloadPDF(result)}
                                 className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
@@ -1518,6 +1530,11 @@ useEffect(() => {
 
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[#2563eb] mb-6">Enter Performance Data</h3>
+                {approvedResultLocked && (
+                  <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    This result has been approved and is read-only for teachers. Contact an administrator if a correction is needed.
+                  </div>
+                )}
 
                 {/* Top Selectors */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -1583,7 +1600,7 @@ useEffect(() => {
                 <div className="space-y-6 mb-8">
                   {visibleSubjects.map(subject => {
                     const scores = subjectScores[subject] || { classScore: '', cat1: '', cat2: '', exam: '' }
-                    const editable = normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))
+                    const editable = normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)) && !approvedResultLocked
                     const classScore = parseFloat(scores.classScore) || 0
                     const cat1 = parseFloat(scores.cat1) || 0
                     const cat2 = parseFloat(scores.cat2) || 0
@@ -1681,7 +1698,7 @@ useEffect(() => {
                     onChange={e => setTeacherRemarks(e.target.value)}
                     rows={4}
                     placeholder={isClassTeacherForSelectedClass ? 'Enter remarks here...' : 'Remarks are read-only for non-class teachers.'}
-                    readOnly={!isClassTeacherForSelectedClass}
+                    readOnly={!isClassTeacherForSelectedClass || approvedResultLocked}
                     className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 ${!isClassTeacherForSelectedClass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                 </div>
@@ -1707,10 +1724,10 @@ useEffect(() => {
                 
              <button
                   onClick={handleGradebookSubmit}
-                  disabled={!gradebookStudent}
+                  disabled={!gradebookStudent || approvedResultLocked}
                   className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-4 rounded-xl transition-colors disabled:opacity-50 text-lg"
                 >
-                  {editingResult ? 'Update Result' : 'Preview and Submit Entry'}
+                  {approvedResultLocked ? 'Approved Result — Read Only' : editingResult ? 'Update Result' : 'Preview and Submit Entry'}
                 </button>
               </div>
               )}

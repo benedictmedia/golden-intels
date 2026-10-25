@@ -13,6 +13,7 @@ import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import FeeAlertModal from '../../components/FeeAlertModal'
+import { WAVE_FINANCE_URL } from '../../utils/financePortal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { displayStudentClassName } from '../../utils/studentClasses'
@@ -368,6 +369,11 @@ const getParentDisplayName = (name) => {
     navigate('/')
   }
 
+  const openFeePayment = (payment) => {
+    window.open(WAVE_FINANCE_URL, '_blank', 'noopener,noreferrer')
+    navigate(`/parent/pay-fees?paymentId=${payment.id}`)
+  }
+
   const handleNotificationClick = (notification) => {
     const routes = {
       result: 'grades',
@@ -378,6 +384,7 @@ const getParentDisplayName = (name) => {
       assignment: 'assessments',
       quiz: 'assessments'
     }
+
     const nextMenu = routes[notification?.type] || 'dashboard'
     setActiveMenu(nextMenu)
     if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false)
@@ -1370,10 +1377,10 @@ const getParentDisplayName = (name) => {
                           <td className="px-6 py-4">
                             {payment.status !== 'paid' ? (
                               <button
-                                onClick={() => navigate('/parent/pay-fees', { state: { alert: payment } })}
+                                onClick={() => openFeePayment(payment)}
                                 className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
                               >
-                                Pay Now
+                                Proceed to Payment
                               </button>
                             ) : (
                               <span className="text-gray-300 text-xs">—</span>
@@ -1540,7 +1547,7 @@ const getParentDisplayName = (name) => {
         alerts={feeAlerts}
         onPayNow={(alert) => {
           setShowFeeAlertModal(false)
-          navigate('/parent/pay-fees', { state: { alert } })
+          openFeePayment(alert)
         }}
       />
     )}

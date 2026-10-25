@@ -368,6 +368,8 @@ model Message {
   receiverId         Int
   conversationUserId Int
   read               Boolean  @default(false)
+  hiddenForParent    Boolean  @default(false)
+  hiddenForAdmin     Boolean  @default(false)
   createdAt          DateTime @default(now())
 }
 

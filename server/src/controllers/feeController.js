@@ -1,5 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
-const { createNotification, createNotificationsForRole } = require('./notificationController')
+const { createNotification } = require('./notificationController')
 const { archive } = require('../utils/archive')
 const { calculateFeeBalance, getFeeStatus } = require('../utils/feeMath')
 const prisma = new PrismaClient()
@@ -213,11 +213,18 @@ const deleteFeePayment = async (req, res) => {
 
 const respondToFeeUpdate = async (req, res) => {
   const { id } = req.params
-  const { responseType } = req.body
+  const { responseType, amountReported, transactionReference } = req.body
   const allowedResponses = ['paid-part-or-full']
+  const reportedAmount = amountReported === undefined || amountReported === '' ? null : Number(amountReported)
 
   if (!allowedResponses.includes(responseType)) {
     return res.status(400).json({ message: 'Invalid fee response.' })
+  }
+  if (reportedAmount !== null && (!Number.isFinite(reportedAmount) || reportedAmount <= 0)) {
+    return res.status(400).json({ message: 'Enter a valid amount paid.' })
+  }
+  if (transactionReference !== undefined && (typeof transactionReference !== 'string' || transactionReference.length > 120)) {
+    return res.status(400).json({ message: 'Transaction reference must be text.' })
   }
 
   try {
@@ -231,20 +238,52 @@ const respondToFeeUpdate = async (req, res) => {
     if (req.user.role !== 'parent' || (payment.student?.parentEmail !== req.user.email && payment.student?.parentId !== req.user.id)) {
       return res.status(403).json({ message: 'Forbidden' })
     }
+    if (payment.status === 'paid' || payment.balance <= 0) {
+      return res.status(409).json({ message: 'This fee statement has already been cleared.' })
+    }
 
     const learnerName = `${payment.student.firstName} ${payment.student.lastName}`.trim()
-    const actionText = responseType === 'paid-part-or-full'
-      ? 'says they have paid part or all of the outstanding fee'
-      : 'says they will make payment soon'
+    const periodLabel = `${payment.term || payment.month || 'Fee'} ${payment.academicYear || payment.year || ''}`.trim()
+    const detailText = [
+      `${req.user.name} reports a payment for ${learnerName} (${periodLabel}) through Wave Finance.`,
+      reportedAmount === null ? null : `Amount reported: GH₵ ${reportedAmount.toFixed(2)}.`,
+      transactionReference?.trim() ? `Reference: ${transactionReference.trim()}.` : null,
+      'Verification is required before academic records are unlocked.'
+    ].filter(Boolean).join(' ')
 
-    await createNotificationsForRole(
-      'admin',
-      'Parent Fee Response',
-      `${req.user.name} ${actionText} for ${learnerName} (${payment.term || payment.month} ${payment.academicYear || payment.year}).`,
-      'fee-response'
-    )
+    const admins = await prisma.user.findMany({
+      where: { role: 'admin', active: true },
+      select: { id: true }
+    })
+    if (!admins.length) {
+      return res.status(503).json({ message: 'The school office is not available to receive payment reports right now. Please try again later.' })
+    }
 
-    res.json({ success: true })
+    const message = await prisma.$transaction(async tx => {
+      const parentMessage = await tx.message.create({
+        data: {
+          content: detailText,
+          senderId: req.user.id,
+          senderName: req.user.name,
+          senderRole: 'parent',
+          receiverId: 0,
+          conversationUserId: req.user.id
+        }
+      })
+      await tx.notification.createMany({
+        data: admins.map(admin => ({
+          userId: admin.id,
+          title: 'Parent Fee Payment Reported',
+          message: detailText,
+          type: 'fee-response'
+        }))
+      })
+      return parentMessage
+    })
+    const io = require('../socket').getIO()
+    if (io) io.to('admin_room').emit('receive_message', message)
+
+    res.json({ success: true, message })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

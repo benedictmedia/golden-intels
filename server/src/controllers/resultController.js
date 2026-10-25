@@ -358,6 +358,9 @@ const updateResult = async (req, res) => {
     }
 
     if (req.user && req.user.role === 'teacher') {
+      if (existing.status === 'approved') {
+        return res.status(403).json({ message: 'Approved results are read-only for teachers. Contact an administrator if a correction is needed.' })
+      }
       if (await isPreviousAcademicPeriod(prisma, existing.academicYear, existing.term)) {
         return res.status(403).json({ message: 'Previous-term results are read-only.' })
       }

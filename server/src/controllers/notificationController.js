@@ -55,8 +55,13 @@ const getNotifications = async (req, res) => {
 
 const markAsRead = async (req, res) => {
   try {
+    const notification = await prisma.notification.findFirst({
+      where: { id: req.params.id, userId: Number.parseInt(req.user.id, 10) },
+      select: { id: true }
+    })
+    if (!notification) return res.status(404).json({ error: 'Notification not found' })
     await prisma.notification.update({
-      where: { id: req.params.id },
+      where: { id: notification.id },
       data: { read: true }
     });
     res.json({ success: true });
@@ -65,4 +70,18 @@ const markAsRead = async (req, res) => {
   }
 };
 
-module.exports = { createNotification, createNotificationsForRole, getNotifications, markAsRead };
+const deleteNotification = async (req, res) => {
+  try {
+    const notification = await prisma.notification.findFirst({
+      where: { id: req.params.id, userId: Number.parseInt(req.user.id, 10) },
+      select: { id: true }
+    })
+    if (!notification) return res.status(404).json({ error: 'Notification not found' })
+    await prisma.notification.delete({ where: { id: notification.id } })
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete notification' })
+  }
+};
+
+module.exports = { createNotification, createNotificationsForRole, getNotifications, markAsRead, deleteNotification };

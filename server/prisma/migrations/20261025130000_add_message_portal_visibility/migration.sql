@@ -1,0 +1,3 @@
+ALTER TABLE "Message"
+ADD COLUMN "hiddenForParent" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "hiddenForAdmin" BOOLEAN NOT NULL DEFAULT false;

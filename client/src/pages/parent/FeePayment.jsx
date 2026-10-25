@@ -1,72 +1,44 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { ArrowLeft, Copy, Check, Smartphone, Landmark } from 'lucide-react'
+import { ArrowLeft, Check, ExternalLink } from 'lucide-react'
 import API_URL from '../../api/config'
 import BrandLogo from '../../components/layout/BrandLogo'
-
-// TODO: Replace these with Golden-Intels International School's actual
-// Mobile Money and bank account details. Keeping them in one place here
-// makes them easy to update later without touching the rest of the page.
-const PAYMENT_DETAILS = {
-  momo: [
-    { network: 'MTN Mobile Money', number: '0598958215', accountName: 'Goldenintels Educare' },
-  ],
-  bank: {
-    bankName: 'GCB',
-    accountName: 'Goldenintels Educare',
-    accountNumber: '5011440001106',
-    branch: 'Ho-Main Branch',
-  },
-
-  bank: {
-    bankName: 'CAL BANK',
-    accountName: 'Goldenintels Educare',
-    accountNumber: '1400007415232',
-    branch: 'Ho Branch',
-  },
-
-}
-
-function CopyRow({ label, value }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    } catch {
-      // Clipboard API unavailable, silently ignore
-    }
-  }
-
-  return (
-    <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-      <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="font-bold text-gray-800">{value}</p>
-      </div>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-white border border-gray-200 hover:border-[#2563eb] hover:text-[#2563eb] transition-colors text-gray-600"
-      >
-        {copied ? <Check size={14} /> : <Copy size={14} />}
-        {copied ? 'Copied' : 'Copy'}
-      </button>
-    </div>
-  )
-}
+import { WAVE_FINANCE_URL } from '../../utils/financePortal'
 
 export default function FeePayment() {
   const location = useLocation()
   const navigate = useNavigate()
-  const alert = location.state?.alert || null
+  const paymentId = new URLSearchParams(location.search).get('paymentId')
+  const [alert, setAlert] = useState(null)
+  const [loadingAlert, setLoadingAlert] = useState(Boolean(paymentId))
 
   const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
+  const [amountReported, setAmountReported] = useState('')
+  const [transactionReference, setTransactionReference] = useState('')
+
+  useEffect(() => {
+    if (!paymentId) return
+    const token = localStorage.getItem('token')
+    axios.get(`${API_URL}/api/fees/payments`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(response => {
+        const payment = response.data.find(item => String(item.id) === paymentId)
+        if (!payment) {
+          setError('This fee statement could not be found for your account.')
+          return
+        }
+        setAlert(payment)
+      })
+      .catch(fetchError => {
+        console.error('Failed to reload fee statement:', fetchError)
+        setError('Could not load this fee statement. Please return to the parent portal and try again.')
+      })
+      .finally(() => setLoadingAlert(false))
+  }, [paymentId])
 
   const studentName = alert?.student ? `${alert.student.firstName} ${alert.student.lastName}`.trim() : null
   const monthYear = alert
@@ -78,7 +50,7 @@ export default function FeePayment() {
 
   const handleConfirmPayment = async () => {
     if (!alert?.id) {
-      navigate('/parent')
+      setError('Please open a fee statement from your parent portal before reporting payment.')
       return
     }
     setConfirming(true)
@@ -87,13 +59,13 @@ export default function FeePayment() {
       const token = localStorage.getItem('token')
       await axios.post(
         `${API_URL}/api/fees/payments/${alert.id}/response`,
-        { responseType: 'paid-part-or-full' },
+        { responseType: 'paid-part-or-full', amountReported, transactionReference },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setConfirmed(true)
     } catch (err) {
       console.error('Failed to confirm payment:', err)
-      setError('Could not notify the school automatically. Your payment is still valid — please contact the school office if this keeps happening.')
+      setError('Could not confirm that your payment report was sent. Please retry or contact the school office.')
     } finally {
       setConfirming(false)
     }
@@ -128,12 +100,14 @@ export default function FeePayment() {
             </div>
           )}
 
-          {confirmed ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-              <Check className="mx-auto text-green-600 mb-2" size={32} />
-              <p className="font-bold text-green-700 mb-1">Thank you!</p>
-              <p className="text-sm text-green-600 mb-4">
-                We've notified the school office of your payment. Records are usually updated within one working day.
+          {loadingAlert ? (
+            <p className="py-8 text-center text-sm text-gray-500">Loading fee statement…</p>
+          ) : confirmed ? (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+              <Check className="mx-auto text-blue-600 mb-2" size={32} />
+              <p className="font-bold text-blue-700 mb-1">Payment reported to the school</p>
+              <p className="text-sm text-blue-700 mb-4">
+                Your report is in the parent-school Messages conversation and the admin has been notified. Academic records will remain locked until the school verifies your payment and updates the fee balance.
               </p>
               <button
                 onClick={() => navigate('/parent')}
@@ -143,41 +117,32 @@ export default function FeePayment() {
               </button>
             </div>
           ) : (
+            alert ? (
             <>
               <p className="text-sm text-gray-600 mb-5">
-                Please make payment using one of the options below, then confirm on this page so the school office can verify and update your records.
+                Make your payment in the school’s Wave Finance portal. When you return here, report the payment so the school can verify it. Reporting a payment does not unlock academic records; an administrator must verify it and update the fee balance.
               </p>
 
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Smartphone size={18} className="text-[#2563eb]" />
-                  <h2 className="font-bold text-gray-800">Mobile Money</h2>
-                </div>
-                <div className="space-y-2">
-                  {PAYMENT_DETAILS.momo.map((option) => (
-                    <div key={option.number} className="border border-gray-100 rounded-xl p-3">
-                      <p className="text-xs font-semibold text-gray-500 mb-2">{option.network}</p>
-                      <div className="space-y-2">
-                        <CopyRow label="Number" value={option.number} />
-                        <CopyRow label="Account Name" value={option.accountName} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                <a
+                  href={WAVE_FINANCE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-5 py-3 font-bold text-white transition-colors hover:bg-[#1d4ed8]"
+                >
+                  Open Wave Finance
+                  <ExternalLink size={18} />
+                </a>
 
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-3">
-                  <Landmark size={18} className="text-[#2563eb]" />
-                  <h2 className="font-bold text-gray-800">Bank Transfer</h2>
+                <div className="mb-6 space-y-4">
+                  <div>
+                    <label htmlFor="reported-payment-amount" className="mb-1 block text-sm font-semibold text-gray-700">Amount paid (GH₵, optional)</label>
+                    <input id="reported-payment-amount" type="number" min="0.01" step="0.01" value={amountReported} onChange={event => setAmountReported(event.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-800" />
+                  </div>
+                  <div>
+                    <label htmlFor="payment-reference" className="mb-1 block text-sm font-semibold text-gray-700">Wave transaction reference (optional)</label>
+                    <input id="payment-reference" type="text" maxLength={120} value={transactionReference} onChange={event => setTransactionReference(event.target.value)} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-800" />
+                  </div>
                 </div>
-                <div className="border border-gray-100 rounded-xl p-3 space-y-2">
-                  <CopyRow label="Bank" value={PAYMENT_DETAILS.bank.bankName} />
-                  <CopyRow label="Account Name" value={PAYMENT_DETAILS.bank.accountName} />
-                  <CopyRow label="Account Number" value={PAYMENT_DETAILS.bank.accountNumber} />
-                  <CopyRow label="Branch" value={PAYMENT_DETAILS.bank.branch} />
-                </div>
-              </div>
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
@@ -190,12 +155,17 @@ export default function FeePayment() {
                 disabled={confirming}
                 className="w-full bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-colors"
               >
-                {confirming ? 'Confirming...' : "I've Completed This Payment"}
+                {confirming ? 'Sending report...' : 'Report Payment to School'}
               </button>
               <p className="text-xs text-gray-400 text-center mt-3">
-                Use your child's name as the payment reference so the office can match it quickly.
+                Your report will appear in Messages for both you and the school. The admin must verify payment before access is restored.
               </p>
             </>
+            ) : (
+              <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                {error || 'Open a fee statement from the parent portal to continue.'}
+              </p>
+            )
           )}
         </div>
       </div>

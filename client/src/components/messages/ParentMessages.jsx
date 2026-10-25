@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import axios from 'axios'
 import { io } from 'socket.io-client'
-import { Send, CheckCheck, Wifi, WifiOff } from 'lucide-react'
+import { Send, CheckCheck, Wifi, WifiOff, Trash2 } from 'lucide-react'
 import API_URL from '../../api/config'
 
 const WA_BG = "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23b5a995' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")"
@@ -110,6 +110,20 @@ export default function ParentMessages() {
     }
   }, [input, sending, conversationUserId, user?.name])
 
+  const deleteMessage = async (messageId) => {
+    if (!window.confirm('Delete this message from your portal only? The school will still see it.')) return
+    try {
+      const token = localStorage.getItem('token')
+      await axios.delete(`${API_URL}/api/messages/${messageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setMessages(prev => prev.filter(message => message.id !== messageId))
+    } catch (error) {
+      console.error('Failed to delete message for this portal:', error)
+      alert('Could not delete this message. Please try again.')
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const formatTime = (d) => new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const formatDay = (d) => {
@@ -197,6 +211,17 @@ export default function ParentMessages() {
                       <p className="text-sm leading-relaxed" style={{ paddingRight: '52px' }}>
                         {msg.content}
                       </p>
+                      {typeof msg.id === 'number' && (
+                        <button
+                          type="button"
+                          onClick={() => deleteMessage(msg.id)}
+                          className="absolute right-2 top-2 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                          aria-label="Delete message from my portal"
+                          title="Delete for me"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                       {/* Timestamp + ticks absolutely positioned */}
                       <span className="absolute bottom-1.5 right-2.5 flex items-center gap-0.5">
                         <span className="text-[10px] text-gray-400 leading-none">{formatTime(msg.createdAt)}</span>

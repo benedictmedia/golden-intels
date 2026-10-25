@@ -5,7 +5,9 @@ export default function FeeAlertModal({ alerts, onPayNow }) {
 
   const alert = alerts[0]
   const studentName = `${alert.student.firstName} ${alert.student.lastName}`.trim()
-  const monthYear = `${alert.month} ${alert.year}`
+  const monthYear = alert.term
+    ? `${alert.academicYear} · ${alert.term}`
+    : `${alert.month || 'Fee'} ${alert.year || ''}`.trim()
   const balanceText = alert.balance > 0
     ? `GH₵ ${alert.balance.toFixed(2)} outstanding`
     : `Due: GH₵ ${alert.amountDue.toFixed(2)}`

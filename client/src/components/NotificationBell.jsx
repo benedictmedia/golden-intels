@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import API_URL from '../api/config';
 
@@ -36,6 +36,21 @@ export default function NotificationBell({ onNotificationClick }) {
     } catch (err) {}
   };
 
+  const deleteNotification = async (event, id) => {
+    event.stopPropagation()
+    try {
+      const token = localStorage.getItem('token')
+      await axios.delete(`${API_URL}/api/notifications/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setNotifications(prev => prev.filter(notification => notification.id !== id))
+      setUnreadCount(prev => Math.max(0, prev - (notifications.find(notification => notification.id === id && !notification.read) ? 1 : 0)))
+    } catch (error) {
+      console.error('Failed to delete notification from this portal:', error)
+      alert('Could not delete this notification. Please try again.')
+    }
+  }
+
   return (
     <div className="relative">
       <button
@@ -71,9 +86,18 @@ export default function NotificationBell({ onNotificationClick }) {
               >
                 <p className="font-medium text-sm">{notif.title}</p>
                 <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notif.message}</p>
-                <p className="text-[10px] text-gray-400 mt-2">
-                  {new Date(notif.createdAt).toLocaleString()}
-                </p>
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-[10px] text-gray-400">{new Date(notif.createdAt).toLocaleString()}</p>
+                  <button
+                    type="button"
+                    onClick={event => deleteNotification(event, notif.id)}
+                    className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                    aria-label="Delete notification from this portal"
+                    title="Delete for me"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
             ))
           )}

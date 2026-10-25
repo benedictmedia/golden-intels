@@ -471,6 +471,7 @@ const handleSaveAcademicContext = async () => {
       'result-review': 'performance',
       result: 'performance',
       fee: 'finance',
+      'fee-response': 'messages',
       account: 'accounts',
       gallery: 'gallery',
       news: 'news',
