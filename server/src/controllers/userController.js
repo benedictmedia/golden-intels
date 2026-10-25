@@ -36,15 +36,15 @@ const getUsers = async (req, res) => {
     if (role) where.role = role
 
     const pageNum = parseInt(page) || 1
-    const pageSize = Math.min(parseInt(limit) || 10, 100)
+    const showAll = String(limit).toLowerCase() === 'all'
+    const pageSize = showAll ? null : Math.min(parseInt(limit) || 10, 100)
 
-    const [total, users] = await Promise.all([
+    const [total, users, parentTotal, teacherTotal] = await Promise.all([
       prisma.user.count({ where }),
       prisma.user.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        skip: (pageNum - 1) * pageSize,
-        take: pageSize,
+        ...(showAll ? {} : { skip: (pageNum - 1) * pageSize, take: pageSize }),
         select: {
           id: true,
           name: true,
@@ -54,7 +54,9 @@ const getUsers = async (req, res) => {
           createdAt: true,
           updatedAt: true
         }
-      })
+      }),
+      prisma.user.count({ where: { role: 'parent' } }),
+      prisma.user.count({ where: { role: 'teacher' } })
     ])
 
     const usersWithTeacherInfo = await Promise.all(users.map(async (user) => {
@@ -74,7 +76,7 @@ const getUsers = async (req, res) => {
       }
     }))
 
-    res.json({ users: usersWithTeacherInfo, total, page: pageNum, limit: pageSize })
+    res.json({ users: usersWithTeacherInfo, total, page: pageNum, limit: showAll ? 'all' : pageSize, parentTotal, teacherTotal })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

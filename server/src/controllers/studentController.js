@@ -30,6 +30,7 @@ const EXTENDED_PROFILE_FIELDS = [
 // Document/photo fields that come in as uploaded files (multer .fields()).
 // Key = form field name, value = Student column name (same for all of these).
 const DOCUMENT_FIELDS = ['photo', 'nhisFront', 'nhisBack', 'ghanaFront', 'ghanaBack', 'signedBooklet']
+const normalizeLearnerName = (value) => String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
 
 // Pulls only the extended-profile keys that were actually sent in the body,
 // so a partial edit never clobbers fields the admin didn't touch.
@@ -350,6 +351,15 @@ const bulkImportStudents = async (req, res) => {
   }
 
   const result = { created: 0, updated: 0, errors: [] }
+  const rowsByStudentId = new Map()
+  for (const [index, row] of students.entries()) {
+    const studentId = String(row?.studentId ?? '').trim().toLowerCase()
+    if (!studentId) continue
+    const rows = rowsByStudentId.get(studentId) || []
+    rows.push(Number.isInteger(row?.rowNumber) ? row.rowNumber : index + 2)
+    rowsByStudentId.set(studentId, rows)
+  }
+
   const importFields = [
     'firstName', 'lastName', 'dateOfBirth', 'gender', 'gradeLevel', 'division',
     'academicYear', 'parentEmail', 'parentName', 'parentPhone', 'fatherName',
@@ -357,12 +367,20 @@ const bulkImportStudents = async (req, res) => {
   ]
 
   for (const [index, row] of students.entries()) {
-    const rowNumber = Number.isInteger(row.rowNumber) ? row.rowNumber : index + 2
+    const rowNumber = Number.isInteger(row?.rowNumber) ? row.rowNumber : index + 2
+    if (!row || typeof row !== 'object' || Array.isArray(row)) {
+      result.errors.push({ row: rowNumber, message: 'This spreadsheet row is invalid and was skipped.' })
+      continue
+    }
     const studentId = String(row.studentId ?? '').trim()
     const firstName = String(row.firstName ?? '').trim()
     const lastName = String(row.lastName ?? '').trim()
     const gradeLevel = String(row.gradeLevel ?? '').trim()
 
+    if ((rowsByStudentId.get(studentId.toLowerCase()) || []).length > 1) {
+      result.errors.push({ row: rowNumber, studentId, message: 'This Admission Number appears more than once in the import. All rows with this ID were skipped.' })
+      continue
+    }
     if (!studentId || !firstName || !gradeLevel) {
       result.errors.push({ row: rowNumber, message: 'Admission Number, Name, and Class are required.' })
       continue
@@ -384,8 +402,25 @@ const bulkImportStudents = async (req, res) => {
     if (addressParts.length) data.address = addressParts.join(', ')
 
     try {
-      const existing = await prisma.student.findUnique({ where: { studentId } })
-      await prisma.$transaction(async (tx) => {
+      const wasExisting = await prisma.$transaction(async (tx) => {
+        const matchingStudents = await tx.student.findMany({
+          where: { studentId: { equals: studentId, mode: 'insensitive' } },
+          take: 2
+        })
+        if (matchingStudents.length > 1) {
+          throw new Error('This Admission Number matches more than one existing learner ID. This row was skipped; ask an administrator to resolve the duplicate IDs.')
+        }
+        const existing = matchingStudents[0]
+        if (existing && (
+          normalizeLearnerName(existing.firstName) !== normalizeLearnerName(firstName) ||
+          normalizeLearnerName(existing.lastName) !== normalizeLearnerName(lastName)
+        )) {
+          throw new Error('The learner name does not match the record for this Admission Number. This row was skipped; verify the ID and learner details.')
+        }
+        if (existing?.archivedAt) {
+          throw new Error('This learner is archived and cannot be updated by spreadsheet import.')
+        }
+
         const parentId = data.parentEmail
           ? await createParentAccountIfNeeded(tx, { email: data.parentEmail, name: data.parentName })
           : existing?.parentId ?? null
@@ -405,7 +440,7 @@ const bulkImportStudents = async (req, res) => {
           learnerUserId: learnerAccount.id
         }
         if (existing) {
-          await tx.student.update({ where: { studentId }, data: learnerData })
+          await tx.student.update({ where: { id: existing.id }, data: learnerData })
         } else {
           await tx.student.create({
             data: {
@@ -418,8 +453,9 @@ const bulkImportStudents = async (req, res) => {
             }
           })
         }
+        return Boolean(existing)
       })
-      result[existing ? 'updated' : 'created']++
+      result[wasExisting ? 'updated' : 'created']++
     } catch (error) {
       result.errors.push({ row: rowNumber, studentId, message: error.message || 'Could not save learner.' })
     }

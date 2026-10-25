@@ -69,6 +69,7 @@ export default function AdminDashboard() {
   const [archiveLoading, setArchiveLoading] = useState(false)
   const [archiveError, setArchiveError] = useState('')
   const [archiveQuery, setArchiveQuery] = useState('')
+  const [selectedArchiveIds, setSelectedArchiveIds] = useState([])
 
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginCreating, setLoginCreating] = useState(false)
@@ -105,6 +106,7 @@ export default function AdminDashboard() {
   })
   const [studentImportLoading, setStudentImportLoading] = useState(false)
   const [studentImportResult, setStudentImportResult] = useState(null)
+  const [selectedStudentIds, setSelectedStudentIds] = useState([])
   const [dashboardCounts, setDashboardCounts] = useState({ learners: 0, staff: 0, maleLearners: 0, femaleLearners: 0 })
 
   // Results state
@@ -152,6 +154,7 @@ export default function AdminDashboard() {
 
   // Staff state
   const [staffList, setStaffList] = useState([])
+  const [selectedStaffIds, setSelectedStaffIds] = useState([])
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [editingStaff, setEditingStaff] = useState(null)
   const [staffLoading, setStaffLoading] = useState(false)
@@ -180,11 +183,16 @@ export default function AdminDashboard() {
   const [parentAccounts, setParentAccounts] = useState([])
   const [accountTab, setAccountTab] = useState('parents')
   const [accountLoading, setAccountLoading] = useState(false)
+  const [accountError, setAccountError] = useState('')
   const [editingUser, setEditingUser] = useState(null)
   const [accountQuery, setAccountQuery] = useState('')
+  const [accountSearch, setAccountSearch] = useState('')
+  const [selectedAccountIds, setSelectedAccountIds] = useState([])
   const [accountPage, setAccountPage] = useState(1)
-  const [accountLimit, setAccountLimit] = useState(10)
+  const [accountLimit, setAccountLimit] = useState('all')
   const [accountTotal, setAccountTotal] = useState(0)
+  const [parentTotal, setParentTotal] = useState(0)
+  const [teacherTotal, setTeacherTotal] = useState(0)
   const [audits, setAudits] = useState([])
   const [showAuditsModal, setShowAuditsModal] = useState(false)
   const [auditPage, setAuditPage] = useState(1)
@@ -199,6 +207,7 @@ export default function AdminDashboard() {
       .toLowerCase()
       .includes(archiveSearch)
   ))
+  const selectableArchiveRecords = filteredArchiveRecords.filter(record => !record.restoredAt)
   const archiveGroups = [
     { key: 'student', title: 'Students', records: filteredArchiveRecords.filter(record => record.entityType === 'student') },
     { key: 'parent', title: 'Parents', records: filteredArchiveRecords.filter(record => record.entityType === 'parent') },
@@ -220,6 +229,11 @@ export default function AdminDashboard() {
       .map(className => [normalizeStudentClassName(className), displayStudentClassName(className)])
   ).values()]
   const filteredStudents = activeClass === 'All' ? students : students.filter(s => normalizeStudentClassName(s.gradeLevel) === normalizeStudentClassName(activeClass))
+  const filteredAccountStudents = students.filter(student => (
+    `${student.firstName} ${student.lastName} ${student.studentId} ${student.gradeLevel} ${student.email || ''}`
+      .toLowerCase()
+      .includes(accountSearch.toLowerCase())
+  ))
   const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => normalizeStudentClassName(p.student?.gradeLevel) === normalizeStudentClassName(feeClassFilter))
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
   const dashboardStats = stats.map(stat => ({
@@ -252,8 +266,14 @@ export default function AdminDashboard() {
         }))
       })
       .catch(err => console.error('Failed to refresh learner total:', err))
-    axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
-      .then(res => setDashboardCounts(prev => ({ ...prev, staff: res.data.length })))
+    Promise.all([
+      axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() }),
+      axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params: { role: 'teacher', limit: 1 } })
+    ])
+      .then(([staffRes, teachersRes]) => setDashboardCounts(prev => ({
+        ...prev,
+        staff: staffRes.data.length + (teachersRes.data.total || 0)
+      })))
       .catch(err => console.error('Failed to refresh staff total:', err))
   }
   if (activeMenu === 'learners' || activeMenu === 'create-account') {
@@ -321,7 +341,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeMenu === 'accounts') fetchAccounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMenu, accountTab, accountPage, accountLimit])
+  }, [activeMenu, accountTab, accountPage, accountLimit, accountSearch])
 
   const handleLogout = () => { logout(); navigate('/') }
 
@@ -556,6 +576,7 @@ const handleSaveAcademicContext = async () => {
     )
 
     setStudents(prev => prev.filter(s => s.id !== id))
+    setSelectedStudentIds(prev => prev.filter(selectedId => selectedId !== id))
 
     if (selectedStudent?.id === id) {
       setSelectedStudent(null)
@@ -572,6 +593,21 @@ const handleSaveAcademicContext = async () => {
   }
 }
 
+  const handleBulkDeleteStudents = async () => {
+    const ids = filteredStudents.filter(student => selectedStudentIds.includes(student.id)).map(student => student.id)
+    if (!ids.length || !window.confirm(`Archive ${ids.length} selected learner(s) and preserve their records?`)) return
+    const results = await Promise.allSettled(ids.map(id => axios.delete(
+      `${API_URL}/api/students/${id}`,
+      { headers: getAuthHeaders() }
+    )))
+    const archivedIds = ids.filter((_, index) => results[index].status === 'fulfilled')
+    setStudents(prev => prev.filter(student => !archivedIds.includes(student.id)))
+    setSelectedStudentIds(prev => prev.filter(id => !archivedIds.includes(id)))
+    if (selectedStudent && archivedIds.includes(selectedStudent.id)) setSelectedStudent(null)
+    const failed = ids.length - archivedIds.length
+    alert(`${archivedIds.length} learner(s) archived.${failed ? ` ${failed} could not be archived; review and retry those records.` : ''}`)
+  }
+
   const handleRestoreArchive = async (archiveId) => {
     if (!window.confirm('Restore this archived record?')) return
     try {
@@ -579,6 +615,7 @@ const handleSaveAcademicContext = async () => {
       setArchiveRecords(prev => prev.map(record => record.id === archiveId
         ? { ...record, restoredAt: new Date().toISOString(), restoredBy: user?.name || user?.email }
         : record))
+      setSelectedArchiveIds(prev => prev.filter(selectedId => selectedId !== archiveId))
       alert('Archived record restored successfully.')
     } catch (err) {
       alert(err.response?.data?.message || 'Could not restore this record.')
@@ -596,10 +633,48 @@ const handleSaveAcademicContext = async () => {
         data: { confirm: confirmation }
       })
       setArchiveRecords(prev => prev.filter(item => item.id !== record.id && !(record.entityType === 'student' && item.studentId === record.entityId)))
+      setSelectedArchiveIds(prev => prev.filter(selectedId => selectedId !== record.id))
       alert('Archived data permanently deleted.')
     } catch (err) {
       alert(err.response?.data?.message || 'Could not permanently delete this archive entry.')
     }
+  }
+
+  const handleBulkPermanentDeleteArchives = async () => {
+    const selectedRecords = selectableArchiveRecords.filter(record => selectedArchiveIds.includes(record.id))
+    const deletedStudentIds = new Set()
+    const records = selectedRecords.filter(record => {
+      if (record.entityType !== 'student') return true
+      if (deletedStudentIds.has(record.entityId)) return false
+      deletedStudentIds.add(record.entityId)
+      return true
+    })
+    if (!records.length) return
+    const confirmation = window.prompt(`Permanently delete ${records.length} selected archived record(s)? This cannot be undone. Type DELETE to continue.`)
+    if (confirmation !== 'DELETE') return
+    const results = []
+    for (const record of records) {
+      try {
+        await axios.delete(`${API_URL}/api/archives/${record.id}/permanent`, {
+          headers: getAuthHeaders(),
+          data: { confirm: confirmation }
+        })
+        results.push({ status: 'fulfilled' })
+      } catch (error) {
+        results.push({ status: 'rejected', reason: error })
+      }
+    }
+    const deletedRecords = records.filter((_, index) => results[index].status === 'fulfilled')
+    const deletedIds = deletedRecords.map(record => record.id)
+    const permanentlyDeletedStudentIds = new Set(deletedRecords.filter(record => record.entityType === 'student').map(record => record.entityId))
+    setArchiveRecords(prev => prev.filter(record => (
+      !deletedIds.includes(record.id) &&
+      !(record.entityType === 'student' && permanentlyDeletedStudentIds.has(record.entityId)) &&
+      !(record.studentId != null && permanentlyDeletedStudentIds.has(record.studentId))
+    )))
+    setSelectedArchiveIds([])
+    const failed = records.length - deletedRecords.length
+    alert(`${deletedRecords.length} archived record(s) permanently deleted.${failed ? ` ${failed} could not be deleted; review and retry those records.` : ''}`)
   }
 
   // Loads the learner's complete profile (every admission-form field, plus
@@ -765,13 +840,17 @@ const handleSaveAcademicContext = async () => {
   // Accounts actions
   const fetchAccounts = async () => {
     setAccountLoading(true)
+    setAccountError('')
     try {
-      const params = { q: accountQuery, page: accountPage, limit: accountLimit }
+      const params = { q: accountSearch, page: accountPage, limit: accountLimit }
       if (accountTab === 'parents') params.role = 'parent'
       if (accountTab === 'teachers') params.role = 'teacher'
+      if (accountTab === 'learners') params.role = 'learner'
       const res = await axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params })
       setUsers(res.data.users || [])
       setAccountTotal(res.data.total || 0)
+      setParentTotal(res.data.parentTotal || 0)
+      setTeacherTotal(res.data.teacherTotal || 0)
       const [studentsRes, staffRes] = await Promise.all([
         axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
         axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
@@ -780,7 +859,15 @@ const handleSaveAcademicContext = async () => {
       setStaffList(staffRes.data)
     } catch (err) {
       console.error('Failed to fetch accounts:', err)
+      setAccountError(err.response?.data?.message || 'Could not load accounts. Please try again.')
     } finally { setAccountLoading(false) }
+  }
+
+  const runAccountSearch = () => {
+    const query = accountQuery.trim()
+    if (query === accountSearch && accountPage === 1) fetchAccounts()
+    setAccountPage(1)
+    setAccountSearch(query)
   }
 
 const handleDeactivateUser = async (email) => {
@@ -805,15 +892,40 @@ const handleReactivateUser = async (email) => {
 const handleDeleteUser = async (id, email) => {
   if (!window.confirm(`Archive and delete ${email}? Related records will be preserved in the archive.`)) return
   try {
+    const deletedAccount = users.find(account => account.id === id)
     await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders(), data: { confirm: true } })
     setUsers(prev => prev.filter(u => u.id !== id))
+    setSelectedAccountIds(prev => prev.filter(selectedId => selectedId !== id))
     setAccountTotal(prev => Math.max(0, prev - 1))
+    if (deletedAccount?.role === 'parent') setParentTotal(prev => Math.max(0, prev - 1))
+    if (deletedAccount?.role === 'teacher') setTeacherTotal(prev => Math.max(0, prev - 1))
     setParentAccounts(prev => prev.filter(account => account.id !== id))
     setStaffList(prev => prev.filter(staff => staff.email !== email))
     alert('Account and related records moved to the archive.')
   } catch (err) { 
     alert(err.response?.data?.message || 'Failed to archive and delete user account.')
   }
+}
+
+const handleBulkDeleteAccounts = async () => {
+  const selectedUsers = users.filter(account => selectedAccountIds.includes(account.id))
+  if (!selectedUsers.length || !window.confirm(`Archive and delete ${selectedUsers.length} selected account(s)? Related records will be preserved in the archive.`)) return
+  const results = await Promise.allSettled(selectedUsers.map(account => axios.delete(
+    `${API_URL}/api/users/${account.id}`,
+    { headers: getAuthHeaders(), data: { confirm: true } }
+  )))
+  const deletedUsers = selectedUsers.filter((_, index) => results[index].status === 'fulfilled')
+  const deletedIds = deletedUsers.map(account => account.id)
+  const deletedEmails = deletedUsers.map(account => account.email)
+  setUsers(prev => prev.filter(account => !deletedIds.includes(account.id)))
+  setAccountTotal(prev => Math.max(0, prev - deletedUsers.length))
+  if (accountTab === 'parents') setParentTotal(prev => Math.max(0, prev - deletedUsers.length))
+  if (accountTab === 'teachers') setTeacherTotal(prev => Math.max(0, prev - deletedUsers.length))
+  setParentAccounts(prev => prev.filter(account => !deletedIds.includes(account.id)))
+  setStaffList(prev => prev.filter(staff => !deletedEmails.includes(staff.email)))
+  setSelectedAccountIds([])
+  const failed = selectedUsers.length - deletedUsers.length
+  alert(`${deletedUsers.length} account(s) archived and deleted.${failed ? ` ${failed} could not be deleted; review and retry those accounts.` : ''}`)
 }
 
 const handleAdminPasswordReset = async (id, email) => {
@@ -1349,7 +1461,22 @@ const handleAdminPasswordReset = async (id, email) => {
     try {
       await axios.delete(`${API_URL}/api/staff/${id}`, { headers: getAuthHeaders() })
       setStaffList(staffList.filter(s => s.id !== id))
+      setSelectedStaffIds(prev => prev.filter(selectedId => selectedId !== id))
     } catch (err) { alert('Failed to delete staff member.') }
+  }
+
+  const handleBulkDeleteStaff = async () => {
+    const members = staffList.filter(member => selectedStaffIds.includes(member.id))
+    if (!members.length || !window.confirm(`Permanently remove ${members.length} selected staff member(s)?`)) return
+    const results = await Promise.allSettled(members.map(member => axios.delete(
+      `${API_URL}/api/staff/${member.id}`,
+      { headers: getAuthHeaders() }
+    )))
+    const deletedIds = members.filter((_, index) => results[index].status === 'fulfilled').map(member => member.id)
+    setStaffList(prev => prev.filter(member => !deletedIds.includes(member.id)))
+    setSelectedStaffIds([])
+    const failed = members.length - deletedIds.length
+    alert(`${deletedIds.length} staff member(s) removed.${failed ? ` ${failed} could not be removed; review and retry those records.` : ''}`)
   }
 
   const handleSaveFeeStructures = async () => {
@@ -1986,6 +2113,27 @@ const handleAdminPasswordReset = async (id, email) => {
                   )}
                 </div>
               )}
+              {filteredStudents.length > 0 && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white px-4 py-3">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={filteredStudents.every(student => selectedStudentIds.includes(student.id))}
+                      onChange={event => setSelectedStudentIds(event.target.checked
+                        ? [...new Set([...selectedStudentIds, ...filteredStudents.map(student => student.id)])]
+                        : selectedStudentIds.filter(id => !filteredStudents.some(student => student.id === id)))}
+                    />
+                    Select all {filteredStudents.length} shown
+                  </label>
+                  <button
+                    onClick={handleBulkDeleteStudents}
+                    disabled={!selectedStudentIds.some(id => filteredStudents.some(student => student.id === id))}
+                    className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Archive selected ({selectedStudentIds.filter(id => filteredStudents.some(student => student.id === id)).length})
+                  </button>
+                </div>
+              )}
               {showAddStudent && (
                 <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-6">
                   <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Learner</h3>
@@ -2091,6 +2239,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <table className="w-full min-w-[620px] text-xs sm:text-sm">
                   <thead className="bg-blue-600 text-white">
                     <tr>
+                      <th className="px-3 py-3 text-left sm:px-4">Select</th>
                       <th className="px-3 py-3 text-left sm:px-4">Photo</th>
                       <th className="px-3 py-3 text-left sm:px-4">Student ID</th>
                       <th className="px-3 py-3 text-left sm:px-4">Name</th>
@@ -2102,10 +2251,13 @@ const handleAdminPasswordReset = async (id, email) => {
                   </thead>
                   <tbody>
                     {filteredStudents.length === 0 ? (
-                      <tr><td colSpan="7" className="px-6 py-8 text-center text-gray-400">No learners in this class yet.</td></tr>
+                      <tr><td colSpan="8" className="px-6 py-8 text-center text-gray-400">No learners in this class yet.</td></tr>
                     ) : (
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                          <td className="px-3 py-3 sm:px-4">
+                            <input type="checkbox" aria-label={`Select ${student.firstName} ${student.lastName}`} checked={selectedStudentIds.includes(student.id)} onChange={event => setSelectedStudentIds(prev => event.target.checked ? [...new Set([...prev, student.id])] : prev.filter(id => id !== student.id))} />
+                          </td>
                           <td className="px-3 py-3 sm:px-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-blue-600">
                               {student.photo ? <img src={student.photo} alt={student.firstName} className="w-full h-full object-cover" loading="lazy" decoding="async" /> :
@@ -2270,23 +2422,53 @@ const handleAdminPasswordReset = async (id, email) => {
                   <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. Passwords are protected, but admins can set temporary passwords when needed.</p>
                 </div>
                 <div className="space-x-2">
-                  <button onClick={() => { setAccountTab('parents'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='parents'?'bg-blue-600 text-white':'bg-white border'}`}>Parents</button>
+                  <button onClick={() => { setAccountTab('parents'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='parents'?'bg-blue-600 text-white':'bg-white border'}`}>Parents ({parentTotal})</button>
                   <button onClick={() => { setAccountTab('learners'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='learners'?'bg-blue-600 text-white':'bg-white border'}`}>Learners</button>
-                  <button onClick={() => { setAccountTab('teachers'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='teachers'?'bg-blue-600 text-white':'bg-white border'}`}>Teachers</button>
+                  <button onClick={() => { setAccountTab('teachers'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='teachers'?'bg-blue-600 text-white':'bg-white border'}`}>Teachers ({teacherTotal})</button>
                   <button onClick={fetchAccounts} className="px-4 py-2 rounded-lg bg-green-50 border">Refresh</button>
                   <button onClick={() => fetchAudits()} className="px-4 py-2 rounded-lg bg-gray-50 border">View Audits</button>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 mb-4">
-                <input value={accountQuery} onChange={e => setAccountQuery(e.target.value)} placeholder="Search accounts by name or email" className="flex-1 border px-3 py-2 rounded" />
-                <select value={accountLimit} onChange={e => { setAccountLimit(parseInt(e.target.value)); setAccountPage(1) }} className="border px-3 py-2 rounded">
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
+                <input
+                  value={accountQuery}
+                  onChange={e => setAccountQuery(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') runAccountSearch() }}
+                  placeholder="Search accounts by name or email"
+                  className="flex-1 border px-3 py-2 rounded"
+                />
+                <select value={accountLimit} onChange={e => { setAccountLimit(e.target.value); setAccountPage(1) }} className="border px-3 py-2 rounded">
+                  <option value="all">All records</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="25">25</option>
                 </select>
-                <button onClick={() => { setAccountPage(1); fetchAccounts() }} className="px-4 py-2 bg-blue-600 text-white rounded">Search</button>
+                <button onClick={runAccountSearch} className="px-4 py-2 bg-blue-600 text-white rounded">Search</button>
               </div>
+
+              {accountError && <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{accountError}</p>}
+              {(accountTab === 'parents' || accountTab === 'teachers') && users.length > 0 && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white px-4 py-3">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={users.every(account => selectedAccountIds.includes(account.id))}
+                      onChange={event => setSelectedAccountIds(event.target.checked
+                        ? [...new Set([...selectedAccountIds, ...users.map(account => account.id)])]
+                        : selectedAccountIds.filter(id => !users.some(account => account.id === id)))}
+                    />
+                    Select all {users.length} shown
+                  </label>
+                  <button
+                    onClick={handleBulkDeleteAccounts}
+                    disabled={!selectedAccountIds.some(id => users.some(account => account.id === id))}
+                    className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Archive &amp; delete selected ({selectedAccountIds.filter(id => users.some(account => account.id === id)).length})
+                  </button>
+                </div>
+              )}
 
               {accountLoading ? (
                 <div className="text-gray-500">Loading...</div>
@@ -2294,9 +2476,14 @@ const handleAdminPasswordReset = async (id, email) => {
                 <div>
                   {accountTab === 'parents' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {users.length === 0 && <p className="col-span-full py-8 text-center text-gray-400">No parents match this search.</p>}
                       {users.map(u => (
                         <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex flex-col gap-4">
+                            <label className="flex items-center gap-2 text-sm text-gray-500">
+                              <input type="checkbox" checked={selectedAccountIds.includes(u.id)} onChange={event => setSelectedAccountIds(prev => event.target.checked ? [...new Set([...prev, u.id])] : prev.filter(id => id !== u.id))} />
+                              Select account
+                            </label>
                             <div>
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
@@ -2321,20 +2508,21 @@ const handleAdminPasswordReset = async (id, email) => {
                       ))}
 
                       {/* pagination */}
-                      <div className="col-span-full flex items-center justify-between mt-4">
+                      {accountLimit !== 'all' && <div className="col-span-full flex items-center justify-between mt-4">
                         <div className="text-sm text-gray-500">Showing {(accountPage-1)*accountLimit + 1} - {Math.min(accountPage*accountLimit, accountTotal)} of {accountTotal}</div>
                         <div className="flex items-center gap-2">
-                          <button disabled={accountPage <= 1} onClick={() => { setAccountPage(p => Math.max(1, p-1)); fetchAccounts() }} className="px-3 py-1 border rounded">Prev</button>
+                          <button disabled={accountPage <= 1} onClick={() => setAccountPage(p => Math.max(1, p-1))} className="px-3 py-1 border rounded">Prev</button>
                           <div className="px-3 py-1 border rounded">{accountPage}</div>
-                          <button disabled={accountPage*accountLimit >= accountTotal} onClick={() => { setAccountPage(p => p+1); fetchAccounts() }} className="px-3 py-1 border rounded">Next</button>
+                          <button disabled={accountPage*Number(accountLimit) >= accountTotal} onClick={() => setAccountPage(p => p+1)} className="px-3 py-1 border rounded">Next</button>
                         </div>
-                      </div>
+                      </div>}
                     </div>
                   )}
 
                   {accountTab === 'learners' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {students.map(s => (
+                      {filteredAccountStudents.length === 0 && <p className="col-span-full py-8 text-center text-gray-400">No learners match this search.</p>}
+                      {filteredAccountStudents.map(s => (
                         <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex flex-col gap-4">
                             <div>
@@ -2377,11 +2565,16 @@ const handleAdminPasswordReset = async (id, email) => {
 
                   {accountTab === 'teachers' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {users.length === 0 && <p className="col-span-full py-8 text-center text-gray-400">No teachers match this search.</p>}
                       {users.map(u => {
                         const staffInfo = u.teacherInfo
                         return (
                           <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex flex-col gap-4">
+                              <label className="flex items-center gap-2 text-sm text-gray-500">
+                                <input type="checkbox" checked={selectedAccountIds.includes(u.id)} onChange={event => setSelectedAccountIds(prev => event.target.checked ? [...new Set([...prev, u.id])] : prev.filter(id => id !== u.id))} />
+                                Select account
+                              </label>
                               <div>
                                 <div className="flex items-center gap-2 mb-2">
                                   <h3 className="font-bold text-[#1d4ed8]">{u.name}</h3>
@@ -2413,6 +2606,14 @@ const handleAdminPasswordReset = async (id, email) => {
                           </div>
                         )
                       })}
+                      {accountLimit !== 'all' && <div className="col-span-full flex items-center justify-between mt-4">
+                        <div className="text-sm text-gray-500">Showing {(accountPage - 1) * Number(accountLimit) + 1} - {Math.min(accountPage * Number(accountLimit), accountTotal)} of {accountTotal}</div>
+                        <div className="flex items-center gap-2">
+                          <button disabled={accountPage <= 1} onClick={() => setAccountPage(page => Math.max(1, page - 1))} className="px-3 py-1 border rounded">Prev</button>
+                          <div className="px-3 py-1 border rounded">{accountPage}</div>
+                          <button disabled={accountPage * Number(accountLimit) >= accountTotal} onClick={() => setAccountPage(page => page + 1)} className="px-3 py-1 border rounded">Next</button>
+                        </div>
+                      </div>}
                     </div>
                   )}
                 </div>
@@ -2975,6 +3176,27 @@ const handleAdminPasswordReset = async (id, email) => {
                   </div>
                 </div>
               )}
+              {staffList.length > 0 && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white px-4 py-3">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={staffList.every(member => selectedStaffIds.includes(member.id))}
+                      onChange={event => setSelectedStaffIds(event.target.checked
+                        ? [...new Set([...selectedStaffIds, ...staffList.map(member => member.id)])]
+                        : selectedStaffIds.filter(id => !staffList.some(member => member.id === id)))}
+                    />
+                    Select all {staffList.length} staff members
+                  </label>
+                  <button
+                    onClick={handleBulkDeleteStaff}
+                    disabled={!selectedStaffIds.length}
+                    className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  >
+                    Delete selected ({selectedStaffIds.length})
+                  </button>
+                </div>
+              )}
               {staffList.length === 0 ? (
                 <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No staff members added yet.</div>
               ) : (
@@ -2989,6 +3211,10 @@ const handleAdminPasswordReset = async (id, email) => {
                         </span>
                       </div>
                       <div className="p-5">
+                        <label className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+                          <input type="checkbox" aria-label={`Select ${member.name}`} checked={selectedStaffIds.includes(member.id)} onChange={event => setSelectedStaffIds(prev => event.target.checked ? [...new Set([...prev, member.id])] : prev.filter(id => id !== member.id))} />
+                          Select staff member
+                        </label>
                         <h3 className="font-bold text-gray-800 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
                         {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Assigned Classes: {member.classes.join(', ')}</p>}
@@ -3169,6 +3395,27 @@ const handleAdminPasswordReset = async (id, email) => {
         aria-label="Search archive"
       />
     </label>
+    {selectableArchiveRecords.length > 0 && (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white px-4 py-3">
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={selectableArchiveRecords.every(record => selectedArchiveIds.includes(record.id))}
+            onChange={event => setSelectedArchiveIds(event.target.checked
+              ? [...new Set([...selectedArchiveIds, ...selectableArchiveRecords.map(record => record.id)])]
+              : selectedArchiveIds.filter(id => !selectableArchiveRecords.some(record => record.id === id)))}
+          />
+          Select all {selectableArchiveRecords.length} archived records shown
+        </label>
+        <button
+          onClick={handleBulkPermanentDeleteArchives}
+          disabled={!selectedArchiveIds.some(id => selectableArchiveRecords.some(record => record.id === id))}
+          className="rounded border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"
+        >
+          Permanently delete selected ({selectedArchiveIds.filter(id => selectableArchiveRecords.some(record => record.id === id)).length})
+        </button>
+      </div>
+    )}
     {archiveLoading ? (
       <div className="bg-white rounded-xl border border-gray-100 p-8 text-center text-gray-400">Loading archive...</div>
     ) : filteredArchiveRecords.length === 0 ? (
@@ -3185,6 +3432,7 @@ const handleAdminPasswordReset = async (id, email) => {
             <table className="w-full text-sm">
               <thead className="bg-white text-gray-600">
                 <tr>
+                  <th className="px-3 py-3 text-left">Select</th>
                   <th className="px-5 py-3 text-left">Record</th>
                   <th className="px-5 py-3 text-left">Academic period</th>
                   <th className="px-5 py-3 text-left">Reason</th>
@@ -3196,6 +3444,9 @@ const handleAdminPasswordReset = async (id, email) => {
               <tbody>
                 {group.records.map(record => (
                   <tr key={record.id} className="border-t border-gray-100">
+                    <td className="px-3 py-4">
+                      {!record.restoredAt && <input type="checkbox" aria-label={`Select archived record ${record.title}`} checked={selectedArchiveIds.includes(record.id)} onChange={event => setSelectedArchiveIds(prev => event.target.checked ? [...new Set([...prev, record.id])] : prev.filter(id => id !== record.id))} />}
+                    </td>
                     <td className="px-5 py-4">
                       <p className="font-semibold text-gray-800">{record.title}</p>
                       {record.accountEmail && <p className="text-xs text-gray-500">{record.accountEmail}</p>}
