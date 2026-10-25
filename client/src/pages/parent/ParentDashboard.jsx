@@ -7,7 +7,7 @@ import {
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock, FolderOpen
 } from 'lucide-react'
 import API_URL from '../../api/config'
-import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import { calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
@@ -202,7 +202,8 @@ export default function ParentDashboard() {
     const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 75) return 'B+'; if (t >= 70) return 'B'; if (t >= 65) return 'C+'; if (t >= 60) return 'C'; if (t >= 55) return 'D+'; if (t >= 50) return 'D'; return 'E' }
     const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
 
-    SUBJECTS.forEach((subject, index) => {
+    const completedSubjects = getCompletedSubjects(scores)
+    completedSubjects.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
@@ -227,7 +228,7 @@ export default function ParentDashboard() {
     // Grand total row
     doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / ${SUBJECTS.length * 100}`, 155, y + 5.5)
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / ${completedSubjects.length * 100}`, 155, y + 5.5)
     y += 10
 
     // Attendance summary — compact single line
@@ -264,11 +265,11 @@ export default function ParentDashboard() {
     const clampedRemarksLines = allRemarksLines.slice(0, 2)
     const remarksHeight = 14
 
-    // ── Class Teacher's Remarks ──
+    // ── Remarks(Class Teacher & Headmaster) ──
     doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Class Teacher's Remarks:", 15, y + 4.5)
+    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
     doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
     doc.text(clampedRemarksLines, 15, y + 10)
     y += remarksHeight + 6
@@ -1036,6 +1037,7 @@ const getParentDisplayName = (name) => {
               ) : (
                 <div className="space-y-4">
                   {contextualApprovedResults.map(result => {
+                    const completedSubjects = getCompletedSubjects(result.scores || {})
                     return (
                       <div key={result.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div className="flex flex-col gap-6">
@@ -1066,7 +1068,7 @@ const getParentDisplayName = (name) => {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {SUBJECTS.map((subject, subjectIndex) => {
+                                  {completedSubjects.map((subject, subjectIndex) => {
                                     const scoreEntry = getSubjectScore(result.scores || {}, subject)
                                     const classScore = parseFloat(scoreEntry.classScore) || 0
                                     const cat1 = parseFloat(scoreEntry.cat1) || 0
@@ -1089,7 +1091,7 @@ const getParentDisplayName = (name) => {
                                   })}
                                   <tr className="bg-[#1d4ed8]/10 font-bold">
                                     <td colSpan="5" className="px-4 py-3 text-[#1d4ed8]">Grand Total</td>
-                                    <td colSpan="2" className="px-4 py-3 text-center text-[#1d4ed8]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
+                                    <td colSpan="2" className="px-4 py-3 text-center text-[#1d4ed8]">{calculateGrandTotal(result.scores || {}, completedSubjects).toFixed(2)} / {completedSubjects.length * 100}</td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -1111,7 +1113,7 @@ const getParentDisplayName = (name) => {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <p className="text-xs text-gray-500 uppercase">Grand Total</p>
-                              <p className="text-xl font-bold text-[#1d4ed8]">{calculateGrandTotal(result.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</p>
+                              <p className="text-xl font-bold text-[#1d4ed8]">{calculateGrandTotal(result.scores || {}, completedSubjects).toFixed(2)} / {completedSubjects.length * 100}</p>
                             </div>
                             <div className="bg-blue-50 rounded-2xl p-4">
                               <p className="text-xs text-gray-500 uppercase">Class</p>
@@ -1446,7 +1448,7 @@ const getParentDisplayName = (name) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {SUBJECTS.map((subject, index) => {
+                    {getCompletedSubjects(viewingResult.scores || {}).map((subject, index) => {
                       const s = getSubjectScore(viewingResult.scores || {}, subject)
                       const classScore = parseFloat(s.classScore) || 0
                       const cat1 = parseFloat(s.cat1) || 0
@@ -1486,7 +1488,7 @@ const getParentDisplayName = (name) => {
                     {/* Grand Total Row */}
                     <tr className="bg-blue-500">
                       <td colSpan="5" className="px-4 py-3 font-bold text-gray-800">Grand Total</td>
-                      <td colSpan="2" className="px-4 py-3 text-center font-bold text-gray-800">{calculateGrandTotal(viewingResult.scores || {}).toFixed(2)} / {SUBJECTS.length * 100}</td>
+                      <td colSpan="2" className="px-4 py-3 text-center font-bold text-gray-800">{calculateGrandTotal(viewingResult.scores || {}, getCompletedSubjects(viewingResult.scores || {})).toFixed(2)} / {getCompletedSubjects(viewingResult.scores || {}).length * 100}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1501,7 +1503,7 @@ const getParentDisplayName = (name) => {
 
               {/* Remarks */}
               <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <p className="text-sm font-bold text-gray-800 mb-1">Class Teacher's Remarks</p>
+                <p className="text-sm font-bold text-gray-800 mb-1">Remarks(Class Teacher & Headmaster)</p>
                 <p className="text-sm text-gray-600 italic">{viewingResult.remarks || 'No remarks provided.'}</p>
               </div>
 

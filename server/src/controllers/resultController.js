@@ -93,6 +93,8 @@ const getTeacherResultPayload = async (req, body) => {
     if (!Object.keys(sanitizedScores).length) {
       return { error: { ok: false, message: 'You must provide scores for at least one subject.' } }
     }
+    const scoreValidation = validateTeacherScores(sanitizedScores, Object.keys(sanitizedScores))
+    if (!scoreValidation.ok) return { error: scoreValidation }
 
     return {
       scores: sanitizedScores,
@@ -302,6 +304,9 @@ const createResult = async (req, res) => {
     }
 
     // Non-teacher case
+    const scoreValidation = validateTeacherScores(scores || {}, Object.keys(scores || {}))
+    if (!scoreValidation.ok) return res.status(400).json({ message: scoreValidation.message })
+
     const result = await prisma.result.create({
       data: {
         studentId: parseInt(studentId),
@@ -385,6 +390,8 @@ const updateResult = async (req, res) => {
     }
 
     const nextScores = scores === undefined ? existing.scores : scores
+    const scoreValidation = validateTeacherScores(nextScores || {}, Object.keys(nextScores || {}))
+    if (!scoreValidation.ok) return res.status(400).json({ message: scoreValidation.message })
     const nextRemarksValue = remarks === undefined ? existing.remarks : remarks
     const nextStatus = status === undefined ? existing.status : status
 

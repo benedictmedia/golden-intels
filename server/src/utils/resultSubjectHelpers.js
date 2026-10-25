@@ -4,9 +4,15 @@ const SUBJECT_ALIASES = {
   math: 'maths',
   'religious and moral education': 'rme',
   'religious & moral education': 'rme',
+  numeracy: 'numeracy',
+  literacy: 'literacy',
   'creative arts': 'creative arts',
-  'uc mas': 'uc mas'
+  'uc mas': 'uc mas',
+  phonics: 'floppy phonics (phonics)',
+  'floppy phonics': 'floppy phonics (phonics)',
+  'floppy phonics (phonics)': 'floppy phonics (phonics)'
 }
+const SCORE_FIELD_MAXIMUMS = { classScore: 10, cat1: 20, cat2: 20, exam: 100 }
 
 const normalizeSubject = (value) => {
   const raw = String(value ?? '').trim().toLowerCase()
@@ -61,6 +67,20 @@ const sanitizeTeacherScores = (scores = {}, allowedSubjects = []) => {
 }
 
 const validateTeacherScores = (scores = {}, allowedSubjects = []) => {
+  for (const [subject, scoreEntry] of Object.entries(scores || {})) {
+    for (const [field, maximum] of Object.entries(SCORE_FIELD_MAXIMUMS)) {
+      const value = scoreEntry?.[field]
+      if (value === undefined || value === null || value === '') continue
+      const score = Number(value)
+      if (!Number.isFinite(score) || score < 0 || score > maximum) {
+        return {
+          ok: false,
+          message: `${field} for ${subject} must be between 0 and ${maximum}.`
+        }
+      }
+    }
+  }
+
   const normalizedAllowed = normalizeSubjectList(allowedSubjects)
   const invalidSubjects = Object.keys(scores || {}).filter((subject) => !normalizedAllowed.includes(normalizeSubject(subject)))
 

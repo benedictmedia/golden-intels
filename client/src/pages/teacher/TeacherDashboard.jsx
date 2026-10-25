@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
-import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 import NotificationBell from '../../components/NotificationBell'
@@ -381,7 +381,8 @@ export default function TeacherDashboard() {
     const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 75) return 'B+'; if (t >= 70) return 'B'; if (t >= 65) return 'C+'; if (t >= 60) return 'C'; if (t >= 55) return 'D+'; if (t >= 50) return 'D'; return 'E' }
     const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
 
-    SUBJECTS.forEach((subject, index) => {
+    const completedSubjects = getCompletedSubjects(scores)
+    completedSubjects.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
@@ -406,7 +407,7 @@ export default function TeacherDashboard() {
     // Grand total row
     doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 5.5)
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / ${completedSubjects.length * 100}`, 155, y + 5.5)
     y += 10
 
     // Attendance summary — compact single line
@@ -443,11 +444,11 @@ export default function TeacherDashboard() {
     const clampedRemarksLines = allRemarksLines.slice(0, 2)
     const remarksHeight = 14
 
-    // ── Class Teacher's Remarks ──
+    // ── Class Teacher's & Headmaster's Remarks ──
     doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Class Teacher's Remarks:", 15, y + 4.5)
+    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
     doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
     doc.text(clampedRemarksLines, 15, y + 10)
     y += remarksHeight + 6
@@ -517,7 +518,7 @@ export default function TeacherDashboard() {
   const handleSubjectScore = (subject, field, value) => {
     setSubjectScores(prev => ({
       ...prev,
-      [subject]: { ...prev[subject], [field]: value }
+      [subject]: { ...prev[subject], [field]: clampScoreInput(field, value) }
     }))
   }
 
@@ -1612,7 +1613,7 @@ useEffect(() => {
                           <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">Class Score (10%)</label>
                             <input
-                              type="number" min="0" max="100"
+                              type="number" min="0" max={SCORE_FIELD_MAXIMUMS.classScore}
                               value={scores.classScore}
                               onChange={e => handleSubjectScore(subject, 'classScore', e.target.value)}
                               readOnly={!editable}
@@ -1623,7 +1624,7 @@ useEffect(() => {
                           <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">CAT 1 (20%)</label>
                             <input
-                              type="number" min="0" max="100"
+                              type="number" min="0" max={SCORE_FIELD_MAXIMUMS.cat1}
                               value={scores.cat1}
                               onChange={e => handleSubjectScore(subject, 'cat1', e.target.value)}
                               readOnly={!editable}
@@ -1634,7 +1635,7 @@ useEffect(() => {
                           <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">CAT 2 (20%)</label>
                             <input
-                              type="number" min="0" max="100"
+                              type="number" min="0" max={SCORE_FIELD_MAXIMUMS.cat2}
                               value={scores.cat2}
                               onChange={e => handleSubjectScore(subject, 'cat2', e.target.value)}
                               readOnly={!editable}
@@ -1645,7 +1646,7 @@ useEffect(() => {
                           <div>
                             <label className="block text-xs font-bold text-gray-500 mb-1">Exam Score (50%)</label>
                             <input
-                              type="number" min="0" max="100"
+                              type="number" min="0" max={SCORE_FIELD_MAXIMUMS.exam}
                               value={scores.exam}
                               onChange={e => handleSubjectScore(subject, 'exam', e.target.value)}
                               readOnly={!editable}
@@ -1667,9 +1668,9 @@ useEffect(() => {
                   })}
                 </div>
 
-                {/* Teacher Remarks */}
+                {/* Teacher/Headmaster Remarks */}
                 <div className="mb-8">
-                  <label className="block text-sm font-bold text-[#2563eb] mb-2">Class Teacher's Remarks</label>
+                  <label className="block text-sm font-bold text-[#2563eb] mb-2">Remarks(Class Teacher & Headmaster)</label>
                   <p className="text-xs text-gray-400 mb-2">
                     {isClassTeacherForSelectedClass
                       ? 'Provide constructive feedback on the student\'s overall performance across all subjects.'

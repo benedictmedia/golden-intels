@@ -9,7 +9,7 @@ import {
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
   UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search
 } from 'lucide-react'
-import { SUBJECTS, calculateGrandTotal, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import { compressImage, compressImages } from '../../utils/compressImage'
 import AdminMessages from '../../components/messages/AdminMessages'
@@ -49,7 +49,6 @@ const stats = [
 ]
 
 const classes = ['All', ...STUDENT_CLASSES]
-const FEE_ACADEMIC_YEARS = ['2026/2027', '2027/2028', '2028/2029', '2029/2030', '2030/2031', '2031/2032', '2032/2033', '2033/2034', '2034/2035', '2035/2036', '2036/2037']
 const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
 
 export default function AdminDashboard() {
@@ -64,6 +63,7 @@ export default function AdminDashboard() {
   const [showChangePassword, setShowChangePassword] = useState(false)
 
   const [academicContext, setAcademicContext] = useState({ academicYear: '2026/2027', term: 'Term 1' })
+  const [availableAcademicYears, setAvailableAcademicYears] = useState(['2026/2027'])
   const [contextSaving, setContextSaving] = useState(false)
   const [contextSaved, setContextSaved] = useState(false)
   const [archiveRecords, setArchiveRecords] = useState([])
@@ -113,6 +113,7 @@ export default function AdminDashboard() {
   // Results state
   const [results, setResults] = useState([])
   const [resultFilter, setResultFilter] = useState('All')
+  const [viewingAdminResult, setViewingAdminResult] = useState(null)
   const [adminEditResult, setAdminEditResult] = useState(null)
   const [adminEditScores, setAdminEditScores] = useState({})
   const [adminEditRemarks, setAdminEditRemarks] = useState('')
@@ -332,6 +333,7 @@ export default function AdminDashboard() {
   axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
     .then(res => {
       setAcademicContext(res.data)
+      setAvailableAcademicYears(res.data.availableAcademicYears || [res.data.academicYear || '2026/2027'])
       setFeeAcademicYear(res.data.academicYear || '2026/2027')
       setFeeTerm(res.data.term || 'Term 1')
       setPaymentForm(prev => ({ ...prev, academicYear: res.data.academicYear || '2026/2027', term: res.data.term || 'Term 1' }))
@@ -448,6 +450,10 @@ const handleSaveAcademicContext = async () => {
     // Save context
     const res = await axios.post(`${API_URL}/api/academic-context`, academicContext, { headers: getAuthHeaders() });
     setAcademicContext(res.data);
+    setAvailableAcademicYears(res.data.availableAcademicYears || [res.data.academicYear])
+    setFeeAcademicYear(res.data.academicYear)
+    setFeeTerm(res.data.term)
+    setPaymentForm(prev => ({ ...prev, academicYear: res.data.academicYear, term: res.data.term }))
     setContextSaved(true);
     setTimeout(() => setContextSaved(false), 3000);
   } catch (err) {
@@ -1025,7 +1031,13 @@ const handleAdminPasswordReset = async (id, email) => {
   }
 };
 
-  const handleAdminEditResult = (result) => { setAdminEditResult(result); setAdminEditScores(getNormalizedScores(result.scores || {})); setAdminEditRemarks(result.remarks || '') }
+  const handleAdminViewResult = (result) => setViewingAdminResult(result)
+  const handleAdminEditResult = (result) => {
+    setViewingAdminResult(null)
+    setAdminEditResult(result)
+    setAdminEditScores(getNormalizedScores(result.scores || {}))
+    setAdminEditRemarks(result.remarks || '')
+  }
 
   const handleAdminSaveEdit = async () => {
     try {
@@ -1129,7 +1141,8 @@ const handleAdminPasswordReset = async (id, email) => {
     const getGrade = (t) => { if (t >= 90) return 'A+'; if (t >= 80) return 'A'; if (t >= 75) return 'B+'; if (t >= 70) return 'B'; if (t >= 65) return 'C+'; if (t >= 60) return 'C'; if (t >= 55) return 'D+'; if (t >= 50) return 'D'; return 'E' }
     const getGradeColor = (t) => { if (t >= 80) return [15, 110, 86]; if (t >= 60) return [26, 60, 110]; if (t >= 50) return [212, 160, 23]; return [220, 50, 50] }
 
-    SUBJECTS.forEach((subject, index) => {
+    const completedSubjects = getCompletedSubjects(scores)
+    completedSubjects.forEach((subject, index) => {
       const s = getSubjectScore(scores, subject)
       const classScore = parseFloat(s.classScore) || 0
       const cat1 = parseFloat(s.cat1) || 0
@@ -1154,7 +1167,7 @@ const handleAdminPasswordReset = async (id, email) => {
     // Grand total row
     doc.setFillColor(212, 160, 23); doc.rect(10, y, pageWidth - 20, 8, 'F')
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 60, 110)
-    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / 1100`, 155, y + 5.5)
+    doc.text('Grand Total', 15, y + 5.5); doc.text(`${grandTotal.toFixed(2)} / ${completedSubjects.length * 100}`, 155, y + 5.5)
     y += 10
 
     // Attendance summary — compact single line
@@ -1191,11 +1204,11 @@ const handleAdminPasswordReset = async (id, email) => {
     const clampedRemarksLines = allRemarksLines.slice(0, 2)
     const remarksHeight = 14
 
-    // ── Class Teacher's Remarks ──
+    // ── Remarks(Class Teacher & Headmaster) ──
     doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
     doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Class Teacher's Remarks:", 15, y + 4.5)
+    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
     doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
     doc.text(clampedRemarksLines, 15, y + 10)
     y += remarksHeight + 6
@@ -1771,7 +1784,7 @@ const handleAdminPasswordReset = async (id, email) => {
                       <div>
                         <label className="block text-sm font-bold text-gray-800 mb-2">Academic Year</label>
                         <select value={feeAcademicYear} onChange={e => setFeeAcademicYear(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-gray-700">
-                          {FEE_ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
+                          {[...new Set([...availableAcademicYears, paymentForm.academicYear])].sort().map(year => <option key={year} value={year}>{year}</option>)}
                         </select>
                       </div>
                       <div>
@@ -1914,7 +1927,7 @@ const handleAdminPasswordReset = async (id, email) => {
                             }
                             setPaymentForm(prev => ({ ...prev, academicYear, amountDue }))
                           }} className="w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700">
-                            {FEE_ACADEMIC_YEARS.map(year => <option key={year} value={year}>{year}</option>)}
+                            {[...new Set([...availableAcademicYears, paymentForm.academicYear])].sort().map(year => <option key={year} value={year}>{year}</option>)}
                           </select>
                         </div>
                         <div>
@@ -2037,13 +2050,71 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{result.status}</span>
                           {result.status !== 'approved' && <button onClick={() => handleApproveResult(result.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>}
-                          <button onClick={() => handleAdminEditResult(result)} className="bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => handleAdminViewResult(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">View</button>
                           <button onClick={() => handleAdminDownloadPDF(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download PDF</button>
                           <button onClick={() => handleAdminDeleteResult(result.id)} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Delete</button>
                         </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              {viewingAdminResult && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                    <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-bold font-serif">Result Details</h2>
+                        <p className="text-sm text-blue-100">{viewingAdminResult.academicYear} | {viewingAdminResult.term}</p>
+                      </div>
+                      <button onClick={() => setViewingAdminResult(null)} aria-label="Close result details"><X size={24} /></button>
+                    </div>
+                    <div className="space-y-5 p-6">
+                      <div className="grid grid-cols-2 gap-3 rounded-xl bg-blue-50 p-4 text-sm">
+                        <p><span className="text-gray-500">Learner:</span> <strong>{viewingAdminResult.student?.firstName} {viewingAdminResult.student?.lastName}</strong></p>
+                        <p><span className="text-gray-500">Admission No:</span> <strong>{viewingAdminResult.student?.studentId}</strong></p>
+                        <p><span className="text-gray-500">Class:</span> <strong>{displayStudentClassName(viewingAdminResult.gradeLevel)}</strong></p>
+                        <p><span className="text-gray-500">Submitted by:</span> <strong>{viewingAdminResult.submittedBy}</strong></p>
+                      </div>
+                      <div className="overflow-x-auto rounded-xl border">
+                        <table className="w-full text-sm">
+                          <thead className="bg-blue-600 text-white">
+                            <tr>
+                              <th className="px-3 py-2 text-left">Subject</th>
+                              <th className="px-3 py-2">Class / 10</th>
+                              <th className="px-3 py-2">CAT 1 / 20</th>
+                              <th className="px-3 py-2">CAT 2 / 20</th>
+                              <th className="px-3 py-2">Exam / 100</th>
+                              <th className="px-3 py-2">Total / 100</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {getCompletedSubjects(viewingAdminResult.scores || {}).map((subject, index) => {
+                              const score = getSubjectScore(viewingAdminResult.scores || {}, subject)
+                              return (
+                                <tr key={subject} className={index % 2 ? 'bg-blue-50' : 'bg-white'}>
+                                  <td className="px-3 py-2 font-semibold">{subject}</td>
+                                  <td className="px-3 py-2 text-center">{score.classScore}</td>
+                                  <td className="px-3 py-2 text-center">{score.cat1}</td>
+                                  <td className="px-3 py-2 text-center">{score.cat2}</td>
+                                  <td className="px-3 py-2 text-center">{score.exam}</td>
+                                  <td className="px-3 py-2 text-center font-bold">{getSubjectTotal(score).toFixed(2)}</td>
+                                </tr>
+                              )
+                            })}
+                            {!getCompletedSubjects(viewingAdminResult.scores || {}).length && (
+                              <tr><td colSpan="6" className="px-4 py-6 text-center text-gray-500">No complete subject scores in this result.</td></tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                      <p className="text-sm text-gray-600">Teacher’s remarks: {viewingAdminResult.remarks || 'No remarks provided.'}</p>
+                      <div className="flex justify-end gap-3">
+                        <button onClick={() => setViewingAdminResult(null)} className="rounded-lg border px-4 py-2">Close</button>
+                        <button onClick={() => handleAdminEditResult(viewingAdminResult)} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">Edit Result</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
               {adminEditResult && (
@@ -2064,7 +2135,7 @@ const handleAdminPasswordReset = async (id, email) => {
                               {[{ key: 'classScore', label: 'Class(10)' }, { key: 'cat1', label: 'CAT1(20)' }, { key: 'cat2', label: 'CAT2(20)' }, { key: 'exam', label: 'Exam(100)' }].map(field => (
                                 <div key={field.key}>
                                   <label className="block text-xs font-bold text-gray-500 mb-1">{field.label}</label>
-                                  <input type="number" min="0" max="100" value={s[field.key] || ''} onChange={e => setAdminEditScores(prev => ({ ...prev, [subject]: { ...prev[subject], [field.key]: e.target.value } }))} className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
+                                  <input type="number" min="0" max={SCORE_FIELD_MAXIMUMS[field.key]} value={s[field.key] ?? ''} onChange={e => setAdminEditScores(prev => ({ ...prev, [subject]: { ...prev[subject], [field.key]: clampScoreInput(field.key, e.target.value) } }))} className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700 text-sm" />
                                 </div>
                               ))}
                             </div>
@@ -3310,8 +3381,7 @@ const handleAdminPasswordReset = async (id, email) => {
             onChange={e => setAcademicContext(prev => ({ ...prev, academicYear: e.target.value }))}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
           >
-            {['2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032',
-              '2032/2033','2033/2034','2034/2035','2035/2036','2036/2037'].map(y => (
+            {[...new Set([...availableAcademicYears, academicContext.academicYear])].sort().map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>

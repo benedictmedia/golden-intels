@@ -1,4 +1,14 @@
-export const SUBJECTS = ['English', 'Maths', 'Science', 'Computing', 'Geography', 'RME', 'History', 'Creative Arts', 'Ewe', 'French', 'UC MAS']
+export const SUBJECTS = [
+  'English', 'Maths', 'Numeracy', 'Literacy', 'Science', 'Computing', 'Geography',
+  'RME', 'History', 'Creative Arts', 'Ewe', 'French', 'UC MAS', 'Floppy Phonics (Phonics)'
+]
+
+export const SCORE_FIELD_MAXIMUMS = {
+  classScore: 10,
+  cat1: 20,
+  cat2: 20,
+  exam: 100
+}
 
 const SUBJECT_ALIASES = {
   english: 'English',
@@ -6,6 +16,8 @@ const SUBJECT_ALIASES = {
   maths: 'Maths',
   mathematics: 'Maths',
   math: 'Maths',
+  numeracy: 'Numeracy',
+  literacy: 'Literacy',
   science: 'Science',
   computing: 'Computing',
   geography: 'Geography',
@@ -18,7 +30,10 @@ const SUBJECT_ALIASES = {
   ewe: 'Ewe',
   french: 'French',
   'uc mas': 'UC MAS',
-  'u c mas': 'UC MAS'
+  'u c mas': 'UC MAS',
+  phonics: 'Floppy Phonics (Phonics)',
+  'floppy phonics': 'Floppy Phonics (Phonics)',
+  'floppy phonics (phonics)': 'Floppy Phonics (Phonics)'
 }
 
 export const normalizeSubjectName = (value) => {
@@ -45,6 +60,22 @@ export const getNormalizedScores = (scores = {}) => {
 export const getSubjectScore = (scores = {}, subject) => {
   const normalizedScores = getNormalizedScores(scores)
   return normalizedScores[normalizeSubjectName(subject)] || {}
+}
+
+export const isSubjectScoreComplete = (scoreEntry = {}) =>
+  Object.keys(SCORE_FIELD_MAXIMUMS).every((field) => {
+    const value = scoreEntry[field]
+    return value !== undefined && value !== null && value !== '' && Number.isFinite(Number(value))
+  })
+
+export const getCompletedSubjects = (scores = {}, subjects = SUBJECTS) =>
+  subjects.filter(subject => isSubjectScoreComplete(getSubjectScore(scores, subject)))
+
+export const clampScoreInput = (field, value) => {
+  if (value === '') return ''
+  const number = Number(value)
+  if (!Number.isFinite(number)) return ''
+  return String(Math.max(0, Math.min(SCORE_FIELD_MAXIMUMS[field] ?? 100, number)))
 }
 
 export const getSubjectTotal = (scoreEntry = {}) => {

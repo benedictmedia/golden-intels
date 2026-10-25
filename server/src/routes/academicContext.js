@@ -66,7 +66,10 @@ router.post('/', protect, async (req, res) => {
       : await prisma.academicContext.create({
           data: { academicYear, term, setBy: req.user.name }
         })
-    res.json(context)
+    res.json({
+      ...context,
+      availableAcademicYears: getAcademicYears(getYearStart(academicYear), true)
+    })
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
