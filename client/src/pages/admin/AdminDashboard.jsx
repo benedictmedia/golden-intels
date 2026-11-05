@@ -41,6 +41,9 @@ const menuItems = [
   { icon: <Archive size={20} />, label: 'Archive', id: 'archives' },
 ]
 
+const getTemporaryPasswordMinimum = (role) => ['parent', 'learner'].includes(role) ? 3 : 6
+const MAX_BULK_PASSWORD_RESETS = 100
+
 const stats = [
   { label: 'Total Learners', value: '0', color: 'bg-[#2563eb]', textColor: 'text-blue-100' },
   { label: 'Admissions', value: '0', color: 'bg-[#1d4ed8]', textColor: 'text-purple-200' },
@@ -191,6 +194,7 @@ export default function AdminDashboard() {
   const [accountQuery, setAccountQuery] = useState('')
   const [accountSearch, setAccountSearch] = useState('')
   const [selectedAccountIds, setSelectedAccountIds] = useState([])
+  const [selectedAccountRoles, setSelectedAccountRoles] = useState({})
   const [accountPage, setAccountPage] = useState(1)
   const [accountLimit, setAccountLimit] = useState('all')
   const [accountTotal, setAccountTotal] = useState(0)
@@ -237,6 +241,27 @@ export default function AdminDashboard() {
       .toLowerCase()
       .includes(accountSearch.toLowerCase())
   ))
+  const selectableAccounts = accountTab === 'learners'
+    ? filteredAccountStudents
+      .filter(student => student.learnerUserId)
+      .map(student => ({
+        id: student.learnerUserId,
+        email: student.email || student.learnerEmail || `${student.firstName} ${student.lastName}`,
+        role: 'learner'
+      }))
+    : users
+  const selectedVisibleAccountIds = selectableAccounts
+    .filter(account => selectedAccountIds.includes(account.id))
+    .map(account => account.id)
+  const selectedAccountBatch = selectedAccountIds.map(id => ({
+    id,
+    role: selectedAccountRoles[id]
+  }))
+  const selectedPasswordMinimum = selectedAccountBatch.some(account => account.role === 'teacher')
+    ? 6
+    : selectedAccountBatch.some(account => account.role === 'parent' || account.role === 'learner')
+      ? 3
+      : 6
   const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => normalizeStudentClassName(p.student?.gradeLevel) === normalizeStudentClassName(feeClassFilter))
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
   const dashboardStats = stats.map(stat => ({
@@ -879,7 +904,26 @@ const handleSaveAcademicContext = async () => {
     setAccountSearch(query)
   }
 
-const handleDeactivateUser = async (email) => {
+  const handleAccountSelection = (accounts, checked) => {
+    const visibleIds = accounts.map(account => account.id)
+    const accountsToAdd = accounts
+      .filter(account => !selectedAccountIds.includes(account.id))
+      .slice(0, Math.max(0, MAX_BULK_PASSWORD_RESETS - selectedAccountIds.length))
+    setSelectedAccountIds(previous => checked
+      ? [...new Set([...previous, ...accountsToAdd.map(account => account.id)])].slice(0, MAX_BULK_PASSWORD_RESETS)
+      : previous.filter(id => !visibleIds.includes(id)))
+    setSelectedAccountRoles(previous => {
+      const updatedRoles = { ...previous }
+      if (checked) {
+        accountsToAdd.forEach(account => { updatedRoles[account.id] = account.role })
+      } else {
+        visibleIds.forEach(id => { delete updatedRoles[id] })
+      }
+      return updatedRoles
+    })
+  }
+
+  const handleDeactivateUser = async (email) => {
   if (!window.confirm(`Deactivate ${email}?`)) return
   try {
     await axios.post(`${API_URL}/api/users/deactivate`, { email }, { headers: getAuthHeaders() })
@@ -905,6 +949,7 @@ const handleDeleteUser = async (id, email) => {
     await axios.delete(`${API_URL}/api/users/${id}`, { headers: getAuthHeaders(), data: { confirm: true } })
     setUsers(prev => prev.filter(u => u.id !== id))
     setSelectedAccountIds(prev => prev.filter(selectedId => selectedId !== id))
+    setSelectedAccountRoles(prev => Object.fromEntries(Object.entries(prev).filter(([selectedId]) => Number(selectedId) !== id)))
     setAccountTotal(prev => Math.max(0, prev - 1))
     if (deletedAccount?.role === 'parent') setParentTotal(prev => Math.max(0, prev - 1))
     if (deletedAccount?.role === 'teacher') setTeacherTotal(prev => Math.max(0, prev - 1))
@@ -932,24 +977,137 @@ const handleBulkDeleteAccounts = async () => {
   if (accountTab === 'teachers') setTeacherTotal(prev => Math.max(0, prev - deletedUsers.length))
   setParentAccounts(prev => prev.filter(account => !deletedIds.includes(account.id)))
   setStaffList(prev => prev.filter(staff => !deletedEmails.includes(staff.email)))
-  setSelectedAccountIds([])
+  setSelectedAccountIds(prev => prev.filter(id => !deletedIds.includes(id)))
+  setSelectedAccountRoles(prev => Object.fromEntries(Object.entries(prev).filter(([id]) => !deletedIds.includes(Number(id)))))
   const failed = selectedUsers.length - deletedUsers.length
   alert(`${deletedUsers.length} account(s) archived and deleted.${failed ? ` ${failed} could not be deleted; review and retry those accounts.` : ''}`)
 }
 
-const handleAdminPasswordReset = async (id, email) => {
-  const password = window.prompt(`Enter a temporary password for ${email}. It must be at least 6 characters.`)
+const handleAdminPasswordReset = async (id, email, role = accountTab === 'learners' ? 'learner' : accountTab === 'teachers' ? 'teacher' : 'parent') => {
+  const minimumLength = getTemporaryPasswordMinimum(role)
+  const password = window.prompt(`Enter a temporary password for ${email}. It must be at least ${minimumLength} characters.`)
   if (!password) return
-  if (password.length < 6) {
-    alert('Temporary password must be at least 6 characters.')
+  if ([...password].length < minimumLength) {
+    alert(`Temporary password must be at least ${minimumLength} characters for ${role} accounts.`)
     return
   }
 
   try {
-    await axios.post(`${API_URL}/api/users/${id}/reset-password`, { password }, { headers: getAuthHeaders() })
-    alert('Temporary password set. The user can log in with it and should change it after login.')
+    const res = await axios.post(`${API_URL}/api/users/${id}/reset-password`, { password }, { headers: getAuthHeaders() })
+    alert(res.data.message || 'Temporary password set successfully.')
   } catch (err) {
     alert(err.response?.data?.message || 'Failed to reset password.')
+  }
+}
+
+const handleBulkPasswordReset = async () => {
+  if (!selectedAccountIds.length) return
+  const password = window.prompt(`Enter one temporary password for the ${selectedAccountIds.length} selected account(s). It must be at least ${selectedPasswordMinimum} characters.`)
+  if (!password) return
+  if ([...password].length < selectedPasswordMinimum) {
+    alert(`Temporary password must be at least ${selectedPasswordMinimum} characters for these selected accounts.`)
+    return
+  }
+  if (!window.confirm(`This will replace the passwords for ${selectedAccountIds.length} selected parent, teacher, and/or learner account(s), then download a PDF containing their temporary passwords. Continue?`)) return
+
+  let resetUsers = null
+  try {
+    const res = await axios.post(
+      `${API_URL}/api/users/reset-passwords`,
+      { userIds: selectedAccountIds, password, sendEmail: false },
+      { headers: getAuthHeaders() }
+    )
+    resetUsers = res.data.users
+    const { jsPDF } = await import('jspdf')
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const margin = 12
+    const gap = 6
+    const cardWidth = (pageWidth - margin * 2 - gap) / 2
+    const cardHeight = 82
+    const cardsPerPage = 6
+    const roleLabels = { parent: 'PARENT PORTAL', teacher: 'TEACHER PORTAL', learner: 'LEARNER PORTAL' }
+    const roleOrder = { parent: 0, teacher: 1, learner: 2 }
+    const cardUsers = [...res.data.users].sort((first, second) => (
+      (roleOrder[first.role] ?? 3) - (roleOrder[second.role] ?? 3) ||
+      String(first.name).localeCompare(String(second.name))
+    ))
+
+    cardUsers.forEach((user, index) => {
+      const pageIndex = Math.floor(index / cardsPerPage)
+      if (pageIndex > 0 && index % cardsPerPage === 0) pdf.addPage()
+      const position = index % cardsPerPage
+      const x = margin + (position % 2) * (cardWidth + gap)
+      const y = margin + Math.floor(position / 2) * (cardHeight + gap)
+      let nameFontSize = 12
+      pdf.setFontSize(nameFontSize)
+      let nameLines = pdf.splitTextToSize(String(user.name || 'User'), cardWidth - 12)
+      while (nameLines.length > 2 && nameFontSize > 5) {
+        nameFontSize -= 0.5
+        pdf.setFontSize(nameFontSize)
+        nameLines = pdf.splitTextToSize(String(user.name || 'User'), cardWidth - 12)
+      }
+      let emailFontSize = 8
+      pdf.setFontSize(emailFontSize)
+      let emailLines = pdf.splitTextToSize(String(user.email || ''), cardWidth - 12)
+      while (emailLines.length > 3 && emailFontSize > 4.5) {
+        emailFontSize -= 0.5
+        pdf.setFontSize(emailFontSize)
+        emailLines = pdf.splitTextToSize(String(user.email || ''), cardWidth - 12)
+      }
+      let passwordFontSize = 11
+      pdf.setFontSize(passwordFontSize)
+      let passwordLines = pdf.splitTextToSize(password, cardWidth - 12)
+      while (passwordLines.length > 1 && passwordFontSize > 6) {
+        passwordFontSize -= 0.5
+        pdf.setFontSize(passwordFontSize)
+        passwordLines = pdf.splitTextToSize(password, cardWidth - 12)
+      }
+
+      pdf.setDrawColor(0)
+      pdf.setLineWidth(0.5)
+      pdf.roundedRect(x, y, cardWidth, cardHeight, 2, 2, 'S')
+      pdf.setTextColor(0)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(8)
+      pdf.text('GOLDEN-INTELS INTERNATIONAL SCHOOL', x + 6, y + 9)
+      pdf.setFontSize(7)
+      pdf.text('PORTAL LOGIN CARD', x + cardWidth - 6, y + 9, { align: 'right' })
+      pdf.setLineWidth(0.25)
+      pdf.line(x + 6, y + 13, x + cardWidth - 6, y + 13)
+
+      pdf.setFontSize(nameFontSize)
+      pdf.text(nameLines, x + 6, y + 21)
+      const roleY = y + 21 + nameLines.length * nameFontSize * 0.42
+      pdf.setFontSize(8)
+      pdf.text(roleLabels[user.role] || 'SCHOOL PORTAL', x + 6, roleY)
+
+      pdf.setFontSize(7)
+      pdf.text('EMAIL', x + 6, roleY + 9)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(emailFontSize)
+      pdf.text(emailLines, x + 6, roleY + 14)
+
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(7)
+      pdf.text('TEMPORARY PASSWORD', x + 6, y + 57)
+      pdf.setFontSize(passwordFontSize)
+      pdf.text(passwordLines, x + 6, y + 64)
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(7)
+      pdf.text(pdf.splitTextToSize('Please log in and change this to a stronger password.', cardWidth - 12), x + 6, y + 73)
+    })
+
+    pdf.save('golden-intels-login-cards.pdf')
+    setSelectedAccountIds([])
+    setSelectedAccountRoles({})
+    alert(`Temporary password set for ${res.data.updatedCount} accounts. Keep the downloaded PDF secure and share each card only with its named user.`)
+  } catch (err) {
+    if (resetUsers) {
+      alert(`The passwords were reset, but the PDF could not be downloaded. Temporary password: ${password}. Share it securely with the selected users before setting another password.`)
+    } else {
+      alert(err.response?.data?.message || 'Could not reset the selected passwords or create login cards.')
+    }
   }
 }
 
@@ -2493,7 +2651,7 @@ const handleAdminPasswordReset = async (id, email) => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Accounts</h2>
-                  <p className="text-gray-500 text-sm">Manage parent, learner and teacher accounts. Passwords are protected, but admins can set temporary passwords when needed.</p>
+                  <p className="text-gray-500 text-sm">Select accounts across tabs to reset passwords and download secure, printable login cards. Existing passwords cannot be viewed; cards use a new temporary password.</p>
                 </div>
                 <div className="space-x-2">
                   <button onClick={() => { setAccountTab('parents'); setAccountPage(1) }} className={`px-4 py-2 rounded-lg ${accountTab==='parents'?'bg-blue-600 text-white':'bg-white border'}`}>Parents ({parentTotal})</button>
@@ -2522,25 +2680,39 @@ const handleAdminPasswordReset = async (id, email) => {
               </div>
 
               {accountError && <p role="alert" className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{accountError}</p>}
-              {(accountTab === 'parents' || accountTab === 'teachers') && users.length > 0 && (
+              {(selectableAccounts.length > 0 || selectedAccountIds.length > 0) && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-white px-4 py-3">
-                  <label className="flex items-center gap-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={users.every(account => selectedAccountIds.includes(account.id))}
-                      onChange={event => setSelectedAccountIds(event.target.checked
-                        ? [...new Set([...selectedAccountIds, ...users.map(account => account.id)])]
-                        : selectedAccountIds.filter(id => !users.some(account => account.id === id)))}
-                    />
-                    Select all {users.length} shown
-                  </label>
-                  <button
-                    onClick={handleBulkDeleteAccounts}
-                    disabled={!selectedAccountIds.some(id => users.some(account => account.id === id))}
-                    className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                  >
-                    Archive &amp; delete selected ({selectedAccountIds.filter(id => users.some(account => account.id === id)).length})
-                  </button>
+                  {selectableAccounts.length > 0 ? (
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={selectableAccounts.every(account => selectedAccountIds.includes(account.id))}
+                        onChange={event => handleAccountSelection(selectableAccounts, event.target.checked)}
+                      />
+                      Select accounts shown (up to {MAX_BULK_PASSWORD_RESETS} total)
+                    </label>
+                  ) : <p className="text-sm text-gray-500">No accounts in this tab; your selection from another tab is retained.</p>}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleBulkPasswordReset}
+                      disabled={selectedAccountIds.length === 0}
+                      className="rounded bg-cyan-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      Download login cards ({selectedAccountIds.length})
+                    </button>
+                    {(accountTab === 'parents' || accountTab === 'teachers') && (
+                      <button
+                        onClick={handleBulkDeleteAccounts}
+                        disabled={selectedVisibleAccountIds.length === 0}
+                        className="rounded bg-gray-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                      >
+                        Archive &amp; delete selected ({selectedVisibleAccountIds.length})
+                      </button>
+                    )}
+                  </div>
+                  <p className="w-full text-xs text-gray-500">
+                    Select accounts across tabs; one temporary password is applied to each selected account and printed on its own black-and-white card. Mixed batches including teachers need at least 6 characters. Choose a stronger password and share the PDF securely.
+                  </p>
                 </div>
               )}
 
@@ -2555,7 +2727,7 @@ const handleAdminPasswordReset = async (id, email) => {
                         <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex flex-col gap-4">
                             <label className="flex items-center gap-2 text-sm text-gray-500">
-                              <input type="checkbox" checked={selectedAccountIds.includes(u.id)} onChange={event => setSelectedAccountIds(prev => event.target.checked ? [...new Set([...prev, u.id])] : prev.filter(id => id !== u.id))} />
+                              <input type="checkbox" checked={selectedAccountIds.includes(u.id)} disabled={!selectedAccountIds.includes(u.id) && selectedAccountIds.length >= MAX_BULK_PASSWORD_RESETS} onChange={event => handleAccountSelection([{ id: u.id, role: u.role }], event.target.checked)} />
                               Select account
                             </label>
                             <div>
@@ -2599,6 +2771,17 @@ const handleAdminPasswordReset = async (id, email) => {
                       {filteredAccountStudents.map(s => (
                         <div key={s.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                           <div className="flex flex-col gap-4">
+                            {s.learnerUserId && (
+                              <label className="flex items-center gap-2 text-sm text-gray-500">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedAccountIds.includes(s.learnerUserId)}
+                                  disabled={!selectedAccountIds.includes(s.learnerUserId) && selectedAccountIds.length >= MAX_BULK_PASSWORD_RESETS}
+                                  onChange={event => handleAccountSelection([{ id: s.learnerUserId, role: 'learner' }], event.target.checked)}
+                                />
+                                Select learner login
+                              </label>
+                            )}
                             <div>
                               <h3 className="font-bold text-[#1d4ed8]">{s.firstName} {s.lastName}</h3>
                               <p className="text-sm text-gray-500">{s.studentId} | {displayStudentClassName(s.gradeLevel)}</p>
@@ -2624,7 +2807,7 @@ const handleAdminPasswordReset = async (id, email) => {
                                     alert('This learner does not have a linked portal login yet. Open View and create login credentials first.')
                                     return
                                   }
-                                  handleAdminPasswordReset(s.learnerUserId, s.email || s.learnerEmail || `${s.firstName} ${s.lastName}`)
+                                  handleAdminPasswordReset(s.learnerUserId, s.email || s.learnerEmail || `${s.firstName} ${s.lastName}`, 'learner')
                                 }}
                                 className="px-3 py-2 bg-cyan-700 text-white rounded"
                               >
@@ -2646,7 +2829,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           <div key={u.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                             <div className="flex flex-col gap-4">
                               <label className="flex items-center gap-2 text-sm text-gray-500">
-                                <input type="checkbox" checked={selectedAccountIds.includes(u.id)} onChange={event => setSelectedAccountIds(prev => event.target.checked ? [...new Set([...prev, u.id])] : prev.filter(id => id !== u.id))} />
+                                <input type="checkbox" checked={selectedAccountIds.includes(u.id)} disabled={!selectedAccountIds.includes(u.id) && selectedAccountIds.length >= MAX_BULK_PASSWORD_RESETS} onChange={event => handleAccountSelection([{ id: u.id, role: u.role }], event.target.checked)} />
                                 Select account
                               </label>
                               <div>
@@ -2668,7 +2851,7 @@ const handleAdminPasswordReset = async (id, email) => {
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <button onClick={() => openEditUser(u)} className="px-3 py-2 bg-blue-600 text-white rounded">Edit</button>
-                                <button onClick={() => handleAdminPasswordReset(u.id, u.email)} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
+                                <button onClick={() => handleAdminPasswordReset(u.id, u.email, 'teacher')} className="px-3 py-2 bg-cyan-700 text-white rounded">Reset Password</button>
                                 {u.active ? (
                                   <button onClick={() => handleDeactivateUser(u.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate</button>
                                 ) : (
@@ -2727,7 +2910,7 @@ const handleAdminPasswordReset = async (id, email) => {
                           Passwords cannot be viewed after they are saved. Set a temporary password if this user cannot log in.
                         </p>
                         <button
-                          onClick={() => handleAdminPasswordReset(editingUser.id, editingUser.email)}
+                          onClick={() => handleAdminPasswordReset(editingUser.id, editingUser.email, editingUser.role)}
                           className="px-4 py-2 bg-cyan-700 text-white rounded-lg text-sm font-bold"
                         >
                           Set Temporary Password

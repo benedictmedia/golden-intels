@@ -2,6 +2,15 @@ const prisma = require('../config/prismaClient')
 const bcrypt = require('bcryptjs')
 const { sendMail } = require('../utils/mailer')
 const { archive } = require('../utils/archive')
+const { validateTemporaryPassword } = require('../utils/temporaryPassword')
+
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, character => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+})[character])
 
 const ensureAdmin = (req, res) => {
   if (!req.user || req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
@@ -165,42 +174,157 @@ const updateUser = async (req, res) => {
 const resetUserPassword = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { id } = req.params
-  const { password } = req.body
+  const { password } = req.body || {}
 
-  if (!password || password.length < 6) {
-    return res.status(400).json({ message: 'Temporary password must be at least 6 characters.' })
+  try {
+    const userId = Number(id)
+    if (!Number.isSafeInteger(userId) || userId < 1) return res.status(400).json({ message: 'A valid account ID is required.' })
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    const passwordError = validateTemporaryPassword(password, user.role)
+    if (passwordError) return res.status(400).json({ message: passwordError })
+
+    const hashed = await bcrypt.hash(password, 10)
+    await prisma.$transaction(async tx => {
+      await tx.user.update({ where: { id: user.id }, data: { password: hashed } })
+      await tx.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() }
+      })
+      await tx.accountAudit.create({
+        data: {
+          userId: user.id,
+          action: 'password_reset_by_admin',
+          performedBy: req.user.email,
+          details: { email: user.email, role: user.role }
+        }
+      })
+    })
+
+    let emailSent = true
+    try {
+      await sendMail({
+        to: user.email,
+        subject: 'Your Golden-Intels portal password was reset',
+        text: `An administrator reset your portal password. Your temporary password is: ${password}\n\nPlease log in and change it as soon as possible.`,
+        html: `
+          <p>Hello ${escapeHtml(user.name)},</p>
+          <p>An administrator reset your portal password.</p>
+          <p><strong>Temporary password:</strong> ${escapeHtml(password)}</p>
+          <p>Please log in and change it as soon as possible.</p>
+        `,
+        throwOnError: true
+      })
+    } catch (emailError) {
+      emailSent = false
+      console.error(`Temporary password was set, but email delivery failed for user ${user.id}:`, emailError.message)
+    }
+
+    res.json({
+      message: emailSent
+        ? 'Temporary password set successfully and sent by email.'
+        : 'Temporary password was set, but the email could not be sent. Please give it to the user securely.',
+      emailSent
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
+const resetUserPasswords = async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
+  const { userIds, password, sendEmail: shouldSendEmail = true } = req.body || {}
+
+  if (!Array.isArray(userIds) || userIds.length === 0 || userIds.length > 100 ||
+      userIds.some(id => !Number.isSafeInteger(id) || id < 1) ||
+      new Set(userIds).size !== userIds.length) {
+    return res.status(400).json({ message: 'Select between 1 and 100 unique accounts.' })
+  }
+  if (typeof shouldSendEmail !== 'boolean') {
+    return res.status(400).json({ message: 'Email delivery preference must be true or false.' })
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: parseInt(id) } })
-    if (!user) return res.status(404).json({ message: 'User not found' })
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true, role: true }
+    })
+    if (users.length !== userIds.length) {
+      return res.status(404).json({ message: 'One or more selected accounts could not be found. Refresh the list and try again.' })
+    }
 
-    const hashed = await bcrypt.hash(password, 10)
-    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } })
-    await prisma.accountAudit.create({
-      data: {
-        userId: user.id,
-        action: 'password_reset_by_admin',
-        performedBy: req.user.email,
-        details: { email: user.email, role: user.role }
+    if (users.some(user => !['parent', 'learner', 'teacher'].includes(user.role))) {
+      return res.status(400).json({ message: 'Admin accounts cannot be included in this reset.' })
+    }
+
+    const passwordError = users
+      .map(user => validateTemporaryPassword(password, user.role))
+      .find(Boolean)
+    if (passwordError) return res.status(400).json({ message: passwordError })
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const resetAt = new Date()
+    await prisma.$transaction(async tx => {
+      const updates = await Promise.all(users.map(user => tx.user.updateMany({
+        where: { id: user.id, role: user.role },
+        data: { password: hashedPassword }
+      })))
+      if (updates.some(result => result.count !== 1)) {
+        const error = new Error('The selected accounts changed during the reset. Refresh the list and try again.')
+        error.statusCode = 409
+        throw error
       }
-    })
 
-    await sendMail({
-      to: user.email,
-      subject: 'Your Golden-Intels portal password was reset',
-      text: `An administrator reset your portal password. Your temporary password is: ${password}\n\nPlease log in and change it as soon as possible.`,
-      html: `
-        <p>Hello ${user.name},</p>
-        <p>An administrator reset your portal password.</p>
-        <p><strong>Temporary password:</strong> ${password}</p>
-        <p>Please log in and change it as soon as possible.</p>
-      `
-    })
+      await tx.passwordResetToken.updateMany({
+        where: { userId: { in: userIds }, usedAt: null },
+        data: { usedAt: resetAt }
+      })
+      await tx.accountAudit.createMany({
+        data: users.map(user => ({
+          userId: user.id,
+          action: 'password_reset_by_admin',
+          performedBy: req.user.email,
+          details: { email: user.email, role: user.role }
+        }))
+      })
+    }, { timeout: 30000 })
 
-    res.json({ message: 'Temporary password set successfully.' })
+    let emailFailures = []
+    if (shouldSendEmail) {
+      const emailResults = await Promise.allSettled(users.map(user => sendMail({
+        to: user.email,
+        subject: 'Your Golden-Intels portal password was reset',
+        text: `An administrator reset your portal password. Your temporary password is: ${password}\n\nPlease log in and change it as soon as possible.`,
+        html: `
+          <p>Hello ${escapeHtml(user.name)},</p>
+          <p>An administrator reset your portal password.</p>
+          <p><strong>Temporary password:</strong> ${escapeHtml(password)}</p>
+          <p>Please log in and change it as soon as possible.</p>
+        `,
+        throwOnError: true
+      })))
+      emailFailures = users
+        .filter((_, index) => emailResults[index].status === 'rejected')
+        .map(user => user.email)
+    }
+
+    res.json({
+      message: shouldSendEmail
+        ? emailFailures.length
+          ? `Temporary password set for ${users.length} accounts; email delivery failed for ${emailFailures.length}.`
+          : `Temporary password set and emailed to ${users.length} accounts.`
+        : `Temporary password set for ${users.length} accounts.`,
+      updatedCount: users.length,
+      emailFailures,
+      users
+    })
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error('Bulk temporary password reset failed:', error.message)
+    res.status(error.statusCode || 500).json({
+      message: error.statusCode === 409
+        ? error.message
+        : 'Could not reset the selected passwords. Refresh the account list and try again.'
+    })
   }
 }
 
@@ -315,4 +439,4 @@ const getAccountAudits = async (req, res) => {
   }
 }
 
-module.exports = { getUsers, updateUser, resetUserPassword, deactivateUser, reactivateUser, deleteUser, getAccountAudits }
+module.exports = { getUsers, updateUser, resetUserPassword, resetUserPasswords, deactivateUser, reactivateUser, deleteUser, getAccountAudits }
