@@ -1,87 +1,62 @@
-/* ============================================================
-   PORTAL MOBILE FIXES
-   Applies only on screens smaller than 768px (md breakpoint)
-   ============================================================ */
-
-/* ── Shared portal shell ── */
 @media (max-width: 767px) {
-
-  /* Make the shell full height and prevent body scroll */
   .portal-shell {
     height: 100dvh;
-    overflow: hidden;
-    position: relative;
+    min-height: 100dvh;
   }
 
-  /* Sidebar: slide in as overlay on mobile */
   .portal-sidebar {
     position: fixed !important;
-    top: 0;
-    left: 0;
-    height: 100dvh !important;
+    inset: 0 auto 0 0;
     z-index: 40;
-    transition: transform 0.3s ease, width 0.3s ease;
+    width: min(86vw, 20rem) !important;
+    max-width: 20rem;
+    height: 100dvh !important;
+    transform: translateX(-105%);
+    transition: transform 0.3s ease;
   }
 
-  /* When sidebar is collapsed (w-20 or w-0), hide it off-screen */
-  .portal-sidebar:not(.is-open) {
-    transform: translateX(-100%);
-    width: 16rem !important; /* keep width, just hide with transform */
-  }
-
-  /* When sidebar is open, show it */
   .portal-sidebar.is-open {
     transform: translateX(0);
-    width: 16rem !important;
   }
 
-  /* Backdrop overlay when sidebar is open */
-  .portal-sidebar.is-open::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
-  }
-
-  /* Main content always takes full width on mobile */
   .portal-main {
-    flex: 1;
-    min-width: 0;
-    width: 100% !important;
-    overflow: hidden;
     display: flex;
+    width: 100% !important;
+    min-width: 0;
+    height: 100dvh;
     flex-direction: column;
   }
 
-  /* Top bar */
   .portal-topbar {
     flex-shrink: 0;
-    padding: 0.75rem 1rem !important;
     gap: 0.5rem;
+    padding: 0.75rem 1rem !important;
   }
 
-  /* Reduce topbar font size on mobile */
   .portal-topbar h1 {
     font-size: 1rem !important;
+    line-height: 1.35;
   }
 
-  /* Content area scrolls independently */
   .portal-content {
+    min-height: 0;
     flex: 1;
+    overflow-x: hidden;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     padding: 1rem !important;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* ── Admin Messages chat panel ── */
-  .portal-content > div[style*="calc"] ,
-  div[style*="calc(100dvh"] {
-    height: calc(100dvh - 120px) !important;
-    min-height: 300px;
+  .portal-content .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  /* ── Notification bell dropdown ── */
+  .portal-content :is(.overflow-x-auto, .overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .notification-panel {
     position: fixed !important;
     top: 60px !important;
@@ -93,73 +68,12 @@
     z-index: 100;
   }
 
-  /* ── Tables: make scrollable horizontally ── */
-  .portal-content table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* ── Stat cards: 2 columns on mobile ── */
-  .portal-content .grid-cols-4 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  /* ── Modals: full screen on mobile ── */
-  .fixed.inset-0 > div[class*="max-w"] {
-    margin: 0.5rem;
-    max-height: calc(100dvh - 1rem);
-    overflow-y: auto;
-  }
-}
-
-/* ── Fix for tabs rendered outside portal-content but inside portal-main ── */
-@media (max-width: 767px) {
-
-  /* These four tabs sit directly inside portal-main, not portal-content.
-     Give them their own scroll container and padding */
-  .portal-main > div[class*="max-w-xl"],
-  .portal-main > div > div[class*="max-w-xl"] {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    height: calc(100dvh - 120px);
-    padding: 1rem;
-  }
-
-  /* Contact messages tab - the outer div has no class, target by position */
-  .portal-main > div:not([class]) {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    height: calc(100dvh - 120px);
-    padding: 1rem;
-  }
-}
-
-/* ── Orphaned tabs (outside portal-content, inside portal-main) ── */
-@media (max-width: 767px) {
-
-  .orphan-tab {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    height: calc(100dvh - 120px);
-    padding: 1rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
+  .orphan-tab,
   .orphan-tab-messages {
-    height: calc(100dvh - 120px);
     width: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* AdminMessages inner panel inside orphan wrapper */
-  .orphan-tab-messages > div {
-    flex: 1;
-    height: 100% !important;
-    min-height: unset !important;
+    min-width: 0;
+    max-height: calc(100dvh - 120px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

@@ -53,6 +53,12 @@ export default function TeacherDashboard() {
   const [attendanceSaving, setAttendanceSaving] = useState(false)
   const [attendanceError, setAttendanceError] = useState('')
   const [attendanceSaved, setAttendanceSaved] = useState(false)
+  const [attendanceSavedMessage, setAttendanceSavedMessage] = useState('')
+  const [selectedAttendanceStudentIds, setSelectedAttendanceStudentIds] = useState([])
+  const [bulkAttendanceStatus, setBulkAttendanceStatus] = useState('absent_without_permission')
+  const [backfillDateInput, setBackfillDateInput] = useState('')
+  const [backfillDates, setBackfillDates] = useState([])
+
   const [manualExercises, setManualExercises] = useState([])
   const [showAddManualExercise, setShowAddManualExercise] = useState(false)
   const [manualExercise, setManualExercise] = useState({ title: '', subject: '', gradeLevel: '', studentId: '', workStatus: 'completed', score: '', maxScore: '100', feedback: '' })
@@ -668,6 +674,89 @@ useEffect(() => {
     setAttendance({ ...attendance, [studentId]: status })
   }
 
+  const toggleAttendanceStudent = (studentId) => {
+    setSelectedAttendanceStudentIds(prev => (
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    ))
+  }
+
+  const toggleAllAttendanceStudents = (checked) => {
+    setSelectedAttendanceStudentIds(checked ? filteredStudents.map(student => student.id) : [])
+  }
+
+  const applyBulkAttendanceToDate = () => {
+    setAttendance(prev => ({
+      ...prev,
+      ...Object.fromEntries(selectedAttendanceStudentIds.map(id => [id, bulkAttendanceStatus]))
+    }))
+  }
+
+  const addBackfillDate = () => {
+    if (!backfillDateInput) return
+    const now = new Date()
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
+    const today = now.toISOString().slice(0, 10)
+    if (backfillDateInput > today) {
+      setAttendanceError('Only today or previous dates can be backfilled.')
+      return
+    }
+    setAttendanceError('')
+    setBackfillDates(prev => prev.includes(backfillDateInput) ? prev : [...prev, backfillDateInput].sort())
+    setBackfillDateInput('')
+  }
+
+  const saveAttendanceForMissedDates = async () => {
+    if (!selectedAttendanceStudentIds.length || !backfillDates.length) {
+      setAttendanceError('Select at least one learner and one missed date to continue.')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    setAttendanceSaving(true)
+    setAttendanceError('')
+    try {
+      await axios.post(`${API_URL}/api/attendance`, {
+        dates: backfillDates,
+        gradeLevel: activeClass,
+        recordedBy: user?.name || 'Teacher',
+        academicYear: selectedAcademicYear,
+        term: selectedTerm,
+        records: selectedAttendanceStudentIds.map(studentId => ({
+          studentId,
+          status: bulkAttendanceStatus
+        }))
+      }, { headers })
+
+      if (backfillDates.includes(attendanceDate)) {
+        const res = await axios.get(`${API_URL}/api/attendance`, {
+          headers,
+          params: { date: attendanceDate, gradeLevel: activeClass }
+        })
+        setAttendanceRecords(res.data)
+        const nextAttendance = {}
+        res.data.forEach(record => {
+          nextAttendance[record.studentId] = record.status
+        })
+        setAttendance(nextAttendance)
+      }
+      setAttendanceSavedMessage(
+        `Attendance saved for ${selectedAttendanceStudentIds.length} learner(s) across ${backfillDates.length} date(s).`
+      )
+      setAttendanceSaved(true)
+      setBackfillDates([])
+      setSelectedAttendanceStudentIds([])
+      setTimeout(() => setAttendanceSaved(false), 4000)
+    } catch (error) {
+      console.error('Bulk attendance save error:', error)
+      setAttendanceError(error.response?.data?.message || 'Failed to save attendance for the selected dates.')
+    } finally {
+      setAttendanceSaving(false)
+    }
+  }
+
   const handleAddManualExercise = async () => {
     if (!manualExercise.title || !manualExercise.subject || !manualExercise.gradeLevel || !manualExercise.studentId) {
       setManualExerciseError('Please complete the title, subject, class, and learner fields before saving.')
@@ -745,6 +834,7 @@ useEffect(() => {
         nextAttendance[record.studentId] = record.status
       })
       setAttendance(nextAttendance)
+      setAttendanceSavedMessage(`Attendance saved for ${activeClass} on ${new Date(attendanceDate).toLocaleDateString()}.`)
       setAttendanceSaved(true)
       setTimeout(() => setAttendanceSaved(false), 3000)
     } catch (error) {
@@ -1252,7 +1342,10 @@ useEffect(() => {
                 {teacherClassOptions.map(cls => (
                   <button
                     key={cls}
-                    onClick={() => setActiveClass(cls)}
+                    onClick={() => {
+                      setSelectedAttendanceStudentIds([])
+                      setActiveClass(cls)
+                    }}
                     className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                       activeClass === cls ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb] hover:bg-[#2563eb] hover:text-white'
                     }`}
@@ -1349,7 +1442,10 @@ useEffect(() => {
                 {classTeacherClassOptions.map(cls => (
                   <button
                     key={cls}
-                    onClick={() => setActiveClass(cls)}
+                    onClick={() => {
+                      setSelectedAttendanceStudentIds([])
+                      setActiveClass(cls)
+                    }}
                     className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${
                       activeClass === cls ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb] hover:bg-[#2563eb] hover:text-white'
                     }`}
@@ -1363,9 +1459,83 @@ useEffect(() => {
                   You are not assigned as class teacher for any class yet. Contact admin to add a class-teacher assignment.
                 </div>
               )}
+              <div className="mb-4 grid gap-3 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <div>
+                  <label htmlFor="bulk-attendance-status" className="mb-1 block text-xs font-bold text-[#2563eb]">
+                    Bulk status for selected learners
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <select
+                      id="bulk-attendance-status"
+                      value={bulkAttendanceStatus}
+                      onChange={event => setBulkAttendanceStatus(event.target.value)}
+                      className="min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700"
+                    >
+                      <option value="present">Present</option>
+                      <option value="late">Late</option>
+                      <option value="absent_permission">Absent (on permission)</option>
+                      <option value="absent_without_permission">Absent (without permission)</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={applyBulkAttendanceToDate}
+                      disabled={!selectedAttendanceStudentIds.length}
+                      className="rounded-xl bg-blue-50 px-3 py-2 text-sm font-bold text-[#2563eb] disabled:opacity-50"
+                    >
+                      Apply to {selectedAttendanceStudentIds.length || 'selected'}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">Apply one status to selected learners for the displayed date.</p>
+                </div>
+                <div>
+                  <label htmlFor="attendance-backfill-date" className="mb-1 block text-xs font-bold text-[#2563eb]">
+                    Add missed dates for bulk backfill
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      id="attendance-backfill-date"
+                      type="date"
+                      value={backfillDateInput}
+                      onChange={event => setBackfillDateInput(event.target.value)}
+                      className="min-w-0 flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700"
+                    />
+                    <button
+                      type="button"
+                      onClick={addBackfillDate}
+                      disabled={!backfillDateInput}
+                      className="rounded-xl border border-[#2563eb] px-3 py-2 text-sm font-bold text-[#2563eb] disabled:opacity-50"
+                    >
+                      Add date
+                    </button>
+                  </div>
+                  {backfillDates.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {backfillDates.map(date => (
+                        <button
+                          key={date}
+                          type="button"
+                          onClick={() => setBackfillDates(prev => prev.filter(item => item !== date))}
+                          aria-label={`Remove ${date} from missed dates`}
+                          className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#2563eb]"
+                        >
+                          {new Date(`${date}T00:00:00`).toLocaleDateString()} - Remove
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={saveAttendanceForMissedDates}
+                    disabled={attendanceSaving || !selectedAttendanceStudentIds.length || !backfillDates.length}
+                    className="mt-2 rounded-xl bg-[#1d4ed8] px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    {attendanceSaving ? 'Saving...' : 'Save selected learners to missed dates'}
+                  </button>
+                </div>
+              </div>
               {attendanceSaved && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
-                  Attendance saved for {activeClass} on {new Date(attendanceDate).toLocaleDateString()}.
+                  {attendanceSavedMessage}
                 </div>
               )}
               {attendanceError && (
@@ -1377,6 +1547,14 @@ useEffect(() => {
                 <table className="w-full text-sm">
                   <thead className="bg-[#2563eb] text-white">
                     <tr>
+                      <th className="px-3 py-4 text-left">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all learners in this class"
+                          checked={filteredStudents.length > 0 && filteredStudents.every(student => selectedAttendanceStudentIds.includes(student.id))}
+                          onChange={event => toggleAllAttendanceStudents(event.target.checked)}
+                        />
+                      </th>
                       <th className="px-6 py-4 text-left">Student</th>
                       <th className="px-6 py-4 text-left">Status</th>
                       <th className="px-6 py-4 text-left">Recorded</th>
@@ -1385,15 +1563,23 @@ useEffect(() => {
                   <tbody>
                     {attendanceLoading ? (
                       <tr>
-                        <td colSpan="3" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
+                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">Loading attendance records...</td>
                       </tr>
                     ) : filteredStudents.length === 0 ? (
                       <tr>
-                        <td colSpan="3" className="px-6 py-8 text-center text-gray-400">No students in this class.</td>
+                        <td colSpan="4" className="px-6 py-8 text-center text-gray-400">No students in this class.</td>
                       </tr>
                     ) : (
                       filteredStudents.map((student, index) => (
                         <tr key={student.id} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-50'}>
+                          <td className="px-3 py-4">
+                            <input
+                              type="checkbox"
+                              aria-label={`Select ${student.firstName} ${student.lastName}`}
+                              checked={selectedAttendanceStudentIds.includes(student.id)}
+                              onChange={() => toggleAttendanceStudent(student.id)}
+                            />
+                          </td>
                           <td className="px-6 py-4">
                             <p className="font-bold text-[#2563eb]">{student.firstName} {student.lastName}</p>
                             <p className="text-xs text-gray-400">{student.studentId}</p>

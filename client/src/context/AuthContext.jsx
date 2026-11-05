@@ -51,6 +51,7 @@ export function AuthProvider({ children }) {
     const { token, user } = res.data
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
+    localStorage.setItem('goldenIntelsLastActivityAt', String(Date.now()))
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
     setUser(user)
     return user
@@ -62,6 +63,7 @@ export function AuthProvider({ children }) {
       .forEach(key => sessionStorage.removeItem(key))
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('goldenIntelsLastActivityAt')
     delete axios.defaults.headers.common['Authorization']
     setUser(null)
   }

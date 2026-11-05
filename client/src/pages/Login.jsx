@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/layout/BrandLogo'
@@ -14,6 +14,7 @@ export default function Login() {
   const [forgotMode, setForgotMode] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -68,6 +69,12 @@ export default function Login() {
           <h1 className="text-2xl font-bold font-serif text-cyan-700">Portal Login</h1>
           <p className="text-gray-500 text-sm mt-1">Golden-Intels International School</p>
         </div>
+
+        {location.state?.reason === 'inactive' && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800" role="status">
+            You were logged out after 10 minutes of inactivity. Please log in again.
+          </div>
+        )}
 
         {/* Error */}
         {error && (

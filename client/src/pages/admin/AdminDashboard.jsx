@@ -13,6 +13,7 @@ import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScore
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import { compressImage, compressImages } from '../../utils/compressImage'
 import AdminMessages from '../../components/messages/AdminMessages'
+import { getLearnerAge } from '../../utils/learnerAge'
 import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
@@ -3693,7 +3694,7 @@ const handleAdminPasswordReset = async (id, email) => {
           <div>
             {[
               { title: "Learner's Data", fields: [
-                ['Date of Birth', selectedStudent.dateOfBirth], ['Age', selectedStudent.age], ['Gender', selectedStudent.gender],
+                ['Date of Birth', selectedStudent.dateOfBirth], ['Age', getLearnerAge(selectedStudent.dateOfBirth) || '—'], ['Gender', selectedStudent.gender],
                 ['Month of Birth', selectedStudent.monthOfBirth], ['Place of Birth', selectedStudent.placeOfBirth],
                 ['Grade Level', displayStudentClassName(selectedStudent.gradeLevel)], ['Division', selectedStudent.division],
                 ['Academic Year', selectedStudent.academicYear], ['Previous School', selectedStudent.previousSchool],
@@ -3911,6 +3912,14 @@ const handleAdminPasswordReset = async (id, email) => {
                           <option value="">Select {label.toLowerCase()}</option>
                           {options.map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
+                      ) : key === 'age' ? (
+                        <input
+                          type="text"
+                          value={getLearnerAge(editStudent.dateOfBirth) || '—'}
+                          readOnly
+                          aria-describedby="learner-age-help"
+                          className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 text-sm"
+                        />
                       ) : (
                         <input
                           type={type}
@@ -3922,6 +3931,11 @@ const handleAdminPasswordReset = async (id, email) => {
                     </div>
                   ))}
                 </div>
+                {section.fields.some(([key]) => key === 'age') && (
+                  <p id="learner-age-help" className="mt-2 text-xs text-gray-500">
+                    Age is calculated automatically from the date of birth.
+                  </p>
+                )}
               </div>
             ))}
 

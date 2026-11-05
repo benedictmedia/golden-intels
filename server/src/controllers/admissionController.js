@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const { createNotificationsForRole } = require('./notificationController')
 const { canonicalStudentClassName } = require('../utils/studentClasses')
 const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
+const { getAgeFromDateOfBirth } = require('../utils/studentAge')
 const { sendMail } = require('../utils/mailer')
 
 const path = require('path')
@@ -241,7 +242,7 @@ const approveApplication = async (req, res) => {
         source: 'admission',
         admissionApplicationId: application.id,
 
-        age: application.age,
+        age: getAgeFromDateOfBirth(application.dateOfBirth),
         monthOfBirth: application.monthOfBirth,
         placeOfBirth: application.placeOfBirth,
         height: application.height,

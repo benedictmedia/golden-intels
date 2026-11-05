@@ -50,6 +50,8 @@
     min-height: 100vh;
     height: 100dvh;
     overflow: hidden;
+    width: 100%;
+    min-width: 0;
   }
 
   .portal-sidebar {
@@ -66,10 +68,30 @@
 
   .portal-content {
     min-width: 0;
+    min-height: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .portal-shell :is(.truncate, [class*="line-clamp-"]) {
+    display: block;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+    -webkit-line-clamp: unset;
+    -webkit-box-orient: initial;
+  }
+
+  .portal-content :is(.grid > *, .flex > *) {
+    min-width: 0;
+  }
+
+  .portal-content :is(p, span, label, th, td, h1, h2, h3, h4) {
+    overflow-wrap: anywhere;
   }
 
   .portal-content table {
-    min-width: 720px;
+    min-width: 640px;
   }
 
   .portal-content :is(.overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
@@ -173,7 +195,13 @@
   }
 
   .portal-content table {
-    min-width: 680px;
+    min-width: 640px;
+  }
+
+  .portal-content :is(.overflow-x-auto, .overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -350,7 +378,7 @@
   }
 }
 
-/* Ensure table responsiveness on mobile */
+/* Keep every table column available through horizontal scrolling. */
 @media (max-width: 768px) {
   .portal-content table {
     font-size: 0.75rem;
@@ -361,11 +389,6 @@
     padding: 0.5rem 0.25rem !important;
   }
 
-  /* Hide less important table columns on mobile */
-  .portal-content table th:nth-child(n+5),
-  .portal-content table td:nth-child(n+5) {
-    display: none;
-  }
 }
 
 /* Keep primary actions compact across the admin, teacher, parent, and learner portals. */

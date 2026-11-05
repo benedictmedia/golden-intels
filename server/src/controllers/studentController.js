@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const { archive } = require('../utils/archive')
 const { canonicalStudentClassName, normalizeStudentClassName } = require('../utils/studentClasses')
 const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
+const { getAgeFromDateOfBirth } = require('../utils/studentAge')
 const prisma = new PrismaClient()
 
 // Every "admission form" field that lives on Student in addition to the core
@@ -10,7 +11,7 @@ const prisma = new PrismaClient()
 // Student, so a manually-added learner can be created with just the core
 // fields and have the rest filled in later from the Edit screen.
 const EXTENDED_PROFILE_FIELDS = [
-  'age', 'monthOfBirth', 'placeOfBirth', 'height', 'weight', 'hometown',
+  'monthOfBirth', 'placeOfBirth', 'height', 'weight', 'hometown',
   'motherTongue', 'religion', 'dateOfAdmission', 'previousSchool',
   'parentOccupation', 'secondaryContactName', 'secondaryContactPhone',
   'fatherName', 'fatherAddress', 'fatherNationality', 'fatherMaritalStatus',
@@ -31,6 +32,10 @@ const EXTENDED_PROFILE_FIELDS = [
 // Key = form field name, value = Student column name (same for all of these).
 const DOCUMENT_FIELDS = ['photo', 'nhisFront', 'nhisBack', 'ghanaFront', 'ghanaBack', 'signedBooklet']
 const normalizeLearnerName = (value) => String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
+const withCurrentAge = (student) => ({
+  ...student,
+  age: getAgeFromDateOfBirth(student.dateOfBirth)
+})
 
 // Pulls only the extended-profile keys that were actually sent in the body,
 // so a partial edit never clobbers fields the admin didn't touch.
@@ -132,7 +137,7 @@ const getStudents = async (req, res) => {
         orderBy: order,
         include: { parent: { select: { id: true, name: true, email: true } } }
       })
-      return res.json(students)
+      return res.json(students.map(withCurrentAge))
     }
 
     if (req.user && req.user.role === 'teacher') {
@@ -154,7 +159,7 @@ const getStudents = async (req, res) => {
         ? students.filter(student => teacherClasses.includes(normalizeStudentClassName(canonicalStudentClassName(student.gradeLevel))))
         : students.filter(student => normalizeStudentClassName(canonicalStudentClassName(student.gradeLevel)) === normalizeStudentClassName(canonicalStudentClassName(staff.department)))
 
-      return res.json(filteredStudents)
+      return res.json(filteredStudents.map(withCurrentAge))
     }
 
     const students = await prisma.student.findMany({ 
@@ -162,7 +167,8 @@ const getStudents = async (req, res) => {
       orderBy: order, 
       include: { parent: { select: { id: true, name: true, email: true } } } 
     })
-    res.json(req.user?.role === 'admin' ? await includeLearnerAccountStatus(students) : students)
+    const learners = req.user?.role === 'admin' ? await includeLearnerAccountStatus(students) : students
+    res.json(learners.map(withCurrentAge))
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Server error' })
@@ -196,6 +202,7 @@ const createStudent = async (req, res) => {
           firstName,
           lastName,
           dateOfBirth:  dateOfBirth  || null,
+          age: getAgeFromDateOfBirth(dateOfBirth),
           gender,
           gradeLevel: canonicalStudentClassName(gradeLevel),
           division: division || null,
@@ -280,6 +287,7 @@ const updateStudent = async (req, res) => {
     const studentIdNumber = parseInt(id)
     const existingStudent = await prisma.student.findUnique({ where: { id: studentIdNumber } })
     if (!existingStudent) return res.status(404).json({ message: 'Student not found.' })
+    data.age = getAgeFromDateOfBirth(data.dateOfBirth ?? existingStudent.dateOfBirth)
     const shouldArchive = ['transferred', 'graduated'].includes(String(status || '').toLowerCase()) && !existingStudent.archivedAt
     const student = await prisma.$transaction(async (tx) => {
       if (parentEmail !== undefined) {
@@ -435,6 +443,7 @@ const bulkImportStudents = async (req, res) => {
         })
         const learnerData = {
           ...data,
+          age: getAgeFromDateOfBirth(data.dateOfBirth ?? existing?.dateOfBirth),
           parentId,
           email: learnerAccount.email,
           learnerUserId: learnerAccount.id
@@ -496,7 +505,7 @@ const getStudent = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' })
     }
 
-    res.json(student)
+    res.json(withCurrentAge(student))
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -620,7 +629,7 @@ const getMyProfile = async (req, res) => {
     }
     if (student.archivedAt) return res.status(403).json({ message: 'This learner profile is archived.' })
 
-    res.json(student)
+    res.json(withCurrentAge(student))
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
