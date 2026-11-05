@@ -7,7 +7,6 @@ import {
   GraduationCap, LogOut, Menu, X, Bell, MonitorPlay, 
   User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award, Lock, CalendarDays
 } from 'lucide-react'
-import { jsPDF } from 'jspdf'
 import API_URL from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -886,7 +885,8 @@ useEffect(() => {
     setLmsItemView({ item, type })
   }
 
-  const handleDownloadSubmissionPdf = (record) => {
+  const handleDownloadSubmissionPdf = async (record) => {
+    const { jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     doc.setFontSize(16)
     doc.text('Student Submission Report', 14, 20)

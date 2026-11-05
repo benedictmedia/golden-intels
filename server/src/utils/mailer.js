@@ -1,51 +1,16 @@
 const nodemailer = require('nodemailer')
-const dns = require('node:dns')
-const tls = require('node:tls')
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD
-  },
-  getSocket(options, callback) {
-    dns.promises.resolve4(options.host)
-      .then((addresses) => {
-        const ipv4Address = addresses[0]
-        if (!ipv4Address) {
-          throw new Error(`No IPv4 address found for mail server ${options.host}.`)
-        }
-
-        const connection = tls.connect({
-          host: ipv4Address,
-          port: options.port,
-          servername: options.host
-        })
-        const onError = (error) => {
-          connection.destroy()
-          callback(error)
-        }
-
-        connection.once('error', onError)
-        connection.once('secureConnect', () => {
-          connection.removeListener('error', onError)
-          callback(null, { connection, secured: true })
-        })
-      })
-      .catch(callback)
-  }
-})
 
 const sendWithResend = async ({ to, subject, text, html }) => {
-  const from = process.env.EMAIL_FROM
-  if (!from) {
-    throw new Error('EMAIL_FROM must be configured when using Resend.')
+  const { RESEND_API_KEY: apiKey, EMAIL_FROM: from } = process.env
+  if (!apiKey || !from) {
+    throw new Error('Resend email requires both RESEND_API_KEY and EMAIL_FROM to be configured.')
   }
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
+    signal: AbortSignal.timeout(15000),
     headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -70,31 +35,47 @@ const sendWithResend = async ({ to, subject, text, html }) => {
     throw new Error(`Resend email API failed: ${details}`)
   }
 
-  console.log('✅ Email sent via Resend:', result.id || 'accepted')
+  console.log('Email sent via Resend:', result.id || 'accepted')
   return result
+}
+
+const sendWithGmail = async ({ to, subject, text, html }) => {
+  const { EMAIL_USER: user, EMAIL_APP_PASSWORD: pass } = process.env
+  if (!user || !pass) {
+    throw new Error('No outgoing email provider is configured. Set RESEND_API_KEY and EMAIL_FROM, or EMAIL_USER and EMAIL_APP_PASSWORD.')
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000
+  })
+
+  const info = await transporter.sendMail({
+    from: `"Golden-Intels International School" <${user}>`,
+    to: Array.isArray(to) ? to.join(',') : to,
+    subject,
+    text,
+    html
+  })
+  console.log('Email sent:', info.messageId)
+  return info
 }
 
 const sendMail = async ({ to, subject, text, html, throwOnError = false }) => {
   if (!to || (Array.isArray(to) && to.length === 0)) {
-    console.warn('⚠️ sendMail skipped: no recipient email provided')
+    console.warn('sendMail skipped: no recipient email provided')
     return
   }
   try {
     if (process.env.RESEND_API_KEY) {
       return await sendWithResend({ to, subject, text, html })
     }
-
-    const info = await transporter.sendMail({
-      from: `"Golden-Intels International School" <${process.env.EMAIL_USER}>`,
-      to: Array.isArray(to) ? to.join(',') : to,
-      subject,
-      text,
-      html
-    })
-    console.log('✅ Email sent:', info.messageId)
-    return info
+    return await sendWithGmail({ to, subject, text, html })
   } catch (error) {
-    console.error('❌ Failed to send email:', error.message)
+    console.error('Failed to send email:', error.message)
     if (throwOnError) throw error
   }
 }

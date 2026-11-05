@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -75,7 +73,7 @@
   .portal-shell :is(.truncate, [class*="line-clamp-"]) {
     display: block;
     overflow: visible;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     text-overflow: clip;
     white-space: normal;
     -webkit-line-clamp: unset;
@@ -86,16 +84,73 @@
     min-width: 0;
   }
 
-  .portal-content :is(p, span, label, th, td, h1, h2, h3, h4) {
+  .portal-content :is(p, label, h1, h2, h3, h4) {
     overflow-wrap: anywhere;
   }
 
   .portal-content table {
-    min-width: 640px;
+    width: 100%;
+    min-width: 720px;
+    table-layout: auto;
   }
 
-  .portal-content :is(.overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
-    overflow-x: auto;
+  .portal-content table th {
+    white-space: nowrap;
+  }
+
+  .portal-content table td {
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+  }
+
+  .portal-content table td :is(span, button) {
+    overflow-wrap: normal;
+  }
+
+  .portal-content .admin-learners-table {
+    min-width: 960px;
+    table-layout: fixed;
+  }
+
+  .portal-content .admin-learners-table th:nth-child(1),
+  .portal-content .admin-learners-table td:nth-child(1) { width: 5%; }
+  .portal-content .admin-learners-table th:nth-child(2),
+  .portal-content .admin-learners-table td:nth-child(2) { width: 7%; }
+  .portal-content .admin-learners-table th:nth-child(3),
+  .portal-content .admin-learners-table td:nth-child(3) { width: 16%; }
+  .portal-content .admin-learners-table th:nth-child(4),
+  .portal-content .admin-learners-table td:nth-child(4) { width: 28%; }
+  .portal-content .admin-learners-table th:nth-child(5),
+  .portal-content .admin-learners-table td:nth-child(5) { width: 12%; }
+  .portal-content .admin-learners-table th:nth-child(6),
+  .portal-content .admin-learners-table td:nth-child(6) { width: 10%; }
+  .portal-content .admin-learners-table th:nth-child(7),
+  .portal-content .admin-learners-table td:nth-child(7) { width: 10%; }
+  .portal-content .admin-learners-table th:nth-child(8),
+  .portal-content .admin-learners-table td:nth-child(8) { width: 12%; }
+
+  .portal-content .admin-learners-table td:nth-child(3),
+  .portal-content .admin-learners-table td:nth-child(5),
+  .portal-content .admin-learners-table td:nth-child(6),
+  .portal-content .admin-learners-table td:nth-child(7),
+  .portal-content .admin-learners-table td:nth-child(8) {
+    white-space: nowrap;
+  }
+
+  .portal-content .admin-learners-table td:nth-child(3) span {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .portal-content .admin-learners-table td:nth-child(4) {
+    overflow-wrap: anywhere;
+  }
+
+  .portal-content :is(.overflow-x-auto, .overflow-hidden, .rounded-xl, .rounded-2xl):has(> table) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

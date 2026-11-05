@@ -1,29 +1,30 @@
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useAuth } from './context/AuthContext'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import PageTransition from './components/layout/PageTransition'
-import Home from './pages/Home'
-import About from './pages/About'
-import Academics from './pages/Academics'
-import Curriculum from './pages/Curriculum'
-import CampusLife from './pages/CampusLife'
-import OurServices from './pages/OurServices'
-import Admissions from './pages/Admissions'
-import Gallery from './pages/Gallery'
-import NewsEvents from './pages/NewsEvents'
-import Staff from './pages/Staff'
-import Contact from './pages/Contact'
-import Login from './pages/Login'
-import ResetPassword from './pages/ResetPassword'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import TeacherDashboard from './pages/teacher/TeacherDashboard'
-import ParentDashboard from './pages/parent/ParentDashboard'
-import FeePayment from './pages/parent/FeePayment'
-import LearnerDashboard from './pages/learner/LearnerDashboard'
 import ScrollToTop from './components/ScrollToTop'
+
+const Home = lazy(() => import('./pages/Home'))
+const About = lazy(() => import('./pages/About'))
+const Academics = lazy(() => import('./pages/Academics'))
+const Curriculum = lazy(() => import('./pages/Curriculum'))
+const CampusLife = lazy(() => import('./pages/CampusLife'))
+const OurServices = lazy(() => import('./pages/OurServices'))
+const Admissions = lazy(() => import('./pages/Admissions'))
+const Gallery = lazy(() => import('./pages/Gallery'))
+const NewsEvents = lazy(() => import('./pages/NewsEvents'))
+const Staff = lazy(() => import('./pages/Staff'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Login = lazy(() => import('./pages/Login'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'))
+const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'))
+const FeePayment = lazy(() => import('./pages/parent/FeePayment'))
+const LearnerDashboard = lazy(() => import('./pages/learner/LearnerDashboard'))
 
 const ROLE_HOME = {
   admin: '/admin',
@@ -122,7 +123,8 @@ function AnimatedRoutes() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-sm text-gray-500">Loading page...</div>}>
+          <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />
           <Route path="/about" element={<PageTransition><Navbar /><About /><Footer /></PageTransition>} />
           <Route path="/academics" element={<PageTransition><Navbar /><Academics /><Footer /></PageTransition>} />
@@ -141,7 +143,8 @@ function AnimatedRoutes() {
           <Route path="/parent" element={<RequireRole role="parent"><ParentDashboard /></RequireRole>} />
           <Route path="/parent/pay-fees" element={<RequireRole role="parent"><FeePayment /></RequireRole>} />
           <Route path="/learner" element={<RequireRole role="learner"><LearnerDashboard /></RequireRole>} />
-        </Routes>
+          </Routes>
+        </Suspense>
       </AnimatePresence>
     </div>
   )

@@ -21,7 +21,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const user = await login(email, password)
+      const user = await login(email.trim(), password)
       if (user.role === 'admin') navigate('/admin')
       else if (user.role === 'teacher') navigate('/teacher')
       else if (user.role === 'parent') navigate('/parent')
@@ -46,11 +46,13 @@ export default function Login() {
     setMessage('')
     setLoading(true)
     try {
-      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email })
+      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email: email.trim() })
       setMessage(res.data.message || 'If that email is registered, a password reset link has been sent.')
     } catch (err) {
       if (!err.response) {
         setError('Could not reach the portal server. Check your connection or contact school support.')
+      } else if (err.response.status === 503) {
+        setError('We could not send a password reset email right now. Please try again later or contact school support.')
       } else {
         setError(err.response.data?.message || 'Could not request password reset. Please try again.')
       }
@@ -60,14 +62,16 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center px-4 py-8">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 sm:p-10">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <BrandLogo className="w-20 h-20 mx-auto mb-4 shadow-md" />
-          <h1 className="text-2xl font-bold font-serif text-cyan-700">Portal Login</h1>
-          <p className="text-gray-500 text-sm mt-1">Golden-Intels International School</p>
+          <h1 className="text-2xl font-bold font-serif text-blue-800">{forgotMode ? 'Reset your password' : 'Welcome back'}</h1>
+          <p className="text-gray-500 text-sm mt-2">
+            {forgotMode ? 'Enter the email address linked to your school account.' : 'Sign in to your Golden-Intels school portal.'}
+          </p>
         </div>
 
         {location.state?.reason === 'inactive' && (
@@ -90,25 +94,33 @@ export default function Login() {
         )}
 
         {/* Form */}
-        <form onSubmit={forgotMode ? handleForgotPassword : handleSubmit} className="space-y-5">
+        <form onSubmit={forgotMode ? handleForgotPassword : handleSubmit} className="space-y-5" aria-label={forgotMode ? 'Request a password reset' : 'Portal login'}>
           <div>
-            <label className="block text-sm font-bold text-cyan-700 mb-2">Email Address</label>
+            <label htmlFor="login-email" className="block text-sm font-bold text-blue-800 mb-2">Email Address</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="Enter your email"
+              autoComplete="email"
+              autoCapitalize="none"
+              spellCheck="false"
+              required
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
             />
           </div>
           {!forgotMode && (
             <div>
-              <label className="block text-sm font-bold text-cyan-700 mb-2">Password</label>
+              <label htmlFor="login-password" className="block text-sm font-bold text-blue-800 mb-2">Password</label>
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                autoComplete="current-password"
+                required
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
               />
             </div>
@@ -116,7 +128,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
           >
             {loading ? (forgotMode ? 'Sending...' : 'Logging in...') : (forgotMode ? 'Send Reset Link' : 'Login')}
           </button>
@@ -134,16 +146,6 @@ export default function Login() {
           {forgotMode ? 'Back to login' : 'Forgot password?'}
         </button>
 
-        {/* Roles info */}
-        <div className="mt-8 bg-blue-50 rounded-xl p-4">
-          <p className="text-xs font-bold text-cyan-700 mb-2">Portal Access:</p>
-          <div className="space-y-1">
-            <p className="text-xs text-gray-500">👤 Admin — Full school management</p>
-            <p className="text-xs text-gray-500">📚 Teacher — Classes and gradebook</p>
-            <p className="text-xs text-gray-500">👨‍👩‍👧 Parent — Child progress and school updates</p>
-            <p className="text-xs text-gray-500">👩‍🎓 Learner — Learning resources, assignments and quizzes</p>
-          </div>
-        </div>
       </div>
     </div>
   )

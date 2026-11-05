@@ -59,6 +59,9 @@ export default function ResetPassword() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter new password"
+              autoComplete="new-password"
+              minLength={6}
+              required
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
             />
           </div>
@@ -69,6 +72,9 @@ export default function ResetPassword() {
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
+              autoComplete="new-password"
+              minLength={6}
+              required
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
             />
           </div>

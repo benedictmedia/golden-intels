@@ -2310,7 +2310,7 @@ const handleAdminPasswordReset = async (id, email) => {
                 <h3 className="text-lg font-bold text-gray-800">{activeClass === 'All' ? 'All Learners' : `${activeClass} Class`}<span className="ml-2 text-gray-400 text-sm font-normal">({filteredStudents.length} learners)</span></h3>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
-                <table className="w-full min-w-[620px] text-xs sm:text-sm">
+                <table className="admin-learners-table w-full min-w-[960px] text-xs sm:text-sm">
                   <thead className="bg-blue-600 text-white">
                     <tr>
                       <th className="px-3 py-3 text-left sm:px-4">Select</th>

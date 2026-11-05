@@ -301,10 +301,20 @@ const getClientUrl = () => {
 }
 
 const hashResetToken = (token) => crypto.createHash('sha256').update(token).digest('hex')
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, character => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+})[character])
 
 const forgotPassword = async (req, res) => {
   const email = typeof req.body?.email === 'string' ? req.body.email.trim() : ''
   if (!email) return res.status(400).json({ message: 'Email address is required.' })
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ message: 'Enter a valid email address.' })
+  }
 
   let resetTokenId
   try {
@@ -322,13 +332,13 @@ const forgotPassword = async (req, res) => {
       })
       resetTokenId = resetToken.id
 
-      const resetUrl = `${getClientUrl()}/reset-password/${token}`
+      const resetUrl = new URL(`/reset-password/${encodeURIComponent(token)}`, getClientUrl()).toString()
       await sendMail({
         to: user.email,
         subject: 'Reset your Golden-Intels portal password',
         text: `Use this link to reset your portal password: ${resetUrl}\n\nThis link expires in 1 hour.`,
         html: `
-          <p>Hello ${user.name},</p>
+          <p>Hello ${escapeHtml(user.name)},</p>
           <p>Use the button below to reset your Golden-Intels portal password. This link expires in 1 hour.</p>
           <p><a href="${resetUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:12px 18px;border-radius:8px;text-decoration:none;">Reset password</a></p>
           <p>If the button does not work, copy this link into your browser:</p>
@@ -357,7 +367,12 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   const { token, password } = req.body
-  if (!token || !password) return res.status(400).json({ message: 'Reset token and new password are required.' })
+  if (typeof token !== 'string' || typeof password !== 'string' || !token || !password) {
+    return res.status(400).json({ message: 'Reset token and new password are required.' })
+  }
+  if (!/^[a-f0-9]{64}$/i.test(token)) {
+    return res.status(400).json({ message: 'This password reset link is invalid or has expired.' })
+  }
   if (password.length < 6) return res.status(400).json({ message: 'New password must be at least 6 characters.' })
 
   try {
@@ -373,14 +388,23 @@ const resetPassword = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10)
     const usedAt = new Date()
-    await prisma.$transaction([
-      prisma.user.update({ where: { id: resetToken.userId }, data: { password: hashed } }),
-      prisma.passwordResetToken.update({ where: { id: resetToken.id }, data: { usedAt } }),
-      prisma.passwordResetToken.updateMany({
-        where: { userId: resetToken.userId, usedAt: null, id: { not: resetToken.id } },
+    await prisma.$transaction(async tx => {
+      const consumed = await tx.passwordResetToken.updateMany({
+        where: { id: resetToken.id, usedAt: null, expiresAt: { gt: usedAt } },
         data: { usedAt }
-      }),
-      prisma.accountAudit.create({
+      })
+      if (consumed.count !== 1) {
+        const error = new Error('This password reset link is invalid or has expired.')
+        error.statusCode = 400
+        throw error
+      }
+
+      await tx.user.update({ where: { id: resetToken.userId }, data: { password: hashed } })
+      await tx.passwordResetToken.updateMany({
+        where: { userId: resetToken.userId, usedAt: null },
+        data: { usedAt }
+      })
+      await tx.accountAudit.create({
         data: {
           userId: resetToken.userId,
           action: 'password_reset_by_user',
@@ -388,18 +412,26 @@ const resetPassword = async (req, res) => {
           details: { email: resetToken.user.email, role: resetToken.user.role }
         }
       })
-    ])
+    })
 
-    await createNotificationsForRole(
-      'admin',
-      'Password reset',
-      `${resetToken.user.name} (${resetToken.user.email}) reset their portal password.`,
-      'account'
-    )
+    try {
+      await createNotificationsForRole(
+        'admin',
+        'Password reset',
+        `${resetToken.user.name} (${resetToken.user.email}) reset their portal password.`,
+        'account'
+      )
+    } catch (notificationError) {
+      console.error('Password reset completed but the admin notification failed:', notificationError.message)
+    }
 
     res.json({ message: 'Password reset successfully. You can now log in.' })
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message })
+    if (error.statusCode === 400) {
+      return res.status(400).json({ message: error.message })
+    }
+    console.error('Password reset failed:', error.message)
+    res.status(500).json({ message: 'Could not reset the password. Please request a new link.' })
   }
 }
 
