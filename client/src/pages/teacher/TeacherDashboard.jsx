@@ -65,6 +65,11 @@ export default function TeacherDashboard() {
   const [manualExerciseError, setManualExerciseError] = useState('')
   const [grades, setGrades] = useState({})
   const [gradesSaved, setGradesSaved] = useState(false)
+  const [gradebookEntryMode, setGradebookEntryMode] = useState('single')
+  const [bulkGradebookStudentIds, setBulkGradebookStudentIds] = useState([])
+  const [bulkGradebookEntries, setBulkGradebookEntries] = useState({})
+  const [bulkGradebookSubmitting, setBulkGradebookSubmitting] = useState(false)
+  const [bulkGradebookMessage, setBulkGradebookMessage] = useState('')
   const [gradebookClass, setGradebookClass] = useState('')
   const [gradebookYear, setGradebookYear] = useState('2026/2027')
   const [gradebookTerm, setGradebookTerm] = useState('Term 1')
@@ -78,6 +83,12 @@ export default function TeacherDashboard() {
   const [gradebookLoading, setGradebookLoading] = useState(false)
   const [gradebookError, setGradebookError] = useState('')
   const [activeGradebookTab, setActiveGradebookTab] = useState('enter')
+
+  const clearBulkGradebookDraft = () => {
+    setBulkGradebookStudentIds([])
+    setBulkGradebookEntries({})
+    setBulkGradebookMessage('')
+  }
 
   useEffect(() => {
     setGradebookYear(selectedAcademicYear)
@@ -102,7 +113,11 @@ export default function TeacherDashboard() {
     new Set([...assignedClassOptions, ...classTeacherClassOptions])
   )
   const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
-  const teacherSubjectOptions = effectiveUser?.subjects?.length ? effectiveUser.subjects : SUBJECTS
+  const teacherSubjectOptions = effectiveUser?.subjects?.length
+    ? effectiveUser.subjects
+    : effectiveUser?.staffSubject
+      ? [effectiveUser.staffSubject]
+      : []
   const normalizedTeacherSubjectKeys = new Set((teacherSubjectOptions || []).map(normalizeSubjectKey))
   const teacherEmail = user?.email || effectiveUser?.email || ''
   const teacherName = user?.name || effectiveUser?.name || 'Teacher'
@@ -269,6 +284,8 @@ export default function TeacherDashboard() {
 
   const handleEditResult = (result) => {
     if (result.status === 'approved') return
+    clearBulkGradebookDraft()
+    setGradebookEntryMode('single')
     setEditingResult(result)
     setCurrentResult(result)
     setGradebookClass(result.gradeLevel)
@@ -533,9 +550,9 @@ export default function TeacherDashboard() {
   }
 
   const isClassTeacherForSelectedClass = classTeacherClassOptions.some(cls => matchesClass(gradebookClass, cls))
-  const visibleSubjects = isClassTeacherForSelectedClass
-    ? SUBJECTS
-    : SUBJECTS.filter(subject => normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject)))
+  const visibleSubjects = SUBJECTS.filter(subject =>
+    normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))
+  )
 
   const totalAllSubjects = calculateGrandTotal(subjectScores, visibleSubjects)
   const approvedResultLocked = currentResult?.status === 'approved' || editingResult?.status === 'approved'
@@ -547,6 +564,144 @@ export default function TeacherDashboard() {
   const contextualSubmittedResults = submittedResults.filter(result =>
     result.academicYear === selectedAcademicYear && result.term === selectedTerm
   )
+  const getBulkCurrentResult = (studentId) => submittedResults.find(result =>
+    Number(result.studentId) === Number(studentId) &&
+    matchesClass(result.gradeLevel, gradebookClass) &&
+    result.academicYear === gradebookYear &&
+    result.term === gradebookTerm
+  )
+
+  const toggleBulkGradebookStudent = (studentId, checked) => {
+    const studentKey = String(studentId)
+    if (!checked) {
+      setBulkGradebookStudentIds(previous => previous.filter(id => String(id) !== studentKey))
+      setBulkGradebookEntries(previous => {
+        const next = { ...previous }
+        delete next[studentKey]
+        return next
+      })
+      return
+    }
+
+    const existingResult = getBulkCurrentResult(studentId)
+    if (existingResult?.status === 'approved') return
+
+    setBulkGradebookStudentIds(previous => previous.includes(studentKey) ? previous : [...previous, studentKey])
+    setBulkGradebookEntries(previous => previous[studentKey] ? previous : {
+      ...previous,
+      [studentKey]: {
+        scores: getNormalizedScores(existingResult?.scores || {}),
+        remarks: existingResult?.remarks || ''
+      }
+    })
+  }
+
+  const handleBulkGradebookScore = (studentId, subject, field, value) => {
+    const studentKey = String(studentId)
+    setBulkGradebookEntries(previous => ({
+      ...previous,
+      [studentKey]: {
+        ...previous[studentKey],
+        scores: {
+          ...previous[studentKey]?.scores,
+          [subject]: {
+            ...previous[studentKey]?.scores?.[subject],
+            [field]: clampScoreInput(field, value)
+          }
+        }
+      }
+    }))
+  }
+
+  const handleBulkGradebookRemarks = (studentId, remarks) => {
+    const studentKey = String(studentId)
+    setBulkGradebookEntries(previous => ({
+      ...previous,
+      [studentKey]: { ...previous[studentKey], remarks }
+    }))
+  }
+
+  const handleBulkGradebookSubmit = async () => {
+    if (!bulkGradebookStudentIds.length) return
+    if (!visibleSubjects.length) {
+      setBulkGradebookMessage('You do not have any assigned subjects for this class. Please contact admin to update your assignments.')
+      return
+    }
+
+    const token = localStorage.getItem('token')
+    const headers = { Authorization: `Bearer ${token}` }
+    const selectedStudents = bulkGradebookStudentIds.map(studentId => ({
+      studentId,
+      student: students.find(item => Number(item.id) === Number(studentId)),
+      entry: bulkGradebookEntries[studentId],
+      existingResult: getBulkCurrentResult(studentId)
+    }))
+    const approvedStudent = selectedStudents.find(({ existingResult }) => existingResult?.status === 'approved')
+    if (approvedStudent) {
+      setBulkGradebookMessage('Approved results are read-only for teachers. Remove the approved learner from this batch and contact an administrator if a correction is needed.')
+      return
+    }
+
+    setBulkGradebookSubmitting(true)
+    setBulkGradebookMessage('')
+    const outcomes = await Promise.allSettled(selectedStudents.map(async ({ studentId, student, entry, existingResult }) => {
+      if (!student) throw new Error('Learner is no longer in this class. Refresh the page and try again.')
+      const scores = Object.fromEntries(Object.entries(entry?.scores || {}).filter(([subject]) =>
+        normalizedTeacherSubjectKeys.has(normalizeSubjectKey(subject))
+      ))
+      if (!Object.keys(scores).length) throw new Error('Enter marks for at least one of your assigned subjects.')
+
+      const payload = {
+        scores,
+        remarks: entry?.remarks || '',
+        submittedBy: user?.name
+      }
+      const result = existingResult
+        ? await axios.put(`${API_URL}/api/results/${existingResult.id}`, payload, { headers })
+        : await axios.post(`${API_URL}/api/results`, {
+            ...payload,
+            studentId,
+            gradeLevel: gradebookClass,
+            academicYear: gradebookYear,
+            term: gradebookTerm
+          }, { headers })
+      return { studentId, student, result: result.data }
+    }))
+
+    const successful = outcomes.flatMap(outcome => outcome.status === 'fulfilled'
+      ? [outcome.value]
+      : [])
+    const failed = outcomes.flatMap((outcome, index) => outcome.status === 'rejected'
+      ? [{
+          studentId: selectedStudents[index].studentId,
+          name: `${selectedStudents[index].student?.firstName || ''} ${selectedStudents[index].student?.lastName || ''}`.trim() || 'Learner',
+          message: outcome.reason?.response?.data?.message || outcome.reason?.message || 'Submission failed.'
+        }]
+      : [])
+
+    if (successful.length) {
+      setSubmittedResults(previous => [
+        ...successful.map(item => item.result),
+        ...previous.filter(existing => !successful.some(item =>
+          Number(existing.studentId) === Number(item.studentId) &&
+          existing.academicYear === gradebookYear &&
+          existing.term === gradebookTerm &&
+          matchesClass(existing.gradeLevel, gradebookClass)
+        ))
+      ])
+    }
+
+    const failedIds = failed.map(item => String(item.studentId))
+    setBulkGradebookStudentIds(failedIds)
+    setBulkGradebookEntries(previous => Object.fromEntries(
+      failedIds.map(id => [id, previous[id]])
+    ))
+    setBulkGradebookMessage(failed.length
+      ? `Saved ${successful.length} of ${selectedStudents.length} learners. ${failed.map(item => `${item.name}: ${item.message}`).join(' ')}`
+      : `Performance data submitted successfully for all ${successful.length} learners for admin review.`)
+    setBulkGradebookSubmitting(false)
+    if (!failed.length) setActiveGradebookTab('submitted')
+  }
 
   const [assignments, setAssignments] = useState([])
   const [showAddAssignment, setShowAddAssignment] = useState(false)
@@ -1202,12 +1357,12 @@ useEffect(() => {
   <div className="flex items-center gap-4">
     <NotificationBell onNotificationClick={handleNotificationClick} />
 
-    <select value={selectedAcademicYear} onChange={e => { setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
+    <select value={selectedAcademicYear} onChange={e => { clearBulkGradebookDraft(); setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
               className="px-3 py-2 rounded-lg text-sm focus:outline-none"
               style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
               {academicYears.map(y => <option key={y} value={y} style={{ color: '#000' }}>{y}</option>)}
             </select>
-            <select value={selectedTerm} onChange={e => { setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
+            <select value={selectedTerm} onChange={e => { clearBulkGradebookDraft(); setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
               className="px-3 py-2 rounded-lg text-sm focus:outline-none"
               style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)' }}>
               {terms.map(t => <option key={t} value={t} style={{ color: '#000' }}>{t}</option>)}
@@ -1223,11 +1378,11 @@ useEffect(() => {
               <p className="text-xs text-gray-400 mt-0.5">Auto-set by admin · change to view previous terms</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <select value={selectedAcademicYear} onChange={e => { setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
+              <select value={selectedAcademicYear} onChange={e => { clearBulkGradebookDraft(); setSelectedAcademicYear(e.target.value); setGradebookYear(e.target.value) }}
                 className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 bg-white">
                 {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
               </select>
-              <select value={selectedTerm} onChange={e => { setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
+              <select value={selectedTerm} onChange={e => { clearBulkGradebookDraft(); setSelectedTerm(e.target.value); setGradebookTerm(e.target.value) }}
                 className="px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 bg-white">
                 {terms.map(term => <option key={term} value={term}>{term}</option>)}
               </select>
@@ -1713,7 +1868,180 @@ useEffect(() => {
               )}
 
               {activeGradebookTab === 'enter' && (
+              <>
+              <div className="mb-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => setGradebookEntryMode('single')}
+                  className={`rounded-full px-5 py-2 text-sm font-bold ${gradebookEntryMode === 'single' ? 'bg-[#2563eb] text-white' : 'border border-[#2563eb] bg-white text-[#2563eb]'}`}
+                >
+                  Single learner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGradebookEntryMode('bulk')}
+                  className={`rounded-full px-5 py-2 text-sm font-bold ${gradebookEntryMode === 'bulk' ? 'bg-[#2563eb] text-white' : 'border border-[#2563eb] bg-white text-[#2563eb]'}`}
+                >
+                  Multiple learners
+                </button>
+              </div>
 
+              {gradebookEntryMode === 'bulk' && (
+                <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <h3 className="mb-2 text-lg font-bold text-[#2563eb]">Enter marks for multiple learners</h3>
+                  <p className="mb-6 text-sm text-gray-500">Choose learners, enter marks for your assigned subjects, then submit the batch for admin review.</p>
+
+                  <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-[#2563eb]">Class</label>
+                      <select
+                        value={gradebookClass}
+                        onChange={event => { clearBulkGradebookDraft(); setGradebookClass(event.target.value) }}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-700"
+                      >
+                        {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-[#2563eb]">Academic Year</label>
+                      <select
+                        value={gradebookYear}
+                        onChange={event => {
+                          clearBulkGradebookDraft()
+                          setGradebookYear(event.target.value)
+                          setSelectedAcademicYear(event.target.value)
+                        }}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-700"
+                      >
+                        {academicYears.map(year => <option key={year} value={year}>{year}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-[#2563eb]">Term</label>
+                      <select
+                        value={gradebookTerm}
+                        onChange={event => {
+                          clearBulkGradebookDraft()
+                          setGradebookTerm(event.target.value)
+                          setSelectedTerm(event.target.value)
+                        }}
+                        className="w-full rounded-xl border border-gray-200 px-4 py-3 text-gray-700"
+                      >
+                        {terms.map(term => <option key={term} value={term}>{term}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-6 rounded-xl border border-gray-100">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+                      <h4 className="font-bold text-[#2563eb]">Select learners in {displayStudentClassName(gradebookClass)}</h4>
+                      <button
+                        type="button"
+                        onClick={() => students
+                          .filter(student => matchesClass(student.gradeLevel, gradebookClass))
+                          .filter(student => getBulkCurrentResult(student.id)?.status !== 'approved')
+                          .forEach(student => toggleBulkGradebookStudent(student.id, true))}
+                        className="text-sm font-bold text-[#2563eb] underline"
+                      >
+                        Select all eligible
+                      </button>
+                    </div>
+                    <div className="grid max-h-56 grid-cols-1 gap-2 overflow-y-auto p-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {students.filter(student => matchesClass(student.gradeLevel, gradebookClass)).map(student => {
+                        const locked = getBulkCurrentResult(student.id)?.status === 'approved'
+                        const studentKey = String(student.id)
+                        return (
+                          <label key={student.id} className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${locked ? 'cursor-not-allowed bg-gray-50 text-gray-400' : 'cursor-pointer text-gray-700'}`}>
+                            <input
+                              type="checkbox"
+                              checked={bulkGradebookStudentIds.includes(studentKey)}
+                              disabled={locked || bulkGradebookSubmitting}
+                              onChange={event => toggleBulkGradebookStudent(student.id, event.target.checked)}
+                            />
+                            <span>{student.firstName} {student.lastName}{locked ? ' (approved, locked)' : ''}</span>
+                          </label>
+                        )
+                      })}
+                    </div>
+                    {!visibleSubjects.length && (
+                      <p className="border-t border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        No subjects are assigned to your account. Contact an administrator to update your assignments.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-5">
+                    {bulkGradebookStudentIds.map(studentId => {
+                      const student = students.find(item => Number(item.id) === Number(studentId))
+                      if (!student) return null
+                      const entry = bulkGradebookEntries[studentId] || { scores: {}, remarks: '' }
+                      return (
+                        <section key={studentId} className="rounded-xl border border-gray-200 p-4">
+                          <h4 className="mb-4 font-bold text-[#2563eb]">{student.firstName} {student.lastName}</h4>
+                          <div className="space-y-4">
+                            {visibleSubjects.map(subject => {
+                              const scores = entry.scores?.[subject] || {}
+                              return (
+                                <div key={subject} className="rounded-lg bg-blue-50 p-4">
+                                  <h5 className="mb-3 font-semibold text-[#2563eb]">{subject}</h5>
+                                  <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                                    {[
+                                      { field: 'classScore', label: 'Class Score', maximum: SCORE_FIELD_MAXIMUMS.classScore },
+                                      { field: 'cat1', label: 'CAT 1', maximum: SCORE_FIELD_MAXIMUMS.cat1 },
+                                      { field: 'cat2', label: 'CAT 2', maximum: SCORE_FIELD_MAXIMUMS.cat2 },
+                                      { field: 'exam', label: 'Exam', maximum: SCORE_FIELD_MAXIMUMS.exam }
+                                    ].map(({ field, label, maximum }) => (
+                                      <label key={field} className="block text-xs font-semibold text-gray-600">
+                                        {label} (max {maximum})
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          max={maximum}
+                                          value={scores[field] ?? ''}
+                                          onChange={event => handleBulkGradebookScore(studentId, subject, field, event.target.value)}
+                                          disabled={bulkGradebookSubmitting}
+                                          className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                                        />
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          <label className="mt-4 block text-sm font-semibold text-gray-600">
+                            Remarks
+                            <textarea
+                              value={entry.remarks || ''}
+                              onChange={event => handleBulkGradebookRemarks(studentId, event.target.value)}
+                              readOnly={!isClassTeacherForSelectedClass || bulkGradebookSubmitting}
+                              rows="2"
+                              placeholder={isClassTeacherForSelectedClass ? 'Enter remarks here...' : 'Remarks are read-only for non-class teachers.'}
+                              className={`mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 ${!isClassTeacherForSelectedClass ? 'cursor-not-allowed bg-gray-100' : ''}`}
+                            />
+                          </label>
+                        </section>
+                      )
+                    })}
+                  </div>
+
+                  {bulkGradebookMessage && (
+                    <p role="status" aria-live="polite" className={`mt-4 rounded-lg px-4 py-3 text-sm ${bulkGradebookMessage.startsWith('Performance data submitted') ? 'border border-green-200 bg-green-50 text-green-700' : 'border border-amber-200 bg-amber-50 text-amber-800'}`}>
+                      {bulkGradebookMessage}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleBulkGradebookSubmit}
+                    disabled={!bulkGradebookStudentIds.length || bulkGradebookSubmitting || !visibleSubjects.length}
+                    className="mt-6 w-full rounded-xl bg-[#2563eb] py-4 text-lg font-bold text-white transition-colors disabled:opacity-50"
+                  >
+                    {bulkGradebookSubmitting ? 'Submitting marks...' : `Submit marks for ${bulkGradebookStudentIds.length} learner(s)`}
+                  </button>
+                </div>
+              )}
+
+              {gradebookEntryMode === 'single' && (
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
                 <h3 className="text-lg font-bold text-[#2563eb] mb-6">Enter Performance Data</h3>
                 {approvedResultLocked && (
@@ -1728,7 +2056,7 @@ useEffect(() => {
                     <label className="block text-sm font-bold text-[#2563eb] mb-2">Class <span className="text-red-500">*</span></label>
                     <select
                       value={gradebookClass}
-                      onChange={e => { setGradebookClass(e.target.value); setGradebookStudent('') }}
+                      onChange={e => { clearBulkGradebookDraft(); setGradebookClass(e.target.value); setGradebookStudent('') }}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700"
                     >
                       {teacherClassOptions.map(cls => <option key={cls} value={cls}>{cls}</option>)}
@@ -1739,6 +2067,7 @@ useEffect(() => {
                     <select
                       value={gradebookYear}
                       onChange={e => {
+                        clearBulkGradebookDraft()
                         setGradebookYear(e.target.value)
                         setSelectedAcademicYear(e.target.value)
                       }}
@@ -1752,6 +2081,7 @@ useEffect(() => {
                     <select
                       value={gradebookTerm}
                       onChange={e => {
+                        clearBulkGradebookDraft()
                         setGradebookTerm(e.target.value)
                         setSelectedTerm(e.target.value)
                       }}
@@ -1916,6 +2246,8 @@ useEffect(() => {
                   {approvedResultLocked ? 'Approved Result — Read Only' : editingResult ? 'Update Result' : 'Preview and Submit Entry'}
                 </button>
               </div>
+              )}
+              </>
               )}
             </div>
           )}

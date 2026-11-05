@@ -91,7 +91,7 @@ test('resets mixed portal accounts together and returns card details without ema
   resetTokensInvalidated = false
   mailAttempts = 0
 
-  const response = await invokeReset({ userIds: [1, 2, 3], password: 'secure123', sendEmail: false })
+  const response = await invokeReset({ userIds: ['1', '2', '3'], password: 'secure123', sendEmail: false })
 
   assert.equal(response.statusCode, 200)
   assert.equal(response.body.updatedCount, 3)

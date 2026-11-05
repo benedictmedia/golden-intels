@@ -85,23 +85,7 @@ const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => 
 
 const getTeacherResultPayload = async (req, body) => {
   const teacherAssignments = await buildTeacherAssignments(req.user.email)
-  const { scores = {}, remarks, gradeLevel } = body
-  const isClassTeacherForSelectedClass = teacherAssignments.classTeacherClasses.includes(normalizeClassName(gradeLevel))
-
-  if (isClassTeacherForSelectedClass) {
-    const sanitizedScores = typeof scores === 'object' && scores !== null ? scores : {}
-    if (!Object.keys(sanitizedScores).length) {
-      return { error: { ok: false, message: 'You must provide scores for at least one subject.' } }
-    }
-    const scoreValidation = validateTeacherScores(sanitizedScores, Object.keys(sanitizedScores))
-    if (!scoreValidation.ok) return { error: scoreValidation }
-
-    return {
-      scores: sanitizedScores,
-      remarks,
-      teacherAssignments
-    }
-  }
+  const { scores = {}, remarks } = body
 
   const validation = validateTeacherScores(scores, teacherAssignments.subjects)
   if (!validation.ok) {
@@ -265,6 +249,9 @@ const createResult = async (req, res) => {
       const teacherAssignments = payload.teacherAssignments
       const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, gradeLevel)
       const existingResult = await getResultByScope(studentId, gradeLevel, academicYear, term)
+      if (existingResult?.status === 'approved') {
+        return res.status(403).json({ message: 'Approved results are read-only for teachers. Contact an administrator if a correction is needed.' })
+      }
       const mergedScores = existingResult ? { ...(existingResult.scores || {}), ...payload.scores } : payload.scores
       const nextRemarks = canEditRemarks ? (remarks || existingResult?.remarks || '') : (existingResult?.remarks || '')
 

@@ -234,10 +234,13 @@ const resetUserPassword = async (req, res) => {
 const resetUserPasswords = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { userIds, password, sendEmail: shouldSendEmail = true } = req.body || {}
+  const normalizedUserIds = Array.isArray(userIds)
+    ? userIds.map(id => typeof id === 'string' && /^\d+$/.test(id) ? Number(id) : id)
+    : userIds
 
-  if (!Array.isArray(userIds) || userIds.length === 0 || userIds.length > 100 ||
-      userIds.some(id => !Number.isSafeInteger(id) || id < 1) ||
-      new Set(userIds).size !== userIds.length) {
+  if (!Array.isArray(normalizedUserIds) || normalizedUserIds.length === 0 || normalizedUserIds.length > 100 ||
+      normalizedUserIds.some(id => !Number.isSafeInteger(id) || id < 1) ||
+      new Set(normalizedUserIds).size !== normalizedUserIds.length) {
     return res.status(400).json({ message: 'Select between 1 and 100 unique accounts.' })
   }
   if (typeof shouldSendEmail !== 'boolean') {
@@ -246,10 +249,10 @@ const resetUserPasswords = async (req, res) => {
 
   try {
     const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
+      where: { id: { in: normalizedUserIds } },
       select: { id: true, name: true, email: true, role: true }
     })
-    if (users.length !== userIds.length) {
+    if (users.length !== normalizedUserIds.length) {
       return res.status(404).json({ message: 'One or more selected accounts could not be found. Refresh the list and try again.' })
     }
 
@@ -276,7 +279,7 @@ const resetUserPasswords = async (req, res) => {
       }
 
       await tx.passwordResetToken.updateMany({
-        where: { userId: { in: userIds }, usedAt: null },
+        where: { userId: { in: normalizedUserIds }, usedAt: null },
         data: { usedAt: resetAt }
       })
       await tx.accountAudit.createMany({

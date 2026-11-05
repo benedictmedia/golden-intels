@@ -104,7 +104,7 @@ export default function Navbar() {
                 Portal <ChevronDown size={14} className={`transition-transform duration-300 ${portalOpen ? 'rotate-180' : ''}`} />
               </button>
               <div className={`navbar-dropdown-panel absolute right-0 top-full z-50 mt-3 min-w-44 rounded-xl bg-white p-2 shadow-xl ring-1 ring-black/10 ${portalOpen ? 'is-open' : ''}`}>
-                <Link to="/login" onClick={closeMenu} className={dropdownLinkClass}>
+                <Link to="/login" target="_blank" rel="noopener noreferrer" onClick={closeMenu} className={dropdownLinkClass}>
                   Academics
                 </Link>
                 <div className="my-1 border-t border-gray-200" />
@@ -193,6 +193,8 @@ export default function Navbar() {
               <div className={`navbar-dropdown-panel ${portalOpen ? 'is-open' : ''}`}>
                   <Link
                     to="/login"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => setMenuOpen(false)}
                     className="block rounded-lg px-5 py-2.5 hover:bg-white/10 hover:text-[var(--color-accent)]"
                   >
