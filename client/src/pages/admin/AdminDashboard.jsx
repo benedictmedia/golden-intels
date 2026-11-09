@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList, RefreshCw
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -55,6 +55,58 @@ const stats = [
 
 const classes = ['All', ...STUDENT_CLASSES]
 const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
+const DASHBOARD_CHART_COLORS = ['#2563eb', '#f59e0b', '#8b5cf6', '#10b981', '#ef4444', '#06b6d4']
+
+const getLocalDateString = () => {
+  const date = new Date()
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+  return date.toISOString().slice(0, 10)
+}
+
+function DashboardPieChart({ title, data, unit = 'learners' }) {
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+  let start = 0
+  const gradient = data
+    .filter(item => item.value > 0)
+    .map(item => {
+      const end = start + (item.value / total) * 100
+      const segment = `${item.color} ${start}% ${end}%`
+      start = end
+      return segment
+    })
+    .join(', ')
+
+  return (
+    <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <h3 className="font-bold text-gray-800">{title}</h3>
+      <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row">
+        <div
+          role="img"
+          aria-label={`${title}: ${data.map(item => `${item.label} ${item.value}`).join(', ')}`}
+          className="relative h-40 w-40 shrink-0 rounded-full"
+          style={{ background: total ? `conic-gradient(${gradient})` : '#e5e7eb' }}
+        >
+          <div className="absolute inset-8 flex flex-col items-center justify-center rounded-full bg-white">
+            <span className="text-2xl font-bold text-gray-800">{total}</span>
+            <span className="text-xs text-gray-500">{unit}</span>
+          </div>
+        </div>
+        <ul className="w-full space-y-2">
+          {data.map(item => (
+            <li key={item.label} className="flex items-center justify-between gap-3 text-sm">
+              <span className="flex min-w-0 items-center gap-2 text-gray-600">
+                <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: item.color }} />
+                <span className="truncate">{item.label}</span>
+              </span>
+              <span className="font-semibold text-gray-800">{item.value}</span>
+            </li>
+          ))}
+          {total === 0 && <li className="text-xs text-gray-400">No data available.</li>}
+        </ul>
+      </div>
+    </section>
+  )
+}
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
@@ -114,6 +166,14 @@ export default function AdminDashboard() {
   const [studentImportResult, setStudentImportResult] = useState(null)
   const [selectedStudentIds, setSelectedStudentIds] = useState([])
   const [dashboardCounts, setDashboardCounts] = useState({ learners: 0, staff: 0, maleLearners: 0, femaleLearners: 0 })
+  const [dashboardLearners, setDashboardLearners] = useState([])
+  const [dashboardAttendance, setDashboardAttendance] = useState([])
+  const [dashboardAttendanceKey, setDashboardAttendanceKey] = useState('')
+  const [dashboardAdmissionCount, setDashboardAdmissionCount] = useState(0)
+  const [dashboardRefreshTime, setDashboardRefreshTime] = useState(null)
+  const [dashboardLoadError, setDashboardLoadError] = useState('')
+  const [dashboardRefreshKey, setDashboardRefreshKey] = useState(0)
+  const [dashboardAttendanceDate, setDashboardAttendanceDate] = useState(getLocalDateString)
 
   // Results state
   const [results, setResults] = useState([])
@@ -288,13 +348,69 @@ export default function AdminDashboard() {
   const absentAttendanceRecords = attendanceRecords.filter(record => (
     ['absent', 'absent_permission', 'absent_without_permission'].includes(record.status)
   ))
-  const dashboardStats = stats.map(stat => ({
+  const dashboardAttendanceQueryKey = JSON.stringify([
+    dashboardAttendanceDate,
+    academicContext.academicYear,
+    academicContext.term
+  ])
+  const dashboardAttendanceLoading = dashboardAttendanceKey !== dashboardAttendanceQueryKey
+  const dashboardAttendanceForView = dashboardAttendanceLoading ? [] : dashboardAttendance
+  const classLearnerCounts = STUDENT_CLASSES.map(gradeLevel => ({
+    label: displayStudentClassName(gradeLevel),
+    value: dashboardLearners.filter(learner => normalizeStudentClassName(learner.gradeLevel) === normalizeStudentClassName(gradeLevel)).length
+  }))
+  const unclassifiedLearners = dashboardLearners.filter(learner => (
+    !STUDENT_CLASSES.some(gradeLevel => normalizeStudentClassName(learner.gradeLevel) === normalizeStudentClassName(gradeLevel))
+  )).length
+  const classChartData = unclassifiedLearners
+    ? [...classLearnerCounts, { label: 'Other / unassigned', value: unclassifiedLearners }]
+    : classLearnerCounts
+  const largestClassCount = Math.max(...classChartData.map(item => item.value), 1)
+
+  const getLearnersInClasses = classNames => dashboardLearners.filter(learner => (
+    classNames.some(gradeLevel => normalizeStudentClassName(learner.gradeLevel) === normalizeStudentClassName(gradeLevel))
+  )).length
+  const earlyYearsCount = getLearnersInClasses(STUDENT_CLASSES.slice(0, 6))
+  const primaryCount = getLearnersInClasses(STUDENT_CLASSES.slice(6, 12))
+  const secondaryCount = getLearnersInClasses(STUDENT_CLASSES.slice(12, 18))
+  const genderCounts = countLearnersByGender(dashboardLearners)
+  const unrecordedGenderCount = Math.max(0, dashboardLearners.length - genderCounts.male - genderCounts.female)
+  const dashboardPresentCount = dashboardAttendanceForView.filter(record => record.status === 'present').length
+  const dashboardLateCount = dashboardAttendanceForView.filter(record => record.status === 'late').length
+  const dashboardAbsentCount = dashboardAttendanceForView.filter(record => (
+    ['absent', 'absent_permission', 'absent_without_permission'].includes(record.status)
+  )).length
+  const stageChartData = [
+    { label: 'Early Years (Creche–KG 2)', value: earlyYearsCount, color: DASHBOARD_CHART_COLORS[0] },
+    { label: 'Primary (Grades 1–6)', value: primaryCount, color: DASHBOARD_CHART_COLORS[1] },
+    { label: 'Secondary (Grades 7–12)', value: secondaryCount, color: DASHBOARD_CHART_COLORS[2] },
+    { label: 'Other / unassigned', value: unclassifiedLearners, color: '#9ca3af' }
+  ]
+  const genderChartData = [
+    { label: 'Male', value: genderCounts.male, color: DASHBOARD_CHART_COLORS[0] },
+    { label: 'Female', value: genderCounts.female, color: DASHBOARD_CHART_COLORS[3] },
+    { label: 'Not recorded', value: unrecordedGenderCount, color: '#9ca3af' }
+  ]
+  const attendanceChartData = [
+    { label: 'Present', value: dashboardPresentCount, color: DASHBOARD_CHART_COLORS[3] },
+    { label: 'Late', value: dashboardLateCount, color: DASHBOARD_CHART_COLORS[1] },
+    { label: 'Absent', value: dashboardAbsentCount, color: DASHBOARD_CHART_COLORS[4] }
+  ]
+  const dashboardStats = [
+    ...stats,
+    { label: 'Present (selected date)', color: 'bg-emerald-600', textColor: 'text-emerald-100' },
+    { label: 'Absent (selected date)', color: 'bg-red-600', textColor: 'text-red-100' },
+    { label: 'Late (selected date)', color: 'bg-amber-500', textColor: 'text-amber-100' }
+  ].map(stat => ({
     ...stat,
-    value: stat.label === 'Total Learners' ? String(dashboardCounts.learners)
-      : stat.label === 'Staff Members' ? String(dashboardCounts.staff)
-        : stat.label === 'Male Learners' ? String(dashboardCounts.maleLearners)
-          : stat.label === 'Female Learners' ? String(dashboardCounts.femaleLearners)
-            : stat.value
+    value: stat.label === 'Total Learners' ? dashboardCounts.learners
+      : stat.label === 'Admissions' ? dashboardAdmissionCount
+        : stat.label === 'Staff Members' ? dashboardCounts.staff
+          : stat.label === 'Male Learners' ? dashboardCounts.maleLearners
+            : stat.label === 'Female Learners' ? dashboardCounts.femaleLearners
+              : stat.label === 'Present (selected date)' ? (dashboardAttendanceLoading ? '—' : dashboardPresentCount)
+                : stat.label === 'Absent (selected date)' ? (dashboardAttendanceLoading ? '—' : dashboardAbsentCount)
+                  : dashboardAttendanceLoading ? '—' : dashboardLateCount
   }))
 
   useEffect(() => {
@@ -306,28 +422,6 @@ export default function AdminDashboard() {
         .catch(err => setArchiveError(err.response?.data?.message || 'Could not load archived records.'))
         .finally(() => setArchiveLoading(false))
     }
-  if (activeMenu === 'dashboard') {
-    axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
-      .then(res => {
-        const genderCounts = countLearnersByGender(res.data)
-        setDashboardCounts(prev => ({
-          ...prev,
-          learners: res.data.length,
-          maleLearners: genderCounts.male,
-          femaleLearners: genderCounts.female
-        }))
-      })
-      .catch(err => console.error('Failed to refresh learner total:', err))
-    Promise.all([
-      axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() }),
-      axios.get(`${API_URL}/api/users`, { headers: getAuthHeaders(), params: { role: 'teacher', limit: 1 } })
-    ])
-      .then(([staffRes, teachersRes]) => setDashboardCounts(prev => ({
-        ...prev,
-        staff: staffRes.data.length + (teachersRes.data.total || 0)
-      })))
-      .catch(err => console.error('Failed to refresh staff total:', err))
-  }
   if (activeMenu === 'learners' || activeMenu === 'create-account') {
     axios.get(`${API_URL}/api/students`)
       .then(res => {
@@ -372,6 +466,86 @@ export default function AdminDashboard() {
         .finally(() => setContactLoading(false))
     }
   }, [activeMenu, feeAcademicYear, feeTerm])
+
+  useEffect(() => {
+    if (activeMenu !== 'dashboard') return undefined
+
+    let active = true
+    const refreshDashboard = async () => {
+      const headers = getAuthHeaders()
+      const results = await Promise.allSettled([
+        axios.get(`${API_URL}/api/students`, { headers }),
+        axios.get(`${API_URL}/api/staff`, { headers }),
+        axios.get(`${API_URL}/api/users`, { headers, params: { role: 'teacher', limit: 1 } }),
+        axios.get(`${API_URL}/api/attendance`, {
+          headers,
+          params: {
+            date: dashboardAttendanceDate,
+            academicYear: academicContext.academicYear,
+            term: academicContext.term
+          }
+        }),
+        axios.get(`${API_URL}/api/admissions`, { headers })
+      ])
+      if (!active) return
+
+      const failures = []
+      const valueAt = (index, label) => {
+        const result = results[index]
+        if (result.status === 'fulfilled') return result.value.data
+        failures.push(label)
+        console.error(`Failed to refresh dashboard ${label.toLowerCase()}:`, result.reason)
+        return null
+      }
+
+      const learners = valueAt(0, 'Learner data')
+      const staff = valueAt(1, 'Staff data')
+      const teachers = valueAt(2, 'Teacher account data')
+      const attendance = valueAt(3, 'Attendance data')
+      const admissions = valueAt(4, 'Admission data')
+
+      if (Array.isArray(learners)) {
+        setDashboardLearners(learners)
+        const genderCounts = countLearnersByGender(learners)
+        setDashboardCounts(previous => ({
+          ...previous,
+          learners: learners.length,
+          maleLearners: genderCounts.male,
+          femaleLearners: genderCounts.female
+        }))
+      }
+      if (Array.isArray(staff) && teachers) {
+        setDashboardCounts(previous => ({
+          ...previous,
+          staff: staff.length + (teachers.total || 0)
+        }))
+      }
+      if (Array.isArray(attendance)) {
+        setDashboardAttendance(attendance)
+        setDashboardAttendanceKey(JSON.stringify([
+          dashboardAttendanceDate,
+          academicContext.academicYear,
+          academicContext.term
+        ]))
+      }
+      if (Array.isArray(admissions)) setDashboardAdmissionCount(admissions.length)
+      setDashboardLoadError(failures.length ? `Some dashboard figures could not be refreshed: ${failures.join(', ')}.` : '')
+      setDashboardRefreshTime(new Date())
+    }
+
+    refreshDashboard()
+    const intervalId = window.setInterval(refreshDashboard, 30000)
+    return () => {
+      active = false
+      window.clearInterval(intervalId)
+    }
+  }, [
+    activeMenu,
+    dashboardAttendanceDate,
+    dashboardRefreshKey,
+    academicContext.academicYear,
+    academicContext.term
+  ])
 
   useEffect(() => {
     if (activeMenu !== 'attendance') return undefined
@@ -1817,7 +1991,47 @@ const handleBulkPasswordReset = async () => {
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
             <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">School Overview</h2>
+                  <p className="text-sm text-gray-500">Learner, staffing, admissions, and attendance figures refresh automatically every 30 seconds.</p>
+                  {dashboardRefreshTime && (
+                    <p className="mt-1 text-xs text-gray-400">
+                      Last refresh attempt {dashboardRefreshTime.toLocaleTimeString()}
+                    </p>
+                  )}
+                  {!dashboardRefreshTime && <p className="mt-1 text-xs text-gray-400">Loading live figures…</p>}
+                </div>
+                <div className="flex flex-wrap items-end gap-3">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-bold text-gray-600">Attendance date</span>
+                    <input
+                      type="date"
+                      value={dashboardAttendanceDate}
+                      onChange={event => setDashboardAttendanceDate(event.target.value)}
+                      className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setDashboardRefreshKey(previous => previous + 1)}
+                    aria-label="Refresh dashboard figures"
+                    title="Refresh dashboard figures"
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+                  >
+                    <RefreshCw size={16} />
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              {dashboardLoadError && (
+                <div role="alert" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  {dashboardLoadError} Some figures may show the last successfully loaded values.
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
                 {dashboardStats.map((stat, index) => (
                   <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
                     <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
@@ -1825,9 +2039,45 @@ const handleBulkPasswordReset = async () => {
                   </div>
                 ))}
               </div>
-              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-2">Admin Dashboard</h2>
-                <p className="text-gray-600">Welcome to the Golden-Intels Admin Portal. Use the sidebar to navigate between sections.</p>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                <DashboardPieChart title="Learners by school stage" data={stageChartData} />
+                <DashboardPieChart title="Learners by gender" data={genderChartData} />
+                <DashboardPieChart
+                  title={`Attendance status · ${dashboardAttendanceDate}${dashboardAttendanceLoading ? ' · loading' : ''}`}
+                  data={attendanceChartData}
+                  unit="records"
+                />
+
+                <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                  <div className="mb-5 flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-gray-800">Learners by class</h3>
+                      <p className="mt-1 text-xs text-gray-500">Current active learner records by class level.</p>
+                    </div>
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+                      {dashboardLearners.length} learners
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    {classChartData.map(({ label, value }) => {
+                      const width = value ? Math.max((value / largestClassCount) * 100, 2) : 0
+                      return (
+                        <div key={label} className="grid grid-cols-[7rem_minmax(0,1fr)_2rem] items-center gap-3 text-sm">
+                          <span className="truncate text-gray-600" title={label}>{label}</span>
+                          <div
+                            className="h-3 overflow-hidden rounded-full bg-gray-100"
+                            role="img"
+                            aria-label={`${label}: ${value} learners`}
+                          >
+                            <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${width}%` }} />
+                          </div>
+                          <span className="text-right font-semibold text-gray-800">{value}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
               </div>
             </div>
           )}
