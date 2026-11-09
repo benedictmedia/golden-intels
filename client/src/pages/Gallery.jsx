@@ -122,7 +122,7 @@ export default function Gallery() {
 
       {/* Lightbox Modal */}
       {viewingItem && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div className="modal-backdrop fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setViewingItem(null)}>
           <div className="max-w-4xl w-full">
 
             {/* Header */}

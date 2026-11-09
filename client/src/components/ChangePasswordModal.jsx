@@ -71,7 +71,7 @@ export default function ChangePasswordModal({ onClose, accentColor = '#2563eb' }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && onClose()}>
       <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
 
         <div className="flex items-center justify-between px-6 py-4 rounded-t-2xl"

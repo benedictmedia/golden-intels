@@ -451,7 +451,13 @@ export default function TeacherClassroom() {
 
       {/* ── Create / Edit Modal ── */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => {
+          if (event.target === event.currentTarget) {
+            setShowForm(false)
+            setEditingSession(null)
+            resetForm()
+          }
+        }}>
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
             <div className="bg-[#1d4ed8] text-white p-6 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">

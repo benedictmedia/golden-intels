@@ -2471,7 +2471,7 @@ const handleBulkPasswordReset = async () => {
               )}
 
               {viewingApplication && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setViewingApplication(null)}>
                   <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Admission Application</h2>
@@ -2684,7 +2684,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {showAddPayment && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setShowAddPayment(false)}>
                   <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Record Fee Payment</h2>
@@ -2776,7 +2776,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {editingPayment && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setEditingPayment(null)}>
                   <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Update Payment</h2>
@@ -2861,7 +2861,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {viewingAdminResult && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setViewingAdminResult(null)}>
                   <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <div>
@@ -2919,7 +2919,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {adminEditResult && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setAdminEditResult(null)}>
                   <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Edit Result</h2>
@@ -3536,7 +3536,13 @@ const handleBulkPasswordReset = async () => {
 
               {/* Edit user modal */}
               {editingUser && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
+                <div className="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center p-4 overflow-y-auto" onClick={event => {
+                  if (event.target === event.currentTarget) {
+                    setEditingUser(null)
+                    setEditPhotoFile(null)
+                    setEditPhotoPreview('')
+                  }
+                }}>
                   <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                     <div className="flex items-start justify-between gap-4 mb-5">
                       <div>
@@ -3657,7 +3663,7 @@ const handleBulkPasswordReset = async () => {
 
               {/* Audits modal */}
               {showAuditsModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+                <div className="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center" onClick={event => event.target === event.currentTarget && setShowAuditsModal(false)}>
                   <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-bold">Account Audits</h3>
@@ -3821,7 +3827,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {editingGallery && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setEditingGallery(null)}>
                   <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">Edit Gallery Item</h2>
@@ -3854,7 +3860,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {viewingGallery && (
-                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setViewingGallery(null)}>
                   <div className="max-w-4xl w-full">
                     <div className="flex items-center justify-between mb-4">
                       <div><h3 className="text-white font-bold text-xl">{viewingGallery.title}</h3><p className="text-gray-400 text-sm">{viewingGallery.category} | {new Date(viewingGallery.createdAt).toLocaleDateString()}</p></div>
@@ -3910,7 +3916,15 @@ const handleBulkPasswordReset = async () => {
                 ))}
               </div>
               {(showAddNews || editingNews) && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => {
+                  if (event.target === event.currentTarget) {
+                    setShowAddNews(false)
+                    setEditingNews(null)
+                    setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
+                    setNewsImages([])
+                    setNewsPreviews([])
+                  }
+                }}>
                   <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">{editingNews ? 'Edit Item' : 'Add News / Event'}</h2>
@@ -4019,7 +4033,14 @@ const handleBulkPasswordReset = async () => {
                 Staff audit exports include contact information. Keep downloaded files private and share them only with authorized administrators.
               </p>
               {(showAddStaff || editingStaff) && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => {
+                  if (event.target === event.currentTarget) {
+                    setShowAddStaff(false)
+                    setEditingStaff(null)
+                    setStaffPhotoPreview(null)
+                    setStaffPhoto(null)
+                  }
+                }}>
                   <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                     <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
                       <h2 className="text-xl font-bold font-serif">{editingStaff ? 'Edit Staff Member' : 'Add Staff Member'}</h2>
@@ -4166,7 +4187,7 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
               {viewingStaff && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={event => event.target === event.currentTarget && setViewingStaff(null)}>
                   <section className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
                     <div className="flex items-center justify-between rounded-t-2xl bg-blue-600 p-6 text-white">
                       <div>
@@ -4539,7 +4560,7 @@ const handleBulkPasswordReset = async () => {
 
     {/* View Contact Modal */}
     {viewingContact && (
-      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setViewingContact(null)}>
         <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
           <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
             <h2 className="text-xl font-bold font-serif">Contact Message</h2>
@@ -4580,7 +4601,14 @@ const handleBulkPasswordReset = async () => {
 
       {/* Student Detail Modal */}
 {selectedStudent && (
-  <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+  <div className="modal-backdrop fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={event => {
+    if (event.target === event.currentTarget) {
+      setSelectedStudent(null)
+      setEditMode(false)
+      setLearnerDocFiles({})
+      setLearnerDocPreviews({})
+    }
+  }}>
     <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <div className="bg-blue-600 text-white p-6 rounded-t-2xl flex items-center justify-between">
         <h2 className="text-xl font-bold font-serif">Learner Profile</h2>
@@ -4872,7 +4900,7 @@ const handleBulkPasswordReset = async () => {
       </div>
 
       {showLoginModal && (
-  <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+  <div className="modal-backdrop fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={event => event.target === event.currentTarget && setShowLoginModal(false)}>
     <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
       <h3 className="font-bold text-[#1d4ed8] text-lg mb-1">Create Learner Login</h3>
       <p className="text-sm text-gray-500 mb-4">
