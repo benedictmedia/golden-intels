@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -24,6 +24,7 @@ import usePortalSection from '../../hooks/usePortalSection'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
+  { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
   { icon: <GraduationCap size={20} />, label: 'Admissions', id: 'admissions' },
   { icon: <DollarSign size={20} />, label: 'Finance', id: 'finance' },
   { icon: <BarChart2 size={20} />, label: 'Performance Review', id: 'performance' },
@@ -180,6 +181,16 @@ export default function AdminDashboard() {
   const [feeClassFilter, setFeeClassFilter] = useState('All')
   const [paymentForm, setPaymentForm] = useState({ studentId: '', academicYear: '2026/2027', term: 'Term 1', amountDue: '', previousTermArrears: '0', amountPaid: '0', notes: '' })
 
+  const [attendanceDate, setAttendanceDate] = useState(() => {
+    const today = new Date()
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset())
+    return today.toISOString().slice(0, 10)
+  })
+  const [attendanceAcademicYear, setAttendanceAcademicYear] = useState('2026/2027')
+  const [attendanceTerm, setAttendanceTerm] = useState('Term 1')
+  const [attendanceGradeLevel, setAttendanceGradeLevel] = useState('All')
+  const [attendanceResult, setAttendanceResult] = useState({ queryKey: '', records: [], error: '' })
+
   const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('token')}`
 })
@@ -264,6 +275,19 @@ export default function AdminDashboard() {
       : 6
   const filteredFeePayments = feeClassFilter === 'All' ? feePayments : feePayments.filter(p => normalizeStudentClassName(p.student?.gradeLevel) === normalizeStudentClassName(feeClassFilter))
   const filteredNews = newsFilter === 'All' ? newsItems : newsItems.filter(n => n.type === newsFilter)
+  const attendanceQueryKey = JSON.stringify([attendanceDate, attendanceAcademicYear, attendanceTerm, attendanceGradeLevel])
+  const attendanceRecords = attendanceResult.queryKey === attendanceQueryKey ? attendanceResult.records : []
+  const attendanceLoading = Boolean(attendanceDate) && attendanceResult.queryKey !== attendanceQueryKey
+  const attendanceError = !attendanceDate
+    ? 'Select a date to view attendance.'
+    : attendanceResult.queryKey === attendanceQueryKey
+      ? attendanceResult.error
+      : ''
+  const presentAttendanceRecords = attendanceRecords.filter(record => record.status === 'present')
+  const lateAttendanceRecords = attendanceRecords.filter(record => record.status === 'late')
+  const absentAttendanceRecords = attendanceRecords.filter(record => (
+    ['absent', 'absent_permission', 'absent_without_permission'].includes(record.status)
+  ))
   const dashboardStats = stats.map(stat => ({
     ...stat,
     value: stat.label === 'Total Learners' ? String(dashboardCounts.learners)
@@ -350,6 +374,37 @@ export default function AdminDashboard() {
   }, [activeMenu, feeAcademicYear, feeTerm])
 
   useEffect(() => {
+    if (activeMenu !== 'attendance') return undefined
+    if (!attendanceDate) return undefined
+
+    let cancelled = false
+    axios.get(`${API_URL}/api/attendance`, {
+      headers: getAuthHeaders(),
+      params: {
+        date: attendanceDate,
+        academicYear: attendanceAcademicYear,
+        term: attendanceTerm,
+        ...(attendanceGradeLevel !== 'All' ? { gradeLevel: attendanceGradeLevel } : {})
+      }
+    })
+      .then(res => {
+        if (!cancelled) setAttendanceResult({ queryKey: attendanceQueryKey, records: res.data || [], error: '' })
+      })
+      .catch(err => {
+        if (!cancelled) {
+          console.error('Failed to load attendance summary:', err)
+          setAttendanceResult({
+            queryKey: attendanceQueryKey,
+            records: [],
+            error: err.response?.data?.message || 'Could not load attendance for the selected date and class.'
+          })
+        }
+      })
+
+    return () => { cancelled = true }
+  }, [activeMenu, attendanceDate, attendanceAcademicYear, attendanceTerm, attendanceGradeLevel, attendanceQueryKey])
+
+  useEffect(() => {
   axios.get(`${API_URL}/api/signature`, { headers: getAuthHeaders() })
     .then(res => setHeadmasterSigUrl(res.data.url))
     .catch(() => {})
@@ -362,6 +417,8 @@ export default function AdminDashboard() {
       setAvailableAcademicYears(res.data.availableAcademicYears || [res.data.academicYear || '2026/2027'])
       setFeeAcademicYear(res.data.academicYear || '2026/2027')
       setFeeTerm(res.data.term || 'Term 1')
+      setAttendanceAcademicYear(res.data.academicYear || '2026/2027')
+      setAttendanceTerm(res.data.term || 'Term 1')
       setPaymentForm(prev => ({ ...prev, academicYear: res.data.academicYear || '2026/2027', term: res.data.term || 'Term 1' }))
     })
     .catch(() => {})
@@ -1772,6 +1829,122 @@ const handleBulkPasswordReset = async () => {
                 <h2 className="text-2xl font-bold font-serif text-gray-800 mb-2">Admin Dashboard</h2>
                 <p className="text-gray-600">Welcome to the Golden-Intels Admin Portal. Use the sidebar to navigate between sections.</p>
               </div>
+            </div>
+          )}
+
+          {/* Attendance */}
+          {activeMenu === 'attendance' && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Daily Attendance Summary</h2>
+                <p className="text-gray-500 text-sm">Live summary of attendance saved by teachers for the selected date and academic period.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                <label className="block">
+                  <span className="block text-xs font-bold text-gray-600 mb-1">Attendance date</span>
+                  <input
+                    type="date"
+                    value={attendanceDate}
+                    onChange={event => setAttendanceDate(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                  />
+                </label>
+                <label className="block">
+                  <span className="block text-xs font-bold text-gray-600 mb-1">Academic year</span>
+                  <select
+                    value={attendanceAcademicYear}
+                    onChange={event => setAttendanceAcademicYear(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                  >
+                    {[...new Set([...availableAcademicYears, attendanceAcademicYear])].filter(Boolean).sort().map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="block text-xs font-bold text-gray-600 mb-1">Term</span>
+                  <select
+                    value={attendanceTerm}
+                    onChange={event => setAttendanceTerm(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                  >
+                    {ACADEMIC_TERMS.map(term => <option key={term} value={term}>{term}</option>)}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="block text-xs font-bold text-gray-600 mb-1">Class</span>
+                  <select
+                    value={attendanceGradeLevel}
+                    onChange={event => setAttendanceGradeLevel(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                  >
+                    {classes.map(gradeLevel => (
+                      <option key={gradeLevel} value={gradeLevel}>
+                        {gradeLevel === 'All' ? 'All classes' : displayStudentClassName(gradeLevel)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              {attendanceError && (
+                <div role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {attendanceError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                {[
+                  ['Present (including late)', presentAttendanceRecords.length + lateAttendanceRecords.length, 'bg-blue-600'],
+                  ['Present on time', presentAttendanceRecords.length, 'bg-green-600'],
+                  ['Absent', absentAttendanceRecords.length, 'bg-red-600'],
+                  ['Present but late', lateAttendanceRecords.length, 'bg-amber-500']
+                ].map(([label, value, color]) => (
+                  <div key={label} className={`${color} rounded-2xl p-5 text-white shadow-sm`}>
+                    <p className="text-xs font-bold uppercase tracking-wide text-white/80">{label}</p>
+                    <p className="mt-1 text-3xl font-bold">{attendanceLoading ? '—' : value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {attendanceLoading ? (
+                <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-gray-500">
+                  Loading saved attendance…
+                </div>
+              ) : attendanceRecords.length === 0 ? (
+                <div className="rounded-2xl border border-gray-100 bg-white p-8 text-center text-gray-500">
+                  No teacher attendance records were found for this date, class, academic year, and term.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {[
+                    { title: 'Absent learners', records: absentAttendanceRecords, emptyText: 'No learners are marked absent.' },
+                    { title: 'Present but late', records: lateAttendanceRecords, emptyText: 'No learners are marked late.' }
+                  ].map(group => (
+                    <section key={group.title} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                      <div className="border-b border-gray-100 px-5 py-4">
+                        <h3 className="font-bold text-gray-800">{group.title} <span className="text-gray-400">({group.records.length})</span></h3>
+                      </div>
+                      {group.records.length === 0 ? (
+                        <p className="px-5 py-6 text-sm text-gray-500">{group.emptyText}</p>
+                      ) : (
+                        <ul className="divide-y divide-gray-100">
+                          {group.records.map(record => {
+                            const learnerName = [record.student?.firstName, record.student?.lastName].filter(Boolean).join(' ')
+                            return (
+                              <li key={record.id} className="flex items-center justify-between gap-4 px-5 py-3">
+                                <span className="font-medium text-gray-800">{learnerName || `Learner #${record.studentId}`}</span>
+                                <span className="shrink-0 text-xs text-gray-500">{displayStudentClassName(record.gradeLevel)}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </section>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

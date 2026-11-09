@@ -158,7 +158,12 @@ export default function TeacherDashboard() {
     setAttendanceError('')
     axios.get(`${API_URL}/api/attendance`, {
       headers,
-      params: { date: attendanceDate, gradeLevel: activeClass }
+      params: {
+        date: attendanceDate,
+        gradeLevel: activeClass,
+        academicYear: selectedAcademicYear,
+        term: selectedTerm
+      }
     })
       .then(res => {
         setAttendanceRecords(res.data)
@@ -173,7 +178,7 @@ export default function TeacherDashboard() {
         setAttendanceError('Unable to load attendance for this date.')
       })
       .finally(() => setAttendanceLoading(false))
-  }, [activeMenu, activeClass, attendanceDate])
+  }, [activeMenu, activeClass, attendanceDate, selectedAcademicYear, selectedTerm])
 
   useEffect(() => {
     if (activeMenu !== 'gradebook') return
@@ -887,7 +892,12 @@ useEffect(() => {
       if (backfillDates.includes(attendanceDate)) {
         const res = await axios.get(`${API_URL}/api/attendance`, {
           headers,
-          params: { date: attendanceDate, gradeLevel: activeClass }
+          params: {
+            date: attendanceDate,
+            gradeLevel: activeClass,
+            academicYear: selectedAcademicYear,
+            term: selectedTerm
+          }
         })
         setAttendanceRecords(res.data)
         const nextAttendance = {}
@@ -980,7 +990,12 @@ useEffect(() => {
       }, { headers })
       const res = await axios.get(`${API_URL}/api/attendance`, {
         headers,
-        params: { date: attendanceDate, gradeLevel: activeClass }
+        params: {
+          date: attendanceDate,
+          gradeLevel: activeClass,
+          academicYear: selectedAcademicYear,
+          term: selectedTerm
+        }
       })
       setAttendanceRecords(res.data)
       const nextAttendance = {}
