@@ -3,6 +3,11 @@ const router = express.Router()
 const { getStudents, getStudent, getMyProfile, createStudent, updateStudent, bulkImportStudents, deleteStudent, createLearnerLogin } = require('../controllers/studentController')
 const protect = require('../middleware/authMiddleware')
 
+const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
+  next()
+}
+
 // A learner's profile can now include every admission-form document, not
 // just the passport photo, and the admin can replace any of them later.
 const studentDocumentFields = [
@@ -54,6 +59,7 @@ const handleUpload = (req, res, next) => {
   })
 }
 
+router.get('/admin/export', protect, requireAdmin, getStudents)
 router.get('/', protect, getStudents)
 router.post('/', protect, handleUpload, createStudent)
 router.post('/bulk-import', protect, bulkImportStudents)

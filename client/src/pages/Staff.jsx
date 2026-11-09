@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { X, Mail, Phone } from 'lucide-react'
+import { X } from 'lucide-react'
 import PageHero from '../components/layout/PageHero'
 import API_URL from '../api/config'
 
@@ -164,20 +164,9 @@ export default function Staff() {
                 </div>
               )}
 
-              <div className="space-y-2">
-                {selectedStaff.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail size={16} className="text-[#2563eb]" />
-                    <span className="text-sm text-gray-600">{selectedStaff.email}</span>
-                  </div>
-                )}
-                {selectedStaff.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone size={16} className="text-[#2563eb]" />
-                    <span className="text-sm text-gray-600">{selectedStaff.phone}</span>
-                  </div>
-                )}
-              </div>
+              <p className="text-sm text-gray-500">
+                For staff contact information, please contact the school office.
+              </p>
 
               <button
                 onClick={() => setSelectedStaff(null)}

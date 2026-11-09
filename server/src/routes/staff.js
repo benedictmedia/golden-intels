@@ -1,12 +1,18 @@
 const express = require('express')
 const router = express.Router()
-const { getStaff, createStaff, updateStaff, deleteStaff } = require('../controllers/staffController')
+const { getStaff, getPublicStaff, createStaff, updateStaff, deleteStaff } = require('../controllers/staffController')
 const protect = require('../middleware/authMiddleware')
 const { uploadStaff } = require('../middleware/cloudinaryUpload')
 
-router.get('/', getStaff)
-router.post('/', protect, uploadStaff.single('photo'), createStaff)
-router.put('/:id', protect, uploadStaff.single('photo'), updateStaff)
-router.delete('/:id', protect, deleteStaff)
+const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
+  next()
+}
+
+router.get('/', getPublicStaff)
+router.get('/admin', protect, requireAdmin, getStaff)
+router.post('/', protect, requireAdmin, uploadStaff.single('photo'), createStaff)
+router.put('/:id', protect, requireAdmin, uploadStaff.single('photo'), updateStaff)
+router.delete('/:id', protect, requireAdmin, deleteStaff)
 
 module.exports = router

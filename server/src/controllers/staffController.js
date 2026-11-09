@@ -15,6 +15,28 @@ const getStaff = async (req, res) => {
   }
 }
 
+const getPublicStaff = async (req, res) => {
+  try {
+    const staff = await prisma.staff.findMany({
+      where: { source: 'manual' },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        department: true,
+        subject: true,
+        bio: true,
+        photo: true,
+        category: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    res.json(staff)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 const parseArrayField = (value) => {
   if (!value) return []
   if (Array.isArray(value)) return value.filter(Boolean)
@@ -113,4 +135,4 @@ const deleteStaff = async (req, res) => {
   }
 }
 
-module.exports = { getStaff, createStaff, updateStaff, deleteStaff }
+module.exports = { getStaff, getPublicStaff, createStaff, updateStaff, deleteStaff }

@@ -508,3 +508,82 @@
 .animate-shake {
   animation: shake 0.6s ease-in-out;
 }
+
+@keyframes portal-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .portal-content > * {
+    animation: portal-content-enter 420ms ease-out both;
+  }
+
+  .portal-content .dashboard-card,
+  .portal-content .bg-white.rounded-xl,
+  .portal-content .bg-white.rounded-2xl,
+  .portal-content article {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .portal-content .dashboard-card:hover,
+  .portal-content .bg-white.rounded-xl:hover,
+  .portal-content .bg-white.rounded-2xl:hover,
+  .portal-content article:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .portal-shell button:not(:disabled) {
+    transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+  }
+
+  .portal-shell button:not(:disabled):hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+  }
+
+  .portal-shell button:not(:disabled):active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .dashboard-chart-segment,
+  .dashboard-bar {
+    transition: stroke-dasharray 650ms ease, stroke-dashoffset 650ms ease, y 650ms ease, height 650ms ease;
+  }
+}
+
+@media (min-width: 900px) {
+  .portal-content .admin-dashboard-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.portal-shell button:focus-visible {
+  outline: 3px solid rgba(96, 165, 250, 0.8);
+  outline-offset: 2px;
+}
+
+.portal-content :is(span, div)[class*="rounded-full"][class*="px-"] {
+  max-width: 100%;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-shell *,
+  .portal-shell *::before,
+  .portal-shell *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -504,6 +504,20 @@ const getStudent = async (req, res) => {
     if (req.user && req.user.role === 'learner' && student.learnerUserId !== req.user.id) {
       return res.status(403).json({ message: 'Forbidden' })
     }
+    if (req.user?.role === 'teacher') {
+      const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
+      if (!staff) return res.status(403).json({ message: 'Forbidden' })
+
+      const teacherClasses = Array.from(new Set([
+        ...(staff.classes || []),
+        ...(staff.classTeacherClasses || [])
+      ].map(value => normalizeStudentClassName(canonicalStudentClassName(value))).filter(Boolean)))
+      const studentClass = normalizeStudentClassName(canonicalStudentClassName(student.gradeLevel))
+      const allowed = teacherClasses.length
+        ? teacherClasses.includes(studentClass)
+        : studentClass === normalizeStudentClassName(canonicalStudentClassName(staff.department))
+      if (!allowed) return res.status(403).json({ message: 'Forbidden' })
+    }
 
     res.json(withCurrentAge(student))
   } catch (error) {

@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
-  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList, RefreshCw
+  UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList, RefreshCw, FileDown, Printer
 } from 'lucide-react'
 import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
@@ -20,6 +20,7 @@ import BrandLogo from '../../components/layout/BrandLogo'
 import { parseStudentFile } from '../../utils/studentImport'
 import { displayStudentClassName, normalizeStudentClassName, STUDENT_CLASSES } from '../../utils/studentClasses'
 import { countLearnersByGender } from '../../utils/learnerGenderCounts'
+import { downloadCsv, openAuditPrintWindow, writeAuditReport } from '../../utils/adminDataExports'
 import usePortalSection from '../../hooks/usePortalSection'
 
 const menuItems = [
@@ -56,6 +57,14 @@ const stats = [
 const classes = ['All', ...STUDENT_CLASSES]
 const ACADEMIC_TERMS = ['Term 1', 'Term 2', 'Term 3']
 const DASHBOARD_CHART_COLORS = ['#2563eb', '#f59e0b', '#8b5cf6', '#10b981', '#ef4444', '#06b6d4']
+const LEARNER_AUDIT_HEADERS = [
+  'Learner ID', 'Learner Name', 'Class', 'Division', 'Date of Birth',
+  'Parent / Guardian Name', 'Parent / Guardian Email', 'Parent / Guardian Phone'
+]
+const STAFF_AUDIT_HEADERS = [
+  'Staff Record ID', 'Name', 'Role', 'Department', 'Category',
+  'Email', 'Phone', 'Assigned Classes', 'Class Teacher For', 'Subjects'
+]
 
 const getLocalDateString = () => {
   const date = new Date()
@@ -65,28 +74,42 @@ const getLocalDateString = () => {
 
 function DashboardPieChart({ title, data, unit = 'learners' }) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
-  let start = 0
-  const gradient = data
-    .filter(item => item.value > 0)
-    .map(item => {
-      const end = start + (item.value / total) * 100
-      const segment = `${item.color} ${start}% ${end}%`
-      start = end
-      return segment
-    })
-    .join(', ')
+  const radius = 42
+  const circumference = 2 * Math.PI * radius
+  let offset = 0
 
   return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+    <section className="dashboard-card rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <h3 className="font-bold text-gray-800">{title}</h3>
       <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row">
         <div
           role="img"
           aria-label={`${title}: ${data.map(item => `${item.label} ${item.value}`).join(', ')}`}
-          className="relative h-40 w-40 shrink-0 rounded-full"
-          style={{ background: total ? `conic-gradient(${gradient})` : '#e5e7eb' }}
+          className="relative h-36 w-36 shrink-0"
         >
-          <div className="absolute inset-8 flex flex-col items-center justify-center rounded-full bg-white">
+          <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden="true">
+            <circle cx="50" cy="50" r={radius} fill="none" stroke="#e5e7eb" strokeWidth="16" />
+            {data.map(item => {
+              const segmentLength = total ? (item.value / total) * circumference : 0
+              const segmentOffset = offset
+              offset += segmentLength
+              return (
+                <circle
+                  key={item.label}
+                  className="dashboard-chart-segment"
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  fill="none"
+                  stroke={item.color}
+                  strokeWidth="16"
+                  strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
+                  strokeDashoffset={-segmentOffset}
+                />
+              )
+            })}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-2xl font-bold text-gray-800">{total}</span>
             <span className="text-xs text-gray-500">{unit}</span>
           </div>
@@ -105,6 +128,71 @@ function DashboardPieChart({ title, data, unit = 'learners' }) {
         </ul>
       </div>
     </section>
+  )
+}
+
+function DashboardVerticalBarChart({ data, largestValue }) {
+  const width = Math.max(640, data.length * 52 + 48)
+  const height = 260
+  const left = 38
+  const right = 12
+  const top = 18
+  const bottom = 78
+  const plotHeight = height - top - bottom
+  const axisMaximum = Math.max(4, Math.ceil(largestValue / 4) * 4)
+  const slotWidth = (width - left - right) / data.length
+  const barWidth = Math.min(24, slotWidth * 0.6)
+
+  return (
+    <div className="overflow-x-auto" role="img" aria-label={`Vertical bar chart showing ${data.map(item => `${item.label}: ${item.value} learners`).join(', ')}`}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="block max-w-none">
+        {[0, 1, 2, 3, 4].map(tick => {
+          const y = top + plotHeight * (1 - tick / 4)
+          return (
+            <g key={tick}>
+              <line x1={left} y1={y} x2={width - right} y2={y} stroke="#e5e7eb" strokeDasharray="3 4" />
+              <text x={left - 8} y={y + 3} textAnchor="end" fill="#6b7280" fontSize="10">
+                {Math.round(axisMaximum * tick / 4)}
+              </text>
+            </g>
+          )
+        })}
+        {data.map((item, index) => {
+          const barHeight = (item.value / axisMaximum) * plotHeight
+          const x = left + index * slotWidth + (slotWidth - barWidth) / 2
+          const y = top + plotHeight - barHeight
+          const labelX = x + barWidth / 2
+          const labelY = height - bottom + 12
+          return (
+            <g key={item.label}>
+              <title>{`${item.label}: ${item.value} learners`}</title>
+              <rect
+                className="dashboard-bar"
+                x={x}
+                y={y}
+                width={barWidth}
+                height={Math.max(barHeight, item.value ? 2 : 0)}
+                rx="4"
+                fill="#2563eb"
+              />
+              <text x={labelX} y={y - 5} textAnchor="middle" fill="#374151" fontSize="10" fontWeight="600">
+                {item.value}
+              </text>
+              <text
+                x={labelX}
+                y={labelY}
+                transform={`rotate(-45 ${labelX} ${labelY})`}
+                textAnchor="end"
+                fill="#4b5563"
+                fontSize="10"
+              >
+                {item.label}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+    </div>
   )
 }
 
@@ -148,6 +236,7 @@ export default function AdminDashboard() {
   const [activeClass, setActiveClass] = useState('All')
   const [showAddStudent, setShowAddStudent] = useState(false)
   const [selectedStudent, setSelectedStudent] = useState(null)
+  const [learnerProfileComplete, setLearnerProfileComplete] = useState(false)
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
   const [editMode, setEditMode] = useState(false)
@@ -221,6 +310,7 @@ export default function AdminDashboard() {
 
   // Staff state
   const [staffList, setStaffList] = useState([])
+  const [viewingStaff, setViewingStaff] = useState(null)
   const [selectedStaffIds, setSelectedStaffIds] = useState([])
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [editingStaff, setEditingStaff] = useState(null)
@@ -365,7 +455,7 @@ export default function AdminDashboard() {
   const classChartData = unclassifiedLearners
     ? [...classLearnerCounts, { label: 'Other / unassigned', value: unclassifiedLearners }]
     : classLearnerCounts
-  const largestClassCount = Math.max(...classChartData.map(item => item.value), 1)
+  const largestClassCount = Math.max(...classChartData.map(item => item.value), 0)
 
   const getLearnersInClasses = classNames => dashboardLearners.filter(learner => (
     classNames.some(gradeLevel => normalizeStudentClassName(learner.gradeLevel) === normalizeStudentClassName(gradeLevel))
@@ -423,7 +513,7 @@ export default function AdminDashboard() {
         .finally(() => setArchiveLoading(false))
     }
   if (activeMenu === 'learners' || activeMenu === 'create-account') {
-    axios.get(`${API_URL}/api/students`)
+    axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() })
       .then(res => {
         console.log("Students loaded:", res.data)   // ← For debugging
         setStudents(res.data)
@@ -447,7 +537,7 @@ export default function AdminDashboard() {
       axios.get(`${API_URL}/api/news`).then(res => setNewsItems(res.data))
     }
     if (activeMenu === 'staff') {
-      axios.get(`${API_URL}/api/staff`).then(res => setStaffList(res.data))
+      axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() }).then(res => setStaffList(res.data))
     }
     if (activeMenu === 'finance') {
       axios.get(`${API_URL}/api/fees/structures`, { headers: getAuthHeaders(), params: { academicYear: feeAcademicYear, term: feeTerm } }).then(res => {
@@ -475,7 +565,7 @@ export default function AdminDashboard() {
       const headers = getAuthHeaders()
       const results = await Promise.allSettled([
         axios.get(`${API_URL}/api/students`, { headers }),
-        axios.get(`${API_URL}/api/staff`, { headers }),
+        axios.get(`${API_URL}/api/staff/admin`, { headers }),
         axios.get(`${API_URL}/api/users`, { headers, params: { role: 'teacher', limit: 1 } }),
         axios.get(`${API_URL}/api/attendance`, {
           headers,
@@ -950,11 +1040,13 @@ const handleSaveAcademicContext = async () => {
   const openLearnerProfile = async (studentOrId, openEdit = false) => {
     const id = typeof studentOrId === 'object' ? studentOrId.id : studentOrId
     setLearnerProfileLoading(true)
+    setLearnerProfileComplete(false)
     setLearnerDocFiles({})
     setLearnerDocPreviews({})
     try {
       const res = await axios.get(`${API_URL}/api/students/${id}`, { headers: getAuthHeaders() })
       setSelectedStudent(res.data)
+      setLearnerProfileComplete(true)
       if (openEdit) {
         setEditStudent({ ...res.data })
         setEditMode(true)
@@ -974,6 +1066,149 @@ const handleSaveAcademicContext = async () => {
     } finally {
       setLearnerProfileLoading(false)
     }
+  }
+
+  const requireAdminForExport = () => {
+    if (user?.role === 'admin') return true
+    alert('Only administrators can export personal information.')
+    return false
+  }
+
+  const getLearnerAuditRows = learners => [...learners]
+    .sort((left, right) => {
+      const leftClass = STUDENT_CLASSES.findIndex(grade => normalizeStudentClassName(grade) === normalizeStudentClassName(left.gradeLevel))
+      const rightClass = STUDENT_CLASSES.findIndex(grade => normalizeStudentClassName(grade) === normalizeStudentClassName(right.gradeLevel))
+      return (leftClass < 0 ? STUDENT_CLASSES.length : leftClass) - (rightClass < 0 ? STUDENT_CLASSES.length : rightClass) ||
+        String(left.division || '').localeCompare(String(right.division || '')) ||
+        `${left.firstName} ${left.lastName}`.localeCompare(`${right.firstName} ${right.lastName}`)
+    })
+    .map(learner => [
+      learner.studentId,
+      `${learner.firstName || ''} ${learner.lastName || ''}`.trim(),
+      displayStudentClassName(learner.gradeLevel),
+      learner.division,
+      learner.dateOfBirth,
+      learner.parentName,
+      learner.parentEmail,
+      learner.parentPhone
+    ])
+
+  const getStaffAuditRows = staff => [...staff]
+    .sort((left, right) => String(left.name || '').localeCompare(String(right.name || '')))
+    .map(member => [
+      member.id,
+      member.name,
+      member.role,
+      member.department,
+      member.category,
+      member.email,
+      member.phone,
+      member.classes,
+      member.classTeacherClasses,
+      member.subjects
+    ])
+
+  const fetchLearnerAuditData = async () => {
+    if (!requireAdminForExport()) throw new Error('Administrator access is required.')
+    const response = await axios.get(`${API_URL}/api/students/admin/export`, { headers: getAuthHeaders() })
+    if (!Array.isArray(response.data)) throw new Error('The learner export response was invalid.')
+    return response.data
+  }
+
+  const fetchStaffAuditData = async () => {
+    if (!requireAdminForExport()) throw new Error('Administrator access is required.')
+    const response = await axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
+    if (!Array.isArray(response.data)) throw new Error('The staff export response was invalid.')
+    return response.data
+  }
+
+  const handleDownloadLearnerRoster = async () => {
+    if (!requireAdminForExport()) return
+    try {
+      const learners = await fetchLearnerAuditData()
+      downloadCsv('golden-intels-learner-audit-roster.csv', LEARNER_AUDIT_HEADERS, getLearnerAuditRows(learners))
+    } catch (error) {
+      console.error('Failed to download learner audit roster:', error)
+      alert(error.response?.data?.message || error.message || 'Could not download the learner audit roster.')
+    }
+  }
+
+  const handlePrintLearnerRoster = async () => {
+    if (!requireAdminForExport()) return
+    const printWindow = openAuditPrintWindow()
+    if (!printWindow) {
+      alert('The print window was blocked. Allow pop-ups for this site and try again.')
+      return
+    }
+    try {
+      const learners = await fetchLearnerAuditData()
+      writeAuditReport(printWindow, 'Golden-Intels Learner Audit Roster', LEARNER_AUDIT_HEADERS, getLearnerAuditRows(learners))
+    } catch (error) {
+      printWindow.close()
+      console.error('Failed to prepare learner audit roster:', error)
+      alert(error.response?.data?.message || error.message || 'Could not prepare the learner audit roster.')
+    }
+  }
+
+  const handleDownloadFullLearnerRecord = () => {
+    if (!requireAdminForExport() || !selectedStudent || !learnerProfileComplete || learnerProfileLoading) return
+    const excludedFields = new Set(['id', 'parentId', 'learnerUserId', 'admissionApplicationId', 'parent', 'results', 'archivedAt'])
+    const fields = Object.entries(selectedStudent)
+      .filter(([key]) => !excludedFields.has(key))
+      .map(([key, value]) => [
+        key.replace(/([A-Z])/g, ' $1').replace(/^./, character => character.toUpperCase()),
+        Array.isArray(value) ? value.join('; ') : value
+      ])
+    if (selectedStudent.parent) {
+      fields.push(['Linked Parent Account Name', selectedStudent.parent.name])
+      fields.push(['Linked Parent Account Email', selectedStudent.parent.email])
+    }
+    if (Array.isArray(selectedStudent.results)) {
+      fields.push(['Approved Results', JSON.stringify(selectedStudent.results)])
+    }
+    const safeId = String(selectedStudent.studentId || selectedStudent.id).replace(/[^a-z0-9_-]/gi, '-')
+    downloadCsv(`learner-${safeId}-confidential-profile.csv`, fields.map(([label]) => label), [fields.map(([, value]) => value)])
+  }
+
+  const handleDownloadStaffRoster = async () => {
+    if (!requireAdminForExport()) return
+    try {
+      const staff = await fetchStaffAuditData()
+      downloadCsv('golden-intels-staff-audit-roster.csv', STAFF_AUDIT_HEADERS, getStaffAuditRows(staff))
+    } catch (error) {
+      console.error('Failed to download staff audit roster:', error)
+      alert(error.response?.data?.message || error.message || 'Could not download the staff audit roster.')
+    }
+  }
+
+  const handlePrintStaffRoster = async () => {
+    if (!requireAdminForExport()) return
+    const printWindow = openAuditPrintWindow()
+    if (!printWindow) {
+      alert('The print window was blocked. Allow pop-ups for this site and try again.')
+      return
+    }
+    try {
+      const staff = await fetchStaffAuditData()
+      writeAuditReport(printWindow, 'Golden-Intels Staff Audit Roster', STAFF_AUDIT_HEADERS, getStaffAuditRows(staff))
+    } catch (error) {
+      printWindow.close()
+      console.error('Failed to prepare staff audit roster:', error)
+      alert(error.response?.data?.message || error.message || 'Could not prepare the staff audit roster.')
+    }
+  }
+
+  const handleDownloadFullStaffRecord = () => {
+    if (!requireAdminForExport() || !viewingStaff) return
+    const fields = Object.entries(viewingStaff)
+      .filter(([key]) => key !== 'id')
+      .map(([key, value]) => [
+        key.replace(/([A-Z])/g, ' $1').replace(/^./, character => character.toUpperCase()),
+        Array.isArray(value) ? value.join('; ') : value
+      ])
+    fields.unshift(['Staff Record ID', viewingStaff.id])
+    const safeName = String(viewingStaff.name || viewingStaff.id).replace(/[^a-z0-9_-]+/gi, '-')
+    downloadCsv(`staff-${safeName}-confidential-profile.csv`, fields.map(([label]) => label), [fields.map(([, value]) => value)])
   }
 
   const handleLearnerDocChange = (field, file) => {
@@ -1118,7 +1353,7 @@ const handleSaveAcademicContext = async () => {
       setTeacherTotal(res.data.teacherTotal || 0)
       const [studentsRes, staffRes] = await Promise.all([
         axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
-        axios.get(`${API_URL}/api/staff`, { headers: getAuthHeaders() })
+        axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
       ])
       setStudents(studentsRes.data)
       setStaffList(staffRes.data)
@@ -2031,11 +2266,11 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-                {dashboardStats.map((stat, index) => (
-                  <div key={index} className={`${stat.color} text-white rounded-2xl p-6 shadow-md`}>
-                    <p className={`${stat.textColor} text-sm mb-1`}>{stat.label}</p>
-                    <p className="text-3xl font-bold">{stat.value}</p>
+              <div className="admin-dashboard-stats grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+                {dashboardStats.map(stat => (
+                  <div key={stat.label} className={`dashboard-card ${stat.color} text-white rounded-xl p-4 shadow-sm`}>
+                    <p className={`${stat.textColor} text-xs sm:text-sm mb-1`}>{stat.label}</p>
+                    <p className="text-2xl font-bold tabular-nums">{stat.value}</p>
                   </div>
                 ))}
               </div>
@@ -2049,7 +2284,7 @@ const handleBulkPasswordReset = async () => {
                   unit="records"
                 />
 
-                <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <section className="dashboard-card rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                   <div className="mb-5 flex items-start justify-between gap-3">
                     <div>
                       <h3 className="font-bold text-gray-800">Learners by class</h3>
@@ -2059,24 +2294,7 @@ const handleBulkPasswordReset = async () => {
                       {dashboardLearners.length} learners
                     </span>
                   </div>
-                  <div className="space-y-3">
-                    {classChartData.map(({ label, value }) => {
-                      const width = value ? Math.max((value / largestClassCount) * 100, 2) : 0
-                      return (
-                        <div key={label} className="grid grid-cols-[7rem_minmax(0,1fr)_2rem] items-center gap-3 text-sm">
-                          <span className="truncate text-gray-600" title={label}>{label}</span>
-                          <div
-                            className="h-3 overflow-hidden rounded-full bg-gray-100"
-                            role="img"
-                            aria-label={`${label}: ${value} learners`}
-                          >
-                            <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${width}%` }} />
-                          </div>
-                          <span className="text-right font-semibold text-gray-800">{value}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
+                  <DashboardVerticalBarChart data={classChartData} largestValue={largestClassCount} />
                 </section>
               </div>
             </div>
@@ -2746,6 +2964,20 @@ const handleBulkPasswordReset = async () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold font-serif text-gray-800">Learners</h2>
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadLearnerRoster}
+                    className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50"
+                  >
+                    <FileDown size={16} /> Download audit roster
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrintLearnerRoster}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                  >
+                    <Printer size={16} /> Print audit roster
+                  </button>
                   <label className="inline-flex items-center gap-2 bg-white border border-blue-600 text-blue-700 hover:bg-blue-50 font-bold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer">
                     <Upload size={16} />
                     {studentImportLoading ? 'Importing…' : 'Import Excel / CSV'}
@@ -2754,6 +2986,9 @@ const handleBulkPasswordReset = async () => {
                   <button onClick={() => setShowAddStudent(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Learner</button>
                 </div>
               </div>
+              <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                Audit downloads contain personal learner and guardian details. Full learner profiles may also include health information and identity-document links. Store exported files securely and share them only with authorized staff.
+              </p>
               {studentImportResult && (
                 <div className={`mb-5 rounded-lg border px-4 py-3 text-sm ${studentImportResult.error || studentImportResult.errors?.length ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-green-200 bg-green-50 text-green-800'}`}>
                   {studentImportResult.error ? studentImportResult.error : (
@@ -3762,8 +3997,27 @@ const handleBulkPasswordReset = async () => {
                   <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Our Staff</h2>
                   <p className="text-gray-500 text-sm">Manage school staff members.</p>
                 </div>
-                <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadStaffRoster}
+                    className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50"
+                  >
+                    <FileDown size={16} /> Download audit roster
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrintStaffRoster}
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                  >
+                    <Printer size={16} /> Print audit roster
+                  </button>
+                  <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
+                </div>
               </div>
+              <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+                Staff audit exports include contact information. Keep downloaded files private and share them only with authorized administrators.
+              </p>
               {(showAddStaff || editingStaff) && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -3902,12 +4156,67 @@ const handleBulkPasswordReset = async () => {
                         {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
+                          <button onClick={() => setViewingStaff(member)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors">View</button>
                           <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              {viewingStaff && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                  <section className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                    <div className="flex items-center justify-between rounded-t-2xl bg-blue-600 p-6 text-white">
+                      <div>
+                        <h3 className="text-xl font-bold">Staff Profile</h3>
+                        <p className="mt-1 text-xs text-blue-100">Confidential staff record · ID {viewingStaff.id}</p>
+                      </div>
+                      <button type="button" onClick={() => setViewingStaff(null)} aria-label="Close staff profile"><X size={24} /></button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 p-6 sm:grid-cols-2">
+                      {[
+                        ['Name', viewingStaff.name],
+                        ['Role', viewingStaff.role],
+                        ['Department', viewingStaff.department],
+                        ['Category', viewingStaff.category],
+                        ['Email', viewingStaff.email],
+                        ['Phone', viewingStaff.phone],
+                        ['Subject', viewingStaff.subject],
+                        ['Subjects', viewingStaff.subjects],
+                        ['Assigned Classes', viewingStaff.classes],
+                        ['Class Teacher For', viewingStaff.classTeacherClasses],
+                        ['Biography', viewingStaff.bio],
+                        ['Photo URL', viewingStaff.photo],
+                        ['Record Created', viewingStaff.createdAt],
+                        ['Last Updated', viewingStaff.updatedAt]
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-lg bg-blue-50 px-3 py-2">
+                          <p className="text-xs font-bold text-gray-700">{label}</p>
+                          <p className="break-words text-sm text-gray-600">
+                            {Array.isArray(value) ? value.join(', ') : value || '—'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-3 px-6 pb-6">
+                      <button
+                        type="button"
+                        onClick={handleDownloadFullStaffRecord}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-700"
+                      >
+                        <FileDown size={18} /> Download full staff record
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewingStaff(null)}
+                        className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </section>
                 </div>
               )}
             </div>
@@ -4419,8 +4728,17 @@ const handleBulkPasswordReset = async () => {
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button onClick={() => { setEditMode(true); setEditStudent({ ...selectedStudent }) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-3 rounded-xl transition-colors">Edit Details</button>
+              <button
+                type="button"
+                onClick={handleDownloadFullLearnerRecord}
+                disabled={!learnerProfileComplete || learnerProfileLoading}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 py-3 font-bold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                title={!learnerProfileComplete ? 'Download is available after the full profile loads.' : 'Download confidential learner information'}
+              >
+                <FileDown size={18} /> Download full record
+              </button>
               <button onClick={() => { setSelectedStudent(null); setEditMode(false) }} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Close</button>
             </div>
           </div>
