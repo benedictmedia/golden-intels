@@ -90,6 +90,7 @@ const register = async (req, res) => {
     classes,
     subjects,
     classTeacherClasses,
+    staffId,
     firstName,
     lastName,
     dateOfBirth,
@@ -168,25 +169,22 @@ const register = async (req, res) => {
         const parsedClasses = parseArrayField(classes)
         const parsedSubjects = parseArrayField(subjects)
         const parsedClassTeacherClasses = parseArrayField(classTeacherClasses)
-        const hasTeacherAssignments = parsedClasses.length > 0 || parsedSubjects.length > 0 || parsedClassTeacherClasses.length > 0 || Boolean(teacherSubject)
-
-        if (hasTeacherAssignments) {
-          await tx.staff.create({
-            data: {
-              name,
-              role: 'teacher',
-              department: department || 'Teaching',
-              subject: teacherSubject || parsedSubjects[0] || null,
-              subjects: parsedSubjects,
-              classes: parsedClasses,
-              classTeacherClasses: parsedClassTeacherClasses,
-              source: 'account',
-              email,
-              phone: null,
-              category: 'teaching'
-            }
-          })
-        }
+        await tx.staff.create({
+          data: {
+            name,
+            role: 'teacher',
+            department: department || 'Teaching',
+            subject: teacherSubject || parsedSubjects[0] || null,
+            subjects: parsedSubjects,
+            classes: parsedClasses,
+            classTeacherClasses: parsedClassTeacherClasses,
+            source: 'account',
+            email,
+            phone: null,
+            staffId: typeof staffId === 'string' ? staffId.trim() || null : null,
+            category: 'teaching'
+          }
+        })
       }
 
       return createdUser
@@ -199,6 +197,9 @@ const register = async (req, res) => {
     const token = generateToken(user.id, user.role, user.name, user.email)
     res.status(201).json({ token, user: responseUser })
   } catch (error) {
+    if (error.code === 'P2002' && error.meta?.target?.includes('staffId')) {
+      return res.status(409).json({ message: 'This staff ID is already in use.' })
+    }
     res.status(error.statusCode || 500).json({ message: error.message || 'Server error' })
   }
 }

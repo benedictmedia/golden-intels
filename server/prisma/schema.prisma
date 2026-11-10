@@ -296,6 +296,7 @@ model Staff {
   photo               String?
   email               String?
   phone               String?
+  staffId             String?  @unique
   category            String   @default("teaching")
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

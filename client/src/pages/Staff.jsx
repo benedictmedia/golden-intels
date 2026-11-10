@@ -60,6 +60,15 @@ export default function Staff() {
         <h3 className="font-bold text-slate-800 text-lg mb-1">{member.name}</h3>
         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
         {member.subject && <p className="text-xs text-[#2563eb] font-bold mb-3">{member.subject}</p>}
+        {member.email && (
+          <a
+            href={`mailto:${member.email}`}
+            onClick={event => event.stopPropagation()}
+            className="block text-sm text-blue-700 hover:underline mb-3"
+          >
+            {member.email}
+          </a>
+        )}
         <p className="text-sm text-gray-600 line-clamp-2">{member.bio}</p>
       </div>
     </div>
@@ -164,9 +173,14 @@ export default function Staff() {
                 </div>
               )}
 
-              <p className="text-sm text-gray-500">
-                For staff contact information, please contact the school office.
-              </p>
+              {selectedStaff.email && (
+                <p className="text-sm text-gray-600">
+                  Email:{' '}
+                  <a href={`mailto:${selectedStaff.email}`} className="text-blue-700 hover:underline">
+                    {selectedStaff.email}
+                  </a>
+                </p>
+              )}
 
               <button
                 onClick={() => setSelectedStaff(null)}

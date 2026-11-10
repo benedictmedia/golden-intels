@@ -15,6 +15,68 @@ const getStaff = async (req, res) => {
   }
 }
 
+const getStaffAudit = async (req, res) => {
+  try {
+    const [staffMembers, teacherAccounts] = await Promise.all([
+      prisma.staff.findMany({
+        where: { source: { in: ['manual', 'account'] } },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.user.findMany({
+        where: { role: 'teacher' },
+        select: { id: true, name: true, email: true }
+      })
+    ])
+
+    const rosterByEmail = new Map()
+    const rosterWithoutEmail = []
+    staffMembers.forEach(member => {
+      const emailKey = member.email?.trim().toLowerCase()
+      if (!emailKey) {
+        rosterWithoutEmail.push(member)
+        return
+      }
+
+      const existing = rosterByEmail.get(emailKey)
+      if (!existing || (member.source === 'account' && existing.source !== 'account')) {
+        rosterByEmail.set(emailKey, {
+          ...existing,
+          ...member,
+          staffId: member.staffId || existing?.staffId
+        })
+      }
+    })
+
+    teacherAccounts.forEach(account => {
+      const emailKey = account.email.trim().toLowerCase()
+      if (!rosterByEmail.has(emailKey)) {
+        rosterByEmail.set(emailKey, {
+          id: null,
+          staffId: null,
+          name: account.name,
+          role: 'teacher',
+          department: 'Teaching',
+          subject: null,
+          subjects: [],
+          classes: [],
+          classTeacherClasses: [],
+          source: 'account',
+          bio: null,
+          photo: null,
+          email: account.email,
+          phone: null,
+          category: 'teaching',
+          accountId: account.id
+        })
+      }
+    })
+
+    res.json([...rosterByEmail.values(), ...rosterWithoutEmail])
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 const getPublicStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
@@ -22,6 +84,7 @@ const getPublicStaff = async (req, res) => {
       select: {
         id: true,
         name: true,
+        email: true,
         role: true,
         department: true,
         subject: true,
@@ -53,7 +116,7 @@ const parseArrayField = (value) => {
 
 const createStaff = async (req, res) => {
   try {
-    const { name, role, department, subject, bio, email, phone, category, classes, subjects, classTeacherClasses } = req.body
+    const { name, role, department, subject, bio, email, phone, staffId, category, classes, subjects, classTeacherClasses } = req.body
     const parsedClasses = parseArrayField(classes)
     const parsedSubjects = parseArrayField(subjects)
     const parsedClassTeacherClasses = parseArrayField(classTeacherClasses)
@@ -74,12 +137,14 @@ const createStaff = async (req, res) => {
         bio,
         email,
         phone,
+        staffId: typeof staffId === 'string' ? staffId.trim() || null : null,
         category,
         photo
       }
     })
     res.status(201).json(staff)
   } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ message: 'This staff ID is already in use.' })
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
@@ -87,7 +152,7 @@ const createStaff = async (req, res) => {
 const updateStaff = async (req, res) => {
   const { id } = req.params
   try {
-    const { name, role, department, subject, bio, email, phone, category, classes, subjects, classTeacherClasses } = req.body
+    const { name, role, department, subject, bio, email, phone, staffId, category, classes, subjects, classTeacherClasses } = req.body
     const existing = await prisma.staff.findUnique({ where: { id: parseInt(id) } })
     const parsedClasses = parseArrayField(classes)
     const parsedSubjects = parseArrayField(subjects)
@@ -110,12 +175,14 @@ const updateStaff = async (req, res) => {
         bio,
         email,
         phone,
+        staffId: typeof staffId === 'string' ? staffId.trim() || null : existing?.staffId || null,
         category,
         photo
       }
     })
     res.json(staff)
   } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ message: 'This staff ID is already in use.' })
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
@@ -135,4 +202,4 @@ const deleteStaff = async (req, res) => {
   }
 }
 
-module.exports = { getStaff, getPublicStaff, createStaff, updateStaff, deleteStaff }
+module.exports = { getStaff, getStaffAudit, getPublicStaff, createStaff, updateStaff, deleteStaff }

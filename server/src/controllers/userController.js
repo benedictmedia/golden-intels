@@ -129,6 +129,7 @@ const updateUser = async (req, res) => {
       const nextSubject = normalizeOptionalField(req.body.subject)
       const nextBio = normalizeOptionalField(req.body.bio)
       const nextPhone = normalizeOptionalField(req.body.phone)
+      const nextStaffId = normalizeOptionalField(req.body.staffId)
 
       const staffData = {
         name: nextName,
@@ -142,6 +143,7 @@ const updateUser = async (req, res) => {
         bio: nextBio === undefined ? (existingAccountStaff?.bio ?? null) : nextBio,
         email: nextEmail,
         phone: nextPhone === undefined ? (existingAccountStaff?.phone ?? null) : nextPhone,
+        staffId: nextStaffId === undefined ? (existingAccountStaff?.staffId ?? null) : nextStaffId,
         category: existingAccountStaff?.category || 'teaching',
         photo: req.file ? req.file.path : existingAccountStaff?.photo || null
       }
@@ -167,6 +169,9 @@ const updateUser = async (req, res) => {
 
     res.json(user)
   } catch (error) {
+    if (error.code === 'P2002' && error.meta?.target?.includes('staffId')) {
+      return res.status(409).json({ message: 'This staff ID is already in use.' })
+    }
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }

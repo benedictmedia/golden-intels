@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getStaff, getPublicStaff, createStaff, updateStaff, deleteStaff } = require('../controllers/staffController')
+const { getStaff, getStaffAudit, getPublicStaff, createStaff, updateStaff, deleteStaff } = require('../controllers/staffController')
 const protect = require('../middleware/authMiddleware')
 const { uploadStaff } = require('../middleware/cloudinaryUpload')
 
@@ -11,6 +11,7 @@ const requireAdmin = (req, res, next) => {
 
 router.get('/', getPublicStaff)
 router.get('/admin', protect, requireAdmin, getStaff)
+router.get('/admin/audit', protect, requireAdmin, getStaffAudit)
 router.post('/', protect, requireAdmin, uploadStaff.single('photo'), createStaff)
 router.put('/:id', protect, requireAdmin, uploadStaff.single('photo'), updateStaff)
 router.delete('/:id', protect, requireAdmin, deleteStaff)

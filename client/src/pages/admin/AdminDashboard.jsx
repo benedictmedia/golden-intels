@@ -62,7 +62,7 @@ const LEARNER_AUDIT_HEADERS = [
   'Parent / Guardian Name', 'Parent / Guardian Email', 'Parent / Guardian Phone'
 ]
 const STAFF_AUDIT_HEADERS = [
-  'Staff Record ID', 'Name', 'Role', 'Department', 'Category',
+  'Staff Record ID', 'Staff ID', 'Name', 'Role', 'Department', 'Category',
   'Email', 'Phone', 'Assigned Classes', 'Class Teacher For', 'Subjects'
 ]
 
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
   // Create account state
   const initialNewUserState = {
     name: '', email: '', password: '', role: 'teacher',
-    classes: [], subjects: [], classTeacherClasses: [], teacherSubject: '', teacherDepartment: 'Teaching',
+    classes: [], subjects: [], classTeacherClasses: [], teacherSubject: '', teacherDepartment: 'Teaching', staffId: '',
     learnerFirstName: '', learnerLastName: '', learnerDateOfBirth: '', learnerGender: '', learnerGradeLevel: '', learnerParentEmail: '', learnerParentName: '', learnerParentPhone: ''
   }
   const [newUser, setNewUser] = useState(initialNewUserState)
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
   const [staffLoading, setStaffLoading] = useState(false)
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
-  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
+  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
 
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
@@ -1097,6 +1097,7 @@ const handleSaveAcademicContext = async () => {
     .sort((left, right) => String(left.name || '').localeCompare(String(right.name || '')))
     .map(member => [
       member.id,
+      member.staffId,
       member.name,
       member.role,
       member.department,
@@ -1117,7 +1118,7 @@ const handleSaveAcademicContext = async () => {
 
   const fetchStaffAuditData = async () => {
     if (!requireAdminForExport()) throw new Error('Administrator access is required.')
-    const response = await axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
+    const response = await axios.get(`${API_URL}/api/staff/admin/audit`, { headers: getAuthHeaders() })
     if (!Array.isArray(response.data)) throw new Error('The staff export response was invalid.')
     return response.data
   }
@@ -1287,6 +1288,7 @@ const handleSaveAcademicContext = async () => {
     setEditingUser({
       ...userRecord,
       teacherDepartment: staffInfo?.department || 'Teaching',
+      staffId: staffInfo?.staffId || '',
       teacherSubject: staffInfo?.subject || '',
       subjects: staffInfo?.subjects || [],
       classes: staffInfo?.classes || [],
@@ -1310,6 +1312,7 @@ const handleSaveAcademicContext = async () => {
 
       if (newUser.role === 'teacher') {
         payload.department = newUser.teacherDepartment
+        payload.staffId = newUser.staffId
         payload.subjects = newUser.subjects
         payload.classes = newUser.classes
         payload.classTeacherClasses = newUser.classTeacherClasses
@@ -1596,6 +1599,7 @@ const handleBulkPasswordReset = async () => {
 
       if (payload.role === 'teacher') {
         requestPayload.department = payload.teacherDepartment || 'Teaching'
+        requestPayload.staffId = payload.staffId || ''
         requestPayload.subject = payload.teacherSubject || ''
         requestPayload.subjects = payload.subjects || []
         requestPayload.classes = payload.classes || []
@@ -2069,9 +2073,9 @@ const handleBulkPasswordReset = async () => {
       if (staffPhoto) data.append('photo', staffPhoto)
       const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList]); setShowAddStaff(false)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
-    } catch (err) { alert('Failed to add staff member.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to add staff member.') }
     finally { setStaffLoading(false) }
   }
 
@@ -2091,9 +2095,9 @@ const handleBulkPasswordReset = async () => {
       const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList(staffList.map(s => s.id === editingStaff.id ? res.data : s))
       setEditingStaff(null)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
-    } catch (err) { alert('Failed to update staff member.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to update staff member.') }
   }
 
   const handleDeleteStaff = async (id) => {
@@ -3200,6 +3204,15 @@ const handleBulkPasswordReset = async () => {
                 {newUser.role === 'teacher' && (
                   <div className="space-y-5">
                     <div>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">Staff ID</label>
+                      <input
+                        value={newUser.staffId}
+                        onChange={e => setNewUser({ ...newUser, staffId: e.target.value })}
+                        placeholder="Enter staff ID (optional)"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-sm font-bold text-gray-800 mb-2">Assign Classes</label>
                       <div className="grid grid-cols-2 gap-2">
                         {classes.filter(c => c !== 'All').map(className => (
@@ -3583,6 +3596,10 @@ const handleBulkPasswordReset = async () => {
 
                       {editingUser.role === 'teacher' && (
                         <div className="space-y-4 border border-gray-100 rounded-2xl p-4 bg-gray-50">
+                          <div>
+                            <label className="block text-sm font-bold text-gray-800 mb-2">Staff ID</label>
+                            <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.staffId || ''} onChange={e => setEditingUser({ ...editingUser, staffId: e.target.value })} />
+                          </div>
                           <div>
                             <label className="block text-sm font-bold text-gray-800 mb-2">Department</label>
                             <input className="w-full border px-3 py-2 rounded-lg" value={editingUser.teacherDepartment || ''} onChange={e => setEditingUser({ ...editingUser, teacherDepartment: e.target.value })} />
@@ -4059,7 +4076,7 @@ const handleBulkPasswordReset = async () => {
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {[['Full Name *','name','text'],['Role *','role','text'],['Department','department','text'],['Email','email','email'],['Phone','phone','text']].map(([label, key, type]) => (
+                        {[['Full Name *','name','text'],['Role *','role','text'],['Department','department','text'],['Staff ID','staffId','text'],['Email','email','email'],['Phone','phone','text']].map(([label, key, type]) => (
                           <div key={key}>
                             <label className="block text-sm font-bold text-gray-800 mb-2">{label}</label>
                             <input type={type} value={staffForm[key]} onChange={e => setStaffForm({ ...staffForm, [key]: e.target.value })} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
@@ -4178,7 +4195,7 @@ const handleBulkPasswordReset = async () => {
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
                           <button onClick={() => setViewingStaff(member)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors">View</button>
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', staffId: member.staffId || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
                           <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
                         </div>
                       </div>
@@ -4202,6 +4219,7 @@ const handleBulkPasswordReset = async () => {
                         ['Role', viewingStaff.role],
                         ['Department', viewingStaff.department],
                         ['Category', viewingStaff.category],
+                        ['Staff ID', viewingStaff.staffId],
                         ['Email', viewingStaff.email],
                         ['Phone', viewingStaff.phone],
                         ['Subject', viewingStaff.subject],
