@@ -2040,7 +2040,9 @@ const handleBulkPasswordReset = async () => {
   const getNewsRequestError = (error, action) => {
     const responseMessage = typeof error.response?.data === 'string'
       ? error.response.data
-      : error.response?.data?.message || error.response?.data?.error
+      : error.response?.data?.message ||
+        error.response?.data?.error?.message ||
+        (typeof error.response?.data?.error === 'string' ? error.response.data.error : null)
     if (error.response) {
       return responseMessage || `${action} failed (HTTP ${error.response.status}).`
     }
@@ -2048,34 +2050,64 @@ const handleBulkPasswordReset = async () => {
       return 'The upload timed out. Try fewer or smaller images.'
     }
     if (error.request) {
-      return `The API did not return a response (${error.code || error.message}). Check the API URL (${API_URL}) and whether this website's origin is allowed by the server's CORS settings.`
+      const uploadService = error.config?.url?.startsWith('https://api.cloudinary.com/')
+        ? 'Cloudinary image service'
+        : 'School API'
+      const diagnostic = uploadService === 'Cloudinary image service'
+        ? 'Check whether the browser or network allows uploads to Cloudinary.'
+        : `Check the API URL (${API_URL}) and whether this website's origin is allowed by the server's CORS settings.`
+      return `${uploadService} did not return a response (${error.code || error.message}). ${diagnostic}`
     }
     return error.message || `${action} failed.`
   }
+
+  const uploadNewsImages = async () => Promise.all(newsImages.map(async (image, index) => {
+    setNewsStatus(newsImages.length === 1
+      ? 'Preparing secure image upload...'
+      : `Preparing image ${index + 1} of ${newsImages.length}...`)
+    const signatureResponse = await axios.post(
+      `${API_URL}/api/news/upload-signature`,
+      {},
+      { headers: getAuthHeaders() }
+    )
+    const { cloudName, apiKey, timestamp, folder, publicId, signature } = signatureResponse.data
+    const uploadData = new FormData()
+    uploadData.append('file', image)
+    uploadData.append('api_key', apiKey)
+    uploadData.append('timestamp', String(timestamp))
+    uploadData.append('folder', folder)
+    uploadData.append('public_id', publicId)
+    uploadData.append('signature', signature)
+
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`,
+      uploadData,
+      {
+        onUploadProgress: event => {
+          if (!event.total) return
+          const progress = Math.round((event.loaded * 100) / event.total)
+          setNewsStatus(`Uploading image ${index + 1} of ${newsImages.length}: ${progress}%`)
+        }
+      }
+    )
+    if (!response.data?.secure_url) {
+      throw new Error('Cloudinary did not return a secure image URL.')
+    }
+    return response.data.secure_url
+  }))
 
   const handleAddNews = async () => {
     if (!newsForm.title || !newsForm.content) { alert('Please add a title and content.'); return }
     setNewsLoading(true)
     setNewsStatus('Publishing news and event...')
     try {
-      const requestBody = newsImages.length
-        ? (() => {
-            const formData = new FormData()
-            Object.entries(newsForm).forEach(([key, value]) => formData.append(key, value))
-            formData.append('uploadedBy', user?.name || '')
-            newsImages.forEach(image => formData.append('images', image))
-            return formData
-          })()
-        : { ...newsForm, uploadedBy: user?.name || '' }
-      const res = await axios.post(`${API_URL}/api/news`, requestBody, {
-        headers: getAuthHeaders(),
-        onUploadProgress: event => {
-          if (newsImages.length && event.total) {
-            const progress = Math.round((event.loaded * 100) / event.total)
-            setNewsStatus(progress < 100 ? `Uploading media: ${progress}%` : 'Finishing publication...')
-          }
-        }
-      })
+      const images = newsImages.length ? await uploadNewsImages() : []
+      setNewsStatus('Saving news and event...')
+      const res = await axios.post(`${API_URL}/api/news`, {
+        ...newsForm,
+        uploadedBy: user?.name || '',
+        images
+      }, { headers: getAuthHeaders() })
       setNewsItems(previous => [res.data, ...previous]); setShowAddNews(false)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
@@ -2094,18 +2126,12 @@ const handleBulkPasswordReset = async () => {
     setNewsLoading(true)
     setNewsStatus('Saving changes...')
     try {
-      const data = new FormData()
-      Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
-      newsImages.forEach(img => data.append('images', img))
-      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, {
-        headers: getAuthHeaders(),
-        onUploadProgress: event => {
-          if (event.total) {
-            const progress = Math.round((event.loaded * 100) / event.total)
-            setNewsStatus(progress < 100 ? `Uploading media: ${progress}%` : 'Finishing update...')
-          }
-        }
-      })
+      const images = newsImages.length ? await uploadNewsImages() : undefined
+      setNewsStatus('Saving changes...')
+      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, {
+        ...newsForm,
+        ...(images ? { images } : {})
+      }, { headers: getAuthHeaders() })
       setNewsItems(previous => previous.map(item => item.id === editingNews.id ? res.data : item))
       setEditingNews(null)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })

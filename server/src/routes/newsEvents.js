@@ -1,6 +1,13 @@
 const express = require('express')
 const router = express.Router()
-const { getNewsEvents, getHomepageNewsEvents, createNewsEvent, updateNewsEvent, deleteNewsEvent } = require('../controllers/newsEventController')
+const {
+  getNewsEvents,
+  getHomepageNewsEvents,
+  createNewsImageUploadSignature,
+  createNewsEvent,
+  updateNewsEvent,
+  deleteNewsEvent
+} = require('../controllers/newsEventController')
 const protect = require('../middleware/authMiddleware')
 const { uploadNews } = require('../middleware/cloudinaryUpload')
 
@@ -21,11 +28,18 @@ const handleNewsUpload = (req, res, next) => {
 
 router.get('/', getNewsEvents)
 router.get('/homepage', getHomepageNewsEvents)
+router.post('/upload-signature', protect, (req, res, next) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
+  next()
+}, createNewsImageUploadSignature)
 router.post('/', protect, (req, res, next) => {
   if (req.is('application/json')) return createNewsEvent(req, res, next)
   return handleNewsUpload(req, res, next)
 }, createNewsEvent)
-router.put('/:id', protect, handleNewsUpload, updateNewsEvent)
+router.put('/:id', protect, (req, res, next) => {
+  if (req.is('application/json')) return updateNewsEvent(req, res, next)
+  return handleNewsUpload(req, res, next)
+}, updateNewsEvent)
 router.delete('/:id', protect, deleteNewsEvent)
 
 module.exports = router
