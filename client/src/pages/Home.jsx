@@ -3,6 +3,7 @@ import WhyChooseUs from '../components/layout/WhyChooseUs';
 import AcademicExcellence from '../components/layout/AcademicExcellence';
 import CampusLife from '../components/layout/CampusLife';
 import CallToAction from '../components/layout/CallToAction';
+import HomeNewsSpotlight from '../components/layout/HomeNewsSpotlight';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <AcademicExcellence />
       <CampusLife />
       <CallToAction />
+      <HomeNewsSpotlight />
     </div>
   );
 }

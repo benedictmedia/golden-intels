@@ -1,0 +1,4 @@
+ALTER TABLE "Staff"
+ADD COLUMN "showOnPublicPage" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN "archivedAt" TIMESTAMP(3),
+ADD COLUMN "archivedBy" TEXT;

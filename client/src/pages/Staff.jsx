@@ -35,7 +35,7 @@ export default function Staff() {
 
   const leadership = staff.filter(s => s.category === 'leadership')
   const teaching = staff.filter(s => s.category === 'teaching')
-  const support = staff.filter(s => s.category === 'support')
+  const support = staff.filter(s => s.category !== 'leadership' && s.category !== 'teaching')
 
   const StaffCard = ({ member }) => (
     <div
@@ -119,7 +119,7 @@ export default function Staff() {
           {support.length > 0 && (
             <section className="py-20 bg-gradient-to-br from-green-50 via-white to-blue-50">
               <div className="max-w-7xl mx-auto px-4">
-                <SectionTitle title="Support Staff" subtitle="Our Support Team" />
+                <SectionTitle title="Support & Other Staff" subtitle="Our Team" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {support.map(member => <StaffCard key={member.id} member={member} />)}
                 </div>

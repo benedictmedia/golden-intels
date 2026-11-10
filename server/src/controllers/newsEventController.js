@@ -16,17 +16,37 @@ const getNewsEvents = async (req, res) => {
   }
 }
 
+const getHomepageNewsEvents = async (req, res) => {
+  try {
+    const postedWithinLastMonth = new Date()
+    postedWithinLastMonth.setMonth(postedWithinLastMonth.getMonth() - 1)
+    const items = await prisma.newsEvent.findMany({
+      where: { createdAt: { gte: postedWithinLastMonth } },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    })
+    res.set('Cache-Control', 'public, max-age=60')
+    res.json(items)
+  } catch (error) {
+    console.error('Homepage news load error:', error)
+    res.status(500).json({ message: 'Could not load recent announcements.' })
+  }
+}
+
 // Create news or event
 const createNewsEvent = async (req, res) => {
   try {
     const { title, content, category, type, videoUrl, eventDate, venue, uploadedBy } = req.body
+    if (typeof title !== 'string' || !title.trim() || typeof content !== 'string' || !content.trim()) {
+      return res.status(400).json({ message: 'A title and content are required.' })
+    }
     const files = req.files || []
     const images = files.map(file => file.path || file.secure_url || file.url || '').filter(Boolean)
 
     const item = await prisma.newsEvent.create({
       data: {
-        title: title || 'Untitled',
-        content: content || '',
+        title: title.trim(),
+        content: content.trim(),
         category: category || 'General',
         type: type || 'news',
         images,
@@ -98,4 +118,4 @@ const deleteNewsEvent = async (req, res) => {
   }
 }
 
-module.exports = { getNewsEvents, createNewsEvent, updateNewsEvent, deleteNewsEvent }
+module.exports = { getNewsEvents, getHomepageNewsEvents, createNewsEvent, updateNewsEvent, deleteNewsEvent }

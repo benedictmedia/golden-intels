@@ -303,6 +303,7 @@ export default function AdminDashboard() {
   const [showAddNews, setShowAddNews] = useState(false)
   const [editingNews, setEditingNews] = useState(null)
   const [newsLoading, setNewsLoading] = useState(false)
+  const [newsStatus, setNewsStatus] = useState('')
   const [newsFilter, setNewsFilter] = useState('All')
   const [newsForm, setNewsForm] = useState({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
   const [newsImages, setNewsImages] = useState([])
@@ -315,9 +316,10 @@ export default function AdminDashboard() {
   const [showAddStaff, setShowAddStaff] = useState(false)
   const [editingStaff, setEditingStaff] = useState(null)
   const [staffLoading, setStaffLoading] = useState(false)
+  const [staffArchiveView, setStaffArchiveView] = useState(false)
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
-  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
+  const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching', showOnPublicPage: true })
 
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
@@ -537,7 +539,13 @@ export default function AdminDashboard() {
       axios.get(`${API_URL}/api/news`).then(res => setNewsItems(res.data))
     }
     if (activeMenu === 'staff') {
-      axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() }).then(res => setStaffList(res.data))
+      axios.get(`${API_URL}/api/staff/admin`, {
+        headers: getAuthHeaders(),
+        params: { archived: staffArchiveView }
+      }).then(res => {
+        setStaffList(res.data)
+        setSelectedStaffIds([])
+      }).catch(err => alert(err.response?.data?.message || 'Failed to load staff members.'))
     }
     if (activeMenu === 'finance') {
       axios.get(`${API_URL}/api/fees/structures`, { headers: getAuthHeaders(), params: { academicYear: feeAcademicYear, term: feeTerm } }).then(res => {
@@ -555,7 +563,7 @@ export default function AdminDashboard() {
         .catch(console.error)
         .finally(() => setContactLoading(false))
     }
-  }, [activeMenu, feeAcademicYear, feeTerm])
+  }, [activeMenu, feeAcademicYear, feeTerm, staffArchiveView])
 
   useEffect(() => {
     if (activeMenu !== 'dashboard') return undefined
@@ -1996,45 +2004,102 @@ const handleBulkPasswordReset = async () => {
   }
 
   const handleNewsImageChange = async (e) => {
-  const raw = Array.from(e.target.files)
-  const compressed = await compressImages(raw, { maxWidthPx: 1280, maxSizeMB: 0.8 })
-  setNewsImages(compressed)
-  setNewsPreviews(compressed.map(f => URL.createObjectURL(f)))
-}
+    const raw = Array.from(e.target.files || [])
+    if (raw.length > 5) {
+      alert('Choose no more than 5 images for one news or event post.')
+      e.target.value = ''
+      return
+    }
+    if (raw.length === 0) {
+      setNewsImages([])
+      setNewsPreviews([])
+      setNewsStatus('')
+      return
+    }
+    setNewsLoading(true)
+    setNewsStatus('Optimizing images...')
+    try {
+      const compressed = await compressImages(raw, {
+        maxWidthPx: 1280,
+        maxSizeMB: 0.8,
+        quality: 0.76,
+        force: true
+      })
+      setNewsImages(compressed)
+      setNewsPreviews(compressed.map(file => URL.createObjectURL(file)))
+      setNewsStatus(`${compressed.length} image${compressed.length === 1 ? '' : 's'} ready.`)
+    } catch (error) {
+      console.error('Failed to optimize news images:', error)
+      setNewsStatus('')
+      alert('Could not prepare the selected images. Please try smaller JPG, PNG, or WebP files.')
+    } finally {
+      setNewsLoading(false)
+    }
+  }
 
   const handleAddNews = async () => {
     if (!newsForm.title || !newsForm.content) { alert('Please add a title and content.'); return }
     setNewsLoading(true)
+    setNewsStatus('Publishing news and event...')
     try {
       const data = new FormData()
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       data.append('uploadedBy', user?.name)
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.post(`${API_URL}/api/news`, data, { headers: getAuthHeaders() })
-      setNewsItems([res.data, ...newsItems]); setShowAddNews(false)
+      const res = await axios.post(`${API_URL}/api/news`, data, {
+        headers: getAuthHeaders(),
+        onUploadProgress: event => {
+          if (event.total) {
+            const progress = Math.round((event.loaded * 100) / event.total)
+            setNewsStatus(progress < 100 ? `Uploading media: ${progress}%` : 'Finishing publication...')
+          }
+        }
+      })
+      setNewsItems(previous => [res.data, ...previous]); setShowAddNews(false)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
+      setNewsStatus('')
     } catch (err) {
       console.error('Failed to add news item:', err)
-      alert(err.response?.data?.message || 'Failed to add news item.')
+      const message = err.response?.data?.message || (err.code === 'ECONNABORTED'
+        ? 'The upload timed out. Try fewer or smaller images.'
+        : 'Could not publish the item. Check your connection and try again.')
+      setNewsStatus(message)
+      alert(message)
     }
     finally { setNewsLoading(false) }
   }
 
   const handleEditNews = async () => {
+    if (!newsForm.title || !newsForm.content) { alert('Please add a title and content.'); return }
+    setNewsLoading(true)
+    setNewsStatus('Saving changes...')
     try {
       const data = new FormData()
       Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
       newsImages.forEach(img => data.append('images', img))
-      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, { headers: getAuthHeaders() })
-      setNewsItems(newsItems.map(n => n.id === editingNews.id ? res.data : n))
+      const res = await axios.put(`${API_URL}/api/news/${editingNews.id}`, data, {
+        headers: getAuthHeaders(),
+        onUploadProgress: event => {
+          if (event.total) {
+            const progress = Math.round((event.loaded * 100) / event.total)
+            setNewsStatus(progress < 100 ? `Uploading media: ${progress}%` : 'Finishing update...')
+          }
+        }
+      })
+      setNewsItems(previous => previous.map(item => item.id === editingNews.id ? res.data : item))
       setEditingNews(null)
       setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' })
       setNewsImages([]); setNewsPreviews([])
+      setNewsStatus('')
     } catch (err) {
       console.error('Failed to update news item:', err)
-      alert(err.response?.data?.message || 'Failed to update news item.')
-    }
+      const message = err.response?.data?.message || (err.code === 'ECONNABORTED'
+        ? 'The upload timed out. Try fewer or smaller images.'
+        : 'Could not save the item. Check your connection and try again.')
+      setNewsStatus(message)
+      alert(message)
+    } finally { setNewsLoading(false) }
   }
 
   const handleDeleteNews = async (id) => {
@@ -2057,7 +2122,7 @@ const handleBulkPasswordReset = async () => {
   const handleAddStaff = async () => {
     if (!staffForm.name || !staffForm.role) { alert('Please fill in name and role.'); return }
     const isTeacher = staffForm.role.toLowerCase() === 'teacher'
-    if (isTeacher && (!staffForm.classes.length && !staffForm.subjects.length && !staffForm.classTeacherClasses.length)) {
+    if (editingStaff.source !== 'account' && isTeacher && (!staffForm.classes.length && !staffForm.subjects.length && !staffForm.classTeacherClasses.length)) {
       alert('Teachers must be assigned at least one class, one subject, or one class-teacher class.')
       return
     }
@@ -2071,7 +2136,7 @@ const handleBulkPasswordReset = async () => {
       if (staffPhoto) data.append('photo', staffPhoto)
       const res = await axios.post(`${API_URL}/api/staff`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList([res.data, ...staffList]); setShowAddStaff(false)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching', showOnPublicPage: true })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert(err.response?.data?.message || 'Failed to add staff member.') }
     finally { setStaffLoading(false) }
@@ -2093,32 +2158,68 @@ const handleBulkPasswordReset = async () => {
       const res = await axios.put(`${API_URL}/api/staff/${editingStaff.id}`, data, { headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' } })
       setStaffList(staffList.map(s => s.id === editingStaff.id ? res.data : s))
       setEditingStaff(null)
-      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
+      setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching', showOnPublicPage: true })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert(err.response?.data?.message || 'Failed to update staff member.') }
   }
 
-  const handleDeleteStaff = async (id) => {
-    if (!window.confirm('Are you sure you want to remove this staff member?')) return
+  const handleArchiveStaff = async (id) => {
+    if (!window.confirm('Archive this staff member? They will be removed from active lists and the public page.')) return
     try {
-      await axios.delete(`${API_URL}/api/staff/${id}`, { headers: getAuthHeaders() })
+      await axios.post(`${API_URL}/api/staff/${id}/archive`, {}, { headers: getAuthHeaders() })
       setStaffList(staffList.filter(s => s.id !== id))
       setSelectedStaffIds(prev => prev.filter(selectedId => selectedId !== id))
-    } catch (err) { alert('Failed to delete staff member.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to archive staff member.') }
   }
 
-  const handleBulkDeleteStaff = async () => {
+  const handleRestoreStaff = async (id) => {
+    try {
+      await axios.post(`${API_URL}/api/staff/${id}/restore`, {}, { headers: getAuthHeaders() })
+      setStaffList(staffList.filter(s => s.id !== id))
+    } catch (err) { alert(err.response?.data?.message || 'Failed to restore staff member.') }
+  }
+
+  const handleBulkArchiveStaff = async () => {
     const members = staffList.filter(member => selectedStaffIds.includes(member.id))
-    if (!members.length || !window.confirm(`Permanently remove ${members.length} selected staff member(s)?`)) return
-    const results = await Promise.allSettled(members.map(member => axios.delete(
-      `${API_URL}/api/staff/${member.id}`,
+    if (!members.length || !window.confirm(`Archive ${members.length} selected staff member(s)?`)) return
+    const results = await Promise.allSettled(members.map(member => axios.post(
+      `${API_URL}/api/staff/${member.id}/archive`,
+      {},
       { headers: getAuthHeaders() }
     )))
-    const deletedIds = members.filter((_, index) => results[index].status === 'fulfilled').map(member => member.id)
-    setStaffList(prev => prev.filter(member => !deletedIds.includes(member.id)))
+    const archivedIds = members.filter((_, index) => results[index].status === 'fulfilled').map(member => member.id)
+    setStaffList(prev => prev.filter(member => !archivedIds.includes(member.id)))
     setSelectedStaffIds([])
-    const failed = members.length - deletedIds.length
-    alert(`${deletedIds.length} staff member(s) removed.${failed ? ` ${failed} could not be removed; review and retry those records.` : ''}`)
+    const failed = members.length - archivedIds.length
+    alert(`${archivedIds.length} staff member(s) archived.${failed ? ` ${failed} could not be archived; review and retry those records.` : ''}`)
+  }
+
+  const handleBulkRestoreStaff = async () => {
+    const members = staffList.filter(member => selectedStaffIds.includes(member.id))
+    if (!members.length || !window.confirm(`Restore ${members.length} selected staff member(s)?`)) return
+    const results = await Promise.allSettled(members.map(member => axios.post(
+      `${API_URL}/api/staff/${member.id}/restore`,
+      {},
+      { headers: getAuthHeaders() }
+    )))
+    const restoredIds = members.filter((_, index) => results[index].status === 'fulfilled').map(member => member.id)
+    setStaffList(prev => prev.filter(member => !restoredIds.includes(member.id)))
+    setSelectedStaffIds([])
+    const failed = members.length - restoredIds.length
+    alert(`${restoredIds.length} staff member(s) restored.${failed ? ` ${failed} could not be restored; review and retry those records.` : ''}`)
+  }
+
+  const handleToggleStaffVisibility = async (member, showOnPublicPage) => {
+    try {
+      const response = await axios.patch(
+        `${API_URL}/api/staff/${member.id}/public-visibility`,
+        { showOnPublicPage },
+        { headers: getAuthHeaders() }
+      )
+      setStaffList(prev => prev.map(item => item.id === member.id ? response.data : item))
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update public visibility.')
+    }
   }
 
   const handleSaveFeeStructures = async () => {
@@ -3971,13 +4072,14 @@ const handleBulkPasswordReset = async () => {
                         <div><label className="block text-sm font-bold text-gray-800 mb-2">Video URL (optional)</label><input type="text" value={newsForm.videoUrl} onChange={e => setNewsForm({ ...newsForm, videoUrl: e.target.value })} placeholder="YouTube or video link..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" /></div>
                         <div>
                           <label className="block text-sm font-bold text-gray-800 mb-2">Images (up to 5)</label>
-                          <input type="file" accept="image/*" multiple onChange={handleNewsImageChange} className="text-sm text-gray-600" />
+                          <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleNewsImageChange} disabled={newsLoading} className="text-sm text-gray-600 disabled:opacity-50" />
                           {newsPreviews.length > 0 && <div className="grid grid-cols-4 gap-2 mt-3">{newsPreviews.map((preview, index) => <img key={index} src={preview} alt={`Preview ${index + 1}`} className="w-full h-16 object-cover rounded-lg" loading="lazy" decoding="async" />)}</div>}
+                          {newsStatus && <p role="status" className="mt-2 text-sm font-medium text-blue-700">{newsStatus}</p>}
                         </div>
                       </div>
                       <div className="flex gap-4 mt-6">
                         <button onClick={editingNews ? handleEditNews : handleAddNews} disabled={newsLoading} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">{newsLoading ? 'Saving...' : editingNews ? 'Save Changes' : 'Publish'}</button>
-                        <button onClick={() => { setShowAddNews(false); setEditingNews(null); setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' }); setNewsImages([]); setNewsPreviews([]) }} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Cancel</button>
+                        <button onClick={() => { setShowAddNews(false); setEditingNews(null); setNewsForm({ title: '', content: '', category: 'General', type: 'news', videoUrl: '', eventDate: '', venue: '' }); setNewsImages([]); setNewsPreviews([]); setNewsStatus('') }} disabled={newsLoading} className="bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors disabled:opacity-50">Cancel</button>
                       </div>
                     </div>
                   </div>
@@ -4024,9 +4126,23 @@ const handleBulkPasswordReset = async () => {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold font-serif text-gray-800 mb-1">Our Staff</h2>
-                  <p className="text-gray-500 text-sm">Manage school staff members.</p>
+                  <p className="text-gray-500 text-sm">Manage staff members and teacher profiles.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStaffArchiveView(false)}
+                    className={`rounded-lg border px-4 py-2 text-sm font-bold ${!staffArchiveView ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 bg-white text-gray-700'}`}
+                  >
+                    Active Staff
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStaffArchiveView(true)}
+                    className={`rounded-lg border px-4 py-2 text-sm font-bold ${staffArchiveView ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300 bg-white text-gray-700'}`}
+                  >
+                    Archived
+                  </button>
                   <button
                     type="button"
                     onClick={handleDownloadStaffRoster}
@@ -4041,7 +4157,7 @@ const handleBulkPasswordReset = async () => {
                   >
                     <Printer size={16} /> Print audit roster
                   </button>
-                  <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
+                  {!staffArchiveView && <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>}
                 </div>
               </div>
               <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
@@ -4133,6 +4249,14 @@ const handleBulkPasswordReset = async () => {
                             <option value="support">Support Staff</option>
                           </select>
                         </div>
+                        <label className="md:col-span-2 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm font-semibold text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={staffForm.showOnPublicPage}
+                            onChange={event => setStaffForm({ ...staffForm, showOnPublicPage: event.target.checked })}
+                          />
+                          Show this staff member on the public Our Staff page
+                        </label>
                         <div className="md:col-span-2">
                           <label className="block text-sm font-bold text-gray-800 mb-2">Bio</label>
                           <textarea value={staffForm.bio} onChange={e => setStaffForm({ ...staffForm, bio: e.target.value })} rows={3} placeholder="Short bio..." className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
@@ -4159,16 +4283,16 @@ const handleBulkPasswordReset = async () => {
                     Select all {staffList.length} staff members
                   </label>
                   <button
-                    onClick={handleBulkDeleteStaff}
+                    onClick={staffArchiveView ? handleBulkRestoreStaff : handleBulkArchiveStaff}
                     disabled={!selectedStaffIds.length}
-                    className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                    className={`rounded px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 ${staffArchiveView ? 'bg-green-600' : 'bg-amber-600'}`}
                   >
-                    Delete selected ({selectedStaffIds.length})
+                    {staffArchiveView ? 'Restore selected' : 'Archive selected'} ({selectedStaffIds.length})
                   </button>
                 </div>
               )}
               {staffList.length === 0 ? (
-                <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">No staff members added yet.</div>
+                <div className="bg-white rounded-2xl p-8 text-center text-gray-400 border border-gray-100">{staffArchiveView ? 'No archived staff members.' : 'No staff members added yet.'}</div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {staffList.map(member => (
@@ -4187,14 +4311,32 @@ const handleBulkPasswordReset = async () => {
                         </label>
                         <h3 className="font-bold text-gray-800 mb-1">{member.name}</h3>
                         <p className="text-sm text-gray-500 mb-1">{member.role}</p>
+                        {member.email && <p className="text-xs text-gray-500 mb-1">{member.email}</p>}
+                        {!staffArchiveView && (
+                          <label className="mb-3 flex items-center gap-2 text-xs text-gray-600">
+                            <input
+                              type="checkbox"
+                              checked={member.showOnPublicPage}
+                              onChange={event => handleToggleStaffVisibility(member, event.target.checked)}
+                            />
+                            Show on public page
+                          </label>
+                        )}
+                        {staffArchiveView && <p className="mb-3 text-xs font-semibold text-amber-700">Archived{member.archivedAt ? ` on ${new Date(member.archivedAt).toLocaleDateString()}` : ''}</p>}
                         {member.classes?.length > 0 && <p className="text-xs text-gray-500 mb-1">Assigned Classes: {member.classes.join(', ')}</p>}
                         {member.classTeacherClasses?.length > 0 && <p className="text-xs text-[#2563eb] font-bold mb-1">Class Teacher For: {member.classTeacherClasses.join(', ')}</p>}
                         {member.subjects?.length > 0 && <p className="text-xs text-cyan-600 font-bold mb-2">Subjects: {member.subjects.join(', ')}</p>}
                         <p className="text-xs text-gray-400 mb-4 line-clamp-2">{member.bio}</p>
                         <div className="flex gap-2">
                           <button onClick={() => setViewingStaff(member)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm transition-colors">View</button>
-                          <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', staffId: member.staffId || '', category: member.category }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
-                          <button onClick={() => handleDeleteStaff(member.id)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                          {!staffArchiveView ? (
+                            <>
+                              <button onClick={() => { setEditingStaff(member); setStaffForm({ name: member.name, role: member.role, department: member.department || '', subject: member.subject || '', subjects: member.subjects || [], classes: member.classes || [], classTeacherClasses: member.classTeacherClasses || [], bio: member.bio || '', email: member.email || '', phone: member.phone || '', staffId: member.staffId || '', category: member.category, showOnPublicPage: member.showOnPublicPage ?? true }); setStaffPhotoPreview(null); setStaffPhoto(null) }} className="flex-1 bg-blue-500 hover:bg-blue-300 text-gray-800 font-bold py-2 rounded-lg text-sm transition-colors">Edit</button>
+                              <button onClick={() => handleArchiveStaff(member.id)} aria-label={`Archive ${member.name}`} className="rounded-lg bg-amber-500 p-2 text-white transition-colors hover:bg-amber-600"><Archive size={16} /></button>
+                            </>
+                          ) : (
+                            <button onClick={() => handleRestoreStaff(member.id)} className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-bold text-white transition-colors hover:bg-green-700">Restore</button>
+                          )}
                         </div>
                       </div>
                     </div>

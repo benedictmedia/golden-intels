@@ -298,6 +298,9 @@ model Staff {
   phone               String?
   staffId             String?  @unique
   category            String   @default("teaching")
+  showOnPublicPage    Boolean  @default(true)
+  archivedAt          DateTime?
+  archivedBy          String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
