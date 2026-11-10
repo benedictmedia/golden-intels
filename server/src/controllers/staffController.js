@@ -15,6 +15,14 @@ const getStaff = async (req, res) => {
   }
 }
 
+const normalizeStaffName = value => String(value ?? '')
+  .normalize('NFKD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[^\p{L}\p{N}]+/gu, ' ')
+  .trim()
+  .replace(/\s+/g, ' ')
+  .toLowerCase()
+
 const getStaffAudit = async (req, res) => {
   try {
     const [staffMembers, teacherAccounts] = await Promise.all([
@@ -71,13 +79,38 @@ const getStaffAudit = async (req, res) => {
       }
     })
 
-    res.json([...rosterByEmail.values(), ...rosterWithoutEmail])
+    const roster = [...rosterByEmail.values()]
+    rosterWithoutEmail.forEach(member => {
+      const matchingAccounts = teacherAccounts.filter(account =>
+        normalizeStaffName(account.name) === normalizeStaffName(member.name)
+      )
+      if (matchingAccounts.length !== 1) {
+        roster.push(member)
+        return
+      }
+
+      const teacher = rosterByEmail.get(matchingAccounts[0].email.trim().toLowerCase())
+      if (!teacher) {
+        roster.push(member)
+        return
+      }
+
+      Object.assign(teacher, {
+        staffId: teacher.staffId || member.staffId,
+        phone: teacher.phone || member.phone,
+        bio: teacher.bio || member.bio,
+        photo: teacher.photo || member.photo,
+        subject: teacher.subject || member.subject,
+        subjects: teacher.subjects?.length ? teacher.subjects : member.subjects,
+        classes: teacher.classes?.length ? teacher.classes : member.classes,
+        classTeacherClasses: teacher.classTeacherClasses?.length ? teacher.classTeacherClasses : member.classTeacherClasses
+      })
+    })
+    res.json(roster)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
 }
-
-const normalizeStaffName = value => String(value ?? '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase()
 
 const importStaff = async (req, res) => {
   const { staff } = req.body || {}
@@ -136,78 +169,121 @@ const importStaff = async (req, res) => {
       }
 
       let existing = idMatches[0] || null
-      let teacherAccount = existing?.source === 'account'
-        ? teacherAccounts.find(account => account.email.toLowerCase() === existing.email?.toLowerCase())
+      const nameMatches = existingStaff.filter(member =>
+        normalizeStaffName(member.name) === normalizeStaffName(name)
+      )
+      let teacherAccount = existing?.email
+        ? teacherAccounts.find(account => account.email.toLowerCase() === existing.email.toLowerCase())
         : null
+      let duplicateManualStaff = existing?.source === 'manual' ? existing : null
 
-      if (!existing) {
-        const normalizedName = normalizeStaffName(name)
-        const nameMatches = existingStaff.filter(member => normalizeStaffName(member.name) === normalizedName)
-        const matchingTeachers = teacherAccounts.filter(account => normalizeStaffName(account.name) === normalizedName)
-        const candidates = new Map()
-        nameMatches.forEach(member => {
-          const key = member.email ? `email:${member.email.toLowerCase()}` : `staff:${member.id}`
-          const current = candidates.get(key)
-          if (!current || (member.source === 'account' && current.staff?.source !== 'account')) {
-            candidates.set(key, { staff: member, teacher: null })
-          }
-        })
-        matchingTeachers.forEach(account => {
-          const key = `email:${account.email.toLowerCase()}`
-          const current = candidates.get(key)
-          candidates.set(key, {
-            staff: current?.staff || null,
-            teacher: account
-          })
-        })
-        if (candidates.size > 1) {
-          result.errors.push({ row: rowNumber, message: 'This name matches multiple existing staff or teacher accounts. Use their existing STAFF ID to update the correct record.' })
+      if (!teacherAccount) {
+        const namesToMatch = existing ? [existing.name, name] : [name]
+        const matchingTeachers = teacherAccounts.filter(account =>
+          namesToMatch.some(candidateName =>
+            normalizeStaffName(account.name) === normalizeStaffName(candidateName)
+          )
+        )
+        const uniqueMatchingTeachers = [...new Map(matchingTeachers.map(account => [account.id, account])).values()]
+        if (uniqueMatchingTeachers.length > 1) {
+          result.errors.push({ row: rowNumber, staffId, message: 'This name matches multiple teacher accounts. Use a unique STAFF ID or ask an administrator to resolve the duplicate names.' })
           continue
         }
-        const candidate = candidates.values().next().value
-        existing = candidate?.staff || null
-        teacherAccount = candidate?.teacher || null
+        teacherAccount = uniqueMatchingTeachers[0] || null
+      }
+
+      if (!existing && teacherAccount) {
+        const matchingStaff = existingStaff.filter(member =>
+          normalizeStaffName(member.name) === normalizeStaffName(teacherAccount.name)
+        )
+        const accountStaff = matchingStaff.find(member =>
+          member.source === 'account' && member.email?.toLowerCase() === teacherAccount.email.toLowerCase()
+        )
+        const unlinkedStaff = matchingStaff.filter(member =>
+          member.source === 'manual' && !member.email
+        )
+        if (unlinkedStaff.length > 1) {
+          result.errors.push({ row: rowNumber, staffId, message: 'Multiple unlinked staff records have this teacher name. Use an existing STAFF ID or ask an administrator to resolve the duplicate records.' })
+          continue
+        }
+        duplicateManualStaff = unlinkedStaff[0] || duplicateManualStaff
+        existing = accountStaff || unlinkedStaff[0] || null
+      } else if (!existing && !teacherAccount) {
+        if (nameMatches.length > 1) {
+          result.errors.push({ row: rowNumber, staffId, message: 'This name matches multiple existing staff records. Use an existing STAFF ID to update the correct record.' })
+          continue
+        }
+        existing = nameMatches[0] || null
       }
 
       try {
-        if (existing) {
+        if (teacherAccount) {
+          const accountStaff = existingStaff.find(member =>
+            member.source === 'account' && member.email?.toLowerCase() === teacherAccount.email.toLowerCase()
+          )
+          const unlinkedStaff = duplicateManualStaff || (existing?.source === 'manual' ? existing : null)
+          await prisma.$transaction(async tx => {
+            let targetStaff
+            if (accountStaff) {
+              const profileData = {
+                name,
+                staffId,
+                bio: accountStaff.bio || unlinkedStaff?.bio,
+                photo: accountStaff.photo || unlinkedStaff?.photo,
+                phone: accountStaff.phone || unlinkedStaff?.phone,
+                subject: accountStaff.subject || unlinkedStaff?.subject,
+                subjects: accountStaff.subjects.length ? accountStaff.subjects : unlinkedStaff?.subjects || [],
+                classes: accountStaff.classes.length ? accountStaff.classes : unlinkedStaff?.classes || [],
+                classTeacherClasses: accountStaff.classTeacherClasses.length ? accountStaff.classTeacherClasses : unlinkedStaff?.classTeacherClasses || []
+              }
+              if (unlinkedStaff) await tx.staff.delete({ where: { id: unlinkedStaff.id } })
+              targetStaff = await tx.staff.update({ where: { id: accountStaff.id }, data: profileData })
+            } else if (unlinkedStaff) {
+              targetStaff = await tx.staff.update({
+                where: { id: unlinkedStaff.id },
+                data: {
+                  name,
+                  staffId,
+                  email: teacherAccount.email,
+                  role: 'teacher',
+                  department: unlinkedStaff.department || 'Teaching',
+                  source: 'account',
+                  category: unlinkedStaff.category || 'teaching'
+                }
+              })
+            } else {
+              targetStaff = await tx.staff.create({
+                data: {
+                  name,
+                  staffId,
+                  role: 'teacher',
+                  department: 'Teaching',
+                  source: 'account',
+                  email: teacherAccount.email,
+                  category: 'teaching'
+                }
+              })
+            }
+            if (teacherAccount.name !== name) {
+              await tx.user.update({ where: { id: teacherAccount.id }, data: { name } })
+            }
+            return targetStaff
+          })
+          if (accountStaff) Object.assign(accountStaff, { name, staffId })
+          else if (unlinkedStaff) Object.assign(unlinkedStaff, { name, staffId, source: 'account', email: teacherAccount.email, role: 'teacher' })
+          else existingStaff.push({ name, staffId, source: 'account', email: teacherAccount.email, role: 'teacher' })
+          if (unlinkedStaff && accountStaff) {
+            const manualIndex = existingStaff.findIndex(member => member.id === unlinkedStaff.id)
+            if (manualIndex >= 0) existingStaff.splice(manualIndex, 1)
+          }
+          teacherAccount.name = name
+          result.updated += 1
+        } else if (existing) {
           const updated = await prisma.staff.update({
             where: { id: existing.id },
             data: { name, staffId }
           })
           Object.assign(existing, updated)
-          if (teacherAccount && teacherAccount.name !== name) {
-            await prisma.user.update({ where: { id: teacherAccount.id }, data: { name } })
-            teacherAccount.name = name
-          }
-          result.updated += 1
-        } else if (teacherAccount) {
-          const accountStaff = existingStaff.find(member =>
-            member.source === 'account' && member.email?.toLowerCase() === teacherAccount.email.toLowerCase()
-          )
-          if (accountStaff) {
-            const updated = await prisma.staff.update({
-              where: { id: accountStaff.id },
-              data: { name, staffId }
-            })
-            Object.assign(accountStaff, updated)
-          } else {
-            await prisma.staff.create({
-              data: {
-                name,
-                staffId,
-                role: 'teacher',
-                department: 'Teaching',
-                source: 'account',
-                email: teacherAccount.email,
-                category: 'teaching'
-              }
-            })
-          }
-          if (teacherAccount.name !== name) {
-            await prisma.user.update({ where: { id: teacherAccount.id }, data: { name } })
-            teacherAccount.name = name
-          }
           result.updated += 1
         } else {
           await prisma.staff.create({
@@ -240,7 +316,10 @@ const importStaff = async (req, res) => {
 const getPublicStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
-      where: { source: 'manual' },
+      where: {
+        source: 'manual',
+        department: { equals: 'Leadership & Management', mode: 'insensitive' }
+      },
       select: {
         id: true,
         name: true,
