@@ -77,6 +77,166 @@ const getStaffAudit = async (req, res) => {
   }
 }
 
+const normalizeStaffName = value => String(value ?? '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase()
+
+const importStaff = async (req, res) => {
+  const { staff } = req.body || {}
+  if (!Array.isArray(staff) || staff.length === 0) {
+    return res.status(400).json({ message: 'The import must contain at least one staff row.' })
+  }
+  if (staff.length > 1000) {
+    return res.status(400).json({ message: 'Import no more than 1,000 staff rows at a time.' })
+  }
+
+  const result = { created: 0, updated: 0, errors: [] }
+  const rowsByStaffId = new Map()
+  const rowsByName = new Map()
+  staff.forEach((row, index) => {
+    const staffId = String(row?.staffId ?? '').trim().toLowerCase()
+    if (staffId) {
+      const rows = rowsByStaffId.get(staffId) || []
+      rows.push(Number.isInteger(row?.rowNumber) ? row.rowNumber : index + 2)
+      rowsByStaffId.set(staffId, rows)
+    }
+    const nameKey = normalizeStaffName(row?.name)
+    if (nameKey) {
+      const rows = rowsByName.get(nameKey) || []
+      rows.push(Number.isInteger(row?.rowNumber) ? row.rowNumber : index + 2)
+      rowsByName.set(nameKey, rows)
+    }
+  })
+
+  try {
+    const [existingStaff, teacherAccounts] = await Promise.all([
+      prisma.staff.findMany({ where: { source: { in: ['manual', 'account'] } } }),
+      prisma.user.findMany({ where: { role: 'teacher' }, select: { id: true, name: true, email: true } })
+    ])
+
+    for (const [index, row] of staff.entries()) {
+      const rowNumber = Number.isInteger(row?.rowNumber) ? row.rowNumber : index + 2
+      const name = typeof row?.name === 'string' ? row.name.trim().replace(/\s+/g, ' ') : ''
+      const staffId = typeof row?.staffId === 'string' ? row.staffId.trim() : ''
+      if (!name || !staffId) {
+        result.errors.push({ row: rowNumber, message: 'STAFF NAME and STAFF ID are required.' })
+        continue
+      }
+      if ((rowsByStaffId.get(staffId.toLowerCase()) || []).length > 1) {
+        result.errors.push({ row: rowNumber, staffId, message: 'This STAFF ID appears more than once in the CSV; all rows with this ID were skipped.' })
+        continue
+      }
+
+      const idMatches = existingStaff.filter(member => member.staffId?.toLowerCase() === staffId.toLowerCase())
+      if (idMatches.length > 1) {
+        result.errors.push({ row: rowNumber, staffId, message: 'This STAFF ID matches multiple existing records. Ask an administrator to resolve the duplicate IDs.' })
+        continue
+      }
+      if (!idMatches.length && (rowsByName.get(normalizeStaffName(name)) || []).length > 1) {
+        result.errors.push({ row: rowNumber, staffId, message: 'This STAFF NAME appears more than once in the CSV and cannot safely be matched by name. Import each record separately or use existing STAFF IDs.' })
+        continue
+      }
+
+      let existing = idMatches[0] || null
+      let teacherAccount = existing?.source === 'account'
+        ? teacherAccounts.find(account => account.email.toLowerCase() === existing.email?.toLowerCase())
+        : null
+
+      if (!existing) {
+        const normalizedName = normalizeStaffName(name)
+        const nameMatches = existingStaff.filter(member => normalizeStaffName(member.name) === normalizedName)
+        const matchingTeachers = teacherAccounts.filter(account => normalizeStaffName(account.name) === normalizedName)
+        const candidates = new Map()
+        nameMatches.forEach(member => {
+          const key = member.email ? `email:${member.email.toLowerCase()}` : `staff:${member.id}`
+          const current = candidates.get(key)
+          if (!current || (member.source === 'account' && current.staff?.source !== 'account')) {
+            candidates.set(key, { staff: member, teacher: null })
+          }
+        })
+        matchingTeachers.forEach(account => {
+          const key = `email:${account.email.toLowerCase()}`
+          const current = candidates.get(key)
+          candidates.set(key, {
+            staff: current?.staff || null,
+            teacher: account
+          })
+        })
+        if (candidates.size > 1) {
+          result.errors.push({ row: rowNumber, message: 'This name matches multiple existing staff or teacher accounts. Use their existing STAFF ID to update the correct record.' })
+          continue
+        }
+        const candidate = candidates.values().next().value
+        existing = candidate?.staff || null
+        teacherAccount = candidate?.teacher || null
+      }
+
+      try {
+        if (existing) {
+          const updated = await prisma.staff.update({
+            where: { id: existing.id },
+            data: { name, staffId }
+          })
+          Object.assign(existing, updated)
+          if (teacherAccount && teacherAccount.name !== name) {
+            await prisma.user.update({ where: { id: teacherAccount.id }, data: { name } })
+            teacherAccount.name = name
+          }
+          result.updated += 1
+        } else if (teacherAccount) {
+          const accountStaff = existingStaff.find(member =>
+            member.source === 'account' && member.email?.toLowerCase() === teacherAccount.email.toLowerCase()
+          )
+          if (accountStaff) {
+            const updated = await prisma.staff.update({
+              where: { id: accountStaff.id },
+              data: { name, staffId }
+            })
+            Object.assign(accountStaff, updated)
+          } else {
+            await prisma.staff.create({
+              data: {
+                name,
+                staffId,
+                role: 'teacher',
+                department: 'Teaching',
+                source: 'account',
+                email: teacherAccount.email,
+                category: 'teaching'
+              }
+            })
+          }
+          if (teacherAccount.name !== name) {
+            await prisma.user.update({ where: { id: teacherAccount.id }, data: { name } })
+            teacherAccount.name = name
+          }
+          result.updated += 1
+        } else {
+          await prisma.staff.create({
+            data: {
+              name,
+              staffId,
+              role: 'staff',
+              department: 'General',
+              source: 'manual',
+              category: 'support'
+            }
+          })
+          result.created += 1
+        }
+      } catch (error) {
+        if (error.code === 'P2002') {
+          result.errors.push({ row: rowNumber, staffId, message: 'This STAFF ID is already in use.' })
+          continue
+        }
+        result.errors.push({ row: rowNumber, staffId, message: error.message || 'This row could not be imported.' })
+      }
+    }
+
+    res.json(result)
+  } catch (error) {
+    res.status(500).json({ message: 'Could not load staff records for import.', error: error.message })
+  }
+}
+
 const getPublicStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
@@ -202,4 +362,4 @@ const deleteStaff = async (req, res) => {
   }
 }
 
-module.exports = { getStaff, getStaffAudit, getPublicStaff, createStaff, updateStaff, deleteStaff }
+module.exports = { getStaff, getStaffAudit, importStaff, getPublicStaff, createStaff, updateStaff, deleteStaff }

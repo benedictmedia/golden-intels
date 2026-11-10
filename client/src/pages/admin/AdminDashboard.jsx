@@ -18,6 +18,7 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import { parseStudentFile } from '../../utils/studentImport'
+import { parseStaffFile } from '../../utils/staffImport'
 import { displayStudentClassName, normalizeStudentClassName, STUDENT_CLASSES } from '../../utils/studentClasses'
 import { countLearnersByGender } from '../../utils/learnerGenderCounts'
 import { downloadCsv, openAuditPrintWindow, writeAuditReport } from '../../utils/adminDataExports'
@@ -62,8 +63,8 @@ const LEARNER_AUDIT_HEADERS = [
   'Parent / Guardian Name', 'Parent / Guardian Email', 'Parent / Guardian Phone'
 ]
 const STAFF_AUDIT_HEADERS = [
-  'Staff Record ID', 'Staff ID', 'Name', 'Role', 'Department', 'Category',
-  'Email', 'Phone', 'Assigned Classes', 'Class Teacher For', 'Subjects'
+  'Staff ID', 'Name', 'Role', 'Department', 'Email', 'Phone',
+  'Assigned Classes', 'Class Teacher For', 'Subjects'
 ]
 
 const getLocalDateString = () => {
@@ -318,6 +319,8 @@ export default function AdminDashboard() {
   const [staffPhoto, setStaffPhoto] = useState(null)
   const [staffPhotoPreview, setStaffPhotoPreview] = useState(null)
   const [staffForm, setStaffForm] = useState({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
+  const [staffImportLoading, setStaffImportLoading] = useState(false)
+  const [staffImportResult, setStaffImportResult] = useState(null)
 
   // Finance state
   const [financeTab, setFinanceTab] = useState('fee-structure')
@@ -1096,12 +1099,10 @@ const handleSaveAcademicContext = async () => {
   const getStaffAuditRows = staff => [...staff]
     .sort((left, right) => String(left.name || '').localeCompare(String(right.name || '')))
     .map(member => [
-      member.id,
       member.staffId,
       member.name,
       member.role,
       member.department,
-      member.category,
       member.email,
       member.phone,
       member.classes,
@@ -2098,6 +2099,30 @@ const handleBulkPasswordReset = async () => {
       setStaffForm({ name: '', role: '', department: '', subject: '', subjects: [], classes: [], classTeacherClasses: [], bio: '', email: '', phone: '', staffId: '', category: 'teaching' })
       setStaffPhoto(null); setStaffPhotoPreview(null)
     } catch (err) { alert(err.response?.data?.message || 'Failed to update staff member.') }
+  }
+
+  const handleStaffImport = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setStaffImportLoading(true)
+    setStaffImportResult(null)
+    try {
+      const rows = await parseStaffFile(file)
+      if (!rows.length) throw new Error('No staff rows were found in this file.')
+      const response = await axios.post(
+        `${API_URL}/api/staff/admin/import`,
+        { staff: rows },
+        { headers: getAuthHeaders() }
+      )
+      const refreshedStaff = await axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
+      setStaffList(refreshedStaff.data)
+      setStaffImportResult(response.data)
+    } catch (error) {
+      setStaffImportResult({ error: error.response?.data?.message || error.message || 'Could not import this file.' })
+    } finally {
+      setStaffImportLoading(false)
+      event.target.value = ''
+    }
   }
 
   const handleDeleteStaff = async (id) => {
@@ -4043,9 +4068,29 @@ const handleBulkPasswordReset = async () => {
                   >
                     <Printer size={16} /> Print audit roster
                   </button>
+                  <label className="inline-flex items-center gap-2 rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-bold text-blue-700 transition-colors hover:bg-blue-50 cursor-pointer">
+                    <Upload size={16} />
+                    {staffImportLoading ? 'Importing…' : 'Import staff CSV'}
+                    <input type="file" accept=".csv,text/csv" onChange={handleStaffImport} disabled={staffImportLoading} className="sr-only" />
+                  </label>
                   <button onClick={() => setShowAddStaff(true)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-6 py-2 rounded-lg text-sm transition-colors">+ Add Staff Member</button>
                 </div>
               </div>
+              <p className="mb-5 text-xs text-gray-500">CSV columns required: STAFF NAME, STAFF ID. Existing staff and teacher records are updated when their staff ID or name matches.</p>
+              {staffImportResult && (
+                <div className={`mb-5 rounded-lg border px-4 py-3 text-sm ${staffImportResult.error || staffImportResult.errors?.length ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-green-200 bg-green-50 text-green-800'}`}>
+                  {staffImportResult.error ? staffImportResult.error : (
+                    <>
+                      <p>Import complete: {staffImportResult.created} added, {staffImportResult.updated} updated, {staffImportResult.errors?.length || 0} failed.</p>
+                      {staffImportResult.errors?.length > 0 && (
+                        <ul className="mt-2 max-h-32 list-disc overflow-y-auto pl-5">
+                          {staffImportResult.errors.map((error, index) => <li key={`${error.row}-${index}`}>Row {error.row}: {error.message}</li>)}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
               <p className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
                 Staff audit exports include contact information. Keep downloaded files private and share them only with authorized administrators.
               </p>
