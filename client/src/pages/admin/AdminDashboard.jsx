@@ -2037,19 +2037,40 @@ const handleBulkPasswordReset = async () => {
     }
   }
 
+  const getNewsRequestError = (error, action) => {
+    const responseMessage = typeof error.response?.data === 'string'
+      ? error.response.data
+      : error.response?.data?.message || error.response?.data?.error
+    if (error.response) {
+      return responseMessage || `${action} failed (HTTP ${error.response.status}).`
+    }
+    if (error.code === 'ECONNABORTED') {
+      return 'The upload timed out. Try fewer or smaller images.'
+    }
+    if (error.request) {
+      return `The API did not return a response (${error.code || error.message}). Check the API URL (${API_URL}) and whether this website's origin is allowed by the server's CORS settings.`
+    }
+    return error.message || `${action} failed.`
+  }
+
   const handleAddNews = async () => {
     if (!newsForm.title || !newsForm.content) { alert('Please add a title and content.'); return }
     setNewsLoading(true)
     setNewsStatus('Publishing news and event...')
     try {
-      const data = new FormData()
-      Object.entries(newsForm).forEach(([key, value]) => data.append(key, value))
-      data.append('uploadedBy', user?.name)
-      newsImages.forEach(img => data.append('images', img))
-      const res = await axios.post(`${API_URL}/api/news`, data, {
+      const requestBody = newsImages.length
+        ? (() => {
+            const formData = new FormData()
+            Object.entries(newsForm).forEach(([key, value]) => formData.append(key, value))
+            formData.append('uploadedBy', user?.name || '')
+            newsImages.forEach(image => formData.append('images', image))
+            return formData
+          })()
+        : { ...newsForm, uploadedBy: user?.name || '' }
+      const res = await axios.post(`${API_URL}/api/news`, requestBody, {
         headers: getAuthHeaders(),
         onUploadProgress: event => {
-          if (event.total) {
+          if (newsImages.length && event.total) {
             const progress = Math.round((event.loaded * 100) / event.total)
             setNewsStatus(progress < 100 ? `Uploading media: ${progress}%` : 'Finishing publication...')
           }
@@ -2061,9 +2082,7 @@ const handleBulkPasswordReset = async () => {
       setNewsStatus('')
     } catch (err) {
       console.error('Failed to add news item:', err)
-      const message = err.response?.data?.message || (err.code === 'ECONNABORTED'
-        ? 'The upload timed out. Try fewer or smaller images.'
-        : 'Could not publish the item. Check your connection and try again.')
+      const message = getNewsRequestError(err, 'Publishing')
       setNewsStatus(message)
       alert(message)
     }
@@ -2094,9 +2113,7 @@ const handleBulkPasswordReset = async () => {
       setNewsStatus('')
     } catch (err) {
       console.error('Failed to update news item:', err)
-      const message = err.response?.data?.message || (err.code === 'ECONNABORTED'
-        ? 'The upload timed out. Try fewer or smaller images.'
-        : 'Could not save the item. Check your connection and try again.')
+      const message = getNewsRequestError(err, 'Saving changes')
       setNewsStatus(message)
       alert(message)
     } finally { setNewsLoading(false) }

@@ -14,13 +14,17 @@ const handleNewsUpload = (req, res, next) => {
     if (error.code === 'LIMIT_UNEXPECTED_FILE') {
       return res.status(400).json({ message: 'A news or event post can include up to 5 images.' })
     }
-    return res.status(502).json({ message: 'An image could not be uploaded. Please try again with smaller images.' })
+    const reason = typeof error.message === 'string' ? error.message.slice(0, 200) : 'Unknown image upload error'
+    return res.status(502).json({ message: `Image upload failed: ${reason}` })
   })
 }
 
 router.get('/', getNewsEvents)
 router.get('/homepage', getHomepageNewsEvents)
-router.post('/', protect, handleNewsUpload, createNewsEvent)
+router.post('/', protect, (req, res, next) => {
+  if (req.is('application/json')) return createNewsEvent(req, res, next)
+  return handleNewsUpload(req, res, next)
+}, createNewsEvent)
 router.put('/:id', protect, handleNewsUpload, updateNewsEvent)
 router.delete('/:id', protect, deleteNewsEvent)
 
