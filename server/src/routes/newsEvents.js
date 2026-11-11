@@ -9,21 +9,8 @@ const {
   deleteNewsEvent
 } = require('../controllers/newsEventController')
 const protect = require('../middleware/authMiddleware')
-<<<<<<< HEAD
 const { uploadNews } = require('../middleware/cloudinaryUpload')
 const { requireAdminPermission } = require('../middleware/adminPermissions')
-=======
-
-const uploadNews = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024, files: 5 },
-  fileFilter: (req, file, callback) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/webp']
-    if (allowed.includes(file.mimetype)) return callback(null, true)
-    callback(new Error('Only JPG, PNG and WebP images are accepted.'))
-  }
-}).array('images', 5)
->>>>>>> 27bda13b1a9283c522603fc654908f1e2e90ce74
 
 const handleNewsUpload = (req, res, next) => {
   uploadNews(req, res, error => {
@@ -41,7 +28,6 @@ const handleNewsUpload = (req, res, next) => {
 
 router.get('/', getNewsEvents)
 router.get('/homepage', getHomepageNewsEvents)
-<<<<<<< HEAD
 router.post('/', protect, requireAdminPermission('news'), (req, res, next) => {
   if (req.is('application/json')) return createNewsEvent(req, res, next)
   return handleNewsUpload(req, res, next)
@@ -51,10 +37,5 @@ router.put('/:id', protect, requireAdminPermission('news'), (req, res, next) => 
   return handleNewsUpload(req, res, next)
 }, updateNewsEvent)
 router.delete('/:id', protect, requireAdminPermission('news'), deleteNewsEvent)
-=======
-router.post('/', protect, handleNewsUpload, createNewsEvent)
-router.put('/:id', protect, handleNewsUpload, updateNewsEvent)
-router.delete('/:id', protect, deleteNewsEvent)
->>>>>>> 27bda13b1a9283c522603fc654908f1e2e90ce74
 
 module.exports = router
