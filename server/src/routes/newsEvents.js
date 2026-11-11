@@ -3,7 +3,6 @@ const router = express.Router()
 const {
   getNewsEvents,
   getHomepageNewsEvents,
-  createNewsImageUploadSignature,
   createNewsEvent,
   updateNewsEvent,
   deleteNewsEvent
@@ -28,10 +27,6 @@ const handleNewsUpload = (req, res, next) => {
 
 router.get('/', getNewsEvents)
 router.get('/homepage', getHomepageNewsEvents)
-router.post('/upload-signature', protect, (req, res, next) => {
-  if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
-  next()
-}, createNewsImageUploadSignature)
 router.post('/', protect, (req, res, next) => {
   if (req.is('application/json')) return createNewsEvent(req, res, next)
   return handleNewsUpload(req, res, next)

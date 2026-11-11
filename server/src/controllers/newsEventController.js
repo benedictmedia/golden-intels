@@ -1,26 +1,9 @@
 const { PrismaClient } = require('@prisma/client')
-const { randomUUID } = require('crypto')
 const cloudinary = require('cloudinary').v2
 const fs = require('fs')
 const path = require('path')
 
 const prisma = new PrismaClient()
-
-const createNewsImageUploadSignature = (req, res) => {
-  const { cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret } = cloudinary.config()
-  if (!cloudName || !apiKey || !apiSecret) {
-    console.error('News image signing is unavailable: Cloudinary credentials are not configured.')
-    return res.status(503).json({ message: 'Image uploads are temporarily unavailable. Please contact the site administrator.' })
-  }
-
-  const timestamp = Math.floor(Date.now() / 1000)
-  const folder = 'goldenintels/news'
-  const publicId = randomUUID()
-  const paramsToSign = { folder, public_id: publicId, timestamp }
-  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret)
-  res.set('Cache-Control', 'no-store')
-  res.json({ cloudName, apiKey, timestamp, folder, publicId, signature })
-}
 
 const getNewsImageUrls = (bodyImages, files = []) => {
   if (files.length) {
@@ -171,7 +154,6 @@ const deleteNewsEvent = async (req, res) => {
 module.exports = {
   getNewsEvents,
   getHomepageNewsEvents,
-  createNewsImageUploadSignature,
   createNewsEvent,
   updateNewsEvent,
   deleteNewsEvent

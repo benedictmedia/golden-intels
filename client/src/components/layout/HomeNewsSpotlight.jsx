@@ -127,7 +127,7 @@ export default function HomeNewsSpotlight() {
                     />
                   ))}
                 </div>
-              ) : <span className="text-xs font-medium text-slate-400">On our homepage this month</span>}
+              ) : null}
               <Link
                 to="/news"
                 className="inline-flex items-center gap-1 rounded-full bg-blue-700 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
