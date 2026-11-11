@@ -7,7 +7,7 @@ import {
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock, FolderOpen
 } from 'lucide-react'
 import API_URL from '../../api/config'
-import { calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
+import { calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import ParentMessages from '../../components/messages/ParentMessages'
 import NotificationBell from '../../components/NotificationBell'
@@ -18,6 +18,7 @@ import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { displayStudentClassName } from '../../utils/studentClasses'
 import usePortalSection from '../../hooks/usePortalSection'
+import { drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
@@ -261,19 +262,7 @@ export default function ParentDashboard() {
     }
 
     // Compact remarks — max 2 lines
-    const remarksText = getRemarksText(result.remarks)
-    const allRemarksLines = doc.splitTextToSize(remarksText, 172)
-    const clampedRemarksLines = allRemarksLines.slice(0, 2)
-    const remarksHeight = 14
-
-    // ── Remarks(Class Teacher & Headmaster) ──
-    doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
-    doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
-    doc.text(clampedRemarksLines, 15, y + 10)
-    y += remarksHeight + 6
+    y = drawResultRemarksSection(doc, result, y, pageWidth)
 
     // ── Headmaster's Signature ──
     const sigHeight = 28
@@ -1510,8 +1499,10 @@ const getParentDisplayName = (name) => {
 
               {/* Remarks */}
               <div className="bg-blue-50 rounded-xl p-4 mb-6">
-                <p className="text-sm font-bold text-gray-800 mb-1">Remarks(Class Teacher & Headmaster)</p>
-                <p className="text-sm text-gray-600 italic">{viewingResult.remarks || 'No remarks provided.'}</p>
+                <p className="text-sm font-bold text-gray-800 mb-1">Class Teacher's Remark</p>
+                <p className="text-sm text-gray-600 italic">{limitRemarkWords(viewingResult.remarks) || 'No remark provided.'}</p>
+                <p className="mt-3 text-sm font-bold text-gray-800 mb-1">Headmaster's Remarks</p>
+                <p className="text-sm text-gray-600 italic">{limitRemarkWords(viewingResult.headmasterRemarks) || 'No remarks provided.'}</p>
               </div>
 
               {/* Buttons */}

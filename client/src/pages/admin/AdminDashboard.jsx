@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -9,7 +9,7 @@ import {
   Key, Copy, CheckCircle, Image as ImageIcon, Newspaper, 
   UserCircle, MessageCircle, Inbox, FileSignature, Lock, CalendarDays, Upload, Archive, Search, ClipboardList, RefreshCw, FileDown, Printer
 } from 'lucide-react'
-import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getSubjectScore, getSubjectTotal, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import { compressImage, compressImages } from '../../utils/compressImage'
 import AdminMessages from '../../components/messages/AdminMessages'
@@ -22,25 +22,49 @@ import { displayStudentClassName, normalizeStudentClassName, STUDENT_CLASSES } f
 import { countLearnersByGender } from '../../utils/learnerGenderCounts'
 import { downloadCsv, openAuditPrintWindow, writeAuditReport } from '../../utils/adminDataExports'
 import usePortalSection from '../../hooks/usePortalSection'
+import { countWords, drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
 
 const menuItems = [
-  { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
-  { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
-  { icon: <GraduationCap size={20} />, label: 'Admissions', id: 'admissions' },
-  { icon: <DollarSign size={20} />, label: 'Finance', id: 'finance' },
-  { icon: <BarChart2 size={20} />, label: 'Performance Review', id: 'performance' },
-  { icon: <Users size={20} />, label: 'Learners', id: 'learners' },
-  { icon: <UserPlus size={20} />, label: 'Create Account', id: 'create-account' },
-  { icon: <Users size={20} />, label: 'Accounts', id: 'accounts' },
-  { icon: <Key size={20} />, label: 'Admission Tokens', id: 'admission-tokens' },
-  { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery' },
-  { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news' },
-  { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff' },
-  { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages' },
-  { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages' },
-  { icon: <FileSignature size={20} />, label: 'Signature', id: 'signature' },
-  { icon: <CalendarDays size={20} />, label: 'Academic Context', id: 'academic-context' },
-  { icon: <Archive size={20} />, label: 'Archive', id: 'archives' },
+  { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard', permission: 'dashboard' },
+  { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance', permission: 'attendance' },
+  { icon: <GraduationCap size={20} />, label: 'Admissions', id: 'admissions', permission: 'admissions' },
+  { icon: <DollarSign size={20} />, label: 'Finance', id: 'finance', permission: 'finance' },
+  { icon: <BarChart2 size={20} />, label: 'Performance Review', id: 'performance', permission: 'performance:view' },
+  { icon: <Users size={20} />, label: 'Learners', id: 'learners', permission: 'learners' },
+  { icon: <UserPlus size={20} />, label: 'Create Account', id: 'create-account', permission: 'accounts' },
+  { icon: <Users size={20} />, label: 'Accounts', id: 'accounts', permission: 'accounts' },
+  { icon: <Key size={20} />, label: 'Admission Tokens', id: 'admission-tokens', permission: 'admission-tokens' },
+  { icon: <ImageIcon size={20} />, label: 'Gallery', id: 'gallery', permission: 'gallery' },
+  { icon: <Newspaper size={20} />, label: 'News & Events', id: 'news', permission: 'news' },
+  { icon: <UserCircle size={20} />, label: 'Our Staff', id: 'staff', permission: 'staff' },
+  { icon: <MessageCircle size={20} />, label: 'Messages', id: 'messages', permission: 'messages' },
+  { icon: <Inbox size={20} />, label: 'Contact Messages', id: 'contact-messages', permission: 'contact-messages' },
+  { icon: <FileSignature size={20} />, label: 'Signature', id: 'signature', permission: 'performance:signature' },
+  { icon: <CalendarDays size={20} />, label: 'Academic Context', id: 'academic-context', permission: 'academic-context' },
+  { icon: <Archive size={20} />, label: 'Archive', id: 'archives', permission: 'archives' },
+]
+
+const adminPermissionOptions = [
+  { value: 'dashboard', label: 'Dashboard' },
+  { value: 'attendance', label: 'Attendance records' },
+  { value: 'admissions', label: 'Admissions' },
+  { value: 'finance', label: 'Finance and fee records' },
+  { value: 'performance:view', label: 'Preview performance results' },
+  { value: 'performance:edit', label: 'Edit scores and class teacher remarks' },
+  { value: 'performance:remarks', label: "Add or edit Headmaster's Remarks" },
+  { value: 'performance:signature', label: "View or upload the Headmaster's signature" },
+  { value: 'performance:approve', label: 'Approve or change result status' },
+  { value: 'performance:delete', label: 'Archive results' },
+  { value: 'learners', label: 'Learner records' },
+  { value: 'accounts', label: 'Create accounts and manage parent/teacher accounts' },
+  { value: 'admission-tokens', label: 'Admission tokens' },
+  { value: 'gallery', label: 'Gallery' },
+  { value: 'news', label: 'News and events' },
+  { value: 'staff', label: 'Staff records' },
+  { value: 'messages', label: 'Parent messages' },
+  { value: 'contact-messages', label: 'Contact messages' },
+  { value: 'academic-context', label: 'Change the active academic year and term' },
+  { value: 'archives', label: 'Archived records' }
 ]
 
 const getTemporaryPasswordMinimum = (role) => ['parent', 'learner'].includes(role) ? 3 : 6
@@ -199,7 +223,16 @@ function DashboardVerticalBarChart({ data, largestValue }) {
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [activeMenu, setActiveMenu] = usePortalSection('dashboard', menuItems.map(item => item.id))
+  const canAccessAdminPermission = useCallback(permission => (
+    user?.role === 'admin' && (
+      user.adminPermissions == null || (
+        Array.isArray(user.adminPermissions) && user.adminPermissions.includes(permission)
+      )
+    )
+  ), [user])
+  const visibleMenuItems = menuItems.filter(item => canAccessAdminPermission(item.permission))
+  const defaultAdminSection = visibleMenuItems[0]?.id || 'restricted'
+  const [activeMenu, setActiveMenu] = usePortalSection(defaultAdminSection, visibleMenuItems.map(item => item.id))
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
 
   const [contactMessages, setContactMessages] = useState([])
@@ -223,6 +256,7 @@ export default function AdminDashboard() {
   // Create account state
   const initialNewUserState = {
     name: '', email: '', password: '', role: 'teacher',
+    adminPermissions: [],
     classes: [], subjects: [], classTeacherClasses: [], teacherSubject: '', teacherDepartment: 'Teaching', staffId: '',
     learnerFirstName: '', learnerLastName: '', learnerDateOfBirth: '', learnerGender: '', learnerGradeLevel: '', learnerParentEmail: '', learnerParentName: '', learnerParentPhone: ''
   }
@@ -271,6 +305,7 @@ export default function AdminDashboard() {
   const [adminEditResult, setAdminEditResult] = useState(null)
   const [adminEditScores, setAdminEditScores] = useState({})
   const [adminEditRemarks, setAdminEditRemarks] = useState('')
+  const [adminEditHeadmasterRemarks, setAdminEditHeadmasterRemarks] = useState('')
 
   const [headmasterSigUrl, setHeadmasterSigUrl] = useState('')
   const [sigUploading, setSigUploading] = useState(false)
@@ -572,25 +607,25 @@ export default function AdminDashboard() {
     const refreshDashboard = async () => {
       const headers = getAuthHeaders()
       const results = await Promise.allSettled([
-        axios.get(`${API_URL}/api/students`, { headers }),
-        axios.get(`${API_URL}/api/staff/admin`, { headers }),
-        axios.get(`${API_URL}/api/users`, { headers, params: { role: 'teacher', limit: 1 } }),
-        axios.get(`${API_URL}/api/attendance`, {
+        canAccessAdminPermission('learners') ? axios.get(`${API_URL}/api/students`, { headers }) : Promise.resolve(null),
+        canAccessAdminPermission('staff') ? axios.get(`${API_URL}/api/staff/admin`, { headers }) : Promise.resolve(null),
+        canAccessAdminPermission('accounts') ? axios.get(`${API_URL}/api/users`, { headers, params: { role: 'teacher', limit: 1 } }) : Promise.resolve(null),
+        canAccessAdminPermission('attendance') ? axios.get(`${API_URL}/api/attendance`, {
           headers,
           params: {
             date: dashboardAttendanceDate,
             academicYear: academicContext.academicYear,
             term: academicContext.term
           }
-        }),
-        axios.get(`${API_URL}/api/admissions`, { headers })
+        }) : Promise.resolve(null),
+        canAccessAdminPermission('admissions') ? axios.get(`${API_URL}/api/admissions`, { headers }) : Promise.resolve(null)
       ])
       if (!active) return
 
       const failures = []
       const valueAt = (index, label) => {
         const result = results[index]
-        if (result.status === 'fulfilled') return result.value.data
+        if (result.status === 'fulfilled') return result.value?.data ?? null
         failures.push(label)
         console.error(`Failed to refresh dashboard ${label.toLowerCase()}:`, result.reason)
         return null
@@ -642,7 +677,8 @@ export default function AdminDashboard() {
     dashboardAttendanceDate,
     dashboardRefreshKey,
     academicContext.academicYear,
-    academicContext.term
+    academicContext.term,
+    canAccessAdminPermission
   ])
 
   useEffect(() => {
@@ -677,10 +713,11 @@ export default function AdminDashboard() {
   }, [activeMenu, attendanceDate, attendanceAcademicYear, attendanceTerm, attendanceGradeLevel, attendanceQueryKey])
 
   useEffect(() => {
-  axios.get(`${API_URL}/api/signature`, { headers: getAuthHeaders() })
-    .then(res => setHeadmasterSigUrl(res.data.url))
-    .catch(() => {})
-}, [])
+    if (!canAccessAdminPermission('performance:signature')) return
+    axios.get(`${API_URL}/api/signature`, { headers: getAuthHeaders() })
+      .then(res => setHeadmasterSigUrl(res.data.url))
+      .catch(() => {})
+  }, [canAccessAdminPermission])
 
   useEffect(() => {
   axios.get(`${API_URL}/api/academic-context`, { headers: getAuthHeaders() })
@@ -1276,6 +1313,26 @@ const handleSaveAcademicContext = async () => {
     })
   }
 
+  const toggleAdminPermission = (permission) => {
+    setNewUser(previous => {
+      const current = previous.adminPermissions || []
+      if (permission === 'performance:view' && current.includes(permission)) {
+        return {
+          ...previous,
+          adminPermissions: current.filter(item => !item.startsWith('performance:'))
+        }
+      }
+
+      const selected = current.includes(permission)
+        ? current.filter(item => item !== permission)
+        : [...current, permission]
+      if (permission.startsWith('performance:') && permission !== 'performance:view' && !selected.includes('performance:view')) {
+        selected.push('performance:view')
+      }
+      return { ...previous, adminPermissions: selected }
+    })
+  }
+
   const toggleEditSelection = (field, value) => {
     setEditingUser(prev => {
       if (!prev) return prev
@@ -1307,6 +1364,11 @@ const handleSaveAcademicContext = async () => {
 
   const handleCreateAccount = async () => {
     setCreateError(''); setCreateSuccess(false); setCreateLoading(true)
+    if (newUser.role === 'admin' && !newUser.adminPermissions.length) {
+      setCreateError('Select at least one permission for this administrator account.')
+      setCreateLoading(false)
+      return
+    }
     try {
       const userName = newUser.name || `${newUser.learnerFirstName} ${newUser.learnerLastName}`.trim() || newUser.email
       const payload = {
@@ -1315,6 +1377,7 @@ const handleSaveAcademicContext = async () => {
         password: newUser.password,
         role: newUser.role
       }
+      if (newUser.role === 'admin') payload.adminPermissions = newUser.adminPermissions
 
       if (newUser.role === 'teacher') {
         payload.department = newUser.teacherDepartment
@@ -1362,10 +1425,12 @@ const handleSaveAcademicContext = async () => {
       setTeacherTotal(res.data.teacherTotal || 0)
       const [studentsRes, staffRes] = await Promise.all([
         axios.get(`${API_URL}/api/students`, { headers: getAuthHeaders() }),
-        axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
+        canAccessAdminPermission('staff')
+          ? axios.get(`${API_URL}/api/staff/admin`, { headers: getAuthHeaders() })
+          : Promise.resolve({ data: [] })
       ])
       setStudents(studentsRes.data)
-      setStaffList(staffRes.data)
+      if (canAccessAdminPermission('staff')) setStaffList(staffRes.data)
     } catch (err) {
       console.error('Failed to fetch accounts:', err)
       setAccountError(err.response?.data?.message || 'Could not load accounts. Please try again.')
@@ -1672,15 +1737,24 @@ const handleBulkPasswordReset = async () => {
     setViewingAdminResult(null)
     setAdminEditResult(result)
     setAdminEditScores(getNormalizedScores(result.scores || {}))
-    setAdminEditRemarks(result.remarks || '')
+    setAdminEditRemarks(limitRemarkWords(result.remarks || ''))
+    setAdminEditHeadmasterRemarks(limitRemarkWords(result.headmasterRemarks || ''))
   }
 
   const handleAdminSaveEdit = async () => {
     try {
-      const res = await axios.put(`${API_URL}/api/results/${adminEditResult.id}`, { scores: adminEditScores, remarks: adminEditRemarks, status: adminEditResult.status }, { headers: getAuthHeaders() })
+      const payload = { status: adminEditResult.status }
+      if (canAccessAdminPermission('performance:edit')) {
+        payload.scores = adminEditScores
+        payload.remarks = adminEditRemarks
+      }
+      if (canAccessAdminPermission('performance:remarks')) {
+        payload.headmasterRemarks = adminEditHeadmasterRemarks
+      }
+      const res = await axios.put(`${API_URL}/api/results/${adminEditResult.id}`, payload, { headers: getAuthHeaders() })
       setResults(results.map(r => r.id === adminEditResult.id ? res.data : r))
       setAdminEditResult(null)
-    } catch (err) { alert('Failed to save changes.') }
+    } catch (err) { alert(err.response?.data?.message || 'Failed to save changes.') }
   }
 
   const handleAdminDeleteResult = async (id) => {
@@ -1834,20 +1908,7 @@ const handleBulkPasswordReset = async () => {
       doc.addImage(logoData, 'PNG', 55, 100, 100, 100); doc.restoreGraphicsState()
     }
 
-    // Compact remarks — max 2 lines
-    const remarksText = getRemarksText(result.remarks)
-    const allRemarksLines = doc.splitTextToSize(remarksText, 172)
-    const clampedRemarksLines = allRemarksLines.slice(0, 2)
-    const remarksHeight = 14
-
-    // ── Remarks(Class Teacher & Headmaster) ──
-    doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
-    doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
-    doc.text(clampedRemarksLines, 15, y + 10)
-    y += remarksHeight + 6
+    y = drawResultRemarksSection(doc, result, y, pageWidth)
 
     // ── Headmaster's Signature ──
     const sigHeight = 28
@@ -2296,7 +2357,7 @@ const handleBulkPasswordReset = async () => {
           </button>
         </div>
         <nav className="flex-1 py-6 overflow-y-auto">
-          {menuItems.map(item => (
+          {visibleMenuItems.map(item => (
             <button key={item.id} onClick={() => { setActiveMenu(item.id); if (typeof window !== 'undefined' && window.innerWidth < 768) setSidebarOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
@@ -2347,6 +2408,11 @@ const handleBulkPasswordReset = async () => {
 
         {/* Page Content */}
         <div className="portal-content flex-1 overflow-y-auto p-6">
+          {activeMenu === 'restricted' && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+              This administrator account has not been granted access to any portal sections. Contact the account owner.
+            </div>
+          )}
 
           {/* Dashboard */}
           {activeMenu === 'dashboard' && (
@@ -2975,10 +3041,10 @@ const handleBulkPasswordReset = async () => {
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className={`text-xs font-bold px-3 py-1 rounded-full ${result.status === 'approved' ? 'bg-green-100 text-green-700' : result.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-gray-800'}`}>{result.status}</span>
-                          {result.status !== 'approved' && <button onClick={() => handleApproveResult(result.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>}
+                          {result.status !== 'approved' && canAccessAdminPermission('performance:approve') && <button onClick={() => handleApproveResult(result.id)} className="bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Approve</button>}
                           <button onClick={() => handleAdminViewResult(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">View</button>
                           <button onClick={() => handleAdminDownloadPDF(result)} className="bg-blue-600 hover:bg-blue-400 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Download PDF</button>
-                          <button onClick={() => handleAdminDeleteResult(result.id)} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Delete</button>
+                          {canAccessAdminPermission('performance:delete') && <button onClick={() => handleAdminDeleteResult(result.id)} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">Archive</button>}
                         </div>
                       </div>
                     </div>
@@ -3034,10 +3100,15 @@ const handleBulkPasswordReset = async () => {
                           </tbody>
                         </table>
                       </div>
-                      <p className="text-sm text-gray-600">Teacher’s remarks: {viewingAdminResult.remarks || 'No remarks provided.'}</p>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p><strong>Class Teacher's Remark:</strong> {limitRemarkWords(viewingAdminResult.remarks) || 'No remark provided.'}</p>
+                        <p><strong>Headmaster's Remarks:</strong> {limitRemarkWords(viewingAdminResult.headmasterRemarks) || 'No remarks provided.'}</p>
+                      </div>
                       <div className="flex justify-end gap-3">
                         <button onClick={() => setViewingAdminResult(null)} className="rounded-lg border px-4 py-2">Close</button>
-                        <button onClick={() => handleAdminEditResult(viewingAdminResult)} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">Edit Result</button>
+                        {(canAccessAdminPermission('performance:edit') || canAccessAdminPermission('performance:remarks')) && (
+                          <button onClick={() => handleAdminEditResult(viewingAdminResult)} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">Edit Remarks / Result</button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3052,7 +3123,7 @@ const handleBulkPasswordReset = async () => {
                     </div>
                     <div className="p-6 space-y-4">
                       <p className="text-sm text-gray-500">Editing result for <span className="font-bold text-gray-800">{adminEditResult.student?.firstName} {adminEditResult.student?.lastName}</span></p>
-                      {SUBJECTS.map(subject => {
+                      {canAccessAdminPermission('performance:edit') && SUBJECTS.map(subject => {
                         const s = adminEditScores[subject] || {}
                         return (
                           <div key={subject} className="bg-blue-50 rounded-xl p-4">
@@ -3068,10 +3139,20 @@ const handleBulkPasswordReset = async () => {
                           </div>
                         )
                       })}
-                      <div>
-                        <label className="block text-sm font-bold text-gray-800 mb-2">Teacher's Remarks</label>
-                        <textarea value={adminEditRemarks} onChange={e => setAdminEditRemarks(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
-                      </div>
+                      {canAccessAdminPermission('performance:edit') && (
+                        <div>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Class Teacher's Remark</label>
+                          <textarea value={adminEditRemarks} onChange={e => setAdminEditRemarks(limitRemarkWords(e.target.value))} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                          <p className="mt-1 text-right text-xs text-gray-500">{countWords(adminEditRemarks)}/60 words</p>
+                        </div>
+                      )}
+                      {canAccessAdminPermission('performance:remarks') && (
+                        <div>
+                          <label className="block text-sm font-bold text-gray-800 mb-2">Headmaster's Remarks</label>
+                          <textarea value={adminEditHeadmasterRemarks} onChange={e => setAdminEditHeadmasterRemarks(limitRemarkWords(e.target.value))} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                          <p className="mt-1 text-right text-xs text-gray-500">{countWords(adminEditHeadmasterRemarks)}/60 words</p>
+                        </div>
+                      )}
                       <div className="flex gap-3">
                         <button onClick={handleAdminSaveEdit} className="flex-1 bg-blue-600 hover:bg-blue-400 text-white font-bold py-3 rounded-xl transition-colors">Save Changes</button>
                         <button onClick={() => setAdminEditResult(null)} className="flex-1 bg-blue-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">Cancel</button>
@@ -3303,14 +3384,14 @@ const handleBulkPasswordReset = async () => {
           {activeMenu === 'create-account' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-2xl">
               <h2 className="text-2xl font-bold font-serif text-gray-800 mb-2">Create Account</h2>
-              <p className="text-gray-500 mb-8">Create accounts for teachers and parents to access their respective portals.</p>
+              <p className="text-gray-500 mb-8">Create teacher, parent, or administrator accounts. Each person must use a unique email address and their own password.</p>
               {createSuccess && <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 text-sm">Account created successfully!</div>}
               {createError && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm">{createError}</div>}
               <div className="space-y-5">
                 {[['Full Name','name','text','Enter full name'],['Email Address','email','email','Enter email address'],['Password','password','password','Enter password']].map(([label, key, type, placeholder]) => (
                   <div key={key}>
                     <label className="block text-sm font-bold text-gray-800 mb-2">{label}</label>
-                    <input type={type} value={newUser[key]} onChange={e => setNewUser({ ...newUser, [key]: e.target.value })} placeholder={placeholder} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
+                    <input type={type} minLength={key === 'password' && newUser.role === 'admin' ? 8 : undefined} value={newUser[key]} onChange={e => setNewUser({ ...newUser, [key]: e.target.value })} placeholder={placeholder} required className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-600 text-gray-700" />
                   </div>
                 ))}
                 <div>
@@ -3321,6 +3402,29 @@ const handleBulkPasswordReset = async () => {
                     <option value="admin">Admin</option>
                   </select>
                 </div>
+
+                {newUser.role === 'admin' && (
+                  <fieldset className="space-y-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                    <legend className="px-1 text-sm font-bold text-gray-800">Administrator privileges</legend>
+                    <p className="text-xs text-gray-600">Grant only the sections and actions this administrator needs. Performance actions are separately controlled.</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {adminPermissionOptions.map(permission => (
+                        <label key={permission.value} className="flex items-start gap-2 rounded-lg bg-white p-2 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={newUser.adminPermissions.includes(permission.value)}
+                            onChange={() => toggleAdminPermission(permission.value)}
+                            className="mt-1"
+                          />
+                          <span>{permission.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Result preview is required for remarks, signature, approval, editing, or archiving permissions.
+                    </p>
+                  </fieldset>
+                )}
 
                 {newUser.role === 'teacher' && (
                   <div className="space-y-5">
@@ -3584,8 +3688,12 @@ const handleBulkPasswordReset = async () => {
                               )}
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
-                              <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-green-500 text-white rounded">Edit</button>
+                              {canAccessAdminPermission('learners') && (
+                                <>
+                                  <button onClick={() => openLearnerProfile(s)} className="px-3 py-2 bg-blue-600 text-white rounded">View</button>
+                                  <button onClick={() => openLearnerProfile(s, true)} className="px-3 py-2 bg-green-500 text-white rounded">Edit</button>
+                                </>
+                              )}
                               {s.learnerUserId && (
                                 s.learnerAccountActive ? (
                                   <button onClick={() => handleDeactivateUser(s.email)} className="px-3 py-2 bg-red-500 text-white rounded">Deactivate Login</button>

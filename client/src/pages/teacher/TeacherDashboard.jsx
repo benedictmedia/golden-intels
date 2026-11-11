@@ -8,7 +8,7 @@ import {
   User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award, Lock, CalendarDays
 } from 'lucide-react'
 import API_URL from '../../api/config'
-import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getRemarksText, getSubjectScore, getSubjectTotal, normalizeSubjectName, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
+import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getSubjectScore, getSubjectTotal, normalizeSubjectName, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
 import NotificationBell from '../../components/NotificationBell'
@@ -17,6 +17,7 @@ import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { STUDENT_CLASSES, canonicalStudentClassName, displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
 import usePortalSection from '../../hooks/usePortalSection'
+import { countWords, drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
 
 const menuItems = [
   { icon: <User size={20} />, label: 'My Profile', id: 'profile' },
@@ -214,7 +215,7 @@ export default function TeacherDashboard() {
         setCurrentResult(match || null)
         if (match) {
           setSubjectScores(getNormalizedScores(match.scores || {}))
-          setTeacherRemarks(match.remarks || '')
+          setTeacherRemarks(limitRemarkWords(match.remarks || ''))
         } else {
           setSubjectScores({})
           setTeacherRemarks('')
@@ -298,7 +299,7 @@ export default function TeacherDashboard() {
     setGradebookTerm(result.term)
     setGradebookStudent(result.studentId.toString())
     setSubjectScores(getNormalizedScores(result.scores || {}))
-    setTeacherRemarks(result.remarks || '')
+    setTeacherRemarks(limitRemarkWords(result.remarks || ''))
     setActiveGradebookTab('enter')
   }
 
@@ -470,20 +471,7 @@ export default function TeacherDashboard() {
       doc.addImage(logoData, 'PNG', 55, 100, 100, 100); doc.restoreGraphicsState()
     }
 
-    // Compact remarks — max 2 lines
-    const remarksText = getRemarksText(result.remarks)
-    const allRemarksLines = doc.splitTextToSize(remarksText, 172)
-    const clampedRemarksLines = allRemarksLines.slice(0, 2)
-    const remarksHeight = 14
-
-    // ── Class Teacher's & Headmaster's Remarks ──
-    doc.setFillColor(240, 245, 255); doc.rect(10, y, pageWidth - 20, remarksHeight, 'F')
-    doc.setDrawColor(26, 60, 110); doc.setLineWidth(0.4); doc.rect(10, y, pageWidth - 20, remarksHeight)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 60, 110)
-    doc.text("Remarks(Class Teacher & Headmaster):", 15, y + 4.5)
-    doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(50, 50, 50)
-    doc.text(clampedRemarksLines, 15, y + 10)
-    y += remarksHeight + 6
+    y = drawResultRemarksSection(doc, result, y, pageWidth)
 
     // ── Headmaster's Signature ──
     const sigHeight = 28
@@ -2216,22 +2204,23 @@ useEffect(() => {
                   })}
                 </div>
 
-                {/* Teacher/Headmaster Remarks */}
+                {/* Class teacher remarks */}
                 <div className="mb-8">
-                  <label className="block text-sm font-bold text-[#2563eb] mb-2">Remarks(Class Teacher & Headmaster)</label>
+                  <label className="block text-sm font-bold text-[#2563eb] mb-2">Class Teacher's Remark</label>
                   <p className="text-xs text-gray-400 mb-2">
                     {isClassTeacherForSelectedClass
-                      ? 'Provide constructive feedback on the student\'s overall performance across all subjects.'
+                      ? 'Provide constructive feedback in 60 words or fewer.'
                       : 'Only class teachers can edit remarks for this class.'}
                   </p>
                   <textarea
                     value={teacherRemarks}
-                    onChange={e => setTeacherRemarks(e.target.value)}
+                    onChange={e => setTeacherRemarks(limitRemarkWords(e.target.value))}
                     rows={4}
                     placeholder={isClassTeacherForSelectedClass ? 'Enter remarks here...' : 'Remarks are read-only for non-class teachers.'}
                     readOnly={!isClassTeacherForSelectedClass || approvedResultLocked}
                     className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2563eb] text-gray-700 ${!isClassTeacherForSelectedClass ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
+                  <p className="mt-1 text-right text-xs text-gray-500">{countWords(teacherRemarks)}/60 words</p>
                 </div>
 
                 {/* Summary */}

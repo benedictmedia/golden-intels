@@ -5,6 +5,13 @@ const { archive, isPreviousAcademicPeriod, isAcademicPeriodVisible } = require('
 const { canonicalStudentClassName, normalizeStudentClassName, studentClassNameVariants } = require('../utils/studentClasses')
 
 const normalizeClassName = normalizeStudentClassName
+const attendanceStudentSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  studentId: true,
+  gradeLevel: true
+}
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
 
 const getAttendance = async (req, res) => {
@@ -29,7 +36,7 @@ const getAttendance = async (req, res) => {
         if (await isStudentFeeCleared(child.id)) clearedIds.push(child.id)
       }
       where.studentId = { in: clearedIds }
-      const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const records = await prisma.attendanceRecord.findMany({ where, include: { student: { select: attendanceStudentSelect } }, orderBy: { createdAt: 'desc' } })
       return res.json(records)
     }
 
@@ -37,12 +44,12 @@ const getAttendance = async (req, res) => {
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
       const classTeacherClasses = normalizeClassList(staff?.classTeacherClasses)
-      const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const records = await prisma.attendanceRecord.findMany({ where, include: { student: { select: attendanceStudentSelect } }, orderBy: { createdAt: 'desc' } })
       const filteredRecords = records.filter(record => classTeacherClasses.includes(normalizeClassName(record.gradeLevel)) || record.recordedBy === req.user.name)
       return res.json(filteredRecords)
     }
 
-    const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    const records = await prisma.attendanceRecord.findMany({ where, include: { student: { select: attendanceStudentSelect } }, orderBy: { createdAt: 'desc' } })
     res.json(records)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -75,7 +82,7 @@ const getStudentAttendance = async (req, res) => {
     if (academicYear) where.academicYear = academicYear
     if (term) where.term = term
 
-    const records = await prisma.attendanceRecord.findMany({ where, include: { student: true }, orderBy: { date: 'desc' } })
+    const records = await prisma.attendanceRecord.findMany({ where, include: { student: { select: attendanceStudentSelect } }, orderBy: { date: 'desc' } })
     res.json(records)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })

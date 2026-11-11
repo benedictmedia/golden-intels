@@ -11,8 +11,20 @@ const { createNotificationsForRole } = require('./notificationController')
 const { isStudentFeeCleared } = require('../utils/feeStatus')
 const { archive, isPreviousAcademicPeriod } = require('../utils/archive')
 const { canonicalStudentClassName, normalizeStudentClassName, studentClassNameVariants } = require('../utils/studentClasses')
+const { isValidRemark } = require('../utils/resultRemarks')
+const { hasAdminPermission } = require('../middleware/adminPermissions')
 
 const prisma = new PrismaClient()
+const resultStudentSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  studentId: true,
+  gender: true,
+  dateOfBirth: true,
+  status: true,
+  photo: true
+}
 
 const normalizeClassName = normalizeStudentClassName
 const normalizeClassList = (classes = []) => (classes || []).map(normalizeClassName).filter(Boolean)
@@ -86,6 +98,9 @@ const isTeacherAllowedForStudent = async (req, studentId, gradeLevel = null) => 
 const getTeacherResultPayload = async (req, body) => {
   const teacherAssignments = await buildTeacherAssignments(req.user.email)
   const { scores = {}, remarks } = body
+  if (remarks !== undefined && !isValidRemark(remarks)) {
+    return { error: { ok: false, message: 'Class teacher remarks must be 60 words or fewer.' } }
+  }
 
   const validation = validateTeacherScores(scores, teacherAssignments.subjects)
   if (!validation.ok) {
@@ -105,6 +120,10 @@ const getTeacherResultPayload = async (req, body) => {
 }
 
 const filterApprovedResults = (results = []) => results.filter((result) => result.status === 'approved')
+const redactAdminSignatures = (req, results) => {
+  if (req.user?.role !== 'admin' || hasAdminPermission(req, 'performance:signature')) return results
+  return results.map(result => ({ ...result, headmasterSignature: null }))
+}
 
 const filterVisibleAcademicPeriods = async (user, results = []) => {
   if (user?.role === 'admin') return results
@@ -136,7 +155,7 @@ const redactLockedResults = async (results = []) => {
   return Promise.all(results.map(async (result) => {
     const cleared = await checkCleared(result.studentId)
     if (cleared) return { ...result, feeLocked: false }
-    return { ...result, scores: {}, remarks: '', headmasterSignature: null, feeLocked: true }
+    return { ...result, scores: {}, remarks: '', headmasterRemarks: '', headmasterSignature: null, feeLocked: true }
   }))
 }
 
@@ -150,7 +169,7 @@ const getResults = async (req, res) => {
         select: { id: true }
       })
       const ids = children.map((child) => child.id)
-      const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const results = await prisma.result.findMany({ where: { studentId: { in: ids } }, include: { student: { select: resultStudentSelect } }, orderBy: { createdAt: 'desc' } })
       const approved = filterApprovedResults(results)
       return res.json(await redactLockedResults(await filterVisibleAcademicPeriods(req.user, approved)))
     }
@@ -161,7 +180,7 @@ const getResults = async (req, res) => {
         ...normalizeClassList(staff?.classes),
         ...normalizeClassList(staff?.classTeacherClasses)
       ]))
-      const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const results = await prisma.result.findMany({ include: { student: { select: resultStudentSelect } }, orderBy: { createdAt: 'desc' } })
       const filteredResults = teacherClasses.length
         ? results.filter((result) => teacherClasses.includes(normalizeClassName(result.gradeLevel)) || result.submittedBy === req.user.name)
         : staff?.department
@@ -175,12 +194,12 @@ const getResults = async (req, res) => {
         where: { OR: [{ learnerUserId: req.user.id }, { email: req.user.email }] }
       })
       if (!learner) return res.json([])
-      const results = await prisma.result.findMany({ where: { studentId: learner.id }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const results = await prisma.result.findMany({ where: { studentId: learner.id }, include: { student: { select: resultStudentSelect } }, orderBy: { createdAt: 'desc' } })
       return res.json(await filterVisibleAcademicPeriods(req.user, results))
     }
 
-    const results = await prisma.result.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
-    res.json(results)
+    const results = await prisma.result.findMany({ include: { student: { select: resultStudentSelect } }, orderBy: { createdAt: 'desc' } })
+    res.json(redactAdminSignatures(req, results))
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -219,12 +238,12 @@ const getResultsByStudent = async (req, res) => {
       if (!allowedByClass) return res.status(403).json({ message: 'Forbidden' })
     }
 
-    let results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    let results = await prisma.result.findMany({ where: { studentId: parseInt(studentId) }, include: { student: { select: resultStudentSelect } }, orderBy: { createdAt: 'desc' } })
     results = await filterVisibleAcademicPeriods(req.user, results)
     if (req.user && req.user.role === 'parent') {
       return res.json(await redactLockedResults(filterApprovedResults(results)))
     }
-    res.json(results)
+    res.json(redactAdminSignatures(req, results))
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }
@@ -233,6 +252,9 @@ const getResultsByStudent = async (req, res) => {
 // Create result
 const createResult = async (req, res) => {
   const { studentId, gradeLevel, academicYear, term, scores, remarks, submittedBy } = req.body
+  if (remarks !== undefined && !isValidRemark(remarks)) {
+    return res.status(400).json({ message: 'Class teacher remarks must be 60 words or fewer.' })
+  }
 
   try {
     if (req.user && req.user.role === 'teacher') {
@@ -264,7 +286,7 @@ const createResult = async (req, res) => {
               submittedBy,
               status: 'pending'
             },
-            include: { student: true }
+            include: { student: { select: resultStudentSelect } }
           })
         : await prisma.result.create({
             data: {
@@ -277,7 +299,7 @@ const createResult = async (req, res) => {
               submittedBy,
               status: 'pending'
             },
-            include: { student: true }
+            include: { student: { select: resultStudentSelect } }
           })
 
       await createNotificationsForRole(
@@ -305,14 +327,18 @@ const createResult = async (req, res) => {
         submittedBy,
         status: 'pending'
       },
-      include: { student: true }
+      include: { student: { select: resultStudentSelect } }
     })
 
     // === NOTIFY PARENT ===
-    if (result.student?.parentEmail) {
+    const studentContact = await prisma.student.findUnique({
+      where: { id: parseInt(studentId) },
+      select: { parentEmail: true }
+    })
+    if (studentContact?.parentEmail) {
       const parent = await prisma.user.findUnique({
-        where: { email: result.student.parentEmail }
-      });
+        where: { email: studentContact.parentEmail }
+      })
       if (parent) {
         const { createNotification } = require('./notificationController');
         await createNotification(
@@ -333,7 +359,7 @@ const createResult = async (req, res) => {
 // Update result
 const updateResult = async (req, res) => {
   const { id } = req.params
-  const { scores, remarks, status } = req.body
+  const { scores, remarks, headmasterRemarks, status } = req.body
   if (!['admin', 'teacher'].includes(req.user?.role)) {
     return res.status(403).json({ message: 'Only teachers and administrators can update results.' })
   }
@@ -364,7 +390,7 @@ const updateResult = async (req, res) => {
       const teacherAssignments = payload.teacherAssignments
       const canEditRemarks = isClassTeacherForClass(teacherAssignments.classTeacherClasses, existing.gradeLevel)
       const mergedScores = { ...(existing.scores || {}), ...payload.scores }
-      const nextRemarks = canEditRemarks ? (remarks || existing.remarks || '') : (existing.remarks || '')
+      const nextRemarks = canEditRemarks ? (remarks === undefined ? (existing.remarks || '') : remarks) : (existing.remarks || '')
 
       const result = await prisma.result.update({
         where: { id: parseInt(id) },
@@ -373,10 +399,30 @@ const updateResult = async (req, res) => {
           remarks: nextRemarks,
           status: existing.status === 'approved' ? 'approved' : 'pending'
         },
-        include: { student: true }
+        include: { student: { select: resultStudentSelect } }
       })
 
       return res.json(result)
+    }
+
+    if (scores !== undefined || remarks !== undefined) {
+      if (!hasAdminPermission(req, 'performance:edit')) {
+        return res.status(403).json({ message: 'You do not have permission to edit result scores or class teacher remarks.' })
+      }
+    }
+    if (headmasterRemarks !== undefined) {
+      if (!hasAdminPermission(req, 'performance:remarks')) {
+        return res.status(403).json({ message: 'You do not have permission to edit headmaster remarks.' })
+      }
+      if (!isValidRemark(headmasterRemarks)) {
+        return res.status(400).json({ message: 'Headmaster remarks must be 60 words or fewer.' })
+      }
+    }
+    if (remarks !== undefined && !isValidRemark(remarks)) {
+      return res.status(400).json({ message: 'Class teacher remarks must be 60 words or fewer.' })
+    }
+    if (status !== undefined && status !== existing.status && !hasAdminPermission(req, 'performance:approve')) {
+      return res.status(403).json({ message: 'You do not have permission to approve or change result status.' })
     }
 
     const nextScores = scores === undefined ? existing.scores : scores
@@ -399,7 +445,8 @@ const updateResult = async (req, res) => {
 
     const updateData = {
       scores: nextScores,
-      remarks: nextRemarksValue,
+      ...(remarks === undefined ? {} : { remarks: nextRemarksValue }),
+      ...(headmasterRemarks === undefined ? {} : { headmasterRemarks }),
       status: nextStatus
     }
 
@@ -407,40 +454,43 @@ const updateResult = async (req, res) => {
     if (nextStatus === 'approved') {
       updateData.approvedAt = new Date()
       updateData.approvedBy = req.user?.name || 'Admin'
-      // Fetch the actual stored signature URL from settings
-const { PrismaClient: PrismaClient2 } = require('@prisma/client')
-const prisma2 = new PrismaClient2()
-const sigSetting = await prisma2.setting.findUnique({
-  where: { key: 'headmaster_signature_url' }
-})
-if (sigSetting?.value) {
-  updateData.headmasterSignature = sigSetting.value
-}
+      if (hasAdminPermission(req, 'performance:signature')) {
+        const sigSetting = await prisma.setting.findUnique({
+          where: { key: 'headmaster_signature_url' }
+        })
+        if (sigSetting?.value) updateData.headmasterSignature = sigSetting.value
+      }
     }
 
     const result = await prisma.result.update({
       where: { id: parseInt(id) },
       data: updateData,
-      include: { student: true }
+      include: { student: { select: resultStudentSelect } }
     })
 
     // === NOTIFY PARENT WHEN APPROVED ===
-        if (nextStatus === 'approved' && result.student?.parentEmail) {
-      const parent = await prisma.user.findUnique({
-        where: { email: result.student.parentEmail }
-      });
-      if (parent) {
-        const { createNotification } = require('./notificationController');
-        await createNotification(
-          parent.id,
-          "Result Approved",
-          `Your child's result for ${result.term} ${result.academicYear} has been released.`,
-          "result"
-        );
+    if (nextStatus === 'approved') {
+      const studentContact = await prisma.student.findUnique({
+          where: { id: result.studentId },
+          select: { parentEmail: true }
+        })
+      if (studentContact?.parentEmail) {
+        const parent = await prisma.user.findUnique({
+          where: { email: studentContact.parentEmail }
+        })
+        if (parent) {
+          const { createNotification } = require('./notificationController')
+          await createNotification(
+            parent.id,
+            'Result Approved',
+            `Your child's result for ${result.term} ${result.academicYear} has been released.`,
+            'result'
+          )
+        }
       }
     }
 
-    res.json(result)
+    res.json(redactAdminSignatures(req, [result])[0])
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
   }

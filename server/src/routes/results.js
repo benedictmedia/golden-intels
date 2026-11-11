@@ -8,11 +8,12 @@ const {
   deleteResult
 } = require('../controllers/resultController')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
-router.get('/', protect, getResults)
-router.get('/student/:studentId', protect, getResultsByStudent)
-router.post('/', protect, createResult)
-router.put('/:id', protect, updateResult)
-router.delete('/:id', protect, deleteResult)
+router.get('/', protect, requireAdminPermission('performance:view'), getResults)
+router.get('/student/:studentId', protect, requireAdminPermission('performance:view'), getResultsByStudent)
+router.post('/', protect, requireAdminPermission('performance:edit'), createResult)
+router.put('/:id', protect, requireAdminPermission('performance:view'), updateResult)
+router.delete('/:id', protect, requireAdminPermission('performance:delete'), deleteResult)
 
 module.exports = router

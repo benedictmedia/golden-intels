@@ -8,11 +8,12 @@ const {
   deleteMessageForCurrentPortal
 } = require('../controllers/messageController')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
-router.get('/conversations', protect, getConversations)   // admin: all parent conversations
-router.get('/:conversationUserId', protect, getConversation) // load one conversation
-router.post('/', protect, sendMessage)                    // send a message
-router.put('/read/:conversationUserId', protect, markAsRead) // mark as read
-router.delete('/:id', protect, deleteMessageForCurrentPortal)
+router.get('/conversations', protect, requireAdminPermission('messages'), getConversations)
+router.get('/:conversationUserId', protect, requireAdminPermission('messages'), getConversation)
+router.post('/', protect, requireAdminPermission('messages'), sendMessage)
+router.put('/read/:conversationUserId', protect, requireAdminPermission('messages'), markAsRead)
+router.delete('/:id', protect, requireAdminPermission('messages'), deleteMessageForCurrentPortal)
 
 module.exports = router

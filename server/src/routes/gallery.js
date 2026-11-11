@@ -3,9 +3,10 @@ const router = express.Router()
 const { getGalleryItems, createGalleryItem, updateGalleryItem, deleteGalleryItem } = require('../controllers/galleryController')
 const protect = require('../middleware/authMiddleware')
 const { uploadGallery } = require('../middleware/cloudinaryUpload')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
 router.get('/', getGalleryItems)
-router.post('/', protect, (req, res, next) => {
+router.post('/', protect, requireAdminPermission('gallery'), (req, res, next) => {
   uploadGallery.array('images', 20)(req, res, (err) => {
     if (err) {
       console.error('Multer/Cloudinary error:', err)
@@ -14,7 +15,7 @@ router.post('/', protect, (req, res, next) => {
     next()
   })
 }, createGalleryItem)
-router.put('/:id', protect, (req, res, next) => {
+router.put('/:id', protect, requireAdminPermission('gallery'), (req, res, next) => {
   uploadGallery.array('images', 20)(req, res, (err) => {
     if (err) {
       console.error('Multer/Cloudinary error:', err)
@@ -23,6 +24,6 @@ router.put('/:id', protect, (req, res, next) => {
     next()
   })
 }, updateGalleryItem)
-router.delete('/:id', protect, deleteGalleryItem)
+router.delete('/:id', protect, requireAdminPermission('gallery'), deleteGalleryItem)
 
 module.exports = router

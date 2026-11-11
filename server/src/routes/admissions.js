@@ -12,6 +12,7 @@ const {
   deleteApplication
 } = require('../controllers/admissionController')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
@@ -68,13 +69,13 @@ router.post('/', (req, res, next) => {
     next()
   })
 }, submitApplication)
-router.get('/', protect, getApplications)
-router.get('/:id', protect, getApplication)
-router.put('/:id/approve', protect, approveApplication)
-router.put('/:id/reject', protect, rejectApplication)
-router.delete('/:id', protect, deleteApplication)
+router.get('/', protect, requireAdminPermission('admissions'), getApplications)
+router.get('/:id', protect, requireAdminPermission('admissions'), getApplication)
+router.put('/:id/approve', protect, requireAdminPermission('admissions'), approveApplication)
+router.put('/:id/reject', protect, requireAdminPermission('admissions'), rejectApplication)
+router.delete('/:id', protect, requireAdminPermission('admissions'), deleteApplication)
 
-router.get('/download-booklet/:id', protect, async (req, res) => {
+router.get('/download-booklet/:id', protect, requireAdminPermission('admissions'), async (req, res) => {
   try {
     const { PrismaClient } = require('@prisma/client')
     const prisma = new PrismaClient()

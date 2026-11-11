@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { PrismaClient } = require('@prisma/client')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 const prisma = new PrismaClient()
 const FIRST_ACADEMIC_YEAR = 2026
 const TERMS = ['Term 1', 'Term 2', 'Term 3']
@@ -47,7 +48,7 @@ router.get('/', protect, async (req, res) => {
 })
 
 // POST set active academic context (admin only)
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, requireAdminPermission('academic-context'), async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
   const { academicYear, term } = req.body
   if (!academicYear || !term) return res.status(400).json({ message: 'Academic year and term are required.' })

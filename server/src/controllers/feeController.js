@@ -3,6 +3,13 @@ const { createNotification } = require('./notificationController')
 const { archive } = require('../utils/archive')
 const { calculateFeeBalance, getFeeStatus } = require('../utils/feeMath')
 const prisma = new PrismaClient()
+const feeStudentSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  studentId: true,
+  gradeLevel: true
+}
 
 // Fee Structure
 const getFeeStructures = async (req, res) => {
@@ -48,10 +55,10 @@ const getFeePayments = async (req, res) => {
         select: { id: true }
       })
       const ids = children.map(c => c.id)
-      const payments = await prisma.feePayment.findMany({ where: { studentId: { in: ids } }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+      const payments = await prisma.feePayment.findMany({ where: { studentId: { in: ids } }, include: { student: { select: feeStudentSelect } }, orderBy: { createdAt: 'desc' } })
       return res.json(payments)
     }
-    const payments = await prisma.feePayment.findMany({ include: { student: true }, orderBy: { createdAt: 'desc' } })
+    const payments = await prisma.feePayment.findMany({ include: { student: { select: feeStudentSelect } }, orderBy: { createdAt: 'desc' } })
     res.json(payments)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -68,7 +75,7 @@ const getStudentFeePayments = async (req, res) => {
         return res.status(403).json({ message: 'Forbidden' })
       }
     }
-    const payments = await prisma.feePayment.findMany({ where: { studentId: parseInt(studentId) }, include: { student: true }, orderBy: { createdAt: 'desc' } })
+    const payments = await prisma.feePayment.findMany({ where: { studentId: parseInt(studentId) }, include: { student: { select: feeStudentSelect } }, orderBy: { createdAt: 'desc' } })
     res.json(payments)
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message })
@@ -110,14 +117,18 @@ const createFeePayment = async (req, res) => {
         notes,
         paidAt: paid > 0 ? new Date() : null
       },
-      include: { student: true }
+      include: { student: { select: feeStudentSelect } }
+    })
+    const studentContact = await prisma.student.findUnique({
+      where: { id: payment.studentId },
+      select: { parentEmail: true }
     })
     res.status(201).json(payment)
 
-        // After creating/updating payment
-    if (payment.student?.parentEmail) {
+    // After creating/updating payment
+    if (studentContact?.parentEmail) {
       const parent = await prisma.user.findUnique({
-        where: { email: payment.student.parentEmail }
+        where: { email: studentContact.parentEmail }
       });
       if (parent) {
         const periodLabel = `${payment.term || 'Legacy monthly'} ${payment.academicYear || payment.year || ''}`.trim()
@@ -164,14 +175,18 @@ const updateFeePayment = async (req, res) => {
         // Reset alert flag when admin updates fee so parent sees it on next login
         feePaymentAlertSeen: status === 'paid' ? true : false
       },
-      include: { student: true }
+      include: { student: { select: feeStudentSelect } }
+    })
+    const studentContact = await prisma.student.findUnique({
+      where: { id: payment.studentId },
+      select: { parentEmail: true }
     })
     res.json(payment)
 
-        // After creating/updating payment
-    if (payment.student?.parentEmail) {
+    // After creating/updating payment
+    if (studentContact?.parentEmail) {
       const parent = await prisma.user.findUnique({
-        where: { email: payment.student.parentEmail }
+        where: { email: studentContact.parentEmail }
       });
       if (parent) {
         const periodLabel = `${payment.term || payment.month || 'Fee'} ${payment.academicYear || payment.year || ''}`.trim()
@@ -230,7 +245,17 @@ const respondToFeeUpdate = async (req, res) => {
   try {
     const payment = await prisma.feePayment.findUnique({
       where: { id: parseInt(id) },
-      include: { student: true }
+      include: {
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            parentEmail: true,
+            parentId: true
+          }
+        }
+      }
     })
 
     if (!payment) return res.status(404).json({ message: 'Fee update not found.' })
@@ -309,7 +334,7 @@ const getUnseenFeeAlerts = async (req, res) => {
         studentId: { in: studentIds },
         status: { in: ['partial', 'unpaid'] }
       },
-      include: { student: true },
+      include: { student: { select: feeStudentSelect } },
       orderBy: { createdAt: 'desc' }
     })
 

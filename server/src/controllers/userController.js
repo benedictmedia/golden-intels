@@ -42,7 +42,9 @@ const getUsers = async (req, res) => {
     const { q = '', page = 1, limit = 10, role } = req.query
     const where = {}
     if (q) where.OR = [{ name: { contains: q, mode: 'insensitive' } }, { email: { contains: q, mode: 'insensitive' } }]
+    if (role === 'admin') return res.status(403).json({ message: 'Administrator accounts are not listed here.' })
     if (role) where.role = role
+    else where.role = { not: 'admin' }
 
     const pageNum = parseInt(page) || 1
     const showAll = String(limit).toLowerCase() === 'all'
@@ -98,6 +100,9 @@ const updateUser = async (req, res) => {
   try {
     const existingUser = await prisma.user.findUnique({ where: { id: parseInt(id) } })
     if (!existingUser) return res.status(404).json({ message: 'User not found' })
+    if (existingUser.role === 'admin' || req.body.role === 'admin') {
+      return res.status(403).json({ message: 'Administrator accounts cannot be changed here.' })
+    }
 
     const nextName = req.body.name || existingUser.name
     const nextEmail = req.body.email || existingUser.email
@@ -186,6 +191,7 @@ const resetUserPassword = async (req, res) => {
     if (!Number.isSafeInteger(userId) || userId < 1) return res.status(400).json({ message: 'A valid account ID is required.' })
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) return res.status(404).json({ message: 'User not found' })
+    if (user.role === 'admin') return res.status(400).json({ message: 'Administrator passwords cannot be reset here.' })
     const passwordError = validateTemporaryPassword(password, user.role)
     if (passwordError) return res.status(400).json({ message: passwordError })
 
@@ -340,6 +346,9 @@ const deactivateUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { email } = req.body
   try {
+    const target = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })
+    if (!target) return res.status(404).json({ message: 'User not found' })
+    if (target.role === 'admin') return res.status(400).json({ message: 'Administrator accounts cannot be deactivated here.' })
     const user = await prisma.user.update({ where: { email }, data: { active: false } })
     // create audit
     await prisma.accountAudit.create({ data: { userId: user.id, action: 'deactivate', performedBy: req.user.email, details: { email } } })
@@ -353,6 +362,9 @@ const reactivateUser = async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admin only' })
   const { email } = req.body
   try {
+    const target = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })
+    if (!target) return res.status(404).json({ message: 'User not found' })
+    if (target.role === 'admin') return res.status(400).json({ message: 'Administrator accounts cannot be reactivated here.' })
     const user = await prisma.user.update({ where: { email }, data: { active: true } })
     await prisma.accountAudit.create({ data: { userId: user.id, action: 'reactivate', performedBy: req.user.email, details: { email } } })
     res.json({ message: 'User reactivated', email })

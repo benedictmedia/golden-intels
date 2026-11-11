@@ -9,6 +9,7 @@ const {
 } = require('../controllers/newsEventController')
 const protect = require('../middleware/authMiddleware')
 const { uploadNews } = require('../middleware/cloudinaryUpload')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
 const handleNewsUpload = (req, res, next) => {
   uploadNews.array('images', 5)(req, res, error => {
@@ -27,14 +28,14 @@ const handleNewsUpload = (req, res, next) => {
 
 router.get('/', getNewsEvents)
 router.get('/homepage', getHomepageNewsEvents)
-router.post('/', protect, (req, res, next) => {
+router.post('/', protect, requireAdminPermission('news'), (req, res, next) => {
   if (req.is('application/json')) return createNewsEvent(req, res, next)
   return handleNewsUpload(req, res, next)
 }, createNewsEvent)
-router.put('/:id', protect, (req, res, next) => {
+router.put('/:id', protect, requireAdminPermission('news'), (req, res, next) => {
   if (req.is('application/json')) return updateNewsEvent(req, res, next)
   return handleNewsUpload(req, res, next)
 }, updateNewsEvent)
-router.delete('/:id', protect, deleteNewsEvent)
+router.delete('/:id', protect, requireAdminPermission('news'), deleteNewsEvent)
 
 module.exports = router

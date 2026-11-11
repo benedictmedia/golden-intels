@@ -7,15 +7,16 @@ const {
   getUnseenFeeAlerts
 } = require('../controllers/feeController')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
-router.get('/structures', protect, getFeeStructures)
-router.post('/structures', protect, upsertFeeStructure)
-router.get('/payments', protect, getFeePayments)
-router.get('/payments/student/:studentId', protect, getStudentFeePayments)
-router.get('/unseen-alerts', protect, getUnseenFeeAlerts)
-router.post('/payments', protect, createFeePayment)
-router.put('/payments/:id', protect, updateFeePayment)
-router.post('/payments/:id/response', protect, respondToFeeUpdate)
-router.delete('/payments/:id', protect, deleteFeePayment)
+router.get('/structures', protect, requireAdminPermission('finance'), getFeeStructures)
+router.post('/structures', protect, requireAdminPermission('finance'), upsertFeeStructure)
+router.get('/payments', protect, requireAdminPermission('finance'), getFeePayments)
+router.get('/payments/student/:studentId', protect, requireAdminPermission('finance'), getStudentFeePayments)
+router.get('/unseen-alerts', protect, requireAdminPermission('finance'), getUnseenFeeAlerts)
+router.post('/payments', protect, requireAdminPermission('finance'), createFeePayment)
+router.put('/payments/:id', protect, requireAdminPermission('finance'), updateFeePayment)
+router.post('/payments/:id/response', protect, requireAdminPermission('finance'), respondToFeeUpdate)
+router.delete('/payments/:id', protect, requireAdminPermission('finance'), deleteFeePayment)
 
 module.exports = router

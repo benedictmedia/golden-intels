@@ -4,9 +4,10 @@ const protect = require('../middleware/authMiddleware')
 const { PrismaClient } = require('@prisma/client')
 const cloudinary = require('cloudinary').v2
 const prisma = new PrismaClient()
+const { requireAdminPermission } = require('../middleware/adminPermissions')
 
 // Upload headmaster signature (admin only)
-router.post('/upload', protect, async (req, res) => {
+router.post('/upload', protect, requireAdminPermission('performance:signature'), async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
   try {
     const { imageBase64 } = req.body
@@ -33,7 +34,7 @@ router.post('/upload', protect, async (req, res) => {
 })
 
 // Get current signature URL from database
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, requireAdminPermission('performance:signature'), async (req, res) => {
   try {
     const setting = await prisma.setting.findUnique({
       where: { key: 'headmaster_signature_url' }
@@ -47,7 +48,7 @@ router.get('/', protect, async (req, res) => {
 const axios = require('axios')
 
 // Proxy the signature image through your own server to avoid CORS/tracking issues
-router.get('/preview', protect, async (req, res) => {
+router.get('/preview', protect, requireAdminPermission('performance:signature'), async (req, res) => {
   try {
     const setting = await prisma.setting.findUnique({
       where: { key: 'headmaster_signature_url' }

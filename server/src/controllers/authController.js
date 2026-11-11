@@ -6,6 +6,7 @@ const { sendMail } = require('../utils/mailer')
 const { createNotificationsForRole } = require('./notificationController')
 const { canonicalStudentClassName } = require('../utils/studentClasses')
 const { createParentAccountIfNeeded, createLearnerAccount } = require('../utils/studentAccounts')
+const { ADMIN_PERMISSION_OPTIONS, normalizeAdminPermissions } = require('../middleware/adminPermissions')
 
 // Generate JWT
 const generateToken = (id, role, name, email) => {
@@ -49,7 +50,8 @@ const buildUserResponse = async (user) => {
     name: user.name,
     email: user.email,
     role: user.role,
-    active: user.active
+    active: user.active,
+    ...(user.role === 'admin' ? { adminPermissions: user.adminPermissions } : {})
   }
 
   if (user.role === 'teacher') {
@@ -85,6 +87,7 @@ const register = async (req, res) => {
     email,
     password,
     role,
+    adminPermissions,
     department,
     subject: teacherSubject,
     classes,
@@ -104,18 +107,34 @@ const register = async (req, res) => {
 
   try {
     const accountRole = role || 'parent'
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
     const learnerFirstName = firstName || String(name || '').split(' ')[0] || ''
     const learnerLastName = lastName || String(name || '').split(' ').slice(1).join(' ') || ''
+
+    if (accountRole === 'admin') {
+      const permissions = normalizeAdminPermissions(adminPermissions)
+      if (!permissions || !permissions.length) {
+        return res.status(400).json({ message: `Choose at least one valid administrator permission: ${ADMIN_PERMISSION_OPTIONS.join(', ')}.` })
+      }
+      if (typeof password !== 'string' || password.length < 8) {
+        return res.status(400).json({ message: 'Administrator passwords must be at least 8 characters long.' })
+      }
+    }
 
     if (accountRole === 'learner') {
       if (!learnerFirstName || !gender || !gradeLevel) {
         return res.status(400).json({ message: 'Learner first name, gender, and grade level are required.' })
       }
     } else {
-      if (!email || !password) {
+      if (!name || !normalizedEmail || typeof password !== 'string' || !password) {
         return res.status(400).json({ message: 'Name, email, and password are required.' })
       }
-      const existingUser = await prisma.user.findUnique({ where: { email } })
+      if (normalizedEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        return res.status(400).json({ message: 'Enter a valid email address.' })
+      }
+      const existingUser = await prisma.user.findFirst({
+        where: { email: { equals: normalizedEmail, mode: 'insensitive' } }
+      })
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists' })
       }
@@ -159,9 +178,10 @@ const register = async (req, res) => {
       const createdUser = await tx.user.create({
         data: {
           name,
-          email,
+          email: normalizedEmail,
           password: hashedPassword,
-          role: accountRole
+          role: accountRole,
+          ...(accountRole === 'admin' ? { adminPermissions: normalizeAdminPermissions(adminPermissions) } : {})
         }
       })
 
@@ -179,7 +199,7 @@ const register = async (req, res) => {
             classes: parsedClasses,
             classTeacherClasses: parsedClassTeacherClasses,
             source: 'account',
-            email,
+            email: normalizedEmail,
             phone: null,
             staffId: typeof staffId === 'string' ? staffId.trim() || null : null,
             category: 'teaching'

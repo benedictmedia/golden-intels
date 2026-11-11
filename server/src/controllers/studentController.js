@@ -142,11 +142,32 @@ const getStudents = async (req, res) => {
 
     if (req.user && req.user.role === 'teacher') {
       const staff = await prisma.staff.findFirst({ where: { email: req.user.email } })
-      const students = await prisma.student.findMany({ 
+      const hasFullLearnerAccess = req.user?.role !== 'admin' ||
+        req.adminPermissions === null ||
+        req.adminPermissions?.includes('learners')
+      const studentQuery = {
         where: activeLearnerWhere,
-        orderBy: order, 
-        include: { parent: { select: { id: true, name: true, email: true } } } 
-      })
+        orderBy: order
+      }
+      if (hasFullLearnerAccess) {
+        studentQuery.include = { parent: { select: { id: true, name: true, email: true } } }
+      } else {
+        studentQuery.select = {
+          id: true,
+          studentId: true,
+          firstName: true,
+          lastName: true,
+          gradeLevel: true,
+          division: true,
+          academicYear: true,
+          status: true
+        }
+        if (req.adminPermissions?.includes('accounts')) {
+          studentQuery.select.email = true
+          studentQuery.select.learnerUserId = true
+        }
+      }
+      const students = await prisma.student.findMany(studentQuery)
 
       if (!staff) return res.json([])
 

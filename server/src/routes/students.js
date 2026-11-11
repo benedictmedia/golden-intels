@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { getStudents, getStudent, getMyProfile, createStudent, updateStudent, bulkImportStudents, deleteStudent, createLearnerLogin } = require('../controllers/studentController')
 const protect = require('../middleware/authMiddleware')
+const { requireAdminPermission, requireAnyAdminPermission } = require('../middleware/adminPermissions')
 
 const requireAdmin = (req, res, next) => {
   if (req.user?.role !== 'admin') return res.status(403).json({ message: 'Admins only' })
@@ -59,14 +60,14 @@ const handleUpload = (req, res, next) => {
   })
 }
 
-router.get('/admin/export', protect, requireAdmin, getStudents)
-router.get('/', protect, getStudents)
-router.post('/', protect, handleUpload, createStudent)
-router.post('/bulk-import', protect, bulkImportStudents)
+router.get('/admin/export', protect, requireAdminPermission('learners'), requireAdmin, getStudents)
+router.get('/', protect, requireAnyAdminPermission(['learners', 'accounts', 'finance', 'attendance']), getStudents)
+router.post('/', protect, requireAdminPermission('learners'), handleUpload, createStudent)
+router.post('/bulk-import', protect, requireAdminPermission('learners'), bulkImportStudents)
 router.get('/me', protect, getMyProfile)
-router.get('/:id', protect, getStudent)
-router.put('/:id', protect, handleUpload, updateStudent)
-router.delete('/:id', protect, deleteStudent)
-router.post('/:id/create-login', protect, createLearnerLogin)
+router.get('/:id', protect, requireAdminPermission('learners'), getStudent)
+router.put('/:id', protect, requireAdminPermission('learners'), handleUpload, updateStudent)
+router.delete('/:id', protect, requireAdminPermission('learners'), deleteStudent)
+router.post('/:id/create-login', protect, requireAnyAdminPermission(['learners', 'accounts']), createLearnerLogin)
 
 module.exports = router
