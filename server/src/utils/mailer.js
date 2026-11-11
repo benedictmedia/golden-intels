@@ -1,9 +1,7 @@
 const sendWithGmailApi = async ({ to, subject, text, html }) => {
-  const {
-    GMAIL_CLIENT_ID: clientId,
-    GMAIL_CLIENT_SECRET: clientSecret,
-    GMAIL_REFRESH_TOKEN: refreshToken
-  } = process.env
+  const clientId = process.env.GMAIL_CLIENT_ID
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN
   const user = (process.env.GMAIL_USER || 'goldenintelse@gmail.com').trim().toLowerCase()
 
   if (!clientId || !clientSecret || !refreshToken) {
@@ -27,34 +25,34 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
 
   const tokenBody = await tokenResponse.json().catch(() => ({}))
   if (!tokenResponse.ok || !tokenBody.access_token) {
-    const reason = tokenBody.error_description || tokenBody.error || \`HTTP \${tokenResponse.status}\`
-    throw new Error(\`Google OAuth token refresh failed: \${reason}\`)
+    const reason = tokenBody.error_description || tokenBody.error || ('HTTP ' + tokenResponse.status)
+    throw new Error('Google OAuth token refresh failed: ' + reason)
   }
 
   const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean)
   if (!recipients.length) throw new Error('At least one email recipient is required.')
 
-  const boundary = \`goldenintels_\${require('crypto').randomBytes(12).toString('hex')}\`
+  const boundary = 'goldenintels_' + require('crypto').randomBytes(12).toString('hex')
   const encodePart = (value) => Buffer.from(String(value || ''), 'utf8').toString('base64').replace(/.{1,76}/g, '$&\r\n').trim()
   const safeHeader = (value) => String(value || '').replace(/[\r\n]+/g, ' ').trim()
   const mime = [
-    \`From: Golden-Intels International School <\${user}>\`,
-    \`To: \${recipients.map(safeHeader).join(', ')}\`,
-    \`Subject: \${safeHeader(subject)}\`,
+    'From: Golden-Intels International School <' + user + '>',
+    'To: ' + recipients.map(safeHeader).join(', '),
+    'Subject: ' + safeHeader(subject),
     'MIME-Version: 1.0',
-    \`Content-Type: multipart/alternative; boundary="\${boundary}"\`,
+    'Content-Type: multipart/alternative; boundary="' + boundary + '"',
     '',
-    \`--\${boundary}\`,
+    '--' + boundary,
     'Content-Type: text/plain; charset="UTF-8"',
     'Content-Transfer-Encoding: base64',
     '',
     encodePart(text),
-    \`--\${boundary}\`,
+    '--' + boundary,
     'Content-Type: text/html; charset="UTF-8"',
     'Content-Transfer-Encoding: base64',
     '',
     encodePart(html || text),
-    \`--\${boundary}--\`,
+    '--' + boundary + '--',
     ''
   ].join('\r\n')
 
@@ -63,7 +61,7 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
     method: 'POST',
     signal: AbortSignal.timeout(20000),
     headers: {
-      Authorization: \`Bearer \${tokenBody.access_token}\`,
+      Authorization: 'Bearer ' + tokenBody.access_token,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ raw })
@@ -71,8 +69,8 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
 
   const sendBody = await sendResponse.json().catch(() => ({}))
   if (!sendResponse.ok || !sendBody.id) {
-    const reason = sendBody.error?.message || sendBody.error_description || \`HTTP \${sendResponse.status}\`
-    throw new Error(\`Gmail API send failed: \${reason}\`)
+    const reason = (sendBody.error && sendBody.error.message) || sendBody.error_description || ('HTTP ' + sendResponse.status)
+    throw new Error('Gmail API send failed: ' + reason)
   }
 
   console.log('Password-reset email accepted by Gmail API.')
@@ -80,7 +78,8 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
 }
 
 const sendWithResend = async ({ to, subject, text, html }) => {
-  const { RESEND_API_KEY: apiKey, EMAIL_FROM: from } = process.env
+  const apiKey = process.env.RESEND_API_KEY
+  const from = process.env.EMAIL_FROM
   if (!apiKey || !from) {
     throw new Error('No email provider is configured. Configure Gmail API OAuth credentials.')
   }
@@ -89,7 +88,7 @@ const sendWithResend = async ({ to, subject, text, html }) => {
     method: 'POST',
     signal: AbortSignal.timeout(15000),
     headers: {
-      Authorization: \`Bearer \${apiKey}\`,
+      Authorization: 'Bearer ' + apiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
@@ -110,8 +109,8 @@ const sendWithResend = async ({ to, subject, text, html }) => {
   }
 
   if (!response.ok) {
-    const details = result.message || result.name || \`HTTP \${response.status}\`
-    throw new Error(\`Resend email API failed: \${details}\`)
+    const details = result.message || result.name || ('HTTP ' + response.status)
+    throw new Error('Resend email API failed: ' + details)
   }
 
   console.log('Email sent via Resend fallback:', result.id || 'accepted')
