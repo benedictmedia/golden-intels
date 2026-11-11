@@ -14,15 +14,29 @@ if (!targetUrl) throw new Error('SUPABASE_DATABASE_URL (Supabase destination) is
 if (sourceUrl === targetUrl) throw new Error('Source and destination URLs must differ.')
 
 const cwd = path.join(__dirname, '..')
-console.log('Preparing Supabase schema from committed Prisma migrations...')
+const withSchema = (connectionString, schema) => {
+  const url = new URL(connectionString)
+  url.searchParams.set('schema', schema)
+  return url.toString()
+}
+const targetPublicUrl = withSchema(targetUrl, 'public')
+const targetSchoolUrl = withSchema(targetUrl, 'school')
+
+// Supabase already contains the public.news_events table used by the website.
+// Keep it in public and isolate Prisma-managed school records in their own schema.
+const bootstrap = new PrismaClient({ datasources: { db: { url: targetPublicUrl } } })
+bootstrap.$executeRawUnsafe('CREATE SCHEMA IF NOT EXISTS school')
+  .finally(() => bootstrap.$disconnect())
+
+console.log('Preparing isolated school schema from committed Prisma migrations...')
 execFileSync('npx', ['prisma', 'migrate', 'deploy', '--schema=prisma/schema.prisma'], {
   cwd,
-  env: { ...process.env, DATABASE_URL: targetUrl },
+  env: { ...process.env, DATABASE_URL: targetSchoolUrl },
   stdio: 'inherit'
 })
 
 const source = new PrismaClient({ datasources: { db: { url: sourceUrl } } })
-const target = new PrismaClient({ datasources: { db: { url: targetUrl } } })
+const target = new PrismaClient({ datasources: { db: { url: targetSchoolUrl } } })
 const migrationKey = 'neon-to-supabase-prisma-v1'
 
 // Copy parents before dependent records. All IDs and original timestamps are retained.
@@ -57,15 +71,15 @@ const run = async () => {
   await target.$queryRaw`SELECT 1`
 
   await target.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS public."_NeonDataMigrationLog" (
+    CREATE TABLE IF NOT EXISTS school."_NeonDataMigrationLog" (
       "migrationKey" text PRIMARY KEY,
       "completedAt" timestamptz NOT NULL DEFAULT now()
     )
   `)
-  await target.$executeRawUnsafe('ALTER TABLE public."_NeonDataMigrationLog" ENABLE ROW LEVEL SECURITY')
+  await target.$executeRawUnsafe('ALTER TABLE school."_NeonDataMigrationLog" ENABLE ROW LEVEL SECURITY')
 
   const done = await target.$queryRawUnsafe(
-    'SELECT "migrationKey" FROM public."_NeonDataMigrationLog" WHERE "migrationKey" = $1',
+    'SELECT "migrationKey" FROM school."_NeonDataMigrationLog" WHERE "migrationKey" = $1',
     migrationKey
   )
   if (done.length) {
@@ -101,11 +115,11 @@ const run = async () => {
 
     if (hasSerialId) {
       await target.$queryRawUnsafe(
-        `SELECT setval(pg_get_serial_sequence('public."${tableName}"', 'id'), COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM public."${tableName}"`
+        `SELECT setval(pg_get_serial_sequence('school."${tableName}"', 'id'), COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM school."${tableName}"`
       )
     }
 
-    await target.$executeRawUnsafe(`ALTER TABLE public."${tableName}" ENABLE ROW LEVEL SECURITY`)
+    await target.$executeRawUnsafe(`ALTER TABLE school."${tableName}" ENABLE ROW LEVEL SECURITY`)
   }
 
   // The application uses a separate, existing snake_case news_events table for public news.
@@ -113,7 +127,7 @@ const run = async () => {
   await target.$executeRawUnsafe('ALTER TABLE public."_prisma_migrations" ENABLE ROW LEVEL SECURITY')
 
   await target.$executeRawUnsafe(
-    'INSERT INTO public."_NeonDataMigrationLog" ("migrationKey") VALUES ($1) ON CONFLICT ("migrationKey") DO NOTHING',
+    'INSERT INTO school."_NeonDataMigrationLog" ("migrationKey") VALUES ($1) ON CONFLICT ("migrationKey") DO NOTHING',
     migrationKey
   )
 
