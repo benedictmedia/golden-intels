@@ -129,7 +129,17 @@ const sendMail = async ({ to, subject, text, html, throwOnError = false }) => {
       process.env.GMAIL_REFRESH_TOKEN
     )
     if (gmailConfigured) {
-      return await sendWithGmailApi({ to, subject, text, html })
+      try {
+        return await sendWithGmailApi({ to, subject, text, html })
+      } catch (gmailError) {
+        if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) throw gmailError
+        console.warn('Gmail delivery failed; attempting configured Resend fallback:', gmailError.message)
+        try {
+          return await sendWithResend({ to, subject, text, html })
+        } catch (resendError) {
+          throw new Error('Gmail delivery failed (' + gmailError.message + '); Resend fallback also failed (' + resendError.message + ').')
+        }
+      }
     }
     if (process.env.RESEND_API_KEY) {
       return await sendWithResend({ to, subject, text, html })
