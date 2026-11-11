@@ -20,6 +20,8 @@ const Staff = lazy(() => import('./pages/Staff'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Login = lazy(() => import('./pages/Login'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = lazy(() => import('./pages/TermsOfService'))
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'))
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'))
@@ -136,6 +138,8 @@ function AnimatedRoutes() {
           <Route path="/news" element={<PageTransition><Navbar /><NewsEvents /><Footer /></PageTransition>} />
           <Route path="/staff" element={<PageTransition><Navbar /><Staff /><Footer /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Navbar /><Contact /><Footer /></PageTransition>} />
+          <Route path="/privacy-policy" element={<PageTransition><Navbar /><PrivacyPolicy /><Footer /></PageTransition>} />
+          <Route path="/terms-of-service" element={<PageTransition><Navbar /><TermsOfService /><Footer /></PageTransition>} />
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/reset-password/:token" element={<PageTransition><ResetPassword /></PageTransition>} />
           <Route path="/admin" element={<RequireRole role="admin"><AdminDashboard /></RequireRole>} />
