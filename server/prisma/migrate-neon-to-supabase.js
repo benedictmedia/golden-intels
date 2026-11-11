@@ -24,16 +24,21 @@ const targetSchoolUrl = withSchema(targetUrl, 'school')
 
 // Supabase already contains the public.news_events table used by the website.
 // Keep it in public and isolate Prisma-managed school records in their own schema.
-const bootstrap = new PrismaClient({ datasources: { db: { url: targetPublicUrl } } })
-bootstrap.$executeRawUnsafe('CREATE SCHEMA IF NOT EXISTS school')
-  .finally(() => bootstrap.$disconnect())
+const prepareSchoolSchema = async () => {
+  const bootstrap = new PrismaClient({ datasources: { db: { url: targetPublicUrl } } })
+  try {
+    await bootstrap.$executeRawUnsafe('CREATE SCHEMA IF NOT EXISTS school')
+  } finally {
+    await bootstrap.$disconnect()
+  }
 
-console.log('Preparing isolated school schema from committed Prisma migrations...')
-execFileSync('npx', ['prisma', 'migrate', 'deploy', '--schema=prisma/schema.prisma'], {
-  cwd,
-  env: { ...process.env, DATABASE_URL: targetSchoolUrl },
-  stdio: 'inherit'
-})
+  console.log('Preparing isolated school schema from committed Prisma migrations...')
+  execFileSync('npx', ['prisma', 'migrate', 'deploy', '--schema=prisma/schema.prisma'], {
+    cwd,
+    env: { ...process.env, DATABASE_URL: targetSchoolUrl },
+    stdio: 'inherit'
+  })
+}
 
 const source = new PrismaClient({ datasources: { db: { url: sourceUrl } } })
 const target = new PrismaClient({ datasources: { db: { url: targetSchoolUrl } } })
@@ -67,6 +72,7 @@ const models = [
 ]
 
 const run = async () => {
+  await prepareSchoolSchema()
   await source.$queryRaw`SELECT 1`
   await target.$queryRaw`SELECT 1`
 
