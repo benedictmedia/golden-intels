@@ -25,8 +25,15 @@ const sendWithGmailApi = async ({ to, subject, text, html }) => {
 
   const tokenBody = await tokenResponse.json().catch(() => ({}))
   if (!tokenResponse.ok || !tokenBody.access_token) {
-    const reason = tokenBody.error_description || tokenBody.error || ('HTTP ' + tokenResponse.status)
-    throw new Error('Google OAuth token refresh failed: ' + reason)
+    // Log only Google's non-secret error fields; never log OAuth credentials or tokens.
+    const errorCode = tokenBody.error || 'unknown_error'
+    const errorDescription = tokenBody.error_description || 'No error description returned'
+    console.error('Google OAuth token endpoint rejected refresh request:', {
+      status: tokenResponse.status,
+      error: errorCode,
+      description: errorDescription
+    })
+    throw new Error('Google OAuth token refresh failed (' + tokenResponse.status + '): ' + errorCode + ' — ' + errorDescription)
   }
 
   const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean)
