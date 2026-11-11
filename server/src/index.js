@@ -10,33 +10,57 @@ const { initSocket } = require('./socket')
 
 dotenv.config()
 
+// DATABASE_URL remains the Neon source until the one-time migration verifies.
+// Once SUPABASE_DATABASE_URL is configured, copy the data before serving traffic,
+// then use Supabase for all Prisma-backed school-management requests.
+const useSupabaseDatabase = Boolean(process.env.SUPABASE_DATABASE_URL)
+const runtimeDatabaseUrl = (() => {
+  if (!useSupabaseDatabase) return process.env.DATABASE_URL
+  const url = new URL(process.env.SUPABASE_DATABASE_URL)
+  // Prisma school-management tables live in `school`; public.news_events remains
+  // in `public` for the Supabase Data API and existing website content.
+  url.searchParams.set('schema', 'school')
+  return url.toString()
+})()
+
 try {
-  console.log('⏳ Applying Prisma migrations on startup...')
-  execSync('npx prisma migrate deploy --schema=prisma/schema.prisma', {
-    stdio: 'inherit',
-    cwd: path.join(__dirname, '..')
-  })
-  console.log('✅ Prisma migrations deployed successfully')
+  if (useSupabaseDatabase) {
+    console.log('⏳ Preparing and verifying Neon → Supabase database migration...')
+    execSync('node prisma/migrate-neon-to-supabase.js', {
+      stdio: 'inherit',
+      cwd: path.join(__dirname, '..')
+    })
+    console.log('✅ Supabase database migration verified')
+  } else {
+    console.log('⏳ Applying Prisma migrations to the configured database...')
+    execSync('npx prisma migrate deploy --schema=prisma/schema.prisma', {
+      stdio: 'inherit',
+      cwd: path.join(__dirname, '..')
+    })
+    console.log('✅ Prisma migrations deployed successfully')
+  }
 } catch (error) {
-  console.error('Failed to deploy Prisma migrations:', error)
+  console.error('Database preparation failed. Server startup is aborted to protect school data:', error)
+  process.exit(1)
 }
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: { db: { url: runtimeDatabaseUrl } }
+})
 
-// Wake up Neon DB with retries before accepting traffic
+// Verify the selected database before accepting traffic.
 const waitForDB = async (retries = 10, delay = 3000) => {
   for (let i = 1; i <= retries; i++) {
     try {
       await prisma.$queryRaw`SELECT 1`
-      console.log('✅ Database connected')
+      console.log(`✅ ${useSupabaseDatabase ? 'Supabase' : 'Neon'} database connected`)
       return true
     } catch (err) {
       console.warn(`⏳ DB not ready (attempt ${i}/${retries}), retrying in ${delay/1000}s...`)
       await new Promise(res => setTimeout(res, delay))
     }
   }
-  console.warn('⚠️ Could not reach DB after retries — server will start anyway')
-  return false
+  throw new Error('Could not connect to the configured application database.')
 }
 
 const app = express()
@@ -87,8 +111,8 @@ initSocket(httpServer)
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-const notificationRoutes = require('./routes/notifications');
-app.use('/api/notifications', notificationRoutes);
+const notificationRoutes = require('./routes/notifications')
+app.use('/api/notifications', notificationRoutes)
 
 // Serve uploaded files
 const uploadsPath = path.join(__dirname, '../uploads')
@@ -159,4 +183,7 @@ const startServer = async () => {
   httpServer.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
 }
 
-startServer()
+startServer().catch(error => {
+  console.error('Server startup failed:', error)
+  process.exit(1)
+})
