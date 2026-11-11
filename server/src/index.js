@@ -14,7 +14,14 @@ dotenv.config()
 // Once SUPABASE_DATABASE_URL is configured, copy the data before serving traffic,
 // then use Supabase for all Prisma-backed school-management requests.
 const useSupabaseDatabase = Boolean(process.env.SUPABASE_DATABASE_URL)
-const runtimeDatabaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL
+const runtimeDatabaseUrl = (() => {
+  if (!useSupabaseDatabase) return process.env.DATABASE_URL
+  const url = new URL(process.env.SUPABASE_DATABASE_URL)
+  // Prisma school-management tables live in `school`; public.news_events remains
+  // in `public` for the Supabase Data API and existing website content.
+  url.searchParams.set('schema', 'school')
+  return url.toString()
+})()
 
 try {
   if (useSupabaseDatabase) {
