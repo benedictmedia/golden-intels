@@ -11,11 +11,16 @@ const requireSupabase = () => {
 
 const supabaseRequest = async (path, options = {}) => {
   requireSupabase()
+  // New Supabase secret keys (sb_secret_...) must be sent as apikey only.
+  // Legacy service_role JWT keys also need the Authorization bearer header.
+  const authHeaders = { apikey: SUPABASE_KEY }
+  if (!SUPABASE_KEY.startsWith('sb_secret_')) {
+    authHeaders.Authorization = `Bearer ${SUPABASE_KEY}`
+  }
   const response = await fetch(`${SUPABASE_URL}${path}`, {
     ...options,
     headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
+      ...authHeaders,
       ...(options.headers || {})
     }
   })
@@ -66,7 +71,7 @@ const uploadNewsImages = async (files = []) => {
 
 const getNewsEvents = async (req, res) => {
   try {
-    const rows = await supabaseRequest('/rest/v1/news_events?select=*&order=created_at.desc')
+    const rows = await supabaseRequest('/rest/v1/news_events?select=*&published=eq.true&order=created_at.desc')
     res.json((rows || []).map(toApiItem))
   } catch (error) {
     console.error('News fetch error:', error)
