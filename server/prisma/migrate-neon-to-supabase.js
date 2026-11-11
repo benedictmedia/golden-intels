@@ -130,7 +130,7 @@ const run = async () => {
 
   // The application uses a separate, existing snake_case news_events table for public news.
   // Do not overwrite it: its three existing published records remain untouched.
-  await target.$executeRawUnsafe('ALTER TABLE public."_prisma_migrations" ENABLE ROW LEVEL SECURITY')
+  await target.$executeRawUnsafe('ALTER TABLE school."_prisma_migrations" ENABLE ROW LEVEL SECURITY')
 
   await target.$executeRawUnsafe(
     'INSERT INTO school."_NeonDataMigrationLog" ("migrationKey") VALUES ($1) ON CONFLICT ("migrationKey") DO NOTHING',
