@@ -187,6 +187,10 @@ export default function Footer() {
         <p>
           © {new Date().getFullYear()} Golden-Intels International School. All rights reserved.
         </p>
+        <nav aria-label="Legal" className="mt-3 flex justify-center gap-5 text-xs">
+          <Link to="/privacy-policy" className="hover:text-white hover:underline">Privacy Policy</Link>
+          <Link to="/terms-of-service" className="hover:text-white hover:underline">Terms of Service</Link>
+        </nav>
       </div>
 
     </footer>
