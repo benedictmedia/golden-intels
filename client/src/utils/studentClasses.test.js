@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { canonicalStudentClassName, displayStudentClassName, normalizeStudentClassName } from './studentClasses.js'
+import { canonicalStudentClassName, displayStudentClassName, isEarlyYearsStudentClass, normalizeStudentClassName } from './studentClasses.js'
 
 test('matches new and legacy Creche class names', () => {
   assert.equal(normalizeStudentClassName('CRECHE'), normalizeStudentClassName('Creche(Babies)'))
@@ -21,5 +21,14 @@ test('normalizes legacy KG and Reception names to the same class', () => {
   for (const alias of ['KG2', 'KG 2)', 'KG 2', 'Kindergarten 2', 'Reception 2']) {
     assert.equal(normalizeStudentClassName(alias), normalizeStudentClassName('KG 2'))
     assert.equal(canonicalStudentClassName(alias), 'KG 2')
+  }
+})
+
+test('identifies only the supported preschool classes for portfolios', () => {
+  for (const className of ['Pre-Nursery', 'Nursery 1', 'Nursery 2', 'KG 1', 'Reception 1(KG1)', 'Reception 1 (KG1)', 'KG2', 'Reception 2(KG2)']) {
+    assert.equal(isEarlyYearsStudentClass(className), true)
+  }
+  for (const className of ['Creche', 'Grade 1', 'Reception 3']) {
+    assert.equal(isEarlyYearsStudentClass(className), false)
   }
 })

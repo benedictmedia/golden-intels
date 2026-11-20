@@ -19,12 +19,14 @@ import useAcademicPeriods from '../../hooks/useAcademicPeriods'
 import { displayStudentClassName } from '../../utils/studentClasses'
 import usePortalSection from '../../hooks/usePortalSection'
 import { drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
+import EarlyYearsPortfolio from '../../components/EarlyYearsPortfolio'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard' },
   { icon: <Users size={20} />, label: 'My Children', id: 'children' },
   { icon: <ClipboardList size={20} />, label: 'Attendance', id: 'attendance' },
   { icon: <BookOpen size={20} />, label: 'Statements of results', id: 'grades' },
+  { icon: <FileText size={20} />, label: 'Learning Portfolio', id: 'portfolios' },
   { icon: <FileText size={20} />, label: 'Assessments', id: 'assessments' },
   { icon: <DollarSign size={20} />, label: 'Fee Status', id: 'fees' },
   { icon: <MessageSquare size={20} />, label: 'Messages', id: 'messages' },
@@ -1149,6 +1151,15 @@ const getParentDisplayName = (name) => {
                 </div>
               )}
             </div>
+          )}
+
+          {activeMenu === 'portfolios' && (
+            <EarlyYearsPortfolio
+              key={`${selectedAcademicYear}-${selectedTerm}`}
+              role="parent"
+              academicYear={selectedAcademicYear}
+              term={selectedTerm}
+            />
           )}
 
           {/* Assessments */}

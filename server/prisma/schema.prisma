@@ -146,6 +146,7 @@ model Student {
   attendance      AttendanceRecord[]
   manualExercises ManualExercise[]
   classworkSubmissions ClassworkSubmission[]
+  portfolios           PortfolioEntry[]
 
   @@map("Student")
 }
@@ -489,6 +490,28 @@ model ClassworkSubmission {
 
   @@unique([classworkItemId, studentId])
   @@index([studentId, submittedAt])
+}
+
+model PortfolioEntry {
+  id                Int      @id @default(autoincrement())
+  studentId         Int
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  gradeLevel        String
+  academicYear      String
+  term              String
+  portfolioData     Json
+  parentComment     String?
+  status            String   @default("pending")
+  submittedBy       String
+  submittedByEmail  String
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([studentId, academicYear, term])
+  @@index([status, academicYear, term])
+  @@index([submittedByEmail, status])
 }
 
 model ArchiveRecord {

@@ -12,6 +12,14 @@ test('administrator privileges reject unknown and dependent performance actions 
   assert.deepEqual(normalizeAdminPermissions(['finance', 'finance']), ['finance'])
 })
 
+test('portfolio permissions require portfolio preview access', () => {
+  assert.deepEqual(normalizeAdminPermissions(['portfolios:view', 'portfolios:approve']), [
+    'portfolios:view',
+    'portfolios:approve'
+  ])
+  assert.equal(normalizeAdminPermissions(['portfolios:edit']), null)
+})
+
 test('legacy administrators retain full access while new admins use assigned permissions', () => {
   assert.equal(hasAdminPermission({ user: { role: 'admin' }, adminPermissions: null }, 'finance'), true)
   assert.equal(hasAdminPermission({ user: { role: 'admin' }, adminPermissions: [] }, 'finance'), false)

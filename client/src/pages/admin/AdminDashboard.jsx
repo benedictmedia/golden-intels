@@ -23,6 +23,7 @@ import { countLearnersByGender } from '../../utils/learnerGenderCounts'
 import { downloadCsv, openAuditPrintWindow, writeAuditReport } from '../../utils/adminDataExports'
 import usePortalSection from '../../hooks/usePortalSection'
 import { countWords, drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
+import EarlyYearsPortfolio from '../../components/EarlyYearsPortfolio'
 
 const menuItems = [
   { icon: <LayoutDashboard size={20} />, label: 'Dashboard', id: 'dashboard', permission: 'dashboard' },
@@ -30,6 +31,7 @@ const menuItems = [
   { icon: <GraduationCap size={20} />, label: 'Admissions', id: 'admissions', permission: 'admissions' },
   { icon: <DollarSign size={20} />, label: 'Finance', id: 'finance', permission: 'finance' },
   { icon: <BarChart2 size={20} />, label: 'Performance Review', id: 'performance', permission: 'performance:view' },
+  { icon: <ClipboardList size={20} />, label: 'Early Years Portfolios', id: 'portfolios', permission: 'portfolios:view' },
   { icon: <Users size={20} />, label: 'Learners', id: 'learners', permission: 'learners' },
   { icon: <UserPlus size={20} />, label: 'Create Account', id: 'create-account', permission: 'accounts' },
   { icon: <Users size={20} />, label: 'Accounts', id: 'accounts', permission: 'accounts' },
@@ -55,6 +57,10 @@ const adminPermissionOptions = [
   { value: 'performance:signature', label: "View or upload the Headmaster's signature" },
   { value: 'performance:approve', label: 'Approve or change result status' },
   { value: 'performance:delete', label: 'Archive results' },
+  { value: 'portfolios:view', label: 'View early-years portfolios' },
+  { value: 'portfolios:edit', label: 'Edit early-years portfolio content' },
+  { value: 'portfolios:approve', label: 'Approve or return portfolios to teachers' },
+  { value: 'portfolios:delete', label: 'Delete early-years portfolios' },
   { value: 'learners', label: 'Learner records' },
   { value: 'accounts', label: 'Create accounts and manage parent/teacher accounts' },
   { value: 'admission-tokens', label: 'Admission tokens' },
@@ -1316,18 +1322,23 @@ const handleSaveAcademicContext = async () => {
   const toggleAdminPermission = (permission) => {
     setNewUser(previous => {
       const current = previous.adminPermissions || []
-      if (permission === 'performance:view' && current.includes(permission)) {
+      const permissionPrefix = permission.startsWith('performance:')
+        ? 'performance:'
+        : permission.startsWith('portfolios:')
+          ? 'portfolios:'
+          : ''
+      if (permission === `${permissionPrefix}view` && current.includes(permission)) {
         return {
           ...previous,
-          adminPermissions: current.filter(item => !item.startsWith('performance:'))
+          adminPermissions: current.filter(item => !item.startsWith(permissionPrefix))
         }
       }
 
       const selected = current.includes(permission)
         ? current.filter(item => item !== permission)
         : [...current, permission]
-      if (permission.startsWith('performance:') && permission !== 'performance:view' && !selected.includes('performance:view')) {
-        selected.push('performance:view')
+      if (permissionPrefix && permission !== `${permissionPrefix}view` && !selected.includes(`${permissionPrefix}view`)) {
+        selected.push(`${permissionPrefix}view`)
       }
       return { ...previous, adminPermissions: selected }
     })
@@ -3162,6 +3173,18 @@ const handleBulkPasswordReset = async () => {
                 </div>
               )}
             </div>
+          )}
+
+          {activeMenu === 'portfolios' && (
+            <EarlyYearsPortfolio
+              key={`${academicContext.academicYear}-${academicContext.term}`}
+              role="admin"
+              academicYear={academicContext.academicYear}
+              term={academicContext.term}
+              canEdit={canAccessAdminPermission('portfolios:edit')}
+              canApprove={canAccessAdminPermission('portfolios:approve')}
+              canDelete={canAccessAdminPermission('portfolios:delete')}
+            />
           )}
 
           {/* Learners */}

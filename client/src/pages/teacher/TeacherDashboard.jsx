@@ -15,7 +15,8 @@ import NotificationBell from '../../components/NotificationBell'
 import ChangePasswordModal from '../../components/ChangePasswordModal'
 import BrandLogo from '../../components/layout/BrandLogo'
 import useAcademicPeriods from '../../hooks/useAcademicPeriods'
-import { STUDENT_CLASSES, canonicalStudentClassName, displayStudentClassName, normalizeStudentClassName } from '../../utils/studentClasses'
+import { STUDENT_CLASSES, canonicalStudentClassName, displayStudentClassName, isEarlyYearsStudentClass, normalizeStudentClassName } from '../../utils/studentClasses'
+import EarlyYearsPortfolio from '../../components/EarlyYearsPortfolio'
 import usePortalSection from '../../hooks/usePortalSection'
 import { countWords, drawResultRemarksSection, limitRemarkWords } from '../../utils/resultRemarks'
 
@@ -112,6 +113,9 @@ export default function TeacherDashboard() {
   )
   const teacherClassOptions = Array.from(
     new Set([...assignedClassOptions, ...classTeacherClassOptions])
+  )
+  const earlyYearsTeacherClasses = Array.from(
+    new Set([...assignedClassOptions, ...classTeacherClassOptions].filter(isEarlyYearsStudentClass))
   )
   const classOptions = teacherClassOptions.length ? teacherClassOptions : classes
   const teacherSubjectOptions = effectiveUser?.subjects?.length
@@ -1811,12 +1815,34 @@ useEffect(() => {
                     {contextualSubmittedResults.length}
                   </span>
                 </button>
+                {earlyYearsTeacherClasses.length > 0 && (
+                  <button
+                    onClick={() => setActiveGradebookTab('portfolio')}
+                    className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${
+                      activeGradebookTab === 'portfolio' ? 'bg-[#2563eb] text-white' : 'bg-white text-[#2563eb] border border-[#2563eb]'
+                    }`}
+                  >
+                    Early Years Portfolio
+                  </button>
+                )}
               </div>
 
-              {gradebookSubmitted && (
+              {gradebookSubmitted && activeGradebookTab !== 'portfolio' && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-4 text-sm">
                   {editingResult ? 'Result updated successfully!' : 'Performance data submitted successfully for admin review!'}
                 </div>
+              )}
+
+              {activeGradebookTab === 'portfolio' && (
+                <EarlyYearsPortfolio
+                key={`${earlyYearsTeacherClasses.join('|')}-${selectedAcademicYear}-${selectedTerm}`}
+                  role="teacher"
+                  students={students}
+                  assignedClasses={earlyYearsTeacherClasses}
+                  academicYear={selectedAcademicYear}
+                  term={selectedTerm}
+                  userEmail={teacherEmail}
+                />
               )}
 
               {activeGradebookTab === 'submitted' && (

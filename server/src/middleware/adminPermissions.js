@@ -11,6 +11,10 @@ const ADMIN_PERMISSION_OPTIONS = [
   'performance:signature',
   'performance:approve',
   'performance:delete',
+  'portfolios:view',
+  'portfolios:edit',
+  'portfolios:approve',
+  'portfolios:delete',
   'learners',
   'accounts',
   'admission-tokens',
@@ -30,6 +34,10 @@ const normalizeAdminPermissions = (permissions) => {
   const normalized = [...new Set(permissions)]
   if (normalized.some(permission => permission.startsWith('performance:') && permission !== 'performance:view') &&
       !normalized.includes('performance:view')) {
+    return null
+  }
+  if (normalized.some(permission => permission.startsWith('portfolios:') && permission !== 'portfolios:view') &&
+      !normalized.includes('portfolios:view')) {
     return null
   }
   return normalized

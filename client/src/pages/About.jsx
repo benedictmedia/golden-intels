@@ -56,7 +56,7 @@ export default function About() {
               </p>
 
               <p>
-                At Golden-Intels, we are driven by a deep commitment to humanitarian assistance, providing quality education and compassionate care to unique, brilliant, and vulnerable children. We specialize in welcoming children who have been turned away by formal educational institutions. Our doors are open to the poor and needy, as well as those with unique needs, offering them a nurturing environment where they receive personalized training, academic instruction, and holistic support. Through dedicated care and innovative teaching approaches, we help transform challenges into opportunities for growth and success.
+                At Golden-Intels, we are driven by a deep commitment to humanitarian assistance, providing quality education and compassionate care to unique, brilliant children. We specialize in welcoming children who have been turned away by formal educational institutions. Our doors are open to the poor and needy, as well as those with unique needs, offering them a nurturing environment where they receive personalized training, academic instruction, and holistic support. Through dedicated care and innovative teaching approaches, we help transform challenges into opportunities for growth and success.
               </p>
             </div>
           </div>

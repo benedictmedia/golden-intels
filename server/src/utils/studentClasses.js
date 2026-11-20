@@ -26,12 +26,22 @@ const CLASS_ALIASES = new Map([
   ['kg 1', 'KG 1'],
   ['reception 1', 'KG 1'],
   ['reception1', 'KG 1'],
+  ['reception 1 (kg1', 'KG 1'],
+  ['reception 1 (kg 1', 'KG 1'],
+  ['reception 1(kg1', 'KG 1'],
+  ['reception 1(kg 1', 'KG 1'],
+  ['reception1(kg1', 'KG 1'],
   ['kindergarten 2', 'KG 2'],
   ['kindergarten2', 'KG 2'],
   ['kg2', 'KG 2'],
   ['kg 2', 'KG 2'],
   ['reception 2', 'KG 2'],
   ['reception2', 'KG 2'],
+  ['reception 2 (kg2', 'KG 2'],
+  ['reception 2 (kg 2', 'KG 2'],
+  ['reception 2(kg2', 'KG 2'],
+  ['reception 2(kg 2', 'KG 2'],
+  ['reception2(kg2', 'KG 2'],
 ])
 
 const normalizeStudentClassName = (value) => {

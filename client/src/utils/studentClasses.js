@@ -19,6 +19,14 @@ export const STUDENT_CLASSES = [
   'Grade 12',
 ]
 
+export const EARLY_YEARS_CLASSES = [
+  'Pre-Nursery',
+  'Nursery 1',
+  'Nursery 2',
+  'KG 1',
+  'KG 2',
+]
+
 const CLASS_ALIASES = new Map([
   ['kindergarten 1', 'KG 1'],
   ['kindergarten1', 'KG 1'],
@@ -26,12 +34,22 @@ const CLASS_ALIASES = new Map([
   ['kg 1', 'KG 1'],
   ['reception 1', 'KG 1'],
   ['reception1', 'KG 1'],
+  ['reception 1 (kg1', 'KG 1'],
+  ['reception 1 (kg 1', 'KG 1'],
+  ['reception 1(kg1', 'KG 1'],
+  ['reception 1(kg 1', 'KG 1'],
+  ['reception1(kg1', 'KG 1'],
   ['kindergarten 2', 'KG 2'],
   ['kindergarten2', 'KG 2'],
   ['kg2', 'KG 2'],
   ['kg 2', 'KG 2'],
   ['reception 2', 'KG 2'],
   ['reception2', 'KG 2'],
+  ['reception 2 (kg2', 'KG 2'],
+  ['reception 2 (kg 2', 'KG 2'],
+  ['reception 2(kg2', 'KG 2'],
+  ['reception 2(kg 2', 'KG 2'],
+  ['reception2(kg2', 'KG 2'],
 ])
 
 export const normalizeStudentClassName = (value) => {
@@ -53,3 +71,6 @@ export const canonicalStudentClassName = (value) => {
 }
 
 export const displayStudentClassName = canonicalStudentClassName
+export const isEarlyYearsStudentClass = (value) => EARLY_YEARS_CLASSES.some(
+  className => normalizeStudentClassName(className) === normalizeStudentClassName(value)
+)
