@@ -1,6 +1,8 @@
 const cloudinary = require('cloudinary').v2
 const CloudinaryStorage = require('multer-storage-cloudinary')
 const multer = require('multer')
+const fs = require('fs')
+const path = require('path')
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -83,4 +85,49 @@ const uploadStudentDocuments = multer({
   fileFilter: admissionsFileFilter
 })
 
-module.exports = { cloudinary, uploadStudentPhoto, uploadGallery, uploadNews, uploadStaff, uploadAdmissions, uploadStudentDocuments }
+const portfolioImageFilter = (req, file, cb) => {
+  const allowedExtensions = {
+    'image/jpeg': ['.jpg', '.jpeg'],
+    'image/png': ['.png'],
+    'image/webp': ['.webp']
+  }
+  const extensions = allowedExtensions[file.mimetype]
+  if (extensions?.includes(path.extname(file.originalname).toLowerCase())) return cb(null, true)
+  return cb(new Error('IMAGE_ONLY'))
+}
+
+const cloudinaryConfigured = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+)
+let portfolioEvidenceStorage
+if (cloudinaryConfigured) {
+  portfolioEvidenceStorage = createStorage('portfolio-evidence', { transform: false })
+} else if (process.env.NODE_ENV !== 'production') {
+  const portfolioUploadDir = path.join(__dirname, '../../uploads/portfolio-evidence')
+  fs.mkdirSync(portfolioUploadDir, { recursive: true })
+  portfolioEvidenceStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, portfolioUploadDir),
+    filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname).toLowerCase()}`)
+  })
+}
+
+const uploadPortfolioEvidence = portfolioEvidenceStorage
+  ? multer({
+    storage: portfolioEvidenceStorage,
+    limits: { fileSize: 8 * 1024 * 1024 },
+    fileFilter: portfolioImageFilter
+  })
+  : null
+
+module.exports = {
+  cloudinary,
+  uploadStudentPhoto,
+  uploadGallery,
+  uploadNews,
+  uploadStaff,
+  uploadAdmissions,
+  uploadStudentDocuments,
+  uploadPortfolioEvidence
+}

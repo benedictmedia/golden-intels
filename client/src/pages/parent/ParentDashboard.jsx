@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, ClipboardList, BookOpen,
   FileText, DollarSign, MessageSquare, LogOut, Menu, X, Bell, Send, Lock, FolderOpen
 } from 'lucide-react'
-import API_URL from '../../api/config'
+import API_URL, { MAIN_WEBSITE_URL } from '../../api/config'
 import { calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getSubjectScore, getSubjectTotal } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import ParentMessages from '../../components/messages/ParentMessages'
@@ -357,7 +357,7 @@ const getParentDisplayName = (name) => {
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    window.location.assign(MAIN_WEBSITE_URL)
   }
 
   const openFeePayment = (payment) => {

@@ -43,6 +43,59 @@ const prepareSchoolSchema = async () => {
 const source = new PrismaClient({ datasources: { db: { url: sourceUrl } } })
 const target = new PrismaClient({ datasources: { db: { url: targetSchoolUrl } } })
 const migrationKey = 'neon-to-supabase-prisma-v1'
+const portfolioMigrationKey = 'neon-to-supabase-portfolios-v1'
+
+const copyPortfolioEntries = async () => {
+  const portfolioDone = await target.$queryRawUnsafe(
+    'SELECT "migrationKey" FROM school."_NeonDataMigrationLog" WHERE "migrationKey" = $1',
+    portfolioMigrationKey
+  )
+  if (portfolioDone.length) return
+
+  const sourcePortfolioTable = await source.$queryRawUnsafe(
+    `SELECT to_regclass(format('%I.%I', current_schema(), 'PortfolioEntry'))::text AS name`
+  )
+  if (!sourcePortfolioTable[0]?.name) {
+    console.log('Neon has no PortfolioEntry table yet; no legacy portfolios to copy.')
+    return
+  }
+
+  let offset = 0
+  let copiedSourceCount = 0
+  while (true) {
+    const batch = await source.portfolioEntry.findMany({
+      skip: offset,
+      take: 200,
+      orderBy: { id: 'asc' }
+    })
+    if (!batch.length) break
+    await target.portfolioEntry.createMany({ data: batch, skipDuplicates: true })
+    const matched = await target.portfolioEntry.findMany({
+      where: { id: { in: batch.map(entry => entry.id) } },
+      select: { id: true }
+    })
+    if (matched.length !== batch.length) {
+      throw new Error('PortfolioEntry verification failed: some source portfolio IDs could not be copied.')
+    }
+    copiedSourceCount += batch.length
+    offset += batch.length
+    if (batch.length < 200) break
+  }
+
+  const sourceCount = await source.portfolioEntry.count()
+  const targetCount = await target.portfolioEntry.count()
+  if (sourceCount !== copiedSourceCount) {
+    throw new Error('PortfolioEntry verification failed: the source changed while its portfolios were being copied.')
+  }
+  await target.$queryRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('school."PortfolioEntry"', 'id'), COALESCE(MAX(id), 1), MAX(id) IS NOT NULL) FROM school."PortfolioEntry"`
+  )
+  await target.$executeRawUnsafe(
+    'INSERT INTO school."_NeonDataMigrationLog" ("migrationKey") VALUES ($1) ON CONFLICT ("migrationKey") DO NOTHING',
+    portfolioMigrationKey
+  )
+  console.log(`Verified PortfolioEntry: copied ${copiedSourceCount} source records; target has ${targetCount} records`)
+}
 
 // Copy parents before dependent records. All IDs and original timestamps are retained.
 const models = [
@@ -63,6 +116,7 @@ const models = [
   ['newsEvent', 'NewsEvent', true],
   ['notification', 'Notification', false],
   ['passwordResetToken', 'PasswordResetToken', true],
+  ['portfolioEntry', 'PortfolioEntry', true],
   ['result', 'Result', true],
   ['setting', 'Setting', true],
   ['staff', 'Staff', true],
@@ -89,7 +143,8 @@ const run = async () => {
     migrationKey
   )
   if (done.length) {
-    console.log('Neon-to-Supabase copy already completed; no records changed.')
+    await copyPortfolioEntries()
+    console.log('Core Neon-to-Supabase copy already completed.')
     return
   }
 
@@ -136,6 +191,7 @@ const run = async () => {
     'INSERT INTO school."_NeonDataMigrationLog" ("migrationKey") VALUES ($1) ON CONFLICT ("migrationKey") DO NOTHING',
     migrationKey
   )
+  await copyPortfolioEntries()
 
   console.log('Migration verification complete:', JSON.stringify(summary))
   console.log('All source tables match their Supabase counterparts.')

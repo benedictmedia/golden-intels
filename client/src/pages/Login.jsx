@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/layout/BrandLogo'
-import API_URL from '../api/config'
+import API_URL, { MAIN_WEBSITE_URL } from '../api/config'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -146,6 +146,9 @@ export default function Login() {
           {forgotMode ? 'Back to login' : 'Forgot password?'}
         </button>
 
+        <a href={MAIN_WEBSITE_URL} className="mt-5 block text-center text-sm font-semibold text-blue-700 hover:text-blue-900">
+          ← Main website
+        </a>
       </div>
     </div>
   )

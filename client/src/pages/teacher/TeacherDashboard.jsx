@@ -7,7 +7,7 @@ import {
   GraduationCap, LogOut, Menu, X, Bell, MonitorPlay, 
   User, Mail, Phone, Briefcase, ChevronRight, BookMarked, Award, Lock, CalendarDays
 } from 'lucide-react'
-import API_URL from '../../api/config'
+import API_URL, { MAIN_WEBSITE_URL } from '../../api/config'
 import { SUBJECTS, calculateGrandTotal, getCompletedSubjects, getNormalizedScores, getSubjectScore, getSubjectTotal, normalizeSubjectName, clampScoreInput, SCORE_FIELD_MAXIMUMS } from '../../utils/subjects'
 import { loadCircularLogoDataUrl } from '../../utils/pdfLogo'
 import TeacherClassroom from '../../components/classroom/TeacherClassroom'
@@ -322,7 +322,7 @@ export default function TeacherDashboard() {
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    window.location.assign(MAIN_WEBSITE_URL)
   }
 
   const handleDownloadPDF = async (result) => {

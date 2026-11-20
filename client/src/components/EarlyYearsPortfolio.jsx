@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { Download, FileText, Save, Trash2 } from 'lucide-react'
+import { Camera, Download, FileText, Save, Sparkles, Trash2 } from 'lucide-react'
 import API_URL from '../api/config'
 import { canonicalStudentClassName, displayStudentClassName, isEarlyYearsStudentClass, normalizeStudentClassName } from '../utils/studentClasses'
 
@@ -43,22 +43,47 @@ const ATTAINMENT_OPTIONS = [
   ['exceeding', 'Exceeding']
 ]
 
+const ENGAGEMENT_OPTIONS = [
+  ['', 'Choose engagement'],
+  ['enthusiastic', 'Enthusiastic'],
+  ['engaged', 'Engaged'],
+  ['developing-interest', 'Developing interest'],
+  ['needs-encouragement', 'Needs encouragement'],
+  ['not-observed', 'Not observed']
+]
+
+const EVIDENCE_TYPE_OPTIONS = [
+  ['', 'Choose evidence type'],
+  ['observation', 'Teacher observation'],
+  ['work-sample', 'Work sample'],
+  ['photograph', 'Photograph'],
+  ['conversation', 'Conversation'],
+  ['group-activity', 'Group activity'],
+  ['performance', 'Performance']
+]
+
 const emptyPortfolioData = () => ({
   childProfile: Object.fromEntries(CHILD_PROFILE_FIELDS.map(([key]) => [key, ''])),
   learningAreas: Object.fromEntries(LEARNING_AREAS.map(({ key }) => [key, {
     attainment: '',
+    engagement: '',
+    evidenceType: '',
+    observationDate: '',
     teacherComment: '',
     evidence: '',
-    nextSteps: ''
+    nextSteps: '',
+    evidenceImages: []
   }])),
   summary: Object.fromEntries(SUMMARY_FIELDS.map(([key]) => [key, '']))
 })
 
-const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem('token')}`
-})
+const getAuthHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` })
+
+const getRequestError = (error, fallback) => error.response?.data?.message ||
+  (!error.response ? `${fallback} Check your connection and try again.` : fallback)
 
 const getStudentName = (student) => `${student?.firstName || ''} ${student?.lastName || ''}`.trim() || 'Learner'
+const formatOptionLabel = value => value ? value.replace(/-/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase()) : 'Not recorded'
 
 const getPortfolioClassName = (gradeLevel) => {
   const normalized = normalizeStudentClassName(gradeLevel)
@@ -111,8 +136,11 @@ const downloadPortfolioPdf = async (portfolio) => {
     const entry = data.learningAreas?.[area.key] || {}
     addText(area.label, { bold: true, size: 12, color: [37, 99, 235], gap: 1 })
     addText(`Progress: ${entry.attainment ? entry.attainment[0].toUpperCase() + entry.attainment.slice(1) : 'Not recorded'}`)
+    addText(`Engagement: ${formatOptionLabel(entry.engagement)}  |  Evidence type: ${formatOptionLabel(entry.evidenceType)}`)
+    addText(`Observation date: ${entry.observationDate || 'Not recorded'}`)
     addText(`Teacher observation: ${entry.teacherComment || '—'}`)
     addText(`Evidence / learning journey: ${entry.evidence || '—'}`)
+    ;(entry.evidenceImages || []).forEach(image => addText(`Work photo: ${image.name} (${image.url})`, { size: 8 }))
     addText(`Next steps: ${entry.nextSteps || '—'}`, { gap: 6 })
   })
 
@@ -122,22 +150,43 @@ const downloadPortfolioPdf = async (portfolio) => {
   doc.save(`learning-portfolio-${String(student?.studentId || portfolio.studentId)}-${portfolio.term.toLowerCase().replace(/\s+/g, '-')}.pdf`)
 }
 
-function TextField({ label, value, onChange, rows = 2, disabled = false }) {
+function TextField({ label, value, onChange, rows = 2, disabled = false, onAssist, assisting = false, assistDisabled = false }) {
   return (
-    <label className="block text-sm font-semibold text-slate-700">
-      {label}
+    <div className="block text-sm font-semibold text-slate-700">
+      <span className="flex items-center justify-between gap-2">
+        <span>{label}</span>
+        {onAssist && (
+          <button type="button" onClick={onAssist} disabled={disabled || assistDisabled || assisting} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-violet-700 hover:bg-violet-50 disabled:opacity-50">
+            <Sparkles size={13} /> {assisting ? 'Drafting…' : 'AI draft'}
+          </button>
+        )}
+      </span>
       <textarea
         rows={rows}
         value={value || ''}
         onChange={event => onChange(event.target.value)}
+        aria-label={label}
         disabled={disabled}
         maxLength={4000}
         className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-normal text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50"
       />
-    </label>
+    </div>
   )
 }
 
+function EvidenceImages({ images = [] }) {
+  if (!images.length) return null
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {images.map((image, index) => (
+        <a key={`${image.url}-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+          <img src={image.url} alt={image.name || 'Learner work evidence'} loading="lazy" className="h-32 w-full object-cover transition group-hover:scale-105" />
+          <span className="block truncate px-2 py-1.5 text-xs text-slate-600">{image.name || 'Learner work'}</span>
+        </a>
+      ))}
+    </div>
+  )
+}
 export default function EarlyYearsPortfolio({
   role,
   students = [],
@@ -162,6 +211,7 @@ export default function EarlyYearsPortfolio({
   const [parentComment, setParentComment] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [aiBusyField, setAiBusyField] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
@@ -189,7 +239,7 @@ export default function EarlyYearsPortfolio({
       })
       .catch(requestError => {
         if (!active) return
-        setError(requestError.response?.data?.message || 'Unable to load portfolios.')
+        setError(getRequestError(requestError, 'Unable to load portfolios.'))
         setLoading(false)
       })
     return () => { active = false }
@@ -232,6 +282,68 @@ export default function EarlyYearsPortfolio({
     }))
   }
 
+  const requestAiDraft = async (section, areaKey, field) => {
+    const sourceNotes = section === 'learningArea'
+      ? Object.entries(form.learningAreas?.[areaKey] || {})
+        .filter(([key, value]) => ['teacherComment', 'evidence', 'nextSteps'].includes(key) && value)
+        .map(([, value]) => value)
+        .join('\n')
+      : Object.entries(form.summary || {})
+        .filter(([, value]) => value)
+        .map(([, value]) => value)
+        .join('\n')
+    if (sourceNotes.trim().length < 3) {
+      setError('Add brief, non-identifying classroom notes before asking AI to draft this field.')
+      return
+    }
+
+    const busyKey = `${section}:${areaKey || ''}:${field}`
+    setAiBusyField(busyKey)
+    setError('')
+    setMessage('')
+    try {
+      const response = await axios.post(`${API_URL}/api/portfolios/assist`, {
+        section,
+        areaKey,
+        field,
+        notes: sourceNotes,
+        attainment: areaKey ? form.learningAreas?.[areaKey]?.attainment : undefined,
+        gradeLevel: selectedPortfolio?.gradeLevel || selectedClass
+      }, { headers: getAuthHeaders() })
+      if (section === 'learningArea') updateLearningArea(areaKey, field, response.data.suggestion)
+      else updateFormField('summary', field, response.data.suggestion)
+      setMessage('AI draft added. Review it for accuracy and edit before saving.')
+    } catch (requestError) {
+      setError(getRequestError(requestError, 'AI writing help is unavailable.'))
+    } finally {
+      setAiBusyField('')
+    }
+  }
+
+  const uploadEvidence = async (areaKey, file) => {
+    if (!selectedPortfolio || !file) return
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const payload = new FormData()
+      payload.append('image', file)
+      const response = await axios.post(
+        `${API_URL}/api/portfolios/${selectedPortfolio.id}/evidence/${areaKey}`,
+        payload,
+        { headers: getAuthHeaders() }
+      )
+      const saved = response.data
+      setPortfolios(previous => previous.map(item => item.id === saved.id ? saved : item))
+      setForm({ ...emptyPortfolioData(), ...(saved.portfolioData || {}) })
+      setMessage('Learner work image added to the portfolio.')
+    } catch (requestError) {
+      setError(getRequestError(requestError, 'Could not upload the learner work image.'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const savePortfolio = async () => {
     if (role === 'teacher' && !selectedPortfolio && (!selectedStudent || !selectedYear || !selectedTerm)) {
       setError('Choose an assigned early-years class, learner, academic year, and term.')
@@ -259,7 +371,7 @@ export default function EarlyYearsPortfolio({
       setMessage('Portfolio submitted for administrator review.')
       setRefreshKey(value => value + 1)
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to save this portfolio.')
+      setError(getRequestError(requestError, 'Unable to save this portfolio.'))
     } finally {
       setSaving(false)
     }
@@ -275,7 +387,7 @@ export default function EarlyYearsPortfolio({
       setPortfolios(previous => previous.map(item => item.id === response.data.id ? response.data : item))
       setMessage(status === 'approved' ? 'Portfolio approved and released to the learner’s parent.' : 'Portfolio sent back to the teacher for changes.')
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to update portfolio status.')
+      setError(getRequestError(requestError, 'Unable to update portfolio status.'))
     } finally {
       setSaving(false)
     }
@@ -291,7 +403,7 @@ export default function EarlyYearsPortfolio({
       setSelectedPortfolioId(null)
       setMessage('Portfolio deleted.')
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to delete this portfolio.')
+      setError(getRequestError(requestError, 'Unable to delete this portfolio.'))
     } finally {
       setSaving(false)
     }
@@ -311,7 +423,7 @@ export default function EarlyYearsPortfolio({
       setPortfolios(previous => previous.map(item => item.id === response.data.id ? { ...item, parentComment: response.data.parentComment } : item))
       setMessage('Your reflection has been saved.')
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Unable to save your reflection.')
+      setError(getRequestError(requestError, 'Unable to save your reflection.'))
     } finally {
       setSaving(false)
     }
@@ -329,6 +441,7 @@ export default function EarlyYearsPortfolio({
           <p className="mt-1 max-w-3xl text-sm text-slate-600">
             Early-years progress portfolio for Pre-Nursery, Nursery 1–2, and Reception 1–2. Includes child voice, learning-area observations, evidence, term reflections, and next-step targets.
           </p>
+          {role === 'teacher' && <p className="mt-2 max-w-3xl text-xs text-slate-500">AI drafts use only the notes you enter here. Do not include a learner’s name or other identifying details; check all suggestions before saving.</p>}
         </div>
         {role === 'teacher' && earlyYearsClasses.length > 0 && (
           <button type="button" onClick={startNewPortfolio} className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
@@ -493,14 +606,76 @@ export default function EarlyYearsPortfolio({
                           </select>
                         </label>
                       </div>
+                      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+                        <label className="text-xs font-bold text-slate-600">
+                          Engagement
+                          <select
+                            value={entry.engagement || ''}
+                            disabled={!editingEnabled}
+                            onChange={event => updateLearningArea(area.key, 'engagement', event.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
+                          >
+                            {ENGAGEMENT_OPTIONS.map(([value, label]) => <option key={value || 'none'} value={value}>{label}</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs font-bold text-slate-600">
+                          Main evidence type
+                          <select
+                            value={entry.evidenceType || ''}
+                            disabled={!editingEnabled}
+                            onChange={event => updateLearningArea(area.key, 'evidenceType', event.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
+                          >
+                            {EVIDENCE_TYPE_OPTIONS.map(([value, label]) => <option key={value || 'none'} value={value}>{label}</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs font-bold text-slate-600">
+                          Observation date
+                          <input
+                            type="date"
+                            value={entry.observationDate || ''}
+                            disabled={!editingEnabled}
+                            onChange={event => updateLearningArea(area.key, 'observationDate', event.target.value)}
+                            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
+                          />
+                        </label>
+                      </div>
                       <div className="grid gap-4 md:grid-cols-2">
                         <TextField label="Teacher observation and milestone" value={entry.teacherComment} disabled={!editingEnabled}
-                          onChange={value => updateLearningArea(area.key, 'teacherComment', value)} />
+                          onChange={value => updateLearningArea(area.key, 'teacherComment', value)}
+                          onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'teacherComment') : undefined}
+                          assisting={aiBusyField === `learningArea:${area.key}:teacherComment`}
+                          assistDisabled={Boolean(aiBusyField)} />
                         <TextField label="Evidence / learning journey" value={entry.evidence} disabled={!editingEnabled}
-                          onChange={value => updateLearningArea(area.key, 'evidence', value)} />
+                          onChange={value => updateLearningArea(area.key, 'evidence', value)}
+                          onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'evidence') : undefined}
+                          assisting={aiBusyField === `learningArea:${area.key}:evidence`}
+                          assistDisabled={Boolean(aiBusyField)} />
                         <TextField label="Next steps" value={entry.nextSteps} disabled={!editingEnabled} rows={2}
-                          onChange={value => updateLearningArea(area.key, 'nextSteps', value)} />
+                          onChange={value => updateLearningArea(area.key, 'nextSteps', value)}
+                          onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'nextSteps') : undefined}
+                          assisting={aiBusyField === `learningArea:${area.key}:nextSteps`}
+                          assistDisabled={Boolean(aiBusyField)} />
                       </div>
+                      <EvidenceImages images={entry.evidenceImages} />
+                      {role === 'teacher' && editingEnabled && selectedPortfolio && (
+                        <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-bold text-blue-700 hover:bg-blue-100">
+                          <Camera size={16} /> {saving ? 'Uploading…' : 'Add work photo'}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={saving || (entry.evidenceImages || []).length >= 10}
+                            className="sr-only"
+                            onChange={event => {
+                              uploadEvidence(area.key, event.target.files?.[0])
+                              event.target.value = ''
+                            }}
+                          />
+                        </label>
+                      )}
+                      {role === 'teacher' && editingEnabled && !selectedPortfolio && (
+                        <p className="mt-3 text-xs text-slate-500">Submit the portfolio first to attach work photos. You can upload up to 10 JPEG, PNG, or WEBP images per learning area (8 MB each).</p>
+                      )}
                     </article>
                   )
                 })}
@@ -511,7 +686,10 @@ export default function EarlyYearsPortfolio({
                 <div className="grid gap-4 sm:grid-cols-2">
                   {SUMMARY_FIELDS.map(([key, label]) => (
                     <TextField key={key} label={label} value={form.summary?.[key]} disabled={!editingEnabled}
-                      onChange={value => updateFormField('summary', key, value)} />
+                      onChange={value => updateFormField('summary', key, value)}
+                      onAssist={role === 'teacher' ? () => requestAiDraft('summary', null, key) : undefined}
+                      assisting={aiBusyField === `summary::${key}`}
+                      assistDisabled={Boolean(aiBusyField)} />
                   ))}
                 </div>
               </section>
@@ -576,10 +754,14 @@ export default function EarlyYearsPortfolio({
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold capitalize text-blue-700">{entry.attainment || 'Progress not recorded'}</span>
                       </div>
                       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div><dt className="text-xs font-semibold text-slate-500">Engagement</dt><dd className="mt-1 text-sm text-slate-700">{formatOptionLabel(entry.engagement)}</dd></div>
+                        <div><dt className="text-xs font-semibold text-slate-500">Main evidence type</dt><dd className="mt-1 text-sm text-slate-700">{formatOptionLabel(entry.evidenceType)}</dd></div>
+                        <div><dt className="text-xs font-semibold text-slate-500">Observation date</dt><dd className="mt-1 text-sm text-slate-700">{entry.observationDate || 'Not recorded'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Teacher observation</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.teacherComment || '—'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Evidence / learning journey</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.evidence || '—'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Next steps</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.nextSteps || '—'}</dd></div>
                       </dl>
+                      <EvidenceImages images={entry.evidenceImages} />
                     </article>
                   )
                 })}

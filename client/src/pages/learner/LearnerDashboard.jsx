@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import API_URL from '../../api/config'
+import API_URL, { MAIN_WEBSITE_URL } from '../../api/config'
 import {
   User, BookOpen, ClipboardList, LayoutDashboard,
   LogOut, GraduationCap, Calendar, Mail, Hash,
@@ -36,7 +35,6 @@ const buildSubjectFolders = (items) => Object.values(items.reduce((folders, item
 
 export default function LearnerDashboard() {
   const { user, logout } = useAuth()
-  const navigate = useNavigate()
   const { academicYears, terms, selectedAcademicYear, setSelectedAcademicYear, selectedTerm, setSelectedTerm } = useAcademicPeriods()
   const [activeTab, setActiveTab] = usePortalSection('profile', LEARNER_TAB_IDS)
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768)
@@ -260,7 +258,7 @@ export default function LearnerDashboard() {
     }
   }
 
-  const handleLogout = () => { logout(); navigate('/') }
+  const handleLogout = () => { logout(); window.location.assign(MAIN_WEBSITE_URL) }
 
   const handleNotificationClick = (notification) => {
     const routes = {

@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
       <article className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
         <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-700">Golden-Intels International School</p>
         <h1 className="mb-2 text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
-        <p className="mb-8 text-sm text-slate-500">Effective date: 11 November 2026</p>
+        <p className="mb-8 text-sm text-slate-500">Effective date: 20 November 2026</p>
         <p className="mb-8 leading-7 text-slate-600">Golden-Intels International School ("Golden-Intels", "we", "us" or "our") respects the privacy of learners, parents and guardians, staff, applicants and visitors. This policy explains how information is collected, used, stored and shared when you visit our website or use our school portal.</p>
         <Section title="1. Information we collect">
           <p>Depending on how you interact with the school, we may process:</p>
@@ -36,6 +36,7 @@ export default function PrivacyPolicy() {
         </Section>
         <Section title="4. Service providers and sharing">
           <p>We do not sell personal information. We may use service providers that support the operation of the website and school portal, including hosting and deployment providers, database and file-storage providers, and email delivery services. These providers process information only as needed to provide their services to us and subject to their applicable terms and safeguards.</p>
+          <p>When a teacher chooses AI writing help in an early-years portfolio, the teacher's entered notes, class level, selected progress level, learning area and requested field are sent to OpenAI to produce a draft. The portal does not send the learner's name, date of birth, learner ID, or portfolio photos to that AI service. Teachers should not include identifying details in notes, must review every suggestion, and remain responsible for the final portfolio. AI suggestions are optional and are not an assessment or decision about a learner.</p>
           <p>We may also disclose information where required by law, to protect learners or other individuals, to protect the school's rights and systems, or with the appropriate parent, guardian or individual's authorisation. We do not permit service providers to use school personal information for their own advertising.</p>
         </Section>
         <Section title="5. Storage and security">

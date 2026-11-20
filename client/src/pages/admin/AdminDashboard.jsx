@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import API_URL from '../../api/config'
+import API_URL, { MAIN_WEBSITE_URL } from '../../api/config'
 import {
   LayoutDashboard, Users, GraduationCap, DollarSign,
   BarChart2, UserPlus, LogOut, Menu, X, Bell, Eye, Trash2, 
@@ -744,7 +744,7 @@ export default function AdminDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMenu, accountTab, accountPage, accountLimit, accountSearch])
 
-  const handleLogout = () => { logout(); navigate('/') }
+  const handleLogout = () => { logout(); window.location.assign(MAIN_WEBSITE_URL) }
 
   // Class progression order for auto-promotion
   const CLASS_PROGRESSION = STUDENT_CLASSES

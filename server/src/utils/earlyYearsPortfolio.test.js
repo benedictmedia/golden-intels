@@ -2,6 +2,8 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const {
   PORTFOLIO_AREAS,
+  PORTFOLIO_EVIDENCE_TYPES,
+  PORTFOLIO_ENGAGEMENT_OPTIONS,
   hasPortfolioProgress,
   isEarlyYearsClass,
   normalizePortfolioData
@@ -26,10 +28,46 @@ test('normalizes portfolio content to the supported learner, area, and summary f
   assert.equal(result.childProfile.preferredName, 'Ama')
   assert.equal(result.learningAreas.communication.attainment, 'secure')
   assert.equal(result.learningAreas.communication.evidence, 'Explains her ideas.')
+  assert.equal(result.learningAreas.communication.engagement, '')
+  assert.deepEqual(result.learningAreas.communication.evidenceImages, [])
   assert.equal(result.learningAreas.phonics.attainment, '')
   assert.equal(result.summary.nextTermTargets, 'Practice counting.')
   assert.equal(Object.keys(result.learningAreas).length, PORTFOLIO_AREAS.length)
   assert.equal('unexpected' in result, false)
+})
+
+test('preserves selectable observations and approved image evidence', () => {
+  const result = normalizePortfolioData({
+    learningAreas: {
+      literacy: {
+        engagement: 'engaged',
+        evidenceType: 'work-sample',
+        observationDate: '2026-11-20',
+        evidenceImages: [{ url: 'https://res.cloudinary.com/school/image/upload/work.png', name: 'Letter tracing' }]
+      }
+    }
+  })
+
+  assert.equal(result.learningAreas.literacy.engagement, 'engaged')
+  assert.equal(result.learningAreas.literacy.evidenceType, 'work-sample')
+  assert.equal(result.learningAreas.literacy.observationDate, '2026-11-20')
+  assert.deepEqual(result.learningAreas.literacy.evidenceImages, [
+    { url: 'https://res.cloudinary.com/school/image/upload/work.png', name: 'Letter tracing' }
+  ])
+  assert.throws(() => normalizePortfolioData({
+    learningAreas: { literacy: { engagement: 'always' } }
+  }), /valid Literacy engagement/)
+  assert.throws(() => normalizePortfolioData({
+    learningAreas: { literacy: { evidenceType: 'video' } }
+  }), /valid Literacy evidence type/)
+  assert.throws(() => normalizePortfolioData({
+    learningAreas: { literacy: { observationDate: '2026-02-30' } }
+  }), /valid date/)
+  assert.throws(() => normalizePortfolioData({
+    learningAreas: { literacy: { evidenceImages: [{ url: 'https://untrusted.example/work.png', name: 'Work' }] } }
+  }), /approved image storage URL/)
+  assert.ok(PORTFOLIO_ENGAGEMENT_OPTIONS.includes('engaged'))
+  assert.ok(PORTFOLIO_EVIDENCE_TYPES.includes('work-sample'))
 })
 
 test('rejects invalid attainment values and oversized text', () => {
