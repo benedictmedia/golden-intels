@@ -1,18 +1,36 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios'
 import { Camera, Download, FileText, Save, Sparkles, Trash2 } from 'lucide-react'
 import API_URL from '../api/config'
 import { canonicalStudentClassName, displayStudentClassName, isEarlyYearsStudentClass, normalizeStudentClassName } from '../utils/studentClasses'
 
 const LEARNING_AREAS = [
-  { key: 'communication', label: 'Communication & Language' },
-  { key: 'personalSocialEmotional', label: 'Personal, Social & Emotional Development' },
-  { key: 'physical', label: 'Physical Development' },
-  { key: 'literacy', label: 'Literacy' },
-  { key: 'mathematics', label: 'Mathematics' },
-  { key: 'understandingWorld', label: 'Understanding the World' },
-  { key: 'expressiveArts', label: 'Expressive Arts & Design' },
-  { key: 'phonics', label: "Floppy's Phonics" }
+  { key: 'communication', label: 'Communication & Language', tone: 'sky' },
+  { key: 'personalSocialEmotional', label: 'Personal, Social & Emotional Development', tone: 'rose' },
+  { key: 'physical', label: 'Physical Development', tone: 'emerald' },
+  { key: 'literacy', label: 'Literacy', tone: 'indigo' },
+  { key: 'mathematics', label: 'Mathematics', tone: 'amber' },
+  { key: 'understandingWorld', label: 'Understanding the World', tone: 'violet' },
+  { key: 'expressiveArts', label: 'Expressive Arts & Design', tone: 'fuchsia' },
+  { key: 'phonics', label: "Floppy's Phonics", tone: 'cyan' }
+]
+
+const AREA_TONE_CLASSES = {
+  sky: 'border-l-sky-400 bg-gradient-to-br from-sky-50/80 to-white',
+  rose: 'border-l-rose-400 bg-gradient-to-br from-rose-50/80 to-white',
+  emerald: 'border-l-emerald-400 bg-gradient-to-br from-emerald-50/80 to-white',
+  indigo: 'border-l-indigo-400 bg-gradient-to-br from-indigo-50/80 to-white',
+  amber: 'border-l-amber-400 bg-gradient-to-br from-amber-50/80 to-white',
+  violet: 'border-l-violet-400 bg-gradient-to-br from-violet-50/80 to-white',
+  fuchsia: 'border-l-fuchsia-400 bg-gradient-to-br from-fuchsia-50/80 to-white',
+  cyan: 'border-l-cyan-400 bg-gradient-to-br from-cyan-50/80 to-white'
+}
+
+const AI_AREA_FIELDS = ['teacherComment', 'evidence', 'strengths', 'supportStrategies', 'nextSteps']
+
+const AREA_PDF_COLORS = [
+  [14, 116, 144], [190, 24, 93], [4, 120, 87], [67, 56, 202],
+  [180, 83, 9], [109, 40, 217], [162, 28, 175], [14, 116, 144]
 ]
 
 const CHILD_PROFILE_FIELDS = [
@@ -71,6 +89,8 @@ const emptyPortfolioData = () => ({
     observationDate: '',
     teacherComment: '',
     evidence: '',
+    strengths: '',
+    supportStrategies: '',
     nextSteps: '',
     evidenceImages: []
   }])),
@@ -113,8 +133,10 @@ const downloadPortfolioPdf = async (portfolio) => {
     y += lines.length * 5.5 + (options.gap ?? 3)
   }
 
-  doc.setFillColor(37, 99, 235)
+  doc.setFillColor(136, 34, 48)
   doc.rect(0, 0, pageWidth, 34, 'F')
+  doc.setFillColor(251, 191, 36)
+  doc.rect(0, 31, pageWidth, 3, 'F')
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(18)
   doc.setTextColor(255, 255, 255)
@@ -124,27 +146,29 @@ const downloadPortfolioPdf = async (portfolio) => {
   doc.text('Golden-Intels International School - Early Years Learner Portfolio', 14, 24)
   y = 43
 
-  addText(getStudentName(student), { bold: true, size: 15, color: [37, 99, 235] })
+  addText(getStudentName(student), { bold: true, size: 15, color: [136, 34, 48] })
   addText(`Learner ID: ${student?.studentId || '—'}  |  Date of birth: ${student?.dateOfBirth || '—'}`)
   addText(`Class: ${getPortfolioClassName(portfolio.gradeLevel)}  |  Academic year: ${portfolio.academicYear}  |  ${portfolio.term}`, { size: 10 })
   addText(`Submitted by: ${portfolio.submittedBy || 'Teacher'}  |  Status: ${portfolio.status}`, { size: 9, color: [100, 116, 139], gap: 7 })
 
-  addText('All About Me', { bold: true, size: 13, color: [37, 99, 235] })
+  addText('All About Me', { bold: true, size: 13, color: [136, 34, 48] })
   CHILD_PROFILE_FIELDS.forEach(([key, label]) => addText(`${label}: ${data.childProfile?.[key] || '—'}`))
 
-  LEARNING_AREAS.forEach(area => {
+  LEARNING_AREAS.forEach((area, index) => {
     const entry = data.learningAreas?.[area.key] || {}
-    addText(area.label, { bold: true, size: 12, color: [37, 99, 235], gap: 1 })
+    addText(area.label, { bold: true, size: 12, color: AREA_PDF_COLORS[index], gap: 1 })
     addText(`Progress: ${entry.attainment ? entry.attainment[0].toUpperCase() + entry.attainment.slice(1) : 'Not recorded'}`)
     addText(`Engagement: ${formatOptionLabel(entry.engagement)}  |  Evidence type: ${formatOptionLabel(entry.evidenceType)}`)
     addText(`Observation date: ${entry.observationDate || 'Not recorded'}`)
     addText(`Teacher observation: ${entry.teacherComment || '—'}`)
     addText(`Evidence / learning journey: ${entry.evidence || '—'}`)
+    addText(`Strengths and interests: ${entry.strengths || '—'}`)
+    addText(`Support strategies used: ${entry.supportStrategies || '—'}`)
     ;(entry.evidenceImages || []).forEach(image => addText(`Work photo: ${image.name} (${image.url})`, { size: 8 }))
     addText(`Next steps: ${entry.nextSteps || '—'}`, { gap: 6 })
   })
 
-  addText('End of Term', { bold: true, size: 13, color: [37, 99, 235] })
+  addText('End of Term', { bold: true, size: 13, color: [136, 34, 48] })
   SUMMARY_FIELDS.forEach(([key, label]) => addText(`${label}: ${data.summary?.[key] || '—'}`))
   addText(`Parent / carer reflection: ${portfolio.parentComment || '—'}`)
   doc.save(`learning-portfolio-${String(student?.studentId || portfolio.studentId)}-${portfolio.term.toLowerCase().replace(/\s+/g, '-')}.pdf`)
@@ -215,10 +239,14 @@ export default function EarlyYearsPortfolio({
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
+  const portfolioContextRef = useRef('')
 
   const selectedPortfolio = portfolios.find(portfolio => portfolio.id === selectedPortfolioId) || null
   const classStudents = students.filter(student => normalizeStudentClassName(student.gradeLevel) === normalizeStudentClassName(selectedClass))
   const resolvedSelectedStudentId = selectedStudentId || String(classStudents[0]?.id || '')
+  const portfolioContextKey = selectedPortfolioId
+    ? `portfolio:${selectedPortfolioId}`
+    : `draft:${resolvedSelectedStudentId}:${selectedYear}:${selectedTerm}`
   const selectedStudent = classStudents.find(student => String(student.id) === resolvedSelectedStudentId)
   const existingForSelection = portfolios.find(portfolio => (
     String(portfolio.studentId) === resolvedSelectedStudentId &&
@@ -228,6 +256,10 @@ export default function EarlyYearsPortfolio({
   const editingEnabled = role === 'teacher'
     ? !selectedPortfolio || (selectedPortfolio.status !== 'approved' && selectedPortfolio.submittedByEmail === userEmail)
     : role === 'admin' && canEdit && Boolean(selectedPortfolio)
+
+  useEffect(() => {
+    portfolioContextRef.current = portfolioContextKey
+  }, [portfolioContextKey])
 
   useEffect(() => {
     let active = true
@@ -283,9 +315,10 @@ export default function EarlyYearsPortfolio({
   }
 
   const requestAiDraft = async (section, areaKey, field) => {
+    const requestContext = portfolioContextRef.current
     const sourceNotes = section === 'learningArea'
       ? Object.entries(form.learningAreas?.[areaKey] || {})
-        .filter(([key, value]) => ['teacherComment', 'evidence', 'nextSteps'].includes(key) && value)
+        .filter(([key, value]) => AI_AREA_FIELDS.includes(key) && value)
         .map(([, value]) => value)
         .join('\n')
       : Object.entries(form.summary || {})
@@ -310,9 +343,75 @@ export default function EarlyYearsPortfolio({
         attainment: areaKey ? form.learningAreas?.[areaKey]?.attainment : undefined,
         gradeLevel: selectedPortfolio?.gradeLevel || selectedClass
       }, { headers: getAuthHeaders() })
+      if (portfolioContextRef.current !== requestContext) return
       if (section === 'learningArea') updateLearningArea(areaKey, field, response.data.suggestion)
       else updateFormField('summary', field, response.data.suggestion)
       setMessage('AI draft added. Review it for accuracy and edit before saving.')
+    } catch (requestError) {
+      setError(getRequestError(requestError, 'AI writing help is unavailable.'))
+    } finally {
+      setAiBusyField('')
+    }
+  }
+
+  const requestMissingFieldDrafts = async () => {
+    const requestContext = portfolioContextRef.current
+    const aiPortfolioData = {
+      learningAreas: Object.fromEntries(LEARNING_AREAS.map(({ key }) => {
+        const entry = form.learningAreas?.[key] || {}
+        return [key, {
+          attainment: entry.attainment,
+          engagement: entry.engagement,
+          evidenceType: entry.evidenceType,
+          ...Object.fromEntries(AI_AREA_FIELDS.map(field => [field, entry[field] || '']))
+        }]
+      })),
+      summary: form.summary
+    }
+    const areaNotesLength = Object.values(aiPortfolioData.learningAreas).reduce((total, entry) => (
+      total + AI_AREA_FIELDS.filter(field => entry[field])
+        .map(field => `${field}: ${entry[field]}`)
+        .join('\n').length
+    ), 0)
+    const summaryNotesLength = Object.entries(aiPortfolioData.summary).filter(([, value]) => value)
+      .map(([field, value]) => `${field}: ${value}`)
+      .join('\n').length
+    if (areaNotesLength + summaryNotesLength > 12000) {
+      setError('Shorten the portfolio notes to 12,000 characters or fewer before drafting.')
+      return
+    }
+    setAiBusyField('complete')
+    setError('')
+    setMessage('')
+    try {
+      const response = await axios.post(`${API_URL}/api/portfolios/assist/complete`, {
+        portfolioData: aiPortfolioData,
+        gradeLevel: selectedPortfolio?.gradeLevel || selectedClass
+      }, { headers: getAuthHeaders() })
+      if (portfolioContextRef.current !== requestContext) return
+
+      const suggestions = response.data.suggestions || []
+      setForm(previous => {
+        let next = previous
+        suggestions.forEach(({ section, areaKey, field, suggestion }) => {
+          if (section === 'learningArea') {
+            const entry = next.learningAreas?.[areaKey]
+            if (!entry || entry[field]?.trim()) return
+            next = {
+              ...next,
+              learningAreas: {
+                ...next.learningAreas,
+                [areaKey]: { ...entry, [field]: suggestion }
+              }
+            }
+          } else if (section === 'summary' && !next.summary?.[field]?.trim()) {
+            next = { ...next, summary: { ...next.summary, [field]: suggestion } }
+          }
+        })
+        return next
+      })
+      const remaining = response.data.remainingCount
+      setMessage(`AI drafted ${response.data.draftedCount} missing field${response.data.draftedCount === 1 ? '' : 's'}${remaining ? `; ${remaining} need more evidence` : ''}. Review and edit every draft before saving.`)
     } catch (requestError) {
       setError(getRequestError(requestError, 'AI writing help is unavailable.'))
     } finally {
@@ -435,19 +534,28 @@ export default function EarlyYearsPortfolio({
 
   return (
     <section className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-blue-700">My Learning Journey</h2>
-          <p className="mt-1 max-w-3xl text-sm text-slate-600">
-            Early-years progress portfolio for Pre-Nursery, Nursery 1–2, and Reception 1–2. Includes child voice, learning-area observations, evidence, term reflections, and next-step targets.
-          </p>
-          {role === 'teacher' && <p className="mt-2 max-w-3xl text-xs text-slate-500">AI drafts use only the notes you enter here. Do not include a learner’s name or other identifying details; check all suggestions before saving.</p>}
+      <div className="relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-rose-950 via-rose-800 to-amber-500 p-6 text-white shadow-xl sm:p-8">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 h-64 w-64 rounded-full border-[34px] border-amber-300/25" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 -left-12 h-56 w-56 rounded-full bg-sky-300/20" />
+        <div className="relative flex flex-wrap items-end justify-between gap-5">
+          <div className="max-w-3xl">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-amber-200">Golden-Intels International School · Early Years</p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">My Learning Journey</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-rose-50 sm:text-base">
+              A child-centred record of strengths, meaningful observations, learning evidence and the next steps we take together.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
+              <span className="rounded-full bg-white/15 px-3 py-1.5">8 areas of learning</span>
+              <span className="rounded-full bg-white/15 px-3 py-1.5">Child voice & family partnership</span>
+              <span className="rounded-full bg-white/15 px-3 py-1.5">Evidence-led progress</span>
+            </div>
+          </div>
+          {role === 'teacher' && earlyYearsClasses.length > 0 && (
+            <button type="button" onClick={startNewPortfolio} className="rounded-xl bg-amber-300 px-4 py-3 text-sm font-extrabold text-rose-950 shadow-md transition hover:bg-amber-200">
+              Start a portfolio
+            </button>
+          )}
         </div>
-        {role === 'teacher' && earlyYearsClasses.length > 0 && (
-          <button type="button" onClick={startNewPortfolio} className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
-            Start a portfolio
-          </button>
-        )}
       </div>
 
       {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
@@ -493,7 +601,7 @@ export default function EarlyYearsPortfolio({
           ))}
         </aside>
 
-        <div className="min-w-0 space-y-5">
+        <div key={selectedPortfolioId || 'portfolio-draft'} className="portfolio-page-turn min-w-0 space-y-5">
           {role === 'teacher' && earlyYearsClasses.length > 0 && !selectedPortfolio && (
             <div className="grid gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:grid-cols-2">
               <label className="text-sm font-bold text-slate-700">
@@ -548,18 +656,18 @@ export default function EarlyYearsPortfolio({
           )}
 
           {selectedPortfolio && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-blue-700 p-5 text-white">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-rose-900 via-rose-800 to-amber-600 p-5 text-white shadow-md">
               <div>
                 <h3 className="text-lg font-bold">{getStudentName(selectedPortfolio.student)}</h3>
-                <p className="mt-1 text-sm text-blue-100">
+                <p className="mt-1 text-sm text-rose-100">
                   {getPortfolioClassName(selectedPortfolio.gradeLevel)} · {selectedPortfolio.academicYear} · {selectedPortfolio.term}
                 </p>
-                <p className="mt-1 text-xs text-blue-100">
+                <p className="mt-1 text-xs text-rose-100">
                   Learner ID: {selectedPortfolio.student?.studentId || '—'} · Date of birth: {selectedPortfolio.student?.dateOfBirth || '—'}
                 </p>
-                {role !== 'parent' && <p className="mt-1 text-xs text-blue-100">Submitted by {selectedPortfolio.submittedBy || 'Teacher'}</p>}
+                {role !== 'parent' && <p className="mt-1 text-xs text-rose-100">Submitted by {selectedPortfolio.submittedBy || 'Teacher'}</p>}
               </div>
-              <button type="button" onClick={() => downloadPortfolioPdf(selectedPortfolio)} className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-bold text-blue-700">
+              <button type="button" onClick={() => downloadPortfolioPdf(selectedPortfolio)} className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-bold text-rose-900">
                 <Download size={16} /> Download portfolio
               </button>
             </div>
@@ -572,11 +680,11 @@ export default function EarlyYearsPortfolio({
           {(role === 'teacher' || (role === 'admin' && selectedPortfolio)) && (
             <div className="space-y-5">
               {CHILD_PROFILE_FIELDS.length > 0 && (
-                <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <section className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 to-white p-5 shadow-sm">
                   <h3 className="mb-4 text-lg font-bold text-blue-700">All About Me</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {CHILD_PROFILE_FIELDS.map(([key, label]) => (
-                      <TextField key={key} label={label} value={form.childProfile?.[key]} disabled={!editingEnabled} rows={1}
+                      <TextField key={key} label={label} value={form.childProfile?.[key]} disabled={!editingEnabled || Boolean(aiBusyField)} rows={1}
                         onChange={value => updateFormField('childProfile', key, value)} />
                     ))}
                   </div>
@@ -584,21 +692,41 @@ export default function EarlyYearsPortfolio({
               )}
 
               <section className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-bold text-blue-700">Areas of Learning</h3>
-                  <p className="text-sm text-slate-500">Record progress, specific examples, teacher observations, and next steps for each area.</p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-blue-700">Areas of Learning</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-slate-500">Capture what the learner did or said, the evidence and context, their strengths, support offered and a practical next step.</p>
+                  </div>
+                  {role === 'teacher' && editingEnabled && (
+                    <button
+                      type="button"
+                      onClick={requestMissingFieldDrafts}
+                      disabled={saving || Boolean(aiBusyField)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-violet-800 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      <Sparkles size={16} /> {aiBusyField === 'complete' ? 'Drafting missing fields…' : 'AI draft missing fields'}
+                    </button>
+                  )}
                 </div>
-                {LEARNING_AREAS.map(area => {
+                {role === 'teacher' && editingEnabled && (
+                  <p className="rounded-xl border border-violet-100 bg-violet-50 px-4 py-3 text-xs leading-5 text-violet-900">
+                    Add a progress level and brief, factual observation in one or more areas, then use AI draft missing fields. It can suggest related narratives and a term summary when evidence covers multiple areas; personal details and progress ratings are never drafted. Do not include names or identifying details, and review every suggestion.
+                  </p>
+                )}
+                {LEARNING_AREAS.map((area, index) => {
                   const entry = form.learningAreas?.[area.key] || {}
                   return (
-                    <article key={area.key} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <article key={area.key} className={`rounded-2xl border border-slate-100 border-l-4 p-5 shadow-sm ${AREA_TONE_CLASSES[area.tone]}`}>
                       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <h4 className="font-bold text-slate-800">{area.label}</h4>
+                        <h4 className="flex items-center gap-3 font-bold text-slate-800">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-sm font-extrabold text-slate-600 shadow-sm">{index + 1}</span>
+                          {area.label}
+                        </h4>
                         <label className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                          Progress
+                          Progress level
                           <select
                             value={entry.attainment || ''}
-                            disabled={!editingEnabled}
+                            disabled={!editingEnabled || Boolean(aiBusyField)}
                             onChange={event => updateLearningArea(area.key, 'attainment', event.target.value)}
                             className="ml-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold normal-case tracking-normal text-slate-700 disabled:bg-slate-50"
                           >
@@ -611,7 +739,7 @@ export default function EarlyYearsPortfolio({
                           Engagement
                           <select
                             value={entry.engagement || ''}
-                            disabled={!editingEnabled}
+                            disabled={!editingEnabled || Boolean(aiBusyField)}
                             onChange={event => updateLearningArea(area.key, 'engagement', event.target.value)}
                             className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
                           >
@@ -622,7 +750,7 @@ export default function EarlyYearsPortfolio({
                           Main evidence type
                           <select
                             value={entry.evidenceType || ''}
-                            disabled={!editingEnabled}
+                            disabled={!editingEnabled || Boolean(aiBusyField)}
                             onChange={event => updateLearningArea(area.key, 'evidenceType', event.target.value)}
                             className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
                           >
@@ -634,24 +762,34 @@ export default function EarlyYearsPortfolio({
                           <input
                             type="date"
                             value={entry.observationDate || ''}
-                            disabled={!editingEnabled}
+                            disabled={!editingEnabled || Boolean(aiBusyField)}
                             onChange={event => updateLearningArea(area.key, 'observationDate', event.target.value)}
                             className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm font-normal disabled:bg-slate-50"
                           />
                         </label>
                       </div>
                       <div className="grid gap-4 md:grid-cols-2">
-                        <TextField label="Teacher observation and milestone" value={entry.teacherComment} disabled={!editingEnabled}
+                        <TextField label="Observation & learning milestone" value={entry.teacherComment} disabled={!editingEnabled || Boolean(aiBusyField)}
                           onChange={value => updateLearningArea(area.key, 'teacherComment', value)}
                           onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'teacherComment') : undefined}
                           assisting={aiBusyField === `learningArea:${area.key}:teacherComment`}
                           assistDisabled={Boolean(aiBusyField)} />
-                        <TextField label="Evidence / learning journey" value={entry.evidence} disabled={!editingEnabled}
+                        <TextField label="Evidence & learning journey (what happened?)" value={entry.evidence} disabled={!editingEnabled || Boolean(aiBusyField)}
                           onChange={value => updateLearningArea(area.key, 'evidence', value)}
                           onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'evidence') : undefined}
                           assisting={aiBusyField === `learningArea:${area.key}:evidence`}
                           assistDisabled={Boolean(aiBusyField)} />
-                        <TextField label="Next steps" value={entry.nextSteps} disabled={!editingEnabled} rows={2}
+                        <TextField label="Strengths, interests & learner voice" value={entry.strengths} disabled={!editingEnabled || Boolean(aiBusyField)}
+                          onChange={value => updateLearningArea(area.key, 'strengths', value)}
+                          onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'strengths') : undefined}
+                          assisting={aiBusyField === `learningArea:${area.key}:strengths`}
+                          assistDisabled={Boolean(aiBusyField)} />
+                        <TextField label="Support strategies used" value={entry.supportStrategies} disabled={!editingEnabled || Boolean(aiBusyField)}
+                          onChange={value => updateLearningArea(area.key, 'supportStrategies', value)}
+                          onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'supportStrategies') : undefined}
+                          assisting={aiBusyField === `learningArea:${area.key}:supportStrategies`}
+                          assistDisabled={Boolean(aiBusyField)} />
+                        <TextField label="Next steps" value={entry.nextSteps} disabled={!editingEnabled || Boolean(aiBusyField)} rows={2}
                           onChange={value => updateLearningArea(area.key, 'nextSteps', value)}
                           onAssist={role === 'teacher' ? () => requestAiDraft('learningArea', area.key, 'nextSteps') : undefined}
                           assisting={aiBusyField === `learningArea:${area.key}:nextSteps`}
@@ -681,11 +819,11 @@ export default function EarlyYearsPortfolio({
                 })}
               </section>
 
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+              <section className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/70 to-white p-5 shadow-sm">
                 <h3 className="mb-4 text-lg font-bold text-blue-700">End of Term & Targets for Next Term</h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {SUMMARY_FIELDS.map(([key, label]) => (
-                    <TextField key={key} label={label} value={form.summary?.[key]} disabled={!editingEnabled}
+                    <TextField key={key} label={label} value={form.summary?.[key]} disabled={!editingEnabled || Boolean(aiBusyField)}
                       onChange={value => updateFormField('summary', key, value)}
                       onAssist={role === 'teacher' ? () => requestAiDraft('summary', null, key) : undefined}
                       assisting={aiBusyField === `summary::${key}`}
@@ -702,7 +840,7 @@ export default function EarlyYearsPortfolio({
               )}
 
               {editingEnabled && (role === 'teacher' || canEdit) && (
-                <button type="button" onClick={savePortfolio} disabled={saving || (role === 'teacher' && Boolean(existingForSelection && !selectedPortfolio))} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700 disabled:opacity-50">
+                <button type="button" onClick={savePortfolio} disabled={saving || Boolean(aiBusyField) || (role === 'teacher' && Boolean(existingForSelection && !selectedPortfolio))} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700 disabled:opacity-50">
                   <Save size={17} /> {saving ? 'Saving…' : selectedPortfolio ? 'Save changes' : 'Submit for admin review'}
                 </button>
               )}
@@ -731,7 +869,7 @@ export default function EarlyYearsPortfolio({
 
           {role === 'parent' && selectedPortfolio && (
             <div className="space-y-5">
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+              <section className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/80 to-white p-5 shadow-sm">
                 <h3 className="mb-4 text-lg font-bold text-blue-700">All About Me</h3>
                 <dl className="grid gap-3 sm:grid-cols-2">
                   {CHILD_PROFILE_FIELDS.map(([key, label]) => (
@@ -745,12 +883,15 @@ export default function EarlyYearsPortfolio({
 
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-blue-700">Areas of Learning</h3>
-                {LEARNING_AREAS.map(area => {
+                {LEARNING_AREAS.map((area, index) => {
                   const entry = selectedPortfolio.portfolioData?.learningAreas?.[area.key] || {}
                   return (
-                    <article key={area.key} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <article key={area.key} className={`rounded-2xl border border-slate-100 border-l-4 p-5 shadow-sm ${AREA_TONE_CLASSES[area.tone]}`}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h4 className="font-bold text-slate-800">{area.label}</h4>
+                        <h4 className="flex items-center gap-3 font-bold text-slate-800">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-sm font-extrabold text-slate-600 shadow-sm">{index + 1}</span>
+                          {area.label}
+                        </h4>
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold capitalize text-blue-700">{entry.attainment || 'Progress not recorded'}</span>
                       </div>
                       <dl className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -759,6 +900,8 @@ export default function EarlyYearsPortfolio({
                         <div><dt className="text-xs font-semibold text-slate-500">Observation date</dt><dd className="mt-1 text-sm text-slate-700">{entry.observationDate || 'Not recorded'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Teacher observation</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.teacherComment || '—'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Evidence / learning journey</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.evidence || '—'}</dd></div>
+                        <div><dt className="text-xs font-semibold text-slate-500">Strengths, interests & learner voice</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.strengths || '—'}</dd></div>
+                        <div><dt className="text-xs font-semibold text-slate-500">Support strategies used</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.supportStrategies || '—'}</dd></div>
                         <div><dt className="text-xs font-semibold text-slate-500">Next steps</dt><dd className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{entry.nextSteps || '—'}</dd></div>
                       </dl>
                       <EvidenceImages images={entry.evidenceImages} />
@@ -767,7 +910,7 @@ export default function EarlyYearsPortfolio({
                 })}
               </section>
 
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+              <section className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/70 to-white p-5 shadow-sm">
                 <h3 className="mb-4 text-lg font-bold text-blue-700">End of Term & Targets for Next Term</h3>
                 <dl className="grid gap-4 sm:grid-cols-2">
                   {SUMMARY_FIELDS.map(([key, label]) => (

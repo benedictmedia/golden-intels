@@ -27,7 +27,50 @@ const CHILD_PROFILE_FIELDS = [
   'aspirations'
 ]
 const SUMMARY_FIELDS = ['termHighlights', 'overallProgress', 'homeSupport', 'nextTermTargets']
-const AREA_FIELDS = ['teacherComment', 'evidence', 'nextSteps']
+const AREA_FIELDS = ['teacherComment', 'evidence', 'strengths', 'supportStrategies', 'nextSteps']
+
+const getPortfolioDraftTargets = (portfolioData) => {
+  const areasWithNotes = PORTFOLIO_AREAS.map(area => {
+    const entry = portfolioData.learningAreas[area.key]
+    const notes = AREA_FIELDS
+      .filter(field => entry[field])
+      .map(field => `${field}: ${entry[field]}`)
+      .join('\n')
+    return { ...area, entry, notes }
+  }).filter(area => area.notes.trim().length >= 3)
+
+  const targets = areasWithNotes.flatMap(area => AREA_FIELDS
+    .filter(field => !area.entry[field])
+    .map(field => ({
+      section: 'learningArea',
+      areaKey: area.key,
+      field,
+      areaLabel: area.label,
+      attainment: area.entry.attainment,
+      engagement: area.entry.engagement,
+      evidenceType: area.entry.evidenceType,
+      notes: area.notes
+    })))
+
+  const summaryNotes = Object.entries(portfolioData.summary)
+    .filter(([, value]) => value)
+    .map(([field, value]) => `${field}: ${value}`)
+    .join('\n')
+  if (summaryNotes || areasWithNotes.length >= 2) {
+    targets.push(...SUMMARY_FIELDS
+      .filter(field => !portfolioData.summary[field])
+      .map(field => ({
+        section: 'summary',
+        field,
+        notes: [
+          ...areasWithNotes.map(area => `${area.label} (${area.entry.attainment || 'progress not recorded'}):\n${area.notes}`),
+          summaryNotes && `Teacher summary notes:\n${summaryNotes}`
+        ].filter(Boolean).join('\n\n')
+      })))
+  }
+
+  return { targets, notesLength: areasWithNotes.reduce((total, area) => total + area.notes.length, 0) + summaryNotes.length }
+}
 
 const isEarlyYearsClass = (gradeLevel) => EARLY_YEARS_CLASSES.some(
   className => normalizeStudentClassName(className) === normalizeStudentClassName(gradeLevel)
@@ -137,7 +180,7 @@ const normalizeEvidenceImages = (value, label) => {
 
 const hasPortfolioProgress = (portfolioData) => PORTFOLIO_AREAS.some(({ key }) => {
   const area = portfolioData.learningAreas[key]
-  return Boolean(area.attainment || area.teacherComment || area.evidence || area.nextSteps)
+  return Boolean(area.attainment || AREA_FIELDS.some(field => area[field]))
 })
 
 module.exports = {
@@ -146,6 +189,8 @@ module.exports = {
   PORTFOLIO_ATTAINMENTS,
   PORTFOLIO_ENGAGEMENT_OPTIONS,
   PORTFOLIO_EVIDENCE_TYPES,
+  AREA_FIELDS,
+  getPortfolioDraftTargets,
   isEarlyYearsClass,
   normalizePortfolioData,
   hasPortfolioProgress

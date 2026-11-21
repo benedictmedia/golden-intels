@@ -8,7 +8,8 @@ const {
   deletePortfolio,
   authorizePortfolioEvidenceUpload,
   addPortfolioEvidence,
-  assistPortfolioText
+  assistPortfolioText,
+  assistPortfolioCompletion
 } = require('../controllers/portfolioController')
 const protect = require('../middleware/authMiddleware')
 const { requireAdminPermission, requireAnyAdminPermission } = require('../middleware/adminPermissions')
@@ -17,6 +18,7 @@ const { uploadPortfolioEvidence } = require('../middleware/cloudinaryUpload')
 router.use(protect)
 router.get('/', requireAdminPermission('portfolios:view'), getPortfolios)
 router.post('/assist', assistPortfolioText)
+router.post('/assist/complete', assistPortfolioCompletion)
 router.post('/', createPortfolio)
 router.post('/:id/evidence/:areaKey', authorizePortfolioEvidenceUpload, (req, res, next) => {
   if (!uploadPortfolioEvidence) {

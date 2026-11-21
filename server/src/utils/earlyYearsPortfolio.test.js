@@ -4,6 +4,7 @@ const {
   PORTFOLIO_AREAS,
   PORTFOLIO_EVIDENCE_TYPES,
   PORTFOLIO_ENGAGEMENT_OPTIONS,
+  getPortfolioDraftTargets,
   hasPortfolioProgress,
   isEarlyYearsClass,
   normalizePortfolioData
@@ -28,6 +29,8 @@ test('normalizes portfolio content to the supported learner, area, and summary f
   assert.equal(result.childProfile.preferredName, 'Ama')
   assert.equal(result.learningAreas.communication.attainment, 'secure')
   assert.equal(result.learningAreas.communication.evidence, 'Explains her ideas.')
+  assert.equal(result.learningAreas.communication.strengths, '')
+  assert.equal(result.learningAreas.communication.supportStrategies, '')
   assert.equal(result.learningAreas.communication.engagement, '')
   assert.deepEqual(result.learningAreas.communication.evidenceImages, [])
   assert.equal(result.learningAreas.phonics.attainment, '')
@@ -84,4 +87,42 @@ test('requires at least one documented learning area before submission', () => {
   assert.equal(hasPortfolioProgress(normalizePortfolioData({
     learningAreas: { phonics: { attainment: 'developing' } }
   })), true)
+})
+
+test('selects only blank narrative fields supported by learning-area or summary notes', () => {
+  const portfolioData = normalizePortfolioData({
+    childProfile: { preferredName: 'Keep personal details out of AI drafts' },
+    learningAreas: {
+      communication: {
+        attainment: 'developing',
+        evidence: 'Explained how the toy bridge fell and tried a wider base.',
+        strengths: 'Uses descriptive language.'
+      },
+      mathematics: {
+        attainment: 'secure',
+        teacherComment: 'Counts five counters accurately during a small-group game.'
+      }
+    }
+  })
+
+  const { targets } = getPortfolioDraftTargets(portfolioData)
+  assert.deepEqual(targets.filter(target => target.section === 'learningArea').map(({ areaKey, field }) => [areaKey, field]), [
+    ['communication', 'teacherComment'],
+    ['communication', 'supportStrategies'],
+    ['communication', 'nextSteps'],
+    ['mathematics', 'evidence'],
+    ['mathematics', 'strengths'],
+    ['mathematics', 'supportStrategies'],
+    ['mathematics', 'nextSteps']
+  ])
+  assert.deepEqual(targets.filter(target => target.section === 'summary').map(target => target.field), [
+    'termHighlights',
+    'overallProgress',
+    'homeSupport',
+    'nextTermTargets'
+  ])
+  assert.equal(targets.some(target => target.notes.includes('Keep personal details out of AI drafts')), false)
+  assert.equal(getPortfolioDraftTargets(normalizePortfolioData({
+    learningAreas: { communication: { attainment: 'secure' } }
+  })).targets.length, 0)
 })
